@@ -1,0 +1,14 @@
+version: "3.8"
+
+services:
+  dev1:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    volumes:
+      - ../:/workspace:cached
+    command: sleep infinity
+    environment:
+      - NVIDIA_VISIBLE_DEVICES=all
