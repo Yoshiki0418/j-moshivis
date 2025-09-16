@@ -1,1 +1,25 @@
-torch
+# accelerate==1.1.1
+# datasets==3.1.0
+# deepspeed==0.15.4
+# moshi==0.1.0
+# soundfile>=0.12.1
+# torch>=2.4.1
+# torchaudio>=2.4.1
+# transformers>=4.46.1
+# wandb>=0.18.5
+
+
+accelerate==1.1.1
+datasets==3.1.0
+deepspeed==0.15.4
+moshi==0.1.0
+soundfile>=0.12.1
+torch>=2.4.1
+torchaudio>=2.4.1
+torchvision
+transformers>=4.46.1
+wandb>=0.18.5
+tiktoken
+tqdm
+numpy
+tokenizers>=0.20.1
