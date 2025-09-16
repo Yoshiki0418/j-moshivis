@@ -4,6 +4,7 @@
     "service": "dev1",
     "workspaceFolder": "/workspace",
     "customizations": {
+        "runArgs": ["--shm-size=16g", "--ipc=host"],
         "vscode": {
             "extensions": [
                 "ms-python.python",
