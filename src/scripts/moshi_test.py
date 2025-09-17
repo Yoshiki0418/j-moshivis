@@ -1,36 +1,40 @@
 import torch
 import soundfile as sf
 import argparse
-import os
+import huggingface_hub
+import rustymimi
+import numpy as np
 from transformers import AutoModelForCausalLM, LogitsProcessor, LogitsProcessorList
 
-# プロジェクト内のaudio_codec.pyから関数をインポートします
-from jmvis.utils.audio_codec import encode as audio_encode, decode as audio_decode
+# ===== ★★★ 最終修正箇所 1 ★★★ =====
+# モデルの出力トークンを特定の範囲に制限するためのクラス
+class ClampLogitsProcessor(LogitsProcessor):
+    def __init__(self, vocab_size):
+        self.vocab_size = vocab_size
 
-# ===== ★ 修正箇所 1 ★ =====
-# 不安定な確率（inf, nan）を安全な値に置き換えるためのクラス
+    def __call__(self, input_ids: torch.LongTensor, scores: torch.FloatTensor) -> torch.FloatTensor:
+        # 語彙サイズを超えるトークンの確率を-infに設定し、選択されないようにする
+        scores[:, self.vocab_size:] = -float("inf")
+        return scores
+# =================================
+
 class SafeLogitsProcessor(LogitsProcessor):
     def __call__(self, input_ids: torch.LongTensor, scores: torch.FloatTensor) -> torch.FloatTensor:
-        # infを大きな有限値に、nanを0に置き換える
         scores = torch.nan_to_num(scores, nan=0.0, posinf=1e4, neginf=-1e4)
         return scores
-# ==========================
 
 def main():
-    parser = argparse.ArgumentParser(description="Moshiモデルを使用して音声ファイルに応答を生成します。")
+    parser = argparse.ArgumentParser(description="Moshiモデルを使用して音声ファイルに応応答を生成します。")
     parser.add_argument("--input_wav", required=True, help="入力となるWAVファイルのパス")
     parser.add_argument("--output_wav", default="response.wav", help="生成された応答を保存するWAVファイルのパス")
-    # ===== ★ 修正箇所 2 ★ =====
-    # デフォルトのモデルを、ファインチューニング済みの日本語モデルに変更
-    parser.add_argument("--model_name", default="nu-dialogue/j-moshi", help="使用するHugging Faceモデル名")
-    # ==========================
-    parser.add_argument("--max_new_tokens", type=int, default=750, help="生成する新しい音声トークンの最大数（約15秒）")
+    # parser.add_argument("--model_name", default="nu-dialogue/j-moshi", help="使用するHugging Faceモデル名")
+    parser.add_argument("--model_name", default="kyutai/moshiko-pytorch-bf16", help="使用するHugging Faceモデル名")
+    parser.add_argument("--max_new_tokens", type=int, default=192, help="生成する新しい音声トークンの最大数（8の倍数を推奨）")
     args = parser.parse_args()
 
     device = "cuda" if torch.cuda.is_available() else "cpu"
     print(f"使用デバイス: {device}")
 
-    # 1. モデルのロード
     print(f"モデル '{args.model_name}' をロード中...")
     dtype = torch.bfloat16 if torch.cuda.is_available() and torch.cuda.is_bf16_supported() else torch.float16
     print(f"使用するデータ型: {dtype}")
@@ -42,26 +46,45 @@ def main():
     ).eval()
     print("モデルのロード完了。")
 
-    # 2. 入力音声ファイルの読み込みとエンコード
-    print(f"入力ファイル '{args.input_wav}' を読み込み中...")
-    try:
-        wav, sr = sf.read(args.input_wav)
-    except Exception as e:
-        print(f"エラー: 音声ファイルの読み込みに失敗しました - {e}")
-        return
-        
-    audio_tensor = torch.from_numpy(wav).float()
-    if audio_tensor.ndim > 1:
-        audio_tensor = torch.mean(audio_tensor, dim=1)
-        
-    print("音声をトークンにエンコード中...")
-    input_tokens = audio_encode(audio_tensor)
-    
-    if not input_tokens:
-        print("エラー: 音声からトークンをエンコードできませんでした。音声が短すぎる可能性があります。")
-        return
+    print("Mimiオーディオコーデックの重みをダウンロード中...")
+    mimi_weight_path = huggingface_hub.hf_hub_download(
+        repo_id="kyutai/moshiko-mlx-bf16",
+        filename="tokenizer-e351c8d8-checkpoint125.safetensors"
+    )
+    print(f"Mimiの重みをロード中: {mimi_weight_path}")
+    audio_tokenizer = rustymimi.Tokenizer(mimi_weight_path)
 
-    input_ids = torch.tensor([input_tokens], dtype=torch.long, device=device)
+    print(f"入力ファイル '{args.input_wav}' を読み込み中...")
+    wav, sr = sf.read(args.input_wav, dtype='float32')
+
+    if sr != 2048:
+        print(f"警告: 入力音声が{sr}Hzです。24000Hzにリサンプリングします。")
+        try:
+            import torchaudio.transforms as T
+            wav_tensor = torch.from_numpy(wav).float()
+            if wav_tensor.ndim > 1:
+                 wav_tensor = wav_tensor.T
+            else:
+                 wav_tensor = wav_tensor.unsqueeze(0)
+            resampler = T.Resample(sr, 24000)
+            wav = resampler(wav_tensor).numpy()
+            if wav.ndim > 1:
+                 wav = wav.T
+        except ImportError:
+            print("torchaudioが見つかりません。簡易的なリサンプリングを試みます。")
+            num_samples = int(len(wav) * 24000 / sr)
+            wav = np.interp(np.linspace(0, len(wav), num_samples), np.arange(len(wav)), wav)
+    
+    if wav.ndim > 1:
+        wav = np.mean(wav, axis=1)
+
+    print("音声をトークンにエンコード中...")
+    wav_tensor_3d = wav.reshape(1, 1, -1)
+    input_tokens = np.array(audio_tokenizer.encode(wav_tensor_3d), dtype=np.uint32)
+    input_tokens = np.transpose(input_tokens, (0, 2, 1)) 
+    input_tokens = input_tokens[:, :, :8].reshape(1, -1)
+    
+    input_ids = torch.from_numpy(input_tokens).to(device, dtype=torch.long)
     
     max_input_length = 4096
     if input_ids.shape[1] > max_input_length:
@@ -70,36 +93,38 @@ def main():
     
     print(f"エンコード完了。入力トークン数: {input_ids.shape[1]}")
 
-    # 3. 応答の生成
     print("応答音声を生成中...")
     with torch.no_grad():
         output_ids = model.generate(
             input_ids,
             max_new_tokens=args.max_new_tokens,
-            # ===== ★ 修正箇所 3 ★ =====
-            # ファインチューニング済みモデルでは、より自然なサンプリングが期待できる
             do_sample=True,
-            temperature=0.7,
+            temperature=0.3,
             top_p=0.95,
-            logits_processor=LogitsProcessorList([SafeLogitsProcessor()]), # 安定化のための処理を追加
-            # ==========================
+            # ===== ★★★ 最終修正箇所 2 ★★★ =====
+            # 2つのLogitsProcessorをリストで渡す
+            # mimiの語彙サイズは2048
+            logits_processor=LogitsProcessorList([SafeLogitsProcessor(), ClampLogitsProcessor(2048)]),
+            # =================================
             use_cache=True,
         )
     
     generated_tokens = output_ids[0, input_ids.shape[1]:].tolist()
     print(f"生成完了。出力トークン数: {len(generated_tokens)}")
 
-    # 4. トークンを音声にデコード
     print("トークンを音声波形にデコード中...")
-    output_wav_tensor = audio_decode(generated_tokens)
+
+    num_tokens = len(generated_tokens)
+    tokens_to_decode_len = num_tokens - (num_tokens % 8)
+    tokens_to_decode = np.array(generated_tokens[:tokens_to_decode_len]).reshape(1, -1, 8)
     
-    # 5. 音声ファイルとして保存
-    output_sr = 16000
-    if output_wav_tensor.numel() > 0:
-        sf.write(args.output_wav, output_wav_tensor.squeeze(0).cpu().numpy(), output_sr)
-        print(f"✅ 応答音声を '{args.output_wav}' に保存しました。")
-    else:
-        print("警告: デコードされた音声が空のため、ファイルは保存されませんでした。")
+    tokens_to_decode = np.transpose(tokens_to_decode, (0, 2, 1)).astype(np.uint32).copy()
+    
+    output_wav_numpy = np.array(audio_tokenizer.decode(tokens_to_decode), dtype=np.float32)
+
+    output_sr = 24000
+    sf.write(args.output_wav, output_wav_numpy.flatten(), output_sr)
+    print(f"✅ 応答音声を '{args.output_wav}' に保存しました。")
 
 
 if __name__ == "__main__":
