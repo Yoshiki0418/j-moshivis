@@ -6,6 +6,7 @@ from random import random
 from typing import Dict, Iterator, List, Optional, Sequence
 
 import numpy as np
+import re
 import rich
 import torch
 from multiturn_instruct import MTCInstruct
@@ -40,22 +41,40 @@ def list_to_prompt(
     except ValueError as e:
         raise NotImplementedError("未知の MTCInstruct 設定", setting) from e
 
-    convo_list = copy(convo_list)
+    # convo_list = copy(convo_list)
+    chat = []
     if len(convo_list) % 2 == 0:
-        convo_list = [
-            system_template.format(
+        chat.append({
+            "role": "system",
+            "content": system_template.format(
                 ROLE_SPECIFIC_TEXT=speaker1_template.format(caption=img_caption),
                 caption=img_caption,
-            ),
-            start_conv,
-        ] + convo_list
+            )
+        })
+        chat.append({"role": "user", "content": start_conv})
     else:
-        convo_list = [
-            system_template.format(
+        chat.append({
+            "role": "system",
+            "content": system_template.format(
                 ROLE_SPECIFIC_TEXT=speaker2_template.format(caption=img_caption),
                 caption=img_caption,
             )
-        ] + convo_list
+        })
+    # if len(convo_list) % 2 == 0:
+    #     convo_list = [
+    #         system_template.format(
+    #             ROLE_SPECIFIC_TEXT=speaker1_template.format(caption=img_caption),
+    #             caption=img_caption,
+    #         ),
+    #         start_conv,
+    #     ] + convo_list
+    # else:
+    #     convo_list = [
+    #         system_template.format(
+    #             ROLE_SPECIFIC_TEXT=speaker2_template.format(caption=img_caption),
+    #             caption=img_caption,
+    #         )
+    #     ] + convo_list
 
     def speaker_iter() -> Iterator:
         yield "system"
@@ -69,15 +88,27 @@ def list_to_prompt(
             yield "質問: "
             yield "回答: "
 
-    chat = [
-        {"role": speaker, "content": prefix + c}
-        for c, speaker, prefix in zip(convo_list, speaker_iter(), prefix_iter())
-    ]
+    # chat = [
+    #     {"role": speaker, "content": prefix + c}
+    #     for c, speaker, prefix in zip(convo_list, speaker_iter(), prefix_iter())
+    # ]
+    # tok = pipe.tokenizer
+    # return tok.apply_chat_template(
+    #     chat,
+    #     tokenize=False,
+    #     continue_final_message=False,
+    # )
+    # 既存の会話を交互に追加
+    role = "user"
+    for c in convo_list:
+        chat.append({"role": role, "content": c})
+        role = "assistant" if role == "user" else "user"
+
     tok = pipe.tokenizer
     return tok.apply_chat_template(
         chat,
         tokenize=False,
-        continue_final_message=False,
+        add_generation_prompt=True,  # 次はアシスタントの返答、と指示
     )
 
 
@@ -92,6 +123,11 @@ def postprocess_mtc(
     - LLM的な役割表現を削除
     - 不要な定型句を省略
     """
+    s = re.sub(r"```[\s\S]*?```", "", s)              # ``` ... ``` を削除
+    s = re.sub(r"<[^>]+>", "", s)                     # <div> 等のタグを削除
+    s = re.sub(r"(?m)^\s*(function|const|let|var)\b.*$", "", s)
+    s = re.sub(r"(?m)^\s*[A-Za-z_]\w*\s*\([^)]*\)\s*\{.*$", "", s)
+    s = re.sub(r"(?m)^\s*addComponent\b.*$", "", s)
     pattern = get_replace_pattern()
     s = pattern.sub("", s)
     if drop_probs is None:
@@ -113,6 +149,8 @@ def postprocess_mtc(
             r"記述されていない": dict(p=1.0, replace_by="写っていない"),
             r"記述": dict(p=1.0, replace_by="画像"),
             r"示されていない": dict(p=1.0, replace_by="見えない"),
+            r"^[A-Za-z][A-Za-z0-9_-]{2,15}$": dict(p=1.0, replace_by=""),
+            r"(?m)^\s*(ArgsConstructor|ColumnStyle|AGENT|agent|voksen|foundland)\s*$": dict(p=1.0, replace_by=""),
         }
     if setting is not None and setting not in {"cap", "cap2", "rnd"}:
         drop_probs[r"説明"] = dict(p=1.0, replace_by="画像")

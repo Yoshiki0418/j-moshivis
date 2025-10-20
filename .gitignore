@@ -5,3 +5,9 @@ __pycache__/
 checkpoints/
 synthetic_visual_dialogues/
 *.wav
+tts_model/
+ssvd/tts/models/
+hf_cache/
+**.png
+**.jsonl
+.env

@@ -166,32 +166,17 @@ class Launcher:
         start_idx: int = 0,
         end_idx: int = -1,
         out_dir: str = "./synthetic_visual_dialogues",
-        batch_size: int = 64,
+        batch_size: int = 8,
         temperature: float = 0.3,
         convo_length: int = 16,
         num_retries: int = 5,
         overwrite: Literal["yes", "no", "resume"] = "no",
         verbose: bool = False,
+        output_format: Literal["jsonl", "db", "both"] = "jsonl",
     ) -> None:
         """Generate synthetic visual dialogues for the given dataset
 
-        :param task: Selected Multi-turn Conversation instruct (see `multiturn_instrct.py`)
-        :param dataset: Selected dataset to provide captions
-        :param split: Selected dataset split to provide captions
-        :param start_idx: Start generating for sample `start_idx`
-        :param end_idx: Stop generating at sample `end_idx`
-        :param out_dir: Output directory where to store saved generations
-        :param batch_size: Batch size
-        :param temperature: Sampling temperature
-        :param convo_length: Length of the conversation (number of question-answer pairs)
-        :param num_retries: If the generated conversation is empty or fails,
-            the generation will be reattempted at most `num_retries` times.
-        :param overwrite: If a pre-existing database storing visual dialogues exist,
-            we can choose to either:
-            - skip existing entries and only generate for missing ('no')
-            - overwrite existing and missing entries ('yes')
-            - keep all entries and, if one already exists, just add another dialogue
-            for this image ('resume')
+        :param output_format: 出力先を選択 ("jsonl", "db", "both")
         """
         task = task.lower()
         try:
@@ -213,70 +198,56 @@ class Launcher:
         db_file = Launcher.__get_db_file__(out_dir, dataset)
         os.makedirs(out_dir, exist_ok=True)
 
-        # Save annotations in database; each table corresponds to a task and shard (start end)
-        # a row in the entry contains:
-        # uid: the image ID
-        # idx: the index of the current dialogue for the given image ID
-        # (useful if we generate more than 1 dialogue per image)
-        # turn: the index of the current line in the current dialogue
-        # speaker: speaker for this turn (0 = assistant, 1 = user)
-        # text: content of the line for this turn
-        annotations_db = sqlite3.connect(db_file)
-        annotdb_cursor = annotations_db.cursor()
-        table_name = Launcher.__get_table_name__(task, split)
-        trial = 0
-        while (trial := trial + 1) < 5:
-            try:
-                annotdb_cursor.execute(
-                    f"""
-                CREATE TABLE IF NOT EXISTS {table_name} (
-                    uid INTEGER,
-                    idx INTEGER,
-                    turn INTEGER,
-                    speaker INTEGER,
-                    text TEXT,
-                    PRIMARY KEY(uid, idx, turn)
-                    )
-                """
-                )
-                trial = 5
-            except sqlite3.OperationalError:
-                pass
+        # --- JSONL の場合は既存ファイルの uid を読み込み ---
+        existing_uids = set()
+        if output_format in {"jsonl", "both"}:
+            jsonl_path = os.path.join(out_dir, f"{task}_{dataset}_{split}.jsonl")
+            if os.path.exists(jsonl_path):
+                with open(jsonl_path, "r", encoding="utf-8") as fin:
+                    for line in fin:
+                        try:
+                            obj = json.loads(line)
+                            existing_uids.add(obj["uid"])
+                        except Exception:
+                            continue
+                print(f"Found {len(existing_uids)} existing JSONL dialogues")
 
-        # Track number of dialogues generated per image
+        # DBが必要な場合のみ初期化
+        if output_format in {"db", "both"}:
+            annotations_db = sqlite3.connect(db_file, timeout=60, isolation_level=None)
+            annotdb_cursor = annotations_db.cursor()
+            table_name = Launcher.__get_table_name__(task, split)
+            trial = 0
+            while (trial := trial + 1) < 5:
+                try:
+                    annotdb_cursor.execute(
+                        f"""
+                    CREATE TABLE IF NOT EXISTS {table_name} (
+                        uid INTEGER,
+                        idx INTEGER,
+                        turn INTEGER,
+                        speaker INTEGER,
+                        text TEXT,
+                        PRIMARY KEY(uid, idx, turn)
+                        )
+                    """
+                    )
+                    trial = 5
+                except sqlite3.OperationalError:
+                    pass
+        else:
+            annotations_db, annotdb_cursor, table_name = None, None, None
+
         track_idx_per_uid: Dict[str, int] = defaultdict(lambda: 0)
 
-        # Check if previous annotations exist, in which case we have to check
-        # what overwrite wants
-        if overwrite in {"no", "resume"}:
-            try:
-                existing_uids = set(
-                    x[0]
-                    for x in annotdb_cursor.execute(
-                        f"SELECT DISTINCT uid FROM {table_name}"
-                    ).fetchall()
-                )
-            except sqlite3.OperationalError:
-                existing_uids = set()
-            # no: skip existing dialogues
-            if overwrite == "no":
-                og_length = len(descriptions)
-                descriptions = [
-                    x for x in descriptions if x["uid"] not in existing_uids
-                ]
-                print(
-                    f"Found {len(descriptions)} / {og_length} "
-                    "captions without an associated dialogue"
-                )
-            # resume: we need to know how many dialogues already exist for each uid
-            elif overwrite == "resume":
-                for uid, convo_id in annotdb_cursor.execute(
-                    f"SELECT uid, max(idx) FROM {table_name} GROUP BY uid"
-                ).fetchall():
-                    track_idx_per_uid[str(uid)] = convo_id + 1
+        og_length = len(descriptions)
+        descriptions = [x for x in descriptions if x["uid"] not in existing_uids]
+        print(
+            f"Found {len(descriptions)} / {og_length} captions without an associated dialogue"
+        )
 
-        # Initialize GPT-OSS pipeline
-        rich.print(f"Annotations will be generated in [yellow]{db_file}[/yellow]")
+        # pipeline
+        rich.print(f"Annotations will be generated in [yellow]{out_file}[/yellow]")
         hf_pipeline = get_pipeline()
         try:
             num_rows_written = 0
@@ -298,7 +269,6 @@ class Launcher:
                     captions = [descriptions[i]["caption"].strip() for i in indices]
                     uids = [descriptions[i]["uid"] for i in indices]
 
-                    # pipeline
                     run_multiturn_pipeline(
                         hf_pipeline,
                         captions=[x.strip() for x in captions],
@@ -310,7 +280,7 @@ class Launcher:
                         temperature=temperature,
                     )
 
-                    # Post-process annotations + store for the database
+                    # Post-process
                     with open(out_file, "r") as f:
                         for result in f.readlines():
                             data = json.loads(result)
@@ -322,46 +292,44 @@ class Launcher:
                             )
                             if len(rows) == 0:
                                 failed_uids.add(data["uid"])
+                                continue
 
-                            for line in rows:
-                                try:
-                                    annotdb_cursor.execute(
-                                        f"INSERT OR REPLACE INTO {table_name}"
-                                        " VALUES(?, ?, ?, ?, ?)",
-                                        line,
-                                    )
-                                    num_rows_written += 1
-                                except (
-                                    sqlite3.OperationalError,
-                                    sqlite3.IntegrityError,
-                                ) as e:
-                                    print(e, flush=True)
-                                    continue
-                        # Print the last conversation only
-                        if verbose:
-                            print()
-                            rich.print("[green]Caption:[/green]")
-                            print(captions[-1])
-                            print()
-                            rich.print("[magenta]Example generated dialogue:[/magenta]")
-                            rich.print(
-                                "\n".join(
-                                    f"  - [{color}]{r[-1]}[/{color}]"
-                                    for ir, r in enumerate(rows)
-                                    for color in ["cyan" if ir % 2 == 0 else "yellow"]
-                                )
-                            )
+                            # JSONL 出力
+                            if output_format in {"jsonl", "both"}:
+                                with open(os.path.join(out_dir, f"{task}_{dataset}_{split}.jsonl"),
+                                        "a", encoding="utf-8") as fout:
+                                    dialogue = [
+                                        {"speaker": "ユーザー" if row[3] == 1 else "アシスタント", "text": row[4]}
+                                        for row in rows
+                                    ]
+                                    json.dump({"uid": data["uid"], "dialogue": dialogue}, fout, ensure_ascii=False)
+                                    fout.write("\n")
+
+                            # DB 出力
+                            if output_format in {"db", "both"}:
+                                for line in rows:
+                                    try:
+                                        annotdb_cursor.execute(
+                                            f"INSERT OR REPLACE INTO {table_name} VALUES(?, ?, ?, ?, ?)",
+                                            line,
+                                        )
+                                        num_rows_written += 1
+                                    except (
+                                        sqlite3.OperationalError,
+                                        sqlite3.IntegrityError,
+                                    ):
+                                        continue
 
                     rich.print(
                         f"  [magenta]Batch {(batch_idx + 1):05d}/{num_total_batches:05d}[/magenta]: "
                         f"[cyan]wrote {num_rows_written} rows so far[/cyan]"
                     )
-                # update failed uids
                 descriptions = [s for s in descriptions if s["uid"] in failed_uids]
         finally:
-            annotations_db.commit()
-            annotdb_cursor.close()
-            annotations_db.close()
+            if output_format in {"db", "both"}:
+                annotations_db.commit()
+                annotdb_cursor.close()
+                annotations_db.close()
 
 
 if __name__ == "__main__":

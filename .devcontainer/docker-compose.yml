@@ -1,10 +1,11 @@
-version: "3.8"
-
 services:
   dev1:
     build:
       context: .
       dockerfile: Dockerfile
+      args:
+        HF_USERNAME: ${HF_USERNAME}
+        HF_TOKEN: ${HF_TOKEN}
     ports:
       - "8000:8000"
     shm_size: "16g"
@@ -14,3 +15,10 @@ services:
     command: sleep infinity
     environment:
       - NVIDIA_VISIBLE_DEVICES=all
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
