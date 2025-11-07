@@ -4,6 +4,7 @@ import torchaudio
 from huggingface_hub import hf_hub_download
 from safetensors.torch import load_file
 import soundfile as sf
+from pathlib import Path
 
 from jmoshivis.config.kyuteye_config import KyuteyeConfig
 from moshi.models.loaders import get_mimi
@@ -17,10 +18,10 @@ config = KyuteyeConfig.from_yml("/workspace/j-moshivis/configs/moshi-vis.yaml")
 
 device="cuda:1" if torch.cuda.is_available() else "cpu"
 
-weights_path = hf_hub_download(
-    repo_id="kyutai/moshika-vis-pytorch-bf16",
-    filename="model.safetensors"
-)
+# weights_path = hf_hub_download(
+#     repo_id="kyutai/moshika-vis-pytorch-bf16",
+#     filename="model.safetensors"
+# )
 mimi_weight = hf_hub_download(
     repo_id="kyutai/moshika-vis-pytorch-bf16",
     filename="tokenizer-e351c8d8-checkpoint125.safetensors",
@@ -29,7 +30,7 @@ mimi_weight = hf_hub_download(
 
 moshi_vis, image_embedder = get_moshi_vis(
     config,
-    moshi_weight=weights_path,
+    moshi_weight=Path("/workspace/j-moshivis/model_merged.safetensors"),
     device=device,
     dtype=torch.bfloat16,
 )

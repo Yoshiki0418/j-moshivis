@@ -9,5 +9,10 @@ tts_model/
 ssvd/tts/models/
 hf_cache/
 **.png
+**.jpg
 **.jsonl
 .env
+outputs/
+**.safetensors
+**.model
+**.deb

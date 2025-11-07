@@ -24,3 +24,5 @@ tqdm
 numpy
 tokenizers>=0.20.1
 style_bert_vits2
+hydra-core
+rich

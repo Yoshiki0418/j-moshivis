@@ -12,6 +12,7 @@ services:
     ipc: host
     volumes:
       - ../:/workspace:cached
+      - /gpu-server/user/yoshiki/j-moshivis:/gpu-server/user/yoshiki/j-moshivis
     command: sleep infinity
     environment:
       - NVIDIA_VISIBLE_DEVICES=all

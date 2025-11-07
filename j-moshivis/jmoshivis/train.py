@@ -1,0 +1,151 @@
+import os
+import torch
+from accelerate import Accelerator
+import hydra
+from omegaconf import DictConfig
+from accelerate import dispatch_model
+from accelerate.utils import infer_auto_device_map
+from huggingface_hub import hf_hub_download
+import sentencepiece as spm
+from moshi.models.loaders import get_mimi
+from .models.loaders import get_moshi_vis_train
+from .datasets.interleaver import InterleavedTokenizer, Interleaver
+from .datasets.data_loader import build_data_loader
+from .distributed import get_rank, get_world_size
+from .config.kyuteye_config import KyuteyeConfig
+from .trainer import JmoshiVisTrainer
+from torch.optim import AdamW
+
+
+@hydra.main(version_base=None, config_path="../configs", config_name="config")
+def main(args: DictConfig):
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    accelerator = Accelerator(mixed_precision="bf16")
+    kyuteye_config = KyuteyeConfig.from_yml("/workspace/j-moshivis/configs/j-moshi-vis.yaml")
+
+    # --- Tokenizer / Processor ---
+    tokenizer = spm.SentencePieceProcessor()
+    tokenizer.load("/workspace/j-moshivis/jmoshivis/tokenizer_spm_32k_3.model")
+
+    print("Loading Mimi and MoshiVis...")
+    mimi_weight = hf_hub_download(
+        repo_id=args.repo_id,
+        filename=args.mimi_name,
+    )
+    mimi = get_mimi(mimi_weight, device)
+    mimi.eval()
+    for p in mimi.parameters():
+        p.requires_grad = False
+    
+    print("Start get_moshi_vis_train")
+    moshi_vis, image_embedder = get_moshi_vis_train(
+        kyuteye_config=kyuteye_config,
+        moshivis_weight="/workspace/j-moshivis/model.safetensors",
+        device=device,
+        dtype=torch.bfloat16,
+        strict=False,
+        freeze_backbone=True,
+    )
+
+    interleaver = Interleaver(
+        tokenizer,
+        mimi.frame_rate,
+        moshi_vis.text_padding_token_id,
+        moshi_vis.end_of_text_padding_id,
+        moshi_vis.zero_token_id,
+        keep_main_only=True,
+        device=device,
+    )
+    interleaved_tokenizer = InterleavedTokenizer(
+        mimi, interleaver, duration_sec=args.duration_sec
+    )
+
+    # 5. Load data loaders
+    """
+    ───────────────────────────────────────────────
+    🧠 DataLoader 構成概要（J-MoshiVis）
+    ───────────────────────────────────────────────
+    ・本セクションでは、Interleaver（音声・テキスト統合トークナイザ）を介して、
+    MoshiVis が期待するフォーマットの学習データを読み込みます。
+
+    ・出力は `Batch` オブジェクトであり、
+    以下の2つの主構成を持ちます：
+
+        Batch(
+            codes: torch.Tensor,                # 量子化コード列 [B, D, T]
+            condition_attributes: Optional[...] # 補助条件（例: 画像特徴やアライメント情報）
+        )
+
+    ───────────────────────────────────────────────
+    📦 Shape specification
+    ───────────────────────────────────────────────
+    - codes: Tensor of shape [B, D, T]
+        B : Batch size
+            └─ 各ステップで並列処理するサンプル数
+        D : Depth axis
+            └─ Residual Quantizer（RQ）層の数
+            例: Mimiでは17層（=17コードブック）を使用
+        T : Time axis
+            └─ 音声を一定フレーム幅で分割した系列長
+            例: 約125ステップ ≒ 10秒前後の音声長
+
+    例:
+        >>> batch.codes.shape
+        torch.Size([2, 17, 125])
+        → 2サンプル / 各サンプル17層 / 125フレームのトークン列
+    """
+    data_loader = build_data_loader(
+        instruct_tokenizer=interleaved_tokenizer,
+        args=args.data,
+        batch_size=args.train.batch_size,
+        seed=args.train.seed,
+        rank=get_rank(),  # DDP rank
+        world_size=get_world_size(),  # DDP world_size
+        is_eval=False,
+        image_root=args.data.image_root,
+        image_embedder=image_embedder,
+        device=device,
+    )
+
+    # --- 1. データローダ生成後に1バッチだけ取り出す ---
+    data_iter = iter(data_loader)
+    first_batch = next(data_iter)
+
+    print("=== Batch object ===")
+    print(type(first_batch))
+    print(first_batch)
+
+    # --- 2. 中身を要素ごとに確認 ---
+    if hasattr(first_batch, "codes"):
+        print("\n[Shape] codes:", first_batch.codes.shape)
+        if first_batch.condition_attributes:
+            print("[Type] condition_attributes:", type(first_batch.condition_attributes))
+            print("[Count] len(condition_attributes):", len(first_batch.condition_attributes))
+            print("[Sample 0] condition_attributes[0]:", first_batch.condition_attributes[0])
+    else:
+        # もしBatchクラスでなくlist形式のままならこちら
+        print("\nFirst element sample keys:", first_batch[0].keys())
+        print("First element sample detail:\n", first_batch[0])
+
+    optimizer = torch.optim.AdamW([p for p in moshi_vis.parameters() if p.requires_grad], lr=2e-5, weight_decay=0.01, fused=True)
+
+    # DDP準備
+    moshi_vis, optimizer, data_loader = accelerator.prepare(moshi_vis, optimizer, data_loader)
+
+    # --- Trainer Setup ---
+    trainer = JmoshiVisTrainer(moshi_vis, optimizer, device, args.trainer, accelerator)
+
+    # --- Training ---
+    epochs = 3
+    for epoch in range(1, epochs + 1):
+        trainer.train_epoch(data_loader, epoch)
+
+    # --- Save ---
+    save_dir = "./checkpoints"
+    os.makedirs(save_dir, exist_ok=True)
+    torch.save(moshi_vis.state_dict(), f"{save_dir}/jmoshivis_dummy.pt")
+    print(f"💾 Saved model to {save_dir}/jmoshivis_dummy.pt")
+
+
+if __name__ == "__main__":
+    main()

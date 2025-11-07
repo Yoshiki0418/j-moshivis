@@ -10,6 +10,7 @@ from jmoshivis.modules.streaming_utils import StreamingModule
 from jmoshivis.modules.transformer import Transformer
 from jmoshivis.modules.utils import ClampedEmbedding
 from moshi.utils.sampling import sample_token
+from jmoshivis.models.lm_utils import _delay_sequence, _undelay_sequence
 
 
 class MoshiVis(StreamingModule):
@@ -179,6 +180,32 @@ class MoshiVis(StreamingModule):
         """Offset in the audio codebook. Returns 1 because we always generate with text"""
         return 1
 
+    def forward_speech(self, input_ids, cross_attention_src):
+        B, K, T = input_ids.shape
+        assert K == self.num_codebooks, (K, self.num_codebooks)
+
+        initial = self.get_initial_token().expand(B, -1, -1)
+        delayed = _delay_sequence(self.delays, input_ids, initial)
+        delayed = torch.cat([initial, delayed], dim=2)
+
+        transformer_out, text_logits, gate = self.forward_text(
+            delayed[:, :, :-1],
+            cross_attention_src=cross_attention_src,
+        )
+        assert transformer_out.shape[0] == delayed.shape[0]
+        assert transformer_out.shape[1] == delayed.shape[2] - 1
+
+        audio_logits = self.forward_depformer_training(
+            delayed[:, :, 1:], transformer_out
+        )
+        audio_logits, logits_mask = _undelay_sequence(
+            self.delays[self.audio_offset:self.audio_offset + self.dep_q],
+            audio_logits, fill_value=float('NaN'))
+        logits_mask &= (input_ids[:, self.audio_offset: self.audio_offset + self.dep_q] != self.zero_token_id)
+        text_logits, text_logits_mask = _undelay_sequence(self.delays[:1], text_logits, fill_value=float('NaN'))
+        text_logits_mask &= (input_ids[:, :1] != self.zero_token_id)
+        return {"text_logits": text_logits, "audio_logits": audio_logits, "logits_mask": logits_mask, "text_logits_mask": text_logits_mask, "gate": gate}
+
     def forward_text(
         self,
         input_ids: torch.Tensor,
@@ -264,6 +291,59 @@ class MoshiVis(StreamingModule):
         logits = self.audio_linears[depformer_cb_index](dep_output)
         logits = logits[:, None]
         assert logits.dim() == 4, logits.shape  # [B, Ka, S, card]
+        return logits
+
+    def forward_depformer_training(
+        self,
+        sequence: torch.Tensor,          # [B, K, T]. 正解トークン全体
+        transformer_out: torch.Tensor,   # [B, T, D]. Heliumから得た特徴
+    ) -> torch.Tensor:
+        """Training-time depformer forward (non-streaming)."""
+
+        assert self.depformer_text_emb is not None
+        assert self.depformer_emb is not None
+        assert self.depformer is not None
+
+        B, K, T = sequence.shape
+        Ka = self.num_audio_codebooks_out  # dep_q
+
+        assert (
+            K == self.num_codebooks
+        ), f"Codebooks for Depformer training should be passed all at once, got {K}."
+
+        depformer_inputs = []
+        for cb_index in range(Ka):
+            # --- Transformer hidden projection ---
+            if self.depformer_multi_linear:
+                transformer_in = self.depformer_in[cb_index](transformer_out)
+            else:
+                transformer_in = self.depformer_in[0](transformer_out)
+
+            # --- Token embedding (text or audio) ---
+            if cb_index == 0:
+                token_in = self.depformer_text_emb(sequence[:, 0])  # text token
+            else:
+                token_in = self.depformer_emb[cb_index - 1](
+                    sequence[:, cb_index + self.audio_offset - 1]
+                )
+
+            depformer_inputs.append(transformer_in + token_in)
+
+        # depformer_inputs: list of [B, T, D] → stack as [B, T, Ka, D]
+        depformer_input = torch.stack(depformer_inputs, dim=2)
+        depformer_input = depformer_input.view(B * T, Ka, -1)
+
+        # --- Forward through Depformer ---
+        depformer_output, _ = self.depformer(depformer_input)  # [B*T, Ka, D]
+
+        # --- Project to logits ---
+        all_logits = []
+        for cb_index in range(Ka):
+            logits = self.audio_linears[cb_index](depformer_output[:, cb_index])
+            all_logits.append(logits.view(B, T, -1))
+
+        logits = torch.stack(all_logits, dim=1)  # [B, Ka, T, card]
+        assert logits.dim() == 4, logits.shape  # [B, Ka, T, card]
         return logits
 
     @property

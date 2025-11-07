@@ -12,6 +12,7 @@ import time
 from contextlib import contextmanager
 from dataclasses import dataclass
 from pathlib import Path
+from tqdm import tqdm
 
 import sphn
 import submitit
@@ -83,12 +84,12 @@ def process_one_stereo(
     # チャンネル0 (左: アシスタント) と チャンネル1 (右: ユーザー) をループ処理
     for channel, speaker_label in [(0, "ASSISTANT"), (1, "USER")]:
         logger.debug("Processing channel %d (%s)", channel, speaker_label)
-        
+
         vocals = x[channel][None]
         vocals = F.resample(vocals, sr, SAMPLE_RATE)
-        
+
         vocals_np = vocals.cpu().numpy()[0]
-        
+
         this_duration = vocals_np.shape[-1] / SAMPLE_RATE
         if this_duration < 0.1: # 短すぎる音声はスキップ
             continue
@@ -127,7 +128,7 @@ def process_one_stereo(
             [chunk["text"], chunk["timestamp"], chunk["speaker"]] for chunk in all_chunks
         ]
     }
-    
+
     logger.debug("Whisper applied to both channels.")
     with write_and_rename(out_file, "w", pid=True) as f:
         json.dump(outputs, f, ensure_ascii=False, indent=2) # 読みやすくするためにindentを追加 (任意)
@@ -140,7 +141,7 @@ def run(params: "Params", shard: int = 0):
     logger.info("Hello, world, this is shard %d / %d.", shard, params.shards)
     params.shard = shard
     torch.cuda.set_device(local_rank)
-    
+
     logger.info("Loading Whisper model: %s", params.whisper_model)
     device = torch.device(f"cuda:{local_rank}")
     w_model = whisper.load_model(params.whisper_model, device=device)
@@ -151,27 +152,18 @@ def run(params: "Params", shard: int = 0):
     logger.info("Processing %d files out of %d.", len(kept_paths), len(paths))
     del paths
 
-    for idx, path in enumerate(kept_paths):
-        if (idx + 1) % 10 == 0: # ログの頻度を調整
-            logger.info("Processing %d / %d files.", idx + 1, len(kept_paths))
-        
-        out_file = path.with_suffix(".json")
-        err_file = path.with_suffix(".json.err")
-        
+    for idx, path in enumerate(tqdm(kept_paths, desc="Annotating files")):
+        out_file = path.parent / "stereo_dialogue.json"
+        err_file = path.parent / "stereo_dialogue.json.err"
+
         if out_file.exists():
             logger.debug("Output file %s already exists, skipping.", out_file)
             continue
         if err_file.exists() and not params.rerun_errors:
             logger.debug("Error file %s exists, skipping.", err_file)
             continue
-            
+
         try:
-            if path.stat().st_size < 1000:
-                logger.warning("Small file detected, skipping: %s", path)
-                continue
-            
-            logger.debug("Processing file %s -> %s", path, out_file)
-            # ▼▼▼ process_one_stereo を呼び出すように変更 ▼▼▼
             process_one_stereo(
                 path,
                 out_file,
@@ -216,7 +208,7 @@ def main():
 
     args = parser.parse_args()
     init_logging(args.verbose)
-    
+
     # パラメータをデータクラスに格納
     kwargs = {k: v for k, v in args.__dict__.items() if k not in ["local", "partition", "log_folder"]}
     params = Params(**kwargs)

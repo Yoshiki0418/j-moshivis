@@ -3,6 +3,8 @@
 from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Tuple
 
 import torch
+from torchvision import transforms
+from PIL import Image
 from einops import rearrange
 from jmoshivis.config.enums import ImageEncoder
 from jmoshivis.modules.image_encoder import (
@@ -92,6 +94,7 @@ class ImageProjection(torch.nn.Module):
             missing_keys, _ = image_projection.load_state_dict(
                 moshi_weight, strict=False
             )
+            print(f"Missing Kye: {len(missing_keys)}")
             encoder_keys: List[str] = []
             proj_keys: List[str] = []
             for key in missing_keys:
@@ -188,3 +191,20 @@ class ImageProjection(torch.nn.Module):
         if self.norm_xa is not None:
             return self.norm_xa(logits)
         return logits
+
+
+class ImageProcessor:
+    def __init__(self, size=(224, 224), mean=None, std=None, device="cuda"):
+        self.transform = transforms.Compose([
+            transforms.Resize(size),
+            transforms.ToTensor(),
+            transforms.Normalize(
+                mean or [0.5, 0.5, 0.5],
+                std or [0.5, 0.5, 0.5]
+            ),
+        ])
+        self.device = device
+
+    def __call__(self, image_path: str) -> torch.Tensor:
+        img = Image.open(image_path).convert("RGB")
+        return self.transform(img).to(self.device)
