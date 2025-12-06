@@ -15,13 +15,14 @@ TARGET_SR = 24000
 
 # ===== 1. Configと重みのロード =====
 config = KyuteyeConfig.from_yml("/workspace/j-moshivis/configs/moshi-vis.yaml")
+kyuteye_config = KyuteyeConfig.from_yml("/workspace/j-moshivis/configs/j-moshi-vis.yaml")
 
-device="cuda:1" if torch.cuda.is_available() else "cpu"
+device="cuda:0" if torch.cuda.is_available() else "cpu"
 
-# weights_path = hf_hub_download(
-#     repo_id="kyutai/moshika-vis-pytorch-bf16",
-#     filename="model.safetensors"
-# )
+weights_path = hf_hub_download(
+    repo_id="kyutai/moshika-vis-pytorch-bf16",
+    filename="model.safetensors"
+)
 mimi_weight = hf_hub_download(
     repo_id="kyutai/moshika-vis-pytorch-bf16",
     filename="tokenizer-e351c8d8-checkpoint125.safetensors",
@@ -30,7 +31,8 @@ mimi_weight = hf_hub_download(
 
 moshi_vis, image_embedder = get_moshi_vis(
     config,
-    moshi_weight=Path("/workspace/j-moshivis/model_merged.safetensors"),
+    # moshi_weight=Path("/workspace/j-moshivis/checkpoints/step_10.safetensors"),
+    moshi_weight=weights_path,
     device=device,
     dtype=torch.bfloat16,
 )
@@ -38,7 +40,7 @@ moshi_vis, image_embedder = get_moshi_vis(
 # ===== 2. サンプル音声の読み込み =====
 print("Loading sample audio...")
 mimi = get_mimi(mimi_weight, device)
-wav_path = "/workspace/data/sample2.wav"
+wav_path = "/workspace/data/english.wav"
 waveform, sr = torchaudio.load(wav_path)  # waveform: (channels, time)
 waveform = waveform.mean(dim=0, keepdim=True)  # モノラル化
 

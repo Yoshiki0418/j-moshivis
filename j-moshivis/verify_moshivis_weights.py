@@ -74,7 +74,7 @@ def verify_moshivis_weights(device="cuda" if torch.cuda.is_available() else "cpu
     ckpt_path = hf_hub_download(repo_id=repo_id, filename=filename, resume_download=True)
 
     moshivis_weight = Path("/workspace/j-moshivis/model.safetensors")
-    weights = load_file(moshivis_weight, device=str(device))
+    weights = load_file(ckpt_path, device=str(device))
 
     cfg_path = Path("/workspace/j-moshivis/configs/moshi-vis.yaml")
     assert cfg_path.exists(), f"Config file not found: {cfg_path}"
@@ -197,4 +197,3 @@ def verify_moshivis_weights(device="cuda" if torch.cuda.is_available() else "cpu
 
 if __name__ == "__main__":
     model, image_proj = verify_moshivis_weights()
-    save_merged_model(model, image_proj, "/workspace/j-moshivis/moshivis_bf16.safetensors")

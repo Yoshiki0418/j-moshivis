@@ -30,9 +30,12 @@ def get_moshi_vis(
 
         for key, v in load_file(moshi_weight, device=device).items():  # type: ignore
             if key.startswith("image_prefix."):
-                image_proj_state[key[13:]] = v
+                image_proj_state[key[len("image_prefix."):]] = v
             else:
                 model_state[key] = v
+
+    print("🔍 Num image_prefix params:", len(image_proj_state))
+    print("🔍 Example keys:", list(image_proj_state.keys())[:10])
 
     moshi_vis = MoshiVisGen.from_config(
         kyuteye_config, model_state, device, dtype, **(gen_kwargs or {})
@@ -80,6 +83,9 @@ def get_moshi_vis_train(
             else:
                 model_state[key] = v
 
+    print("🔍 Num image_prefix params:", len(image_proj_state))
+    print("🔍 Example keys:", list(image_proj_state.keys())[:10])
+
     # --- モデル構築 ---
     moshi_vis = MoshiVis(**kyuteye_config.moshi_constructor_kwargs, dtype=dtype)
 
@@ -93,31 +99,25 @@ def get_moshi_vis_train(
             kyuteye_config, moshi_vis.llm.dim, image_proj_state, device
         )
 
+    # ----------------------------------------------------
+    # 3. Freeze / unfreeze strategy
+    # ----------------------------------------------------
     if freeze_backbone:
-        print("🔒 Applying MoshiVis paper-style freezing (train only cross-attn & gating modules).")
-        for name, param in moshi_vis.named_parameters():
-            # Cross-AttentionとGating部分のみ学習対象に
-            if (
-                name.startswith("llm.transformer.layers") and
-                ("cross_attention" in name or "gating" in name)
-            ):
-                param.requires_grad = True
-                param.data = param.data.to(device)
-            else:
-                param.requires_grad = False
-                param.data = param.data.to("cpu")
-        
-        torch.cuda.empty_cache()
+        print("🔒 Applying selective fine-tune: cross-attn only.")
 
-        # ImageEmbedder も凍結
+        for name, param in moshi_vis.named_parameters():
+            if "llm.transformer.layers" in name and "cross_attention" in name:
+                param.requires_grad = True   # train this
+            else:
+                param.requires_grad = False  # freeze
+
+        # ImageProjection fully frozen
         for p in image_embedder.parameters():
             p.requires_grad = False
 
-        print("✅ Trainable: cross_attention.*, gating.*")
-        print("🚫 Frozen: vision_encoder, self_attn, norm*, text_emb, text_linear, out_norm")
-
+        print("🔥 Trainable params: Helium cross-attention only")
     else:
-        print("🟢 Backbone trainable: full fine-tune mode")
+        print("🟢 Full fine-tuning enabled (all params trainable).")
 
     # --- モード設定 ---
     moshi_vis.train()

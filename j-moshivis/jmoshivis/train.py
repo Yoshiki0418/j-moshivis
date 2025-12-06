@@ -15,6 +15,7 @@ from .distributed import get_rank, get_world_size
 from .config.kyuteye_config import KyuteyeConfig
 from .trainer import JmoshiVisTrainer
 from torch.optim import AdamW
+from jmoshivis.tools import WandBMetricsWriter
 
 
 @hydra.main(version_base=None, config_path="../configs", config_name="config")
@@ -36,11 +37,11 @@ def main(args: DictConfig):
     mimi.eval()
     for p in mimi.parameters():
         p.requires_grad = False
-    
+
     print("Start get_moshi_vis_train")
     moshi_vis, image_embedder = get_moshi_vis_train(
         kyuteye_config=kyuteye_config,
-        moshivis_weight="/workspace/j-moshivis/model.safetensors",
+        moshivis_weight="/workspace/j-moshivis/model_merged_bf16.safetensors",
         device=device,
         dtype=torch.bfloat16,
         strict=False,
@@ -94,6 +95,7 @@ def main(args: DictConfig):
         torch.Size([2, 17, 125])
         → 2サンプル / 各サンプル17層 / 125フレームのトークン列
     """
+    target_len = int(mimi.frame_rate * args.duration_sec)
     data_loader = build_data_loader(
         instruct_tokenizer=interleaved_tokenizer,
         args=args.data,
@@ -105,35 +107,68 @@ def main(args: DictConfig):
         image_root=args.data.image_root,
         image_embedder=image_embedder,
         device=device,
+        mode="mixed",
+        text_tokenizer=tokenizer,
+        target_len=target_len
     )
 
-    # --- 1. データローダ生成後に1バッチだけ取り出す ---
-    data_iter = iter(data_loader)
-    first_batch = next(data_iter)
+    # # --- 1. データローダ生成後に1バッチだけ取り出す ---
+    # data_iter = iter(data_loader)
+    # first_batch = next(data_iter)
 
-    print("=== Batch object ===")
-    print(type(first_batch))
-    print(first_batch)
+    # print("=== Batch object ===")
+    # print(type(first_batch))
+    # print(first_batch)
 
-    # --- 2. 中身を要素ごとに確認 ---
-    if hasattr(first_batch, "codes"):
-        print("\n[Shape] codes:", first_batch.codes.shape)
-        if first_batch.condition_attributes:
-            print("[Type] condition_attributes:", type(first_batch.condition_attributes))
-            print("[Count] len(condition_attributes):", len(first_batch.condition_attributes))
-            print("[Sample 0] condition_attributes[0]:", first_batch.condition_attributes[0])
-    else:
-        # もしBatchクラスでなくlist形式のままならこちら
-        print("\nFirst element sample keys:", first_batch[0].keys())
-        print("First element sample detail:\n", first_batch[0])
+    # # --- 2. 中身を要素ごとに確認 ---
+    # if hasattr(first_batch, "codes"):
+    #     print("\n[Shape] codes:", first_batch.codes.shape)
+    #     if first_batch.condition_attributes:
+    #         print("[Type] condition_attributes:", type(first_batch.condition_attributes))
+    #         print("[Count] len(condition_attributes):", len(first_batch.condition_attributes))
+    #         print("[Sample 0] condition_attributes[0]:", first_batch.condition_attributes[0])
+    # else:
+    #     # もしBatchクラスでなくlist形式のままならこちら
+    #     print("\nFirst element sample keys:", first_batch[0].keys())
+    #     print("First element sample detail:\n", first_batch[0])
 
-    optimizer = torch.optim.AdamW([p for p in moshi_vis.parameters() if p.requires_grad], lr=2e-5, weight_decay=0.01, fused=True)
+    cross_attn_params = []
+    gate_params = []
+    other_params = []
+
+    for name, p in moshi_vis.named_parameters():
+        if not p.requires_grad:
+            continue
+
+        # Cross-Attention 層
+        if "cross_attention" in name or "xa" in name:
+            cross_attn_params.append(p)
+
+        # Gate 層（XAGate, gate, gating など）
+        elif "gate" in name or "xa_gate" in name:
+            gate_params.append(p)
+
+        # 念のため想定外が混じっていたらログに出す
+        else:
+            print("[WARN] Unexpected trainable param:", name)
+            other_params.append(p)
+
+    optimizer = torch.optim.AdamW(
+        [
+            {"params": cross_attn_params, "lr": 5e-5, "weight_decay": 0.0},
+            {"params": gate_params,       "lr": 1e-4, "weight_decay": 0.01},
+        ],
+        fused=True
+    )
 
     # DDP準備
     moshi_vis, optimizer, data_loader = accelerator.prepare(moshi_vis, optimizer, data_loader)
 
+    writer = WandBMetricsWriter(project_name="J-MoshiVis-Training",
+                                model_name="j-moshivis")
+
     # --- Trainer Setup ---
-    trainer = JmoshiVisTrainer(moshi_vis, optimizer, device, args.trainer, accelerator)
+    trainer = JmoshiVisTrainer(moshi_vis, optimizer, device, args.trainer, accelerator, image_embedder=image_embedder, writer=writer, tokenizer=tokenizer)
 
     # --- Training ---
     epochs = 3

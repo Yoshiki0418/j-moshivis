@@ -12,7 +12,7 @@ def verify_merged_model(device="cuda" if torch.cuda.is_available() else "cpu"):
     can be successfully reloaded and all dimensions match.
     """
 
-    ckpt_path = Path("/workspace/j-moshivis/model_merged.safetensors")
+    ckpt_path = Path("/workspace/j-moshivis/model_merged_bf16.safetensors")
     assert ckpt_path.exists(), f"Checkpoint not found: {ckpt_path}"
 
     # ------------------------------------------------

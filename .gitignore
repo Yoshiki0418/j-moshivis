@@ -16,3 +16,4 @@ outputs/
 **.safetensors
 **.model
 **.deb
+wandb/

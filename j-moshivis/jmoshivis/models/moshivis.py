@@ -181,6 +181,7 @@ class MoshiVis(StreamingModule):
         return 1
 
     def forward_speech(self, input_ids, cross_attention_src):
+        print(cross_attention_src.shape)
         B, K, T = input_ids.shape
         assert K == self.num_codebooks, (K, self.num_codebooks)
 
@@ -574,6 +575,7 @@ class MoshiVisGen(StreamingModule):
         if current_offset <= self.max_delay:
             self.add_streaming_attribute("cache", current_input_cache)
             self.add_streaming_attribute("offset", current_offset)
+            self.add_streaming_attribute("text_logits", text_logits)
             return None, 0.0
 
         # otherwise, retrieve tokens with the correct delay

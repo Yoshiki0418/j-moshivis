@@ -194,7 +194,7 @@ class ImageProjection(torch.nn.Module):
 
 
 class ImageProcessor:
-    def __init__(self, size=(224, 224), mean=None, std=None, device="cuda"):
+    def __init__(self, size=(512, 512), mean=None, std=None, device="cuda"):
         self.transform = transforms.Compose([
             transforms.Resize(size),
             transforms.ToTensor(),
@@ -206,5 +206,8 @@ class ImageProcessor:
         self.device = device
 
     def __call__(self, image_path: str) -> torch.Tensor:
-        img = Image.open(image_path).convert("RGB")
-        return self.transform(img).to(self.device)
+        try:
+            image = Image.open(image_path).convert("RGB")
+        except Exception:
+            return None
+        return self.transform(image).to(self.device)

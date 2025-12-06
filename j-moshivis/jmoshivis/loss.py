@@ -24,6 +24,12 @@ def compute_loss_with_mask(
     logits = logits.view(-1, logits.size(-1)).float()
     target = target.view(-1)
     weights = weights.view(-1)
+
+    denom = torch.sum(weights)
+    if denom == 0:
+        # 勾配は 0（audio 側は一切更新されない）
+        return logits.new_tensor(0.0)
+
     mb_loss = F.cross_entropy(logits, target, reduction="none")
     mb_loss = torch.where(weights > 0.0, mb_loss * weights, torch.zeros_like(mb_loss))
     mb_loss = torch.sum(mb_loss) / torch.sum(weights)

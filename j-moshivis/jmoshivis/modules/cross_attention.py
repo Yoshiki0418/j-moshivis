@@ -47,7 +47,7 @@ class XAGate(torch.nn.Module):
             )
         else:
             self.alpha = torch.nn.Parameter(
-                torch.full((1, 1, 1), 0.0, device=device, dtype=dtype)
+                torch.full((1, 1, 1), 5.4, device=device, dtype=dtype)
             )
         self.act: Callable
         if activation == "tanh":
@@ -324,9 +324,43 @@ class GatedCrossAttention(StreamingModule):
         if not self.is_active(image_tokens_mask=image_tokens_mask):
             x = torch.zeros_like(x)
         else:
-            x = self.mha(
-                query=x, key=key, value=value, attention_mask=cross_attention_mask
-            )
+            # x = self.mha(
+            #     query=x, key=key, value=value, attention_mask=cross_attention_mask
+            # )
+            try:
+                x = self.mha(
+                    query=x, key=key, value=value, attention_mask=cross_attention_mask
+                )
+            except Exception as e:
+                print("\n\n================ CROSS ATTENTION DEBUG ================")
+                print("Error:", e)
+
+                print("---- Query (x) shape ----")
+                print("x:", x.shape)
+
+                print("---- Key ----")
+                if isinstance(key, tuple):
+                    print("key[0]:", key[0].shape)
+                    print("key[1]:", key[1].shape)
+                elif key is not None:
+                    print("key:", key.shape)
+                else:
+                    print("key: None")
+
+                print("---- Value ----")
+                if value is not None:
+                    print("value:", value.shape)
+                else:
+                    print("value: None")
+
+                print("---- cross_attention_mask ----")
+                if cross_attention_mask is None:
+                    print("mask: None")
+                else:
+                    print("mask:", cross_attention_mask.shape)
+
+                print("=======================================================\n\n")
+                raise
 
             if self.gate is not None:
                 x, gate_weight = self.gate(x)

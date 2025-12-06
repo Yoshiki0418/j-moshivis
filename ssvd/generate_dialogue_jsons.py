@@ -3,7 +3,7 @@ from pathlib import Path
 
 # ======== 入力・出力パス設定 ========
 INPUT_JSONL = Path("/workspace/data/filtered_dialogue/filtered.jsonl")
-OUTPUT_ROOT = Path("/workspace/data/speech/data_stereo")
+OUTPUT_ROOT = Path("/gpu-server/user/yoshiki/j-moshivis/data/speech/data_stereo")
 
 # ======== 出力ディレクトリ確認 ========
 assert INPUT_JSONL.exists(), f"❌ Not found: {INPUT_JSONL}"
