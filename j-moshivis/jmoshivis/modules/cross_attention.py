@@ -47,7 +47,7 @@ class XAGate(torch.nn.Module):
             )
         else:
             self.alpha = torch.nn.Parameter(
-                torch.full((1, 1, 1), 5.4, device=device, dtype=dtype)
+                torch.full((1, 1, 1), 0.0, device=device, dtype=dtype)
             )
         self.act: Callable
         if activation == "tanh":

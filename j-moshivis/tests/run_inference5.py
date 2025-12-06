@@ -36,7 +36,7 @@ mimi_weight = hf_hub_download(
 
 moshi_vis, image_embedder = get_moshi_vis(
     kyuteye_config,
-    moshi_weight=Path("/workspace/j-moshivis/checkpoints/step_5000.safetensors"),
+    moshi_weight=Path("/workspace/j-moshivis/checkpoints/step_500.safetensors"),
     # moshi_weight=weights_path,
     device=device,
     dtype=torch.bfloat16,

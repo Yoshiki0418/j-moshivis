@@ -81,18 +81,38 @@ def get_moshi_vis_train(
             if key.startswith("image_prefix."):
                 image_proj_state[key[len("image_prefix."):]] = v
             else:
+                # =========================================================
+                # ★ 修正ポイント: Cross-Attention/Gate の重みをロードから除外
+                # =========================================================
+                # "cross_attention" がキーに含まれる場合（Gateもこれに含まれる構成が一般的）
+                # 辞書に追加せずスキップすることで、これらのパラメータはロードされず、
+                # モデル初期化時の値（ランダム or ゼロ初期化）が維持されます。
+                if "cross_attention" in key:
+                    # デバッグ用に最初の数個だけログに出しても良い
+                    # print(f"Skipping init for: {key}") 
+                    continue
+                
                 model_state[key] = v
 
     print("🔍 Num image_prefix params:", len(image_proj_state))
-    print("🔍 Example keys:", list(image_proj_state.keys())[:10])
+    print(f"🔍 Model params to load: {len(model_state)} (Cross-Attention excluded)")
 
     # --- モデル構築 ---
+    # ここで __init__ が走り、Cross-AttentionやGateはランダム(または0)で初期化される
     moshi_vis = MoshiVis(**kyuteye_config.moshi_constructor_kwargs, dtype=dtype)
 
     # --- 重みロード ---
     if model_state:
-        missing, unexpected = moshi_vis.load_state_dict(model_state, strict=strict)
-        print(f"✅ MoshiVis loaded. Missing: {len(missing)}, Unexpected: {len(unexpected)}")
+        # Cross-Attentionのキーが model_state に無いため、missing_keys に含まれることになる
+        # strict=False なのでエラーにはならない
+        missing, unexpected = moshi_vis.load_state_dict(model_state, strict=False)
+
+        # 期待通り cross_attention が missing になっているか確認
+        ca_missing = [k for k in missing if "cross_attention" in k]
+        print("✅ MoshiVis loaded.")
+        print(f"   - Total Missing: {len(missing)}")
+        print(f"   - Cross-Attention Missing (As Expected): {len(ca_missing)}")
+        print(f"   - Unexpected: {len(unexpected)}")
 
     if image_proj_state:
         image_embedder = ImageProjection.from_config(
@@ -105,9 +125,11 @@ def get_moshi_vis_train(
     if freeze_backbone:
         print("🔒 Applying selective fine-tune: cross-attn only.")
 
+        trainable_count = 0
         for name, param in moshi_vis.named_parameters():
             if "llm.transformer.layers" in name and "cross_attention" in name:
                 param.requires_grad = True   # train this
+                trainable_count += 1
             else:
                 param.requires_grad = False  # freeze
 
@@ -115,7 +137,7 @@ def get_moshi_vis_train(
         for p in image_embedder.parameters():
             p.requires_grad = False
 
-        print("🔥 Trainable params: Helium cross-attention only")
+        print(f"🔥 Trainable params count: {trainable_count} (Helium cross-attention only)")
     else:
         print("🟢 Full fine-tuning enabled (all params trainable).")
 
