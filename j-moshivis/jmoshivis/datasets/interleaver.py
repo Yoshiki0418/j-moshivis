@@ -278,8 +278,10 @@ class InterleavedTokenizer:
             )
             audio_tokens = audio_tokens.view(1, -1, self.num_audio_frames)
 
-            info_file = os.path.splitext(path)[0] + ".json"
-            with open(info_file) as f:
+            # info_file = os.path.splitext(path)[0] + ".json"
+            directory = os.path.dirname(path)
+            refined_json_path = os.path.join(directory, "assistant_dialogue.refined.json")
+            with open(refined_json_path) as f:
                 data = json.load(f)
                 alignments = data["alignments"]
 

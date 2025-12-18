@@ -3,14 +3,14 @@ mimi_name: tokenizer-e351c8d8-checkpoint125.safetensors
 duration_sec: 10.0
 
 data:
-  train_data: /workspace/train_data_refined.jsonl
+  train_data: /workspace/data/speech/train_data_refined_a.jsonl
   eval_data: /workspace/j-moshivis/dataset/eval
   image_root: /mnt/sub_storage/images/
   shuffle: true
   speech_ratio: 0.5
 
 train:
-  batch_size: 12
+  batch_size: 1
   seed: 42
   num_workers: 0
 

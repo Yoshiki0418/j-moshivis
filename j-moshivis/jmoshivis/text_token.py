@@ -56,6 +56,7 @@ def main(args: DictConfig):
         moshi_vis.zero_token_id,
         keep_main_only=True,
         device=device,
+        use_bos_eos=True,
     )
     interleaved_tokenizer = InterleavedTokenizer(
         mimi, interleaver, duration_sec=args.duration_sec
@@ -209,7 +210,7 @@ def main(args: DictConfig):
     num_samples = 0
     sample_unique_counts = []
 
-    MAX_ANALYZE = 5000  # ★ ここで上限を設定（5000バッチ）
+    MAX_ANALYZE = 1  # ★ ここで上限を設定（5000バッチ）
     print(f"Iterating over dataset for full token analysis (max {MAX_ANALYZE} batches)...")
 
     for i, batch in enumerate(tqdm(data_loader)):
@@ -219,6 +220,21 @@ def main(args: DictConfig):
         # codes: [B, D, T]
         codes = batch.codes  # Tensor on CUDA
         text_tokens = codes[:, 0, :].detach().cpu().numpy()  # [B, T]
+
+        if MAX_ANALYZE == 1 and i == 0:
+            first_sample_tokens = text_tokens[0]  # shape [T], だいたい T=125 のはず
+            print("\n=== First sample text tokens (raw IDs) ===")
+            print(f"Length: {len(first_sample_tokens)}")
+            print(first_sample_tokens.tolist())
+
+            # もしトークン内容も見たければ（tokenizer が使えるなら）：
+            try:
+                pieces = [tokenizer.IdToPiece(int(t)) for t in first_sample_tokens]
+                print("\n=== First sample text tokens (as pieces) ===")
+                for idx, (tid, piece) in enumerate(zip(first_sample_tokens, pieces)):
+                    print(f"{idx:3d}: ID={int(tid):5d}, piece={piece!r}")
+            except Exception as e:
+                print(f"[Warn] failed to convert tokens to pieces: {e}")
 
         # flatten
         flat = text_tokens.reshape(-1)

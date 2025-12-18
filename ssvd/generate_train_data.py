@@ -4,7 +4,7 @@ from pathlib import Path
 
 # ========= 設定 =========
 DATA_ROOT = Path("/gpu-server/user/yoshiki/j-moshivis/data/speech/data_stereo")
-OUTPUT_PATH = Path("/workspace/data/speech/train_data_refined.jsonl")
+OUTPUT_PATH = Path("/workspace/data/speech/train_data_refined_a.jsonl")
 
 # ========= 初期化 =========
 created = 0
@@ -21,7 +21,8 @@ for uid_dir in sorted(DATA_ROOT.iterdir()):
 
     uid = uid_dir.name
     wav_path = uid_dir / f"stereo_dialogue.wav"
-    align_path = uid_dir / f"stereo_dialogue.refined.json"
+    # align_path = uid_dir / f"stereo_dialogue.refined.json"
+    align_path = uid_dir / f"assistant_dialogue.refined.json"
     dialogue_path = uid_dir / "dialogue.json"
 
     # --- 画像ファイル探索 ---

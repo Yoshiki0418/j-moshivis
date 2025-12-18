@@ -127,7 +127,7 @@ def get_moshi_vis_train(
 
         trainable_count = 0
         for name, param in moshi_vis.named_parameters():
-            if "llm.transformer.layers" in name and "cross_attention" in name:
+            if "llm.transformer.layers" in name and ("cross_attention" in name or "norm_cross" in name):
                 param.requires_grad = True   # train this
                 trainable_count += 1
             else:

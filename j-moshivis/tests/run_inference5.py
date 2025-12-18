@@ -36,7 +36,7 @@ mimi_weight = hf_hub_download(
 
 moshi_vis, image_embedder = get_moshi_vis(
     kyuteye_config,
-    moshi_weight=Path("/workspace/j-moshivis/checkpoints/step_500.safetensors"),
+    moshi_weight=Path("/workspace/j-moshivis/xa_layers_26_27/step_11000.safetensors"),
     # moshi_weight=weights_path,
     device=device,
     dtype=torch.bfloat16,
@@ -58,7 +58,7 @@ with torch.no_grad():
 print("Encoded image:", ca_src.shape)
 
 # ===== 5. 音声読み込み =====
-wav_path = "/workspace/data/sample6.wav"
+wav_path = "/workspace/data/sample3.wav"
 waveform, sr = torchaudio.load(wav_path)
 waveform = waveform.mean(dim=0, keepdim=True)
 
@@ -66,8 +66,9 @@ if sr != TARGET_SR:
     waveform = torchaudio.functional.resample(waveform, sr, TARGET_SR)
 
 # 無音追加
-silence = torch.zeros(1, int(6.0 * TARGET_SR))
-waveform = torch.cat([silence, waveform, silence], dim=1).unsqueeze(0).to(device)
+silence_s = torch.zeros(1, int(2.0 * TARGET_SR))
+silence_e = torch.zeros(1, int(10.0 * TARGET_SR))
+waveform = torch.cat([silence_s, waveform, silence_e], dim=1).unsqueeze(0).to(device)
 
 # ===== 6. Mimi codec でトークン化 =====
 codes = mimi.encode(waveform)
