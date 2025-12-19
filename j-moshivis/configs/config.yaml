@@ -15,5 +15,6 @@ train:
   num_workers: 0
 
 trainer:
+  batch_size: 8
   text_padding_weight: 0.0
   first_codebook_weight_multiplier: 3.0

@@ -63,212 +63,358 @@ class JmoshiVisTrainer:
         self.tokenizer = tokenizer
 
     def train_epoch(self, dataloader, epoch: int, log_interval: int = 1):
+        # ---------------------------------------------------------
+        # ★ 修正: 勾配蓄積の設定 (目標バッチサイズ 128 を目指す例)
+        # ---------------------------------------------------------
+        target_batch_size = 128  # ※必要に応じて調整 (64~128推奨)
+        physical_batch_size = self.args.batch_size
+        accumulation_steps = target_batch_size // physical_batch_size
+        if accumulation_steps < 1:
+            accumulation_steps = 1
+        
+        # Acceleratorに蓄積ステップ数を伝える（お作法）
+        self.accelerator.gradient_accumulation_steps = accumulation_steps
+
+        if self.accelerator.is_main_process:
+            print(f"🚀 Gradient Accumulation Enabled:")
+            print(f"   - Physical Batch Size: {physical_batch_size}")
+            print(f"   - Accumulation Steps: {accumulation_steps}")
+            print(f"   - Effective Batch Size: {physical_batch_size * accumulation_steps}")
+
         total_loss = 0.0
         total_text_acc = 0.0
         total_audio_acc = 0.0
+        
+        # 蓄積中のステップカウント用
+        processed_samples = 0
 
-        pbar = tqdm(enumerate(dataloader), desc=f"Epoch {epoch}")
+        pbar = tqdm(enumerate(dataloader), desc=f"Epoch {epoch}", disable=not self.accelerator.is_main_process)
+
+        self.optimizer.zero_grad(set_to_none=True) # ループ前に初期化
 
         for step, batch in pbar:
-            global_step = self.global_step
-            self.global_step += 1
+            # -----------------------------------------------------
+            # ★ 修正: accumulate コンテキストで囲む
+            # -----------------------------------------------------
+            with self.accelerator.accumulate(self.model):
+                # --- Extract inputs ---
+                codes = batch.codes.to(self.device)
 
-            self.optimizer.zero_grad(set_to_none=True)
+                # --- 画像入力の準備 ---
+                image_input = None
+                if isinstance(batch.condition_attributes, list):
+                    tensors = []
+                    for ca in batch.condition_attributes:
+                        if hasattr(ca, "tensor") and "image" in ca.tensor:
+                            tensors.append(ca.tensor["image"].tensor.to(self.device))
+                    if tensors:
+                        image_input = torch.cat(tensors, dim=0)
 
-            # --- Extract inputs ---
-            # batch は jmoshivis.datasets.interleaver.Batch
-            # → batch.codes: torch.Size([B, D, T])
-            # → batch.condition_attributes: Optional[ConditionAttributes]
-            codes = batch.codes.to(self.device)
+                # --- Forward pass ---
+                with self.accelerator.autocast():
+                    cross_attention_src = None
+                    if image_input is not None:
+                        embedder_out = self.image_embedder(image_input)
+                        cross_attention_src = embedder_out["cross_attention_src"]
 
-            # --- 画像入力の準備 ---
-            image_input = None
+                    outputs = self.model.forward_speech(
+                        input_ids=codes,
+                        cross_attention_src=cross_attention_src,
+                    )
 
-            if isinstance(batch.condition_attributes, list):
-                tensors = []
-                for ca in batch.condition_attributes:
-                    if hasattr(ca, "tensor") and "image" in ca.tensor:
-                        tensors.append(ca.tensor["image"].tensor.to(self.device))
-                if tensors:
-                    image_input = torch.cat(tensors, dim=0)
+                    text_logits = outputs["text_logits"]
+                    audio_logits = outputs["audio_logits"]
 
-                    # 最初のステップ、または一定間隔で確認
-                    if self.global_step == 1 or self.global_step % 100 == 0:
-                        print(f"\n🔍 [DEBUG Step {self.global_step}] Image Input Check:")
-                        print(f"   - Shape: {image_input.shape}") # [B, 3, H, W] になっているか？ (例: [B, 3, 448, 448])
-                        print(f"   - Min: {image_input.min().item():.3f}, Max: {image_input.max().item():.3f}") # -1.0 ~ 1.0 付近か？
-                        print(f"   - Mean: {image_input.mean().item():.3f}, Std: {image_input.std().item():.3f}")
+                    # --- Loss Calculation ---
+                    text_target = codes[:, :self.model.audio_offset]
+                    audio_target = codes[:, self.model.audio_offset:self.model.audio_offset + self.model.dep_q]
 
-                        # 画像として保存して目視確認 (最初の1枚だけ)
-                        try:
-                            import os
-                            import torchvision
-                            os.makedirs("debug_images", exist_ok=True)
+                    text_loss = compute_loss_with_mask(
+                        text_logits, text_target, outputs["text_logits_mask"],
+                        mode="text",
+                        text_padding_weight=self.args.text_padding_weight,
+                        text_padding_ids={self.model.text_padding_token_id, self.model.end_of_text_padding_id},
+                    )
+                    audio_loss = compute_loss_with_mask(
+                        audio_logits, audio_target, outputs["logits_mask"],
+                        mode="audio",
+                        first_codebook_weight_multiplier=self.args.first_codebook_weight_multiplier,
+                    )
+
+                    loss = text_loss * 2 + audio_loss
+
+                # --- Backprop (蓄積される) ---
+                self.accelerator.backward(loss)
+
+                # -----------------------------------------------------
+                # ★ 修正: 更新ステップ (蓄積完了時のみ実行される)
+                # -----------------------------------------------------
+                if self.accelerator.sync_gradients:
+                    # 勾配クリッピング
+                    self.accelerator.clip_grad_norm_(self.model.parameters(), 1.0)
+                    self.accelerator.clip_grad_norm_(self.image_embedder.parameters(), 1.0)
+                    
+                    self.optimizer.step()
+                    self.optimizer.zero_grad(set_to_none=True)
+                    
+                    self.global_step += 1 # 更新した回数だけカウントアップ
+
+                    # --- Logging (更新時のみ行う) ---
+                    # 正解率計算などは負荷削減のため更新時のみでOK
+                    with torch.no_grad():
+                        text_mask = outputs["text_logits_mask"]
+                        pred_text = text_logits.argmax(-1)
+                        correct_text = (pred_text == text_target) & text_mask
+                        step_text_acc = correct_text.sum() / text_mask.sum() if text_mask.sum() > 0 else 0.0
+                        
+                        # Audio Acc (マスク考慮)
+                        audio_mask = outputs["logits_mask"]
+                        pred_audio = audio_logits.argmax(-1)
+                        correct_audio = (pred_audio == audio_target) & audio_mask
+                        step_audio_acc = correct_audio.sum() / audio_mask.sum() if audio_mask.sum() > 0 else 0.0
+
+                    total_loss += loss.item()
+                    total_text_acc += float(step_text_acc)
+                    total_audio_acc += float(step_audio_acc)
+                    
+                    processed_samples += 1 # 平均計算用
+
+                    avg_loss = total_loss / processed_samples
+                    avg_text = total_text_acc / processed_samples
+                    avg_audio = total_audio_acc / processed_samples
+
+                    if self.global_step % log_interval == 0:
+                        pbar.set_postfix({
+                            "loss": f"{avg_loss:.4f}",
+                            "txt": f"{avg_text:.3f}",
+                            "aud": f"{avg_audio:.3f}",
+                            "step": self.global_step
+                        })
+
+                    if self.writer is not None:
+                        self.writer.log_step(
+                            step=self.global_step,
+                            loss=loss.item(),
+                            text_loss=text_loss.item(),
+                            audio_loss=audio_loss.item(),
+                        )
+
+                    # --- Save Checkpoint ---
+                    if self.global_step % 2000 == 0 and self.global_step > 0:
+                        if self.accelerator.is_main_process:
+                            self.save_checkpoint(f"./checkpoints/step_{self.global_step}.safetensors")
+
+        # End of Epoch
+        print(f"✅ Epoch {epoch} finished.")
+        return total_loss / max(1, processed_samples)
+
+    # def train_epoch(self, dataloader, epoch: int, log_interval: int = 1):
+    #     total_loss = 0.0
+    #     total_text_acc = 0.0
+    #     total_audio_acc = 0.0
+
+    #     pbar = tqdm(enumerate(dataloader), desc=f"Epoch {epoch}")
+
+    #     for step, batch in pbar:
+    #         global_step = self.global_step
+    #         self.global_step += 1
+
+    #         self.optimizer.zero_grad(set_to_none=True)
+
+    #         # --- Extract inputs ---
+    #         # batch は jmoshivis.datasets.interleaver.Batch
+    #         # → batch.codes: torch.Size([B, D, T])
+    #         # → batch.condition_attributes: Optional[ConditionAttributes]
+    #         codes = batch.codes.to(self.device)
+
+    #         # --- 画像入力の準備 ---
+    #         image_input = None
+
+    #         if isinstance(batch.condition_attributes, list):
+    #             tensors = []
+    #             for ca in batch.condition_attributes:
+    #                 if hasattr(ca, "tensor") and "image" in ca.tensor:
+    #                     tensors.append(ca.tensor["image"].tensor.to(self.device))
+    #             if tensors:
+    #                 image_input = torch.cat(tensors, dim=0)
+
+    #                 # 最初のステップ、または一定間隔で確認
+    #                 if self.global_step == 1 or self.global_step % 100 == 0:
+    #                     print(f"\n🔍 [DEBUG Step {self.global_step}] Image Input Check:")
+    #                     print(f"   - Shape: {image_input.shape}") # [B, 3, H, W] になっているか？ (例: [B, 3, 448, 448])
+    #                     print(f"   - Min: {image_input.min().item():.3f}, Max: {image_input.max().item():.3f}") # -1.0 ~ 1.0 付近か？
+    #                     print(f"   - Mean: {image_input.mean().item():.3f}, Std: {image_input.std().item():.3f}")
+
+    #                     # 画像として保存して目視確認 (最初の1枚だけ)
+    #                     try:
+    #                         import os
+    #                         import torchvision
+    #                         os.makedirs("debug_images", exist_ok=True)
                             
-                            # 正規化を戻す (mean=0.5, std=0.5 を仮定: [-1, 1] -> [0, 1])
-                            # ※ ImageProcessorの設定に合わせて調整してください
-                            img_to_save = image_input[0].clone().detach().float().cpu()
-                            img_to_save = img_to_save * 0.5 + 0.5
-                            img_to_save = torch.clamp(img_to_save, 0, 1)
+    #                         # 正規化を戻す (mean=0.5, std=0.5 を仮定: [-1, 1] -> [0, 1])
+    #                         # ※ ImageProcessorの設定に合わせて調整してください
+    #                         img_to_save = image_input[0].clone().detach().float().cpu()
+    #                         img_to_save = img_to_save * 0.5 + 0.5
+    #                         img_to_save = torch.clamp(img_to_save, 0, 1)
                             
-                            save_path = f"debug_images/step_{self.global_step}.png"
-                            torchvision.utils.save_image(img_to_save, save_path)
-                            print(f"   - Saved debug image to: {save_path}")
-                        except Exception as e:
-                            print(f"   - Failed to save debug image: {e}")
+    #                         save_path = f"debug_images/step_{self.global_step}.png"
+    #                         torchvision.utils.save_image(img_to_save, save_path)
+    #                         print(f"   - Saved debug image to: {save_path}")
+    #                     except Exception as e:
+    #                         print(f"   - Failed to save debug image: {e}")
 
-            if image_input is None and batch.condition_attributes is not None:
-                # Case 1: moshi standard format (image_embed attribute)
-                if hasattr(batch.condition_attributes, "image_embed"):
-                    pass
+    #         if image_input is None and batch.condition_attributes is not None:
+    #             # Case 1: moshi standard format (image_embed attribute)
+    #             if hasattr(batch.condition_attributes, "image_embed"):
+    #                 pass
 
-            # --- Forward pass ---
-            with self.accelerator.autocast():
-                cross_attention_src = None
-                if image_input is not None:
-                    # ここでプロジェクション層 (proj_xa) に勾配が流れる！
-                    # forward戻り値: {"cross_attention_src": ..., "cross_attention_mask": ...}
-                    embedder_out = self.image_embedder(image_input)
+    #         # --- Forward pass ---
+    #         with self.accelerator.autocast():
+    #             cross_attention_src = None
+    #             if image_input is not None:
+    #                 # ここでプロジェクション層 (proj_xa) に勾配が流れる！
+    #                 # forward戻り値: {"cross_attention_src": ..., "cross_attention_mask": ...}
+    #                 embedder_out = self.image_embedder(image_input)
 
-                    cross_attention_src = embedder_out["cross_attention_src"]
-                    # 必要であればマスクも取得 (Pixtralなど画像サイズ可変の場合)
-                    # cross_attention_mask = embedder_out.get("cross_attention_mask", None)
+    #                 cross_attention_src = embedder_out["cross_attention_src"]
+    #                 # 必要であればマスクも取得 (Pixtralなど画像サイズ可変の場合)
+    #                 # cross_attention_mask = embedder_out.get("cross_attention_mask", None)
 
-                # MoshiVis forward_text は Text + Audioトークンの埋め込み系列を入力とする
-                # _, text_logits, _ = self.model.forward_text(
-                #     input_ids=codes,
-                #     cross_attention_src=cross_attention_src,
-                # )
-                outputs = self.model.forward_speech(
-                    input_ids=codes,
-                    cross_attention_src=cross_attention_src,
-                    # cross_attention_mask=cross_attention_mask # 必要なら追加
-                )
+    #             # MoshiVis forward_text は Text + Audioトークンの埋め込み系列を入力とする
+    #             # _, text_logits, _ = self.model.forward_text(
+    #             #     input_ids=codes,
+    #             #     cross_attention_src=cross_attention_src,
+    #             # )
+    #             outputs = self.model.forward_speech(
+    #                 input_ids=codes,
+    #                 cross_attention_src=cross_attention_src,
+    #                 # cross_attention_mask=cross_attention_mask # 必要なら追加
+    #             )
 
-                text_logits = outputs["text_logits"]             # [B,1,T_text,V]
-                audio_logits = outputs["audio_logits"]           # [B,dep_q,T_audio,V]
+    #             text_logits = outputs["text_logits"]             # [B,1,T_text,V]
+    #             audio_logits = outputs["audio_logits"]           # [B,dep_q,T_audio,V]
 
-                with torch.no_grad():
-                    # shape
-                    # text_logits: [B, 1, T, V]
-                    # text_target: [B, 1, T]
-                    # mask: [B, 1, T]
-                    text_mask = outputs["text_logits_mask"]
-                    text_target = codes[:, :self.model.audio_offset]  # [B,1,T]
+    #             with torch.no_grad():
+    #                 # shape
+    #                 # text_logits: [B, 1, T, V]
+    #                 # text_target: [B, 1, T]
+    #                 # mask: [B, 1, T]
+    #                 text_mask = outputs["text_logits_mask"]
+    #                 text_target = codes[:, :self.model.audio_offset]  # [B,1,T]
 
-                    pred = text_logits.argmax(-1)   # [B,1,T]
-                    correct = (pred == text_target) & text_mask       # boolean
+    #                 pred = text_logits.argmax(-1)   # [B,1,T]
+    #                 correct = (pred == text_target) & text_mask       # boolean
 
-                    # avoid ZeroDivision
-                    if text_mask.sum() > 0:
-                        step_text_acc = correct.sum() / text_mask.sum()
-                    else:
-                        step_text_acc = torch.tensor(0.0)
+    #                 # avoid ZeroDivision
+    #                 if text_mask.sum() > 0:
+    #                     step_text_acc = correct.sum() / text_mask.sum()
+    #                 else:
+    #                     step_text_acc = torch.tensor(0.0)
 
-                # ロギング用
-                total_text_acc += float(step_text_acc)
+    #             # ロギング用
+    #             total_text_acc += float(step_text_acc)
 
-                text_target = codes[:, :self.model.audio_offset]  # [B,T_text]
-                audio_target = codes[:,self.model.audio_offset:self.model.audio_offset + self.model.dep_q]
+    #             text_target = codes[:, :self.model.audio_offset]  # [B,T_text]
+    #             audio_target = codes[:,self.model.audio_offset:self.model.audio_offset + self.model.dep_q]
 
-                # decoded = self.tokenizer.decode(codes[0,0].tolist())
-                # print(decoded)
+    #             # decoded = self.tokenizer.decode(codes[0,0].tolist())
+    #             # print(decoded)
 
-                # print("DEBUG: text_target[0, 0, :50]", codes[0, 0])
+    #             # print("DEBUG: text_target[0, 0, :50]", codes[0, 0])
 
-                # text_logits: [B, 1, T, vocab_size]
-                # 教師信号: text部分（= input_ids[:, 0, :]）を参照
-                text_loss = compute_loss_with_mask(
-                    text_logits,
-                    text_target,
-                    outputs["text_logits_mask"],
-                    mode="text",
-                    text_padding_weight=self.args.text_padding_weight,
-                    text_padding_ids={
-                        self.model.text_padding_token_id,
-                        self.model.end_of_text_padding_id,
-                    },
-                )
-                audio_loss = compute_loss_with_mask(
-                    audio_logits,
-                    audio_target,
-                    outputs["logits_mask"],
-                    mode="audio",
-                    first_codebook_weight_multiplier=self.args.first_codebook_weight_multiplier,
-                )
+    #             # text_logits: [B, 1, T, vocab_size]
+    #             # 教師信号: text部分（= input_ids[:, 0, :]）を参照
+    #             text_loss = compute_loss_with_mask(
+    #                 text_logits,
+    #                 text_target,
+    #                 outputs["text_logits_mask"],
+    #                 mode="text",
+    #                 text_padding_weight=self.args.text_padding_weight,
+    #                 text_padding_ids={
+    #                     self.model.text_padding_token_id,
+    #                     self.model.end_of_text_padding_id,
+    #                 },
+    #             )
+    #             audio_loss = compute_loss_with_mask(
+    #                 audio_logits,
+    #                 audio_target,
+    #                 outputs["logits_mask"],
+    #                 mode="audio",
+    #                 first_codebook_weight_multiplier=self.args.first_codebook_weight_multiplier,
+    #             )
 
-                loss = text_loss*2 + audio_loss
+    #             loss = text_loss*2 + audio_loss
 
-            # --- Backprop ---
-            self.accelerator.backward(loss)
-            if self.accelerator.sync_gradients:
-                self.accelerator.clip_grad_norm_(self.model.parameters(), 1.0)
-                # もし image_embedder も学習対象ならそちらもクリップ対象にするのが安全ですが、
-                # 通常は model 側に含めるか、params リストに対して行います。
-                # image_embedder のパラメータも optimizer に含まれているので、
-                # ここで image_embedder.parameters() もクリップするのがベストです。
-                self.accelerator.clip_grad_norm_(self.image_embedder.parameters(), 1.0)
-            self.optimizer.step()
-            self.optimizer.zero_grad(set_to_none=True)
+    #         # --- Backprop ---
+    #         self.accelerator.backward(loss)
+    #         if self.accelerator.sync_gradients:
+    #             self.accelerator.clip_grad_norm_(self.model.parameters(), 1.0)
+    #             # もし image_embedder も学習対象ならそちらもクリップ対象にするのが安全ですが、
+    #             # 通常は model 側に含めるか、params リストに対して行います。
+    #             # image_embedder のパラメータも optimizer に含まれているので、
+    #             # ここで image_embedder.parameters() もクリップするのがベストです。
+    #             self.accelerator.clip_grad_norm_(self.image_embedder.parameters(), 1.0)
+    #         self.optimizer.step()
+    #         self.optimizer.zero_grad(set_to_none=True)
 
-            total_loss += loss.item()
-            avg_loss = total_loss / (step + 1)
-            avg_text_acc = total_text_acc / (step + 1)
-            avg_audio_acc = total_audio_acc / (step + 1)
+    #         total_loss += loss.item()
+    #         avg_loss = total_loss / (step + 1)
+    #         avg_text_acc = total_text_acc / (step + 1)
+    #         avg_audio_acc = total_audio_acc / (step + 1)
 
-            # ============================
-            #   tqdm update
-            # ============================
-            if step % log_interval == 0:
-                pbar.set_postfix({
-                    "loss": f"{avg_loss:.4f}",
-                    "text_acc": f"{avg_text_acc:.3f}",
-                    "audio_acc": f"{avg_audio_acc:.3f}",
-                })
+    #         # ============================
+    #         #   tqdm update
+    #         # ============================
+    #         if step % log_interval == 0:
+    #             pbar.set_postfix({
+    #                 "loss": f"{avg_loss:.4f}",
+    #                 "text_acc": f"{avg_text_acc:.3f}",
+    #                 "audio_acc": f"{avg_audio_acc:.3f}",
+    #             })
 
-            # --- WandB Logging (STEP) ---
-            print(f"writer:{self.writer is not None}")
-            if self.writer is not None:
-                self.writer.log_step(
-                    step=global_step,
-                    loss=loss.item(),
-                    text_loss=text_loss.item(),
-                    audio_loss=audio_loss.item(),
-                )
+    #         # --- WandB Logging (STEP) ---
+    #         print(f"writer:{self.writer is not None}")
+    #         if self.writer is not None:
+    #             self.writer.log_step(
+    #                 step=global_step,
+    #                 loss=loss.item(),
+    #                 text_loss=text_loss.item(),
+    #                 audio_loss=audio_loss.item(),
+    #             )
 
-            # --- Step-based Checkpoint Saving ---
-            import os
-            from safetensors.torch import save_model
+    #         # --- Step-based Checkpoint Saving ---
+    #         import os
+    #         from safetensors.torch import save_model
 
-            if global_step % 2000 == 0 and global_step > 0:
-                if self.accelerator.is_main_process:
-                    ckpt_path = f"./checkpoints/step_{global_step}.safetensors"
-                    os.makedirs("./checkpoints", exist_ok=True)
+    #         if global_step % 2000 == 0 and global_step > 0:
+    #             if self.accelerator.is_main_process:
+    #                 ckpt_path = f"./checkpoints/step_{global_step}.safetensors"
+    #                 os.makedirs("./checkpoints", exist_ok=True)
 
-                    # unwrap MoshiVis 本体
-                    model_to_save = self.model
-                    if hasattr(model_to_save, "module"):
-                        model_to_save = model_to_save.module
+    #                 # unwrap MoshiVis 本体
+    #                 model_to_save = self.model
+    #                 if hasattr(model_to_save, "module"):
+    #                     model_to_save = model_to_save.module
 
-                    # MoshiVis + ImageProjection をまとめたバンドルを作成
-                    bundle = MoshiVisBundle(model_to_save, self.image_embedder)
+    #                 # MoshiVis + ImageProjection をまとめたバンドルを作成
+    #                 bundle = MoshiVisBundle(model_to_save, self.image_embedder)
 
-                    # shared weight 付きでも安全に保存できる
-                    save_model(bundle, ckpt_path)
+    #                 # shared weight 付きでも安全に保存できる
+    #                 save_model(bundle, ckpt_path)
 
-                    print(f"💾 Saved FULL safetensor checkpoint at step {global_step}: {ckpt_path}")
+    #                 print(f"💾 Saved FULL safetensor checkpoint at step {global_step}: {ckpt_path}")
 
 
 
-        # ==================================================
-        #   Epoch Summary
-        # ==================================================
-        avg_loss = total_loss / len(dataloader)
-        avg_text_acc = total_text_acc / len(dataloader)
-        avg_audio_acc = total_audio_acc / len(dataloader)
+    #     # ==================================================
+    #     #   Epoch Summary
+    #     # ==================================================
+    #     avg_loss = total_loss / len(dataloader)
+    #     avg_text_acc = total_text_acc / len(dataloader)
+    #     avg_audio_acc = total_audio_acc / len(dataloader)
 
-        print(f"✅ Epoch {epoch} | Loss={avg_loss:.4f} | TextAcc={avg_text_acc:.3f} | AudioAcc={avg_audio_acc:.3f}")
-        return avg_loss
+    #     print(f"✅ Epoch {epoch} | Loss={avg_loss:.4f} | TextAcc={avg_text_acc:.3f} | AudioAcc={avg_audio_acc:.3f}")
+    #     return avg_loss
 
     def save_checkpoint(self, path: str):
         """AMP安全にcheckpointを保存"""

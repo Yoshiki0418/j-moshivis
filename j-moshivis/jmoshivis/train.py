@@ -163,9 +163,9 @@ def main(args: DictConfig):
 
     optimizer = torch.optim.AdamW(
         [
-            {"params": cross_attn_params, "lr": 5e-5, "weight_decay": 0.0},
-            {"params": gate_params,       "lr": 1e-4, "weight_decay": 0.01},
-            {"params": embedder_params,   "lr": 5e-5, "weight_decay": 0.0},
+            {"params": cross_attn_params, "lr": 1e-5, "weight_decay": 0.0},
+            {"params": gate_params,       "lr": 1e-5, "weight_decay": 0.01},
+            {"params": embedder_params,   "lr": 1e-5, "weight_decay": 0.0},
             # 必要なら {"params": other_params, ...}
         ],
         fused=True
