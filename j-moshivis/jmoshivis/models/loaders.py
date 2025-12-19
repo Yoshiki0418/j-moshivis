@@ -148,6 +148,18 @@ def get_moshi_vis_train(
 
         print(f"🔥 Trainable params count: Moshi(CA)={trainable_count}, Embedder(Proj)={embedder_trainable_count}")
 
+        # =========================================================
+        # Gateパラメータのゼロ初期化 (Zero Initialization)
+        # =========================================================
+        print("🧹 Zero-initializing Gate parameters for stable training start...")
+        initialized_gates = 0
+        for name, p in moshi_vis.named_parameters():
+            if "gate" in name and p.requires_grad:
+                torch.nn.init.constant_(p, 0.0)
+                initialized_gates += 1
+
+        print(f"✅ Initialized {initialized_gates} gates to 0.0.")
+
     else:
         # freeze_backbone=False の場合は全学習
         print("🟢 Full fine-tuning enabled (all params trainable).")

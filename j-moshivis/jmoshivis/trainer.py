@@ -176,6 +176,13 @@ class JmoshiVisTrainer:
 
             # --- Backprop ---
             self.accelerator.backward(loss)
+            if self.accelerator.sync_gradients:
+                self.accelerator.clip_grad_norm_(self.model.parameters(), 1.0)
+                # もし image_embedder も学習対象ならそちらもクリップ対象にするのが安全ですが、
+                # 通常は model 側に含めるか、params リストに対して行います。
+                # image_embedder のパラメータも optimizer に含まれているので、
+                # ここで image_embedder.parameters() もクリップするのがベストです。
+                self.accelerator.clip_grad_norm_(self.image_embedder.parameters(), 1.0)
             self.optimizer.step()
             self.optimizer.zero_grad(set_to_none=True)
 
