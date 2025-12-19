@@ -7,7 +7,7 @@ data:
   eval_data: /workspace/j-moshivis/dataset/eval
   image_root: /mnt/sub_storage/images/
   shuffle: true
-  speech_ratio: 0.5
+  speech_ratio: 0.25
 
 train:
   batch_size: 8

@@ -215,7 +215,7 @@ class JmoshiVisTrainer:
             import os
             from safetensors.torch import save_model
 
-            if global_step % 10000 == 0 and global_step > 0:
+            if global_step % 2000 == 0 and global_step > 0:
                 if self.accelerator.is_main_process:
                     ckpt_path = f"./checkpoints/step_{global_step}.safetensors"
                     os.makedirs("./checkpoints", exist_ok=True)
