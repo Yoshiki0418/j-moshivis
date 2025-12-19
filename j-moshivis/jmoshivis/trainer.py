@@ -81,8 +81,8 @@ class JmoshiVisTrainer:
             # → batch.condition_attributes: Optional[ConditionAttributes]
             codes = batch.codes.to(self.device)
 
-            # --- optional cross-attention src ---
-            cross_attention_src = None
+            # --- 画像入力の準備 ---
+            image_input = None
 
             if isinstance(batch.condition_attributes, list):
                 tensors = []
@@ -90,15 +90,25 @@ class JmoshiVisTrainer:
                     if hasattr(ca, "tensor") and "image" in ca.tensor:
                         tensors.append(ca.tensor["image"].tensor.to(self.device))
                 if tensors:
-                    cross_attention_src = torch.cat(tensors, dim=0)
+                    image_input = torch.cat(tensors, dim=0)
 
-            if batch.condition_attributes is not None:
+            if image_input is None and batch.condition_attributes is not None:
                 # Case 1: moshi standard format (image_embed attribute)
                 if hasattr(batch.condition_attributes, "image_embed"):
-                    cross_attention_src = batch.condition_attributes.image_embed.to(self.device)
+                    pass
 
             # --- Forward pass ---
             with self.accelerator.autocast():
+                cross_attention_src = None
+                if image_input is not None:
+                    # ここでプロジェクション層 (proj_xa) に勾配が流れる！
+                    # forward戻り値: {"cross_attention_src": ..., "cross_attention_mask": ...}
+                    embedder_out = self.image_embedder(image_input)
+
+                    cross_attention_src = embedder_out["cross_attention_src"]
+                    # 必要であればマスクも取得 (Pixtralなど画像サイズ可変の場合)
+                    # cross_attention_mask = embedder_out.get("cross_attention_mask", None)
+
                 # MoshiVis forward_text は Text + Audioトークンの埋め込み系列を入力とする
                 # _, text_logits, _ = self.model.forward_text(
                 #     input_ids=codes,
@@ -107,6 +117,7 @@ class JmoshiVisTrainer:
                 outputs = self.model.forward_speech(
                     input_ids=codes,
                     cross_attention_src=cross_attention_src,
+                    # cross_attention_mask=cross_attention_mask # 必要なら追加
                 )
 
                 text_logits = outputs["text_logits"]             # [B,1,T_text,V]
@@ -197,7 +208,7 @@ class JmoshiVisTrainer:
             import os
             from safetensors.torch import save_model
 
-            if global_step % 100 == 0 and global_step > 0:
+            if global_step % 10000 == 0 and global_step > 0:
                 if self.accelerator.is_main_process:
                     ckpt_path = f"./checkpoints/step_{global_step}.safetensors"
                     os.makedirs("./checkpoints", exist_ok=True)

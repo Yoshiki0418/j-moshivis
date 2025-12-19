@@ -301,23 +301,15 @@ def get_dataset_iterator(
                 uid_dir = wav_path.parent
                 image_path = uid_dir / "image.jpg"
                 cond_attr = None
-                if (
-                    image_embedder is not None
-                    and image_path is not None
-                    and Path(image_path).exists()
-                ):
+                if image_path is not None and Path(image_path).exists():
                     try:
                         image_tensor = image_processor(image_path).unsqueeze(0)
-                        with torch.no_grad():
-                            outputs = image_embedder(image_tensor)          # ← dict が返る
-                            image_embed = outputs["cross_attention_src"]  # [1, N_tokens, D]
-                        mask = torch.ones(
-                            1, image_embed.shape[1], dtype=torch.bool, device=device
-                        )
+                        mask = torch.ones(1, 1, dtype=torch.bool, device=device)
 
                         cond_attr = ConditionAttributes()
                         cond_attr.tensor["image"] = TensorCondition(
-                            tensor=image_embed, mask=mask
+                            tensor=image_tensor.to(device),  # Pixel Tensor
+                            mask=mask
                         )
                     except Exception as e:
                         print(f"[WARN] Failed to embed image: {image_path}, {e}")
@@ -416,18 +408,19 @@ def get_speechless_dataset_iterator(
 
                     # 2. 画像条件付け
                     cond_attr = None
-                    if image_embedder is not None and image_path.exists():
-                        image_tensor = image_processor(image_path).unsqueeze(0)
-                        with torch.no_grad():
-                            outputs = image_embedder(image_tensor)
-                            image_embed = outputs["cross_attention_src"]
-                        mask = torch.ones(
-                            1, image_embed.shape[1], dtype=torch.bool, device=device
-                        )
-                        cond_attr = ConditionAttributes()
-                        cond_attr.tensor["image"] = TensorCondition(
-                            tensor=image_embed, mask=mask
-                        )
+                    if image_path is not None and Path(image_path).exists():
+                        try:
+                            image_tensor = image_processor(image_path).unsqueeze(0)
+                            mask = torch.ones(1, 1, dtype=torch.bool, device=device)
+
+                            cond_attr = ConditionAttributes()
+                            cond_attr.tensor["image"] = TensorCondition(
+                                tensor=image_tensor.to(device),  # Pixel Tensor
+                                mask=mask
+                            )
+                        except Exception as e:
+                            print(f"[WARN] Failed to embed image: {image_path}, {e}")
+                            cond_attr = None
 
                     if cond_attr is not None:
                         sample_out.condition_attributes = cond_attr

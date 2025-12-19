@@ -91,7 +91,7 @@ def get_moshi_vis_train(
                     # デバッグ用に最初の数個だけログに出しても良い
                     # print(f"Skipping init for: {key}") 
                     continue
-                
+
                 model_state[key] = v
 
     print("🔍 Num image_prefix params:", len(image_proj_state))
@@ -128,18 +128,31 @@ def get_moshi_vis_train(
         trainable_count = 0
         for name, param in moshi_vis.named_parameters():
             if "llm.transformer.layers" in name and ("cross_attention" in name or "norm_cross" in name):
-                param.requires_grad = True   # train this
+                param.requires_grad = True
                 trainable_count += 1
             else:
-                param.requires_grad = False  # freeze
+                param.requires_grad = False
 
         # ImageProjection fully frozen
-        for p in image_embedder.parameters():
-            p.requires_grad = False
+        image_embedder.train()
 
-        print(f"🔥 Trainable params count: {trainable_count} (Helium cross-attention only)")
+        embedder_trainable_count = 0
+        for name, p in image_embedder.named_parameters():
+            # "enc" (SigLIPなどのバックボーン) は凍結
+            if "enc." in name:
+                p.requires_grad = False
+            # それ以外 (proj_xa, norm_xa 等) は学習させる
+            else:
+                p.requires_grad = True
+                embedder_trainable_count += 1
+
+        print(f"🔥 Trainable params count: Moshi(CA)={trainable_count}, Embedder(Proj)={embedder_trainable_count}")
+
     else:
+        # freeze_backbone=False の場合は全学習
         print("🟢 Full fine-tuning enabled (all params trainable).")
+        moshi_vis.train()
+        image_embedder.train()
 
     # --- モード設定 ---
     moshi_vis.train()

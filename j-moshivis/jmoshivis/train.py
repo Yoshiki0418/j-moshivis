@@ -153,10 +153,18 @@ def main(args: DictConfig):
             print("[WARN] Unexpected trainable param:", name)
             other_params.append(p)
 
+    # 1. 学習対象のEmbedderパラメータ（proj_xa, norm_xaなど）を収集
+    embedder_params = [p for p in image_embedder.parameters() if p.requires_grad]
+    
+    # (確認用ログ)
+    print(f"Trainable params: CrossAttn={len(cross_attn_params)}, Gate={len(gate_params)}, Embedder={len(embedder_params)}")
+
+    # 2. オプティマイザに渡す
     optimizer = torch.optim.AdamW(
         [
             {"params": cross_attn_params, "lr": 5e-5, "weight_decay": 0.0},
             {"params": gate_params,       "lr": 1e-4, "weight_decay": 0.01},
+            {"params": embedder_params,   "lr": 5e-5, "weight_decay": 0.0},
         ],
         fused=True
     )

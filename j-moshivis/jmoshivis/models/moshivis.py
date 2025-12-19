@@ -181,7 +181,6 @@ class MoshiVis(StreamingModule):
         return 1
 
     def forward_speech(self, input_ids, cross_attention_src):
-        print(cross_attention_src.shape)
         B, K, T = input_ids.shape
         assert K == self.num_codebooks, (K, self.num_codebooks)
 
