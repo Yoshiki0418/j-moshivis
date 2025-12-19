@@ -1,6 +1,6 @@
 add_boi_eoi: false
 align_img_and_speech_tokens_dim: true
-image_size: 512
+image_size: 448
 interpolation: bicubic
 norm_extra: null
 norm_xa: rms_norm

@@ -134,37 +134,39 @@ def main(args: DictConfig):
 
     cross_attn_params = []
     gate_params = []
+    # other_params は今回空になるのが理想ですが、念のため残します
     other_params = []
 
     for name, p in moshi_vis.named_parameters():
         if not p.requires_grad:
             continue
 
-        # Cross-Attention 層
-        if "cross_attention" in name or "xa" in name:
-            cross_attn_params.append(p)
-
-        # Gate 層（XAGate, gate, gating など）
-        elif "gate" in name or "xa_gate" in name:
+        # 【修正1】 先に Gate を判定する (名前に "cross_attention" が含まれていても Gate として扱うため)
+        if "gate" in name or "xa_gate" in name:
             gate_params.append(p)
 
-        # 念のため想定外が混じっていたらログに出す
+        # 【修正2】 norm_cross も CrossAttention グループに含める
+        elif "cross_attention" in name or "xa" in name or "norm_cross" in name:
+            cross_attn_params.append(p)
+
         else:
+            # ここに出るものがなければOK
             print("[WARN] Unexpected trainable param:", name)
             other_params.append(p)
 
-    # 1. 学習対象のEmbedderパラメータ（proj_xa, norm_xaなど）を収集
     embedder_params = [p for p in image_embedder.parameters() if p.requires_grad]
-    
-    # (確認用ログ)
+
     print(f"Trainable params: CrossAttn={len(cross_attn_params)}, Gate={len(gate_params)}, Embedder={len(embedder_params)}")
 
-    # 2. オプティマイザに渡す
+    # もし other_params に何か残っていたら、それも学習対象に加えるべきですが、
+    # 上記の修正で norm_cross は CrossAttn に入るため、基本的には空になるはずです。
+
     optimizer = torch.optim.AdamW(
         [
             {"params": cross_attn_params, "lr": 5e-5, "weight_decay": 0.0},
             {"params": gate_params,       "lr": 1e-4, "weight_decay": 0.01},
             {"params": embedder_params,   "lr": 5e-5, "weight_decay": 0.0},
+            # 必要なら {"params": other_params, ...}
         ],
         fused=True
     )

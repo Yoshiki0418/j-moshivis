@@ -92,6 +92,31 @@ class JmoshiVisTrainer:
                 if tensors:
                     image_input = torch.cat(tensors, dim=0)
 
+                    # 最初のステップ、または一定間隔で確認
+                    if self.global_step == 1 or self.global_step % 100 == 0:
+                        print(f"\n🔍 [DEBUG Step {self.global_step}] Image Input Check:")
+                        print(f"   - Shape: {image_input.shape}") # [B, 3, H, W] になっているか？ (例: [B, 3, 448, 448])
+                        print(f"   - Min: {image_input.min().item():.3f}, Max: {image_input.max().item():.3f}") # -1.0 ~ 1.0 付近か？
+                        print(f"   - Mean: {image_input.mean().item():.3f}, Std: {image_input.std().item():.3f}")
+
+                        # 画像として保存して目視確認 (最初の1枚だけ)
+                        try:
+                            import os
+                            import torchvision
+                            os.makedirs("debug_images", exist_ok=True)
+                            
+                            # 正規化を戻す (mean=0.5, std=0.5 を仮定: [-1, 1] -> [0, 1])
+                            # ※ ImageProcessorの設定に合わせて調整してください
+                            img_to_save = image_input[0].clone().detach().float().cpu()
+                            img_to_save = img_to_save * 0.5 + 0.5
+                            img_to_save = torch.clamp(img_to_save, 0, 1)
+                            
+                            save_path = f"debug_images/step_{self.global_step}.png"
+                            torchvision.utils.save_image(img_to_save, save_path)
+                            print(f"   - Saved debug image to: {save_path}")
+                        except Exception as e:
+                            print(f"   - Failed to save debug image: {e}")
+
             if image_input is None and batch.condition_attributes is not None:
                 # Case 1: moshi standard format (image_embed attribute)
                 if hasattr(batch.condition_attributes, "image_embed"):

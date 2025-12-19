@@ -194,7 +194,7 @@ class ImageProjection(torch.nn.Module):
 
 
 class ImageProcessor:
-    def __init__(self, size=(512, 512), mean=None, std=None, device="cuda"):
+    def __init__(self, size=(448, 448), mean=None, std=None, device="cuda"):
         self.transform = transforms.Compose([
             transforms.Resize(size),
             transforms.ToTensor(),
