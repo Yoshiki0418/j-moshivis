@@ -172,7 +172,9 @@ def main(args: DictConfig):
     )
 
     # DDP準備
-    moshi_vis, optimizer, data_loader = accelerator.prepare(moshi_vis, optimizer, data_loader)
+    moshi_vis, image_embedder, optimizer, data_loader = accelerator.prepare(
+        moshi_vis, image_embedder, optimizer, data_loader
+    )
 
     writer = WandBMetricsWriter(project_name="J-MoshiVis-Training",
                                 model_name="j-moshivis")
