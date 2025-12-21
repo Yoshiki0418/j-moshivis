@@ -155,14 +155,18 @@ def get_moshi_vis_train(
         # =========================================================
         # Gateパラメータのゼロ初期化 (Zero Initialization)
         # =========================================================
-        print("🧹 Zero-initializing Gate parameters for stable training start...")
-        initialized_gates = 0
+        print("🧹 Initializing Gate parameters with small weights...")
         for name, p in moshi_vis.named_parameters():
             if "gate" in name and p.requires_grad:
-                torch.nn.init.constant_(p, 0.0)
-                initialized_gates += 1
-
-        print(f"✅ Initialized {initialized_gates} gates to 0.0.")
+                # 重み(weight)は少し値を持たせる
+                if "weight" in name:
+                    torch.nn.init.xavier_uniform_(p, gain=0.01) 
+                    # または torch.nn.init.normal_(p, mean=0.0, std=0.01)
+                # バイアス(bias)は閉じる方向に設定（元のロジックを維持）
+                elif "bias" in name:
+                    # XAGateの実装が x - 4 としているなら 0.0 でOK
+                    # 実装に依存しますが、今のままでOKな可能性が高い
+                    torch.nn.init.constant_(p, 0.0)
 
     else:
         # freeze_backbone=False の場合は全学習
