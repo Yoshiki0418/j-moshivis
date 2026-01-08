@@ -3,6 +3,7 @@ from torch import nn
 from torch.cuda.amp import GradScaler, autocast
 from tqdm import tqdm
 from torch.cuda.amp import autocast
+from collections import deque
 from contextlib import nullcontext
 from accelerate import Accelerator
 
@@ -11,6 +12,40 @@ from jmoshivis.loss import compute_loss_with_mask
 from jmoshivis.datasets.args import TrainerArgs
 from jmoshivis.tools import WandBMetricsWriter
 from jmoshivis.models.image_projection import ImageProjection
+
+
+def register_nan_hooks(model):
+    """
+    モデル内の全レイヤーにフックを仕掛け、出力がNaNになった瞬間に
+    そのレイヤー名を表示して停止させるデバッグ関数
+    """
+    def hook_fn(module, inputs, output):
+        # 出力がTensorの場合
+        if isinstance(output, torch.Tensor):
+            if torch.isnan(output).any():
+                print(f"\n🚨 [NaN DETECTED] Layer: {module.__class__.__name__}")
+                print(f"   Shape: {output.shape}")
+                raise RuntimeError(f"NaN found in {module.__class__.__name__}")
+
+        # 出力がタプルやリストの場合
+        elif isinstance(output, (tuple, list)):
+            for i, x in enumerate(output):
+                if isinstance(x, torch.Tensor) and torch.isnan(x).any():
+                    print(f"\n🚨 [NaN DETECTED] Layer: {module.__class__.__name__} (Output index {i})")
+                    raise RuntimeError(f"NaN found in {module.__class__.__name__}")
+        
+        # 出力が辞書の場合
+        elif isinstance(output, dict):
+            for k, v in output.items():
+                if isinstance(v, torch.Tensor) and torch.isnan(v).any():
+                    print(f"\n🚨 [NaN DETECTED] Layer: {module.__class__.__name__} (Key: {k})")
+                    raise RuntimeError(f"NaN found in {module.__class__.__name__}")
+
+    for name, layer in model.named_modules():
+        layer.register_forward_hook(hook_fn)
+    
+    print(f"👀 NaN Hunter hooks registered for {model.__class__.__name__}")
+# ==========================================
 
 
 class MoshiVisBundle(nn.Module):
@@ -61,12 +96,16 @@ class JmoshiVisTrainer:
         self.global_step = 0
         self.image_embedder = image_embedder
         self.tokenizer = tokenizer
+        # if self.accelerator.is_main_process:
+        #     print("🕵️‍♀️ Registering NaN Hunter Hooks...")
+        #     register_nan_hooks(self.model)
+        #     register_nan_hooks(self.image_embedder)
 
-    def train_epoch(self, dataloader, epoch: int, log_interval: int = 1):
+    def train_epoch(self, dataloader, epoch: int, log_interval: int = 1, DEBUG: bool = False):
         # ---------------------------------------------------------
         # ★ 修正: 勾配蓄積の設定 (目標バッチサイズ 128 を目指す例)
         # ---------------------------------------------------------
-        target_batch_size = 128  # ※必要に応じて調整 (64~128推奨)
+        target_batch_size = 64  # ※必要に応じて調整 (64~128推奨)
         physical_batch_size = self.args.batch_size
         accumulation_steps = target_batch_size // physical_batch_size
         if accumulation_steps < 1:
@@ -84,6 +123,10 @@ class JmoshiVisTrainer:
         total_loss = 0.0
         total_text_acc = 0.0
         total_audio_acc = 0.0
+
+        loss_window = deque(maxlen=100)
+        text_acc_window = deque(maxlen=100)
+        audio_acc_window = deque(maxlen=100)
         
         # 蓄積中のステップカウント用
         processed_samples = 0
@@ -96,9 +139,19 @@ class JmoshiVisTrainer:
             # -----------------------------------------------------
             # ★ 修正: accumulate コンテキストで囲む
             # -----------------------------------------------------
-            with self.accelerator.accumulate(self.model):
+            with self.accelerator.accumulate(self.model, self.image_embedder):
                 # --- Extract inputs ---
                 codes = batch.codes.to(self.device)
+
+                if DEBUG:
+                    print("\n" + "="*60)
+                    print(f"🔍 [CHECK 1] Input Codes (Step {step})")
+                    print(f"   Shape: {codes.shape} (Batch, Codebooks, Time)")
+                    print(f"   Values: Min={codes.min().item()}, Max={codes.max().item()}")
+                    # パディング(-1や3)だらけになっていないか確認
+                    unique, counts = torch.unique(codes, return_counts=True)
+                    print(f"   Top 5 tokens: {list(zip(unique[:5].tolist(), counts[:5].tolist()))}")
+                    print("="*60)
 
                 # --- 画像入力の準備 ---
                 image_input = None
@@ -110,12 +163,33 @@ class JmoshiVisTrainer:
                     if tensors:
                         image_input = torch.cat(tensors, dim=0)
 
+                if DEBUG:
+                    print(f"🔍 [CHECK 2] Image Input")
+                    if image_input is not None:
+                        print(f"   Shape: {image_input.shape}")
+                        print(f"   Stats: Mean={image_input.mean().item():.3f}, Std={image_input.std().item():.3f}")
+                    else:
+                        print("   ⚠️ WARNING: No Image Input found in this batch!")
+
                 # --- Forward pass ---
                 with self.accelerator.autocast():
                     cross_attention_src = None
                     if image_input is not None:
                         embedder_out = self.image_embedder(image_input)
                         cross_attention_src = embedder_out["cross_attention_src"]
+
+                        if DEBUG:
+                            print(f"🔍 [CHECK 3] Embedder Output (Cross Attention Src)")
+                            print(f"   Shape: {cross_attention_src.shape}")
+                            print(f"   Stats: Mean={cross_attention_src.mean().item():.3f}, Std={cross_attention_src.std().item():.3f}")
+                            print(f"   Max Val: {cross_attention_src.max().item():.3f}") # 爆発していないか(±20以内か)
+
+                    if step == 0:
+                        print(f"DEBUG: Accelerator Mixed Precision: {self.accelerator.mixed_precision}")
+                        # ダミーテンソルを作って型を確認
+                        with self.accelerator.autocast():
+                            dummy = torch.tensor([1.0], device=self.device)
+                            print(f"DEBUG: Real dtype inside autocast: {dummy.dtype}")
 
                     outputs = self.model.forward_speech(
                         input_ids=codes,
@@ -124,6 +198,37 @@ class JmoshiVisTrainer:
 
                     text_logits = outputs["text_logits"]
                     audio_logits = outputs["audio_logits"]
+
+                    if DEBUG:
+                        print(f"🔍 [CHECK 4] Outputs & Masks")
+                        print(f"   Text Logits: {text_logits.shape}")
+                        print(f"   Audio Logits: {audio_logits.shape}")
+                        
+                        # NaNチェック
+                        if torch.isnan(text_logits).any():
+                            print("   🚨 ERROR: Text Logits contain NaN!")
+                        
+                        # AudioはマスクがTrue(有効)な場所にあるNaNだけをエラーとする
+                        real_audio_nan = (torch.isnan(audio_logits) & outputs["logits_mask"].unsqueeze(-1)).any()
+                        
+                        if real_audio_nan:
+                            print("   🚨 FATAL ERROR: Audio Logits contain REAL NaN inside the mask!")
+                            # ここで詳細を出して止める
+                            raise RuntimeError("Audio logits exploded within the valid mask!")
+                        else:
+                            # 正常なNaN(パディング)はスルー
+                            pass
+                        
+                        # Maskの確認: 全てFalseになっていないか？
+                        t_mask = outputs["text_logits_mask"]
+                        a_mask = outputs["logits_mask"]
+                        print(f"   Text Mask Valid Ratio: {t_mask.float().mean().item():.2%}")
+                        print(f"   Audio Mask Valid Ratio: {a_mask.float().mean().item():.2%}")
+                        
+                        if t_mask.sum() == 0:
+                            print("   🚨 FATAL: Text Mask is empty! Loss will be 0.")
+                        if a_mask.sum() == 0:
+                            print("   🚨 FATAL: Audio Mask is empty! Loss will be 0.")
 
                     # --- Loss Calculation ---
                     text_target = codes[:, :self.model.audio_offset]
@@ -142,6 +247,45 @@ class JmoshiVisTrainer:
                     )
 
                     loss = text_loss * 2 + audio_loss
+                    loss = loss / accumulation_steps
+
+                    if DEBUG:
+                        print(f"🔍 [CHECK 5] Loss Values")
+                        print(f"   Text Loss: {text_loss.item():.4f}")
+                        print(f"   Audio Loss: {audio_loss.item():.4f}")
+                        print(f"   Total Loss: {loss.item():.4f}")
+                        print("="*60 + "\n")
+
+                    # =========================================================
+                    # 🔍 [CHECK 6] Alignment & Prediction Preview (Step 0のみ)
+                    # =========================================================
+                    if DEBUG:
+                        print("\n" + "="*60)
+                        print("👀 LOGITS vs TARGET ALIGNMENT CHECK")
+                        
+                        # --- 1. Text Alignment ---
+                        # Batch 0, Channel 0, 最初の10トークンを表示
+                        t_tgt = text_target[0, 0, :15].cpu().tolist()
+                        t_pred = text_logits.argmax(dim=-1)[0, 0, :15].cpu().tolist()
+                        
+                        print(f" [Text] Target (GT): {t_tgt}")
+                        print(f" [Text] Pred (Argmax): {t_pred}")
+                        
+                        # --- 2. Audio Alignment ---
+                        # Batch 0, Channel 0, 最初の10トークン
+                        a_tgt = audio_target[0, 0, :15].cpu().tolist()
+                        a_pred = audio_logits.argmax(dim=-1)[0, 0, :15].cpu().tolist()
+                        
+                        print(f" [Audio] Target (GT): {a_tgt}")
+                        print(f" [Audio] Pred (Argmax): {a_pred}")
+
+                        # --- 3. Data Leakage Check ---
+                        # もし初期状態で「Pred」が「Target」と完全に一致していたら、
+                        # 「カンニング（未来のトークンが見えている）」バグです。
+                        # 逆に、ランダムな予測になっていれば正常です。
+                        text_match_rate = (text_logits.argmax(-1) == text_target).float().mean().item()
+                        print(f" [Check] Initial Text Accuracy: {text_match_rate:.2%} (Should be low/random, NOT 100%)")
+                        print("="*60 + "\n")
 
                 # --- Backprop (蓄積される) ---
                 self.accelerator.backward(loss)
@@ -173,21 +317,28 @@ class JmoshiVisTrainer:
                         correct_audio = (pred_audio == audio_target) & audio_mask
                         step_audio_acc = correct_audio.sum() / audio_mask.sum() if audio_mask.sum() > 0 else 0.0
 
-                    total_loss += loss.item()
+                        current_loss = loss.item() * accumulation_steps
+
+                    total_loss += current_loss
                     total_text_acc += float(step_text_acc)
                     total_audio_acc += float(step_audio_acc)
                     
                     processed_samples += 1 # 平均計算用
 
-                    avg_loss = total_loss / processed_samples
-                    avg_text = total_text_acc / processed_samples
-                    avg_audio = total_audio_acc / processed_samples
+                    loss_window.append(current_loss)
+                    text_acc_window.append(float(step_text_acc))
+                    audio_acc_window.append(float(step_audio_acc))
 
                     if self.global_step % log_interval == 0:
+                        # バッファの中身の平均を計算（直近100ステップの平均）
+                        smooth_loss = sum(loss_window) / len(loss_window)
+                        smooth_txt = sum(text_acc_window) / len(text_acc_window)
+                        smooth_aud = sum(audio_acc_window) / len(audio_acc_window)
+
                         pbar.set_postfix({
-                            "loss": f"{avg_loss:.4f}",
-                            "txt": f"{avg_text:.3f}",
-                            "aud": f"{avg_audio:.3f}",
+                            "loss": f"{smooth_loss:.4f}", # 直近のLoss
+                            "txt": f"{smooth_txt:.3f}",   # 直近のText精度
+                            "aud": f"{smooth_aud:.3f}",   # 直近のAudio精度
                             "step": self.global_step
                         })
 
@@ -197,10 +348,12 @@ class JmoshiVisTrainer:
                             loss=loss.item(),
                             text_loss=text_loss.item(),
                             audio_loss=audio_loss.item(),
+                            text_acc=float(step_text_acc),
+                            audio_acc=float(step_audio_acc),
                         )
 
                     # --- Save Checkpoint ---
-                    if self.global_step % 2000 == 0 and self.global_step > 0:
+                    if self.global_step % 1000 == 0 and self.global_step > 0:
                         if self.accelerator.is_main_process:
                             self.save_checkpoint(f"./checkpoints/step_{self.global_step}.safetensors")
 

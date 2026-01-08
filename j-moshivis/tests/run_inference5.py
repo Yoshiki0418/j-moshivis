@@ -36,7 +36,7 @@ mimi_weight = hf_hub_download(
 
 moshi_vis, image_embedder = get_moshi_vis(
     kyuteye_config,
-    moshi_weight=Path("/workspace/j-moshivis/checkpoints/step_2000.safetensors"),
+    moshi_weight=Path("/workspace/j-moshivis/checkpoints/step_1000.safetensors"),
     # moshi_weight=weights_path,
     device=device,
     dtype=torch.bfloat16,
@@ -58,7 +58,7 @@ with torch.no_grad():
 print("Encoded image:", ca_src.shape)
 
 # ===== 5. 音声読み込み =====
-wav_path = "/workspace/data/sample3.wav"
+wav_path = "/gpu-server/user/yoshiki/j-moshivis/data/speech/data_stereo/1c99faed050be74fb35a7a6e05f35d93742b98923aab56ae9e2a8dcba43fa640/user_dialogue.wav"
 waveform, sr = torchaudio.load(wav_path)
 waveform = waveform.mean(dim=0, keepdim=True)
 
@@ -104,18 +104,19 @@ with moshi_vis.streaming():
             all_text_tokens.append(text_tokens.cpu())
 
         # ===== (C) Text logits from internal streaming state =====
-        state = moshi_vis._streaming_state
-        if state is not None and hasattr(state, "text_logits") and state.text_logits is not None:
-            logits = state.text_logits      # [B,1,1,vocab]
-            token_id = logits.argmax(dim=-1).item()
+        token_ids = [t.item() for t in all_text_tokens]
+        tokenizer_path = "/workspace/j-moshivis/jmoshivis/tokenizer_spm_32k_3.model"
+        sp = spm.SentencePieceProcessor()
+        sp.load(tokenizer_path)
 
-            if token_id not in {
-                moshi_vis.lm_model.text_padding_token_id,
-                moshi_vis.lm_model.end_of_text_padding_id,
-            }:
-                generated_text += tokenizer.decode([token_id])
-                print("TEXT:", generated_text)
+        # 4. デコードして表示
+        decoded_text = sp.decode(token_ids)
 
+        print("=== Token IDs (First 20) ===")
+        print(token_ids[:20])
+
+        print("\n=== Decoded Text ===")
+        print(decoded_text)
 
 # ===== 8. オーディオデコード =====
 if len(all_audio_tokens) > 0:

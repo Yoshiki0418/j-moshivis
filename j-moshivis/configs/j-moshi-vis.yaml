@@ -13,7 +13,7 @@ xa_start: start
 xa_end: end
 xa_gate_shared: false
 xa_gating: sigmoid
-xa_layers: []
+xa_layers: [0, 4, 8, 12, 16, 20, 24]
 xa_shared: true
 xa_step: 1
 encoder_name: siglip_gemma2_448

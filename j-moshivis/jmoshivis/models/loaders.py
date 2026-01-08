@@ -152,6 +152,14 @@ def get_moshi_vis_train(
 
         print(f"🔥 Trainable params count: Moshi(CA)={trainable_count}, Embedder(Proj)={embedder_trainable_count}")
 
+        print("😎 Initializing Cross-Attention weights to handle large inputs...")
+        for name, p in moshi_vis.named_parameters():
+            if "cross_attention" in name and "weight" in name and p.requires_grad:
+                if "in_proj" in name or "out_proj" in name or "linear" in name:
+                    torch.nn.init.normal_(p, mean=0.0, std=0.02)
+            if "cross_attention" in name and "bias" in name and p.requires_grad:
+                torch.nn.init.constant_(p, 0.0)
+
         # =========================================================
         # Gateパラメータのゼロ初期化 (Zero Initialization)
         # =========================================================
@@ -160,13 +168,7 @@ def get_moshi_vis_train(
             if "gate" in name and p.requires_grad:
                 # 重み(weight)は少し値を持たせる
                 if "weight" in name:
-                    torch.nn.init.xavier_uniform_(p, gain=0.01) 
-                    # または torch.nn.init.normal_(p, mean=0.0, std=0.01)
-                # バイアス(bias)は閉じる方向に設定（元のロジックを維持）
-                elif "bias" in name:
-                    # XAGateの実装が x - 4 としているなら 0.0 でOK
-                    # 実装に依存しますが、今のままでOKな可能性が高い
-                    torch.nn.init.constant_(p, 0.0)
+                    torch.nn.init.normal_(p, mean=0.0, std=0.01)
 
     else:
         # freeze_backbone=False の場合は全学習

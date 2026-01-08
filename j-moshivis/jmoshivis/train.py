@@ -158,13 +158,32 @@ def main(args: DictConfig):
 
     print(f"Trainable params: CrossAttn={len(cross_attn_params)}, Gate={len(gate_params)}, Embedder={len(embedder_params)}")
 
+    def print_trainable_parameters(model, model_name="Model"):
+        print(f"\n=== Trainable Parameters in {model_name} ===")
+        total_params = 0
+        for name, param in model.named_parameters():
+            if param.requires_grad:
+                num_params = param.numel()
+                total_params += num_params
+                print(f"{name}: {num_params:,} params | Shape: {list(param.shape)}")
+        print(f"--- Total Trainable Params in {model_name}: {total_params:,} ---\n")
+        return total_params
+
+    # MoshiVis本体の学習対象パラメータを表示
+    moshi_params = print_trainable_parameters(moshi_vis, "MoshiVis (Adapters)")
+
+    # ImageEmbedderの学習対象パラメータを表示
+    embedder_params_count = print_trainable_parameters(image_embedder, "ImageEmbedder (Projection)")
+
+    print(f"🔥 Grand Total Trainable Parameters: {moshi_params + embedder_params_count:,}")
+
     # もし other_params に何か残っていたら、それも学習対象に加えるべきですが、
     # 上記の修正で norm_cross は CrossAttn に入るため、基本的には空になるはずです。
 
     optimizer = torch.optim.AdamW(
         [
             {"params": cross_attn_params, "lr": 1e-5, "weight_decay": 0.0},
-            {"params": gate_params,       "lr": 1e-5, "weight_decay": 0.01},
+            {"params": gate_params,       "lr": 1e-6, "weight_decay": 0.01},
             {"params": embedder_params,   "lr": 1e-5, "weight_decay": 0.0},
             # 必要なら {"params": other_params, ...}
         ],

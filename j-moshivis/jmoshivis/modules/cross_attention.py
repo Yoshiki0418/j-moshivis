@@ -54,7 +54,7 @@ class XAGate(torch.nn.Module):
             self.act = torch.tanh
         elif activation == "sigmoid":
             # shift left to mimic initialization ~ close to 0
-            self.act = lambda x: torch.sigmoid(x - 4)
+            self.act = lambda x: torch.sigmoid(x - 5.3)
         else:
             raise NotImplementedError("Unknown activation function", activation)
 

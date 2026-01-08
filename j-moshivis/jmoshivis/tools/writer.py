@@ -18,12 +18,15 @@ class WandBMetricsWriter():
         loss: float,
         text_loss: float,
         audio_loss: float,
+        text_acc: float = None,
+        audio_acc: float = None,
     ):
-        print("calling wandb log")
         data = {
             "train/loss_step": loss,
             "train/text_loss": text_loss,
             "train/audio_loss": audio_loss,
+            "train/text_acc": text_acc,
+            "train/audio_acc": audio_acc,
         }
 
         wandb.log(data, step=step)
