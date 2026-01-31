@@ -36,7 +36,7 @@ mimi_weight = hf_hub_download(
 
 moshi_vis, image_embedder = get_moshi_vis(
     kyuteye_config,
-    moshi_weight=Path("/workspace/j-moshivis/checkpoints/step_1000.safetensors"),
+    moshi_weight=Path("/workspace/j-moshivis/xa_layers_26_27/step_2000.safetensors"),
     # moshi_weight=weights_path,
     device=device,
     dtype=torch.bfloat16,
@@ -46,7 +46,7 @@ mimi = get_mimi(mimi_weight, device)
 
 # ===== 4. 画像 Encoding =====
 # img_path = "/gpu-server/user/yoshiki/j-moshivis/data/speech/data_stereo/0a38527d6549fe74d89858273a1e12290b36f641993db2714a1668a5d136f881/image.jpg"
-img_path = "/gpu-server/user/yoshiki/j-moshivis/data/speech/data_stereo/1c99faed050be74fb35a7a6e05f35d93742b98923aab56ae9e2a8dcba43fa640/image.jpg"
+img_path = "/gpu-server/user/yoshiki/j-moshivis/data/speech/data_stereo/0a38527d6549fe74d89858273a1e12290b36f641993db2714a1668a5d136f881/image.jpg"
 
 print("Encoding image...")
 image_processor = ImageProcessor()
@@ -58,7 +58,8 @@ with torch.no_grad():
 print("Encoded image:", ca_src.shape)
 
 # ===== 5. 音声読み込み =====
-wav_path = "/gpu-server/user/yoshiki/j-moshivis/data/speech/data_stereo/1c99faed050be74fb35a7a6e05f35d93742b98923aab56ae9e2a8dcba43fa640/user_dialogue.wav"
+wav_path = "/gpu-server/user/yoshiki/j-moshivis/data/speech/data_stereo/0a38527d6549fe74d89858273a1e12290b36f641993db2714a1668a5d136f881/user_dialogue.wav"
+# wav_path = "/workspace/data/sample5.wav"
 waveform, sr = torchaudio.load(wav_path)
 waveform = waveform.mean(dim=0, keepdim=True)
 
@@ -67,8 +68,8 @@ if sr != TARGET_SR:
 
 # 無音追加
 silence_s = torch.zeros(1, int(2.0 * TARGET_SR))
-silence_e = torch.zeros(1, int(10.0 * TARGET_SR))
-waveform = torch.cat([silence_s, waveform, silence_e], dim=1).unsqueeze(0).to(device)
+silence_e = torch.zeros(1, int(5.0 * TARGET_SR))
+waveform = torch.cat([waveform, silence_e], dim=1).unsqueeze(0).to(device)
 
 # ===== 6. Mimi codec でトークン化 =====
 codes = mimi.encode(waveform)
@@ -88,7 +89,7 @@ with moshi_vis.streaming():
 
         tokens, gate = moshi_vis.step(
             chunk,
-            ca_src=ca_src,  # ← ここを画像にしたいなら ca_src に変更
+            ca_src=None,  # ← ここを画像にしたいなら ca_src に変更
         )
         print(ca_src.mean(), ca_src.std())
 

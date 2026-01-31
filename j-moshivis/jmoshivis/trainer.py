@@ -102,12 +102,13 @@ class JmoshiVisTrainer:
         #     register_nan_hooks(self.image_embedder)
 
     def train_epoch(self, dataloader, epoch: int, log_interval: int = 1, DEBUG: bool = False):
-        # ---------------------------------------------------------
-        # ★ 修正: 勾配蓄積の設定 (目標バッチサイズ 128 を目指す例)
-        # ---------------------------------------------------------
-        target_batch_size = 64  # ※必要に応じて調整 (64~128推奨)
+        target_batch_size = 32  # ※必要に応じて調整 (64~128推奨)
+        # 1GPUあたりのバッチサイズ (引数で指定されたもの)
         physical_batch_size = self.args.batch_size
-        accumulation_steps = target_batch_size // physical_batch_size
+        
+        # GPUの枚数
+        num_processes = self.accelerator.num_processes
+        accumulation_steps = target_batch_size // (physical_batch_size * num_processes)
         if accumulation_steps < 1:
             accumulation_steps = 1
         
@@ -115,18 +116,19 @@ class JmoshiVisTrainer:
         self.accelerator.gradient_accumulation_steps = accumulation_steps
 
         if self.accelerator.is_main_process:
-            print(f"🚀 Gradient Accumulation Enabled:")
-            print(f"   - Physical Batch Size: {physical_batch_size}")
-            print(f"   - Accumulation Steps: {accumulation_steps}")
-            print(f"   - Effective Batch Size: {physical_batch_size * accumulation_steps}")
+            print(f"🚀 Epoch {epoch} Start | Grad Accum: {accumulation_steps} steps")
 
         total_loss = 0.0
-        total_text_acc = 0.0
-        total_audio_acc = 0.0
-
+        
+        # --- 移動平均用ウィンドウ ---
         loss_window = deque(maxlen=100)
-        text_acc_window = deque(maxlen=100)
-        audio_acc_window = deque(maxlen=100)
+        # Text
+        text_acc_global_window = deque(maxlen=100)  # 全体
+        text_acc_content_window = deque(maxlen=100) # 意味のある文字のみ (重要!)
+        text_acc_pad_window = deque(maxlen=100)     # PADのみ
+        # Audio
+        audio_acc_global_window = deque(maxlen=100) # 全体
+        audio_acc_cb0_window = deque(maxlen=100)    # Codebook 0のみ (重要!)
         
         # 蓄積中のステップカウント用
         processed_samples = 0
@@ -191,7 +193,7 @@ class JmoshiVisTrainer:
                             dummy = torch.tensor([1.0], device=self.device)
                             print(f"DEBUG: Real dtype inside autocast: {dummy.dtype}")
 
-                    outputs = self.model.forward_speech(
+                    outputs = self.model(
                         input_ids=codes,
                         cross_attention_src=cross_attention_src,
                     )
@@ -234,6 +236,51 @@ class JmoshiVisTrainer:
                     text_target = codes[:, :self.model.audio_offset]
                     audio_target = codes[:, self.model.audio_offset:self.model.audio_offset + self.model.dep_q]
 
+                    # =========================================================================
+                    # ▼ デバッグ用コード: ここから ▼
+                    # =========================================================================
+                    if DEBUG or (self.global_step % 100 == 0): # 毎回出すと重いので100ステップ毎などに制限
+                        with torch.no_grad():
+                            print(f"\n[Step {self.global_step}] Debug Inspection -------------------------")
+                            
+                            # 1. シェイプの確認
+                            # text_logits: [B, 1, T, Vocab] 想定
+                            # text_target: [B, 1, T] 想定
+                            B, _, T, _ = text_logits.shape
+                            
+                            # 2. 予測トークン（ID）を取得 (Argmax)
+                            # 確率が最大のIDを取得
+                            pred_ids = torch.argmax(text_logits, dim=-1) # [B, 1, T]
+                            
+                            # 3. バッチ内の最初のサンプルの内容を表示
+                            sample_idx = 0
+                            
+                            # ターゲット（正解）のID列
+                            target_sample = text_target[sample_idx, 0, :].cpu().numpy()
+                            # モデル予測のID列
+                            pred_sample = pred_ids[sample_idx, 0, :].cpu().numpy()
+                            # マスク（学習対象かどうか）
+                            mask_sample = outputs["text_logits_mask"][sample_idx, 0, :].cpu().numpy()
+
+                            print(f"Target IDs (First 50): {target_sample[:50]}")
+                            print(f"Pred   IDs (First 50): {pred_sample[:50]}")
+                            print(f"Mask       (First 50): {mask_sample[:-1]}")
+
+                            # 4. (もしtokenizerを持っていれば) デコードして文字で確認
+                            # self.tokenizer が Trainerにあると仮定しています
+                            if hasattr(self, 'tokenizer') and self.tokenizer is not None:
+                                # Maskされている部分（Paddingなど）を除外してデコードしてみる
+                                valid_target = target_sample[mask_sample.astype(bool)]
+                                valid_pred = pred_sample[mask_sample.astype(bool)]
+                                
+                                try:
+                                    print(f"Target Text: {self.tokenizer.decode(valid_target)}")
+                                    print(f"Pred   Text: {self.tokenizer.decode(valid_pred)}")
+                                except Exception as e:
+                                    print(f"Decode failed: {e}")
+                            
+                            print("----------------------------------------------------------\n")
+
                     text_loss = compute_loss_with_mask(
                         text_logits, text_target, outputs["text_logits_mask"],
                         mode="text",
@@ -246,7 +293,7 @@ class JmoshiVisTrainer:
                         first_codebook_weight_multiplier=self.args.first_codebook_weight_multiplier,
                     )
 
-                    loss = text_loss * 2 + audio_loss
+                    loss = 2.0 * text_loss + audio_loss
                     loss = loss / accumulation_steps
 
                     if DEBUG:
@@ -290,67 +337,117 @@ class JmoshiVisTrainer:
                 # --- Backprop (蓄積される) ---
                 self.accelerator.backward(loss)
 
-                # -----------------------------------------------------
-                # ★ 修正: 更新ステップ (蓄積完了時のみ実行される)
-                # -----------------------------------------------------
                 if self.accelerator.sync_gradients:
                     # 勾配クリッピング
                     self.accelerator.clip_grad_norm_(self.model.parameters(), 1.0)
                     self.accelerator.clip_grad_norm_(self.image_embedder.parameters(), 1.0)
                     
                     self.optimizer.step()
-                    self.optimizer.zero_grad(set_to_none=True)
-                    
-                    self.global_step += 1 # 更新した回数だけカウントアップ
+                    self.optimizer.zero_grad(set_to_none=True)       
+                    self.global_step += 1  # 更新した回数だけカウントアップ
 
                     # --- Logging (更新時のみ行う) ---
                     # 正解率計算などは負荷削減のため更新時のみでOK
                     with torch.no_grad():
+                        pad_id = self.model.text_padding_token_id
                         text_mask = outputs["text_logits_mask"]
                         pred_text = text_logits.argmax(-1)
-                        correct_text = (pred_text == text_target) & text_mask
-                        step_text_acc = correct_text.sum() / text_mask.sum() if text_mask.sum() > 0 else 0.0
-                        
+                        valid_mask = text_mask.bool()
+                        is_pad = (text_target == pad_id) & valid_mask
+                        is_content = (text_target != pad_id) & valid_mask
+                        # (A) Global Acc
+                        correct_global = (pred_text == text_target) & valid_mask
+                        acc_text_global = correct_global.sum() / valid_mask.sum().clamp(min=1)
+
+                        # (B) Content Acc (★最重要)
+                        correct_content = (pred_text == text_target) & is_content
+                        acc_text_content = correct_content.sum() / is_content.sum().clamp(min=1)
+
+                        # (C) PAD Acc (楽をしてるかチェック)
+                        correct_pad = (pred_text == text_target) & is_pad
+                        acc_text_pad = correct_pad.sum() / is_pad.sum().clamp(min=1)
+
                         # Audio Acc (マスク考慮)
                         audio_mask = outputs["logits_mask"]
-                        pred_audio = audio_logits.argmax(-1)
-                        correct_audio = (pred_audio == audio_target) & audio_mask
-                        step_audio_acc = correct_audio.sum() / audio_mask.sum() if audio_mask.sum() > 0 else 0.0
+                        # --- 2. Audio Metrics ---
+                        pred_audio = audio_logits.argmax(-1) # [B, 8, T]
+                        
+                        # ★重要: マスクの形状を正規化する処理
+                        # audio_mask が [B, T] なのか [B, 8, T] なのかを判定して統一します
+                        if audio_mask.dim() == 2:
+                            # [B, T] の場合 -> [B, 8, T] に拡張して Global計算用に使う
+                            real_audio_mask = audio_mask.unsqueeze(1).expand_as(audio_target)
+                            # Codebook 0 用はそのまま [B, T] を使う
+                            cb0_mask = audio_mask
+                        elif audio_mask.dim() == 3:
+                            # [B, 8, T] の場合 -> そのまま Global計算用に使う
+                            real_audio_mask = audio_mask
+                            # Codebook 0 用は 0チャンネル目を取り出して [B, T] にする
+                            cb0_mask = audio_mask[:, 0, :]
+                        elif audio_mask.dim() == 4: # 万が一 [B, 1, 8, T] などの場合
+                            real_audio_mask = audio_mask.squeeze(1)
+                            cb0_mask = real_audio_mask[:, 0, :]
+                        else:
+                            # 想定外だが、とりあえずそのまま
+                            real_audio_mask = audio_mask
+                            cb0_mask = audio_mask[:, 0, :]
 
-                        current_loss = loss.item() * accumulation_steps
+                        # (A) Global Audio Acc
+                        # 形状が [B, 8, T] で揃ったので安全に計算可能
+                        correct_audio = (pred_audio == audio_target) & real_audio_mask
+                        acc_audio_global = correct_audio.sum() / real_audio_mask.sum().clamp(min=1)
 
-                    total_loss += current_loss
-                    total_text_acc += float(step_text_acc)
-                    total_audio_acc += float(step_audio_acc)
-                    
-                    processed_samples += 1 # 平均計算用
+                        # (B) Codebook 0 Acc (★最重要: 骨格があっているか)
+                        # Channel 0 だけを取り出す
+                        cb0_target = audio_target[:, 0, :] # [B, T]
+                        cb0_pred = pred_audio[:, 0, :]     # [B, T]
+                        
+                        # マスクも [B, T] になっているのでエラーにならない
+                        correct_cb0 = (cb0_pred == cb0_target) & cb0_mask
+                        acc_audio_cb0 = correct_cb0.sum() / cb0_mask.sum().clamp(min=1)
 
-                    loss_window.append(current_loss)
-                    text_acc_window.append(float(step_text_acc))
-                    audio_acc_window.append(float(step_audio_acc))
+                        # --- Update Windows ---
+                        current_loss_val = loss.item() * accumulation_steps
+                        loss_window.append(current_loss_val)
+                        
+                        text_acc_global_window.append(float(acc_text_global))
+                        text_acc_content_window.append(float(acc_text_content))
+                        text_acc_pad_window.append(float(acc_text_pad))
+                        
+                        audio_acc_global_window.append(float(acc_audio_global))
+                        audio_acc_cb0_window.append(float(acc_audio_cb0))
 
-                    if self.global_step % log_interval == 0:
-                        # バッファの中身の平均を計算（直近100ステップの平均）
-                        smooth_loss = sum(loss_window) / len(loss_window)
-                        smooth_txt = sum(text_acc_window) / len(text_acc_window)
-                        smooth_aud = sum(audio_acc_window) / len(audio_acc_window)
+                        if self.global_step % log_interval == 0:
+                            # 平均計算
+                            s_loss = sum(loss_window) / len(loss_window)
+                            s_txt_gl = sum(text_acc_global_window) / len(text_acc_global_window)
+                            s_txt_ct = sum(text_acc_content_window) / len(text_acc_content_window) # Content
+                            s_aud_gl = sum(audio_acc_global_window) / len(audio_acc_global_window)
+                            s_aud_c0 = sum(audio_acc_cb0_window) / len(audio_acc_cb0_window)       # CB0
 
-                        pbar.set_postfix({
-                            "loss": f"{smooth_loss:.4f}", # 直近のLoss
-                            "txt": f"{smooth_txt:.3f}",   # 直近のText精度
-                            "aud": f"{smooth_aud:.3f}",   # 直近のAudio精度
-                            "step": self.global_step
-                        })
+                            # tqdmには重要なものだけ表示
+                            pbar.set_postfix({
+                                "L": f"{s_loss:.3f}",
+                                "TxCt": f"{s_txt_ct:.1%}", # Text Content (ここを見る！)
+                                "AuC0": f"{s_aud_c0:.1%}", # Audio CB0 (ここを見る！)
+                                "AuGl": f"{s_aud_gl:.1%}",
+                                "TxGl": f"{s_txt_gl:.1%}",
+                            })
 
-                    if self.writer is not None:
-                        self.writer.log_step(
-                            step=self.global_step,
-                            loss=loss.item(),
-                            text_loss=text_loss.item(),
-                            audio_loss=audio_loss.item(),
-                            text_acc=float(step_text_acc),
-                            audio_acc=float(step_audio_acc),
-                        )
+                            if self.writer is not None:
+                                self.writer.log_step(
+                                    step=self.global_step,
+                                    loss=current_loss_val,
+                                    text_loss=text_loss.item(),
+                                    audio_loss=audio_loss.item(),
+                                    # Text詳細
+                                    text_acc_global=float(acc_text_global),
+                                    text_acc_content=float(acc_text_content), # WandBでこれをグラフ化！
+                                    text_acc_pad=float(acc_text_pad),
+                                    # Audio詳細
+                                    audio_acc_global=float(acc_audio_global),
+                                    audio_acc_codebook0=float(acc_audio_cb0), # WandBでこれをグラフ化！
+                                )
 
                     # --- Save Checkpoint ---
                     if self.global_step % 1000 == 0 and self.global_step > 0:

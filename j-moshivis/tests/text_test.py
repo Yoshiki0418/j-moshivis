@@ -4,8 +4,10 @@ import os
 
 def check_tokens():
     # 1. 確認したいトークンIDのリスト
-    token_ids = [9, 20796, 3, 3, 3, 3, 3, 3, 3, 0, 1340, 3, 3, 3, 0]
-
+    token_ids =  [ 9,    9,    8,     3,     3,     3,     3,     0,     9,  1400,     3,     0,
+     9,    11,     9, 25879,     3,     3,     3,     0,     9,  1560,     3,     3,
+     0,     9,     7,     0,     9,   7668
+      ]
     # 2. トークナイザのパス（ご提示いただいたパス）
     tokenizer_path = "/workspace/j-moshivis/jmoshivis/tokenizer_spm_32k_3.model"
 

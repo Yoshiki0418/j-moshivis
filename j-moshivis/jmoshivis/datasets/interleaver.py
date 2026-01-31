@@ -292,12 +292,14 @@ class InterleavedTokenizer:
                 for a in alignments[start_alignment:end_alignment]
             ]
 
-            text_tokens = self.interleaver.prepare_item(
-                alignments, this_num_audio_frames
+            current_duration = this_num_audio_frames / self.mimi.frame_rate
+
+            ext_tokens = self.interleaver.prepare_item(
+                alignments, current_duration
             )
             text_tokens = torch.nn.functional.pad(
-                text_tokens,
-                (0, self.num_audio_frames - text_tokens.shape[-1]),
+                ext_tokens,
+                (0, self.num_audio_frames - ext_tokens.shape[-1]),
                 value=self.interleaver.zero_padding,
             )
 

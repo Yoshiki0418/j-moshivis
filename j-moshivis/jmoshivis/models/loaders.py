@@ -27,12 +27,48 @@ def get_moshi_vis(
 
     if moshi_weight is not None:
         from safetensors.torch import load_file
+        loaded_weights = load_file(moshi_weight, device="cpu")
+
+        # =========================================================
+        # 🔍 デバッグ: ファイル内のキー名を確認 (最初の50個)
+        # =========================================================
+        print("\n🔍 [DEBUG] File Keys Preview (First 50):")
+        all_file_keys = list(loaded_weights.keys())
+        for k in all_file_keys[:50]:
+            print(f"  - {k}")
+        
+        # 特にCross-Attention関連のキーを抽出して表示
+        print("\n🔍 [DEBUG] Cross-Attention Keys in File:")
+        ca_keys = [k for k in all_file_keys if "cross_attention" in k]
+        if ca_keys:
+            for k in ca_keys[:20]: # 長いので最初の20個
+                print(f"  - {k}")
+        else:
+            print("  ❌ No cross_attention keys found!")
+        print("=========================================================\n")
 
         for key, v in load_file(moshi_weight, device=device).items():  # type: ignore
-            if key.startswith("image_prefix."):
-                image_proj_state[key[len("image_prefix."):]] = v
+            clean_key = key
+            is_image_proj = False
+
+            # 1. "image_prefix." の処理
+            if clean_key.startswith("image_prefix."):
+                clean_key = clean_key[len("image_prefix."):]
+                is_image_proj = True
+            
+            # 2. "module." の強制削除 (これが今回の肝)
+            if clean_key.startswith("module."):
+                clean_key = clean_key[len("module."):]
+
+            # 3. "_orig_mod." (torch.compile由来) も念のため削除
+            if clean_key.startswith("_orig_mod."):
+                clean_key = clean_key[len("_orig_mod."):]
+
+            # 4. 振り分け
+            if is_image_proj:
+                image_proj_state[clean_key] = v
             else:
-                model_state[key] = v
+                model_state[clean_key] = v
 
     print("🔍 Num image_prefix params:", len(image_proj_state))
     print("🔍 Example keys:", list(image_proj_state.keys())[:10])
@@ -43,6 +79,45 @@ def get_moshi_vis(
     image_embedder = ImageProjection.from_config(
         kyuteye_config, moshi_vis.model_dim, image_proj_state, device
     )
+
+    # --- 2. 厳密なロード確認 (Verification) ---
+    print("\n🔍 --- Weight Loading Verification ---")
+
+    # (A) Image Embedder の Projection層
+    # SigLIP (enc.model...) だけでなく、学習させた projection (proj, linearなど) があるか？
+    embedder_keys = set(image_embedder.state_dict().keys())
+    loaded_embedder_keys = set(image_proj_state.keys())
+    
+    # 必須チェック: "proj" または "linear" を含む層（実装依存だが通常存在するはず）
+    proj_params = [k for k in embedder_keys if "proj" in k or "linear" in k]
+    missing_proj = [k for k in proj_params if k not in loaded_embedder_keys]
+
+    if missing_proj:
+        print(f"❌ [CRITICAL] Image Projection weights MISSING! ({len(missing_proj)} params)")
+        print(f"   Example missing: {missing_proj[:3]}")
+        print("   -> 画像の特徴量がMoshiの次元に変換されず、推論が壊れます。")
+    else:
+        print(f"✅ Image Projection weights loaded ({len(proj_params)} params).")
+
+    # (B) MoshiVis の Cross-Attention と Gate
+    # モデルの全パラメータ名を取得
+    moshi_keys = set(moshi_vis.lm_model.state_dict().keys())
+    loaded_moshi_keys = set(model_state.keys())
+
+    # チェック対象: Cross-Attention と Gate
+    target_keywords = ["cross_attention", "gate", "xa"]
+    important_params = [k for k in moshi_keys if any(x in k for x in target_keywords)]
+    
+    missing_important = [k for k in important_params if k not in loaded_moshi_keys]
+
+    if missing_important:
+        print(f"❌ [CRITICAL] Cross-Attention/Gate weights MISSING! ({len(missing_important)} params)")
+        print(f"   Example missing: {missing_important[:-1]}")
+        print("   -> モデルは画像情報を無視してテキストのみで生成します。")
+    else:
+        print(f"✅ Cross-Attention & Gate weights loaded ({len(important_params)} params).")
+
+    print("---------------------------------------\n")
 
     return moshi_vis.to(dtype), image_embedder.to(dtype)
 

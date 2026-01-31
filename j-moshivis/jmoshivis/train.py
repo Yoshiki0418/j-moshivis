@@ -28,7 +28,8 @@ def main(args: DictConfig):
     tokenizer = spm.SentencePieceProcessor()
     tokenizer.load("/workspace/j-moshivis/jmoshivis/tokenizer_spm_32k_3.model")
 
-    print("Loading Mimi and MoshiVis...")
+    if accelerator.is_main_process:
+        print("Loading Mimi and MoshiVis...")
     mimi_weight = hf_hub_download(
         repo_id=args.repo_id,
         filename=args.mimi_name,
@@ -107,7 +108,7 @@ def main(args: DictConfig):
         image_root=args.data.image_root,
         image_embedder=image_embedder,
         device=device,
-        mode="mixed",
+        mode="speech",
         text_tokenizer=tokenizer,
         target_len=target_len
     )
@@ -158,45 +159,57 @@ def main(args: DictConfig):
 
     print(f"Trainable params: CrossAttn={len(cross_attn_params)}, Gate={len(gate_params)}, Embedder={len(embedder_params)}")
 
-    def print_trainable_parameters(model, model_name="Model"):
-        print(f"\n=== Trainable Parameters in {model_name} ===")
-        total_params = 0
-        for name, param in model.named_parameters():
-            if param.requires_grad:
-                num_params = param.numel()
-                total_params += num_params
-                print(f"{name}: {num_params:,} params | Shape: {list(param.shape)}")
-        print(f"--- Total Trainable Params in {model_name}: {total_params:,} ---\n")
-        return total_params
+    if accelerator.is_main_process:
+        def print_trainable_parameters(model, model_name="Model"):
+            print(f"\n=== Trainable Parameters in {model_name} ===")
+            total_params = 0
+            for name, param in model.named_parameters():
+                if param.requires_grad:
+                    num_params = param.numel()
+                    total_params += num_params
+                    print(f"{name}: {num_params:,} params | Shape: {list(param.shape)}")
+            print(f"--- Total Trainable Params in {model_name}: {total_params:,} ---\n")
+            return total_params
 
-    # MoshiVis本体の学習対象パラメータを表示
-    moshi_params = print_trainable_parameters(moshi_vis, "MoshiVis (Adapters)")
+        # MoshiVis本体の学習対象パラメータを表示
+        moshi_params = print_trainable_parameters(moshi_vis, "MoshiVis (Adapters)")
 
-    # ImageEmbedderの学習対象パラメータを表示
-    embedder_params_count = print_trainable_parameters(image_embedder, "ImageEmbedder (Projection)")
+        # ImageEmbedderの学習対象パラメータを表示
+        embedder_params_count = print_trainable_parameters(image_embedder, "ImageEmbedder (Projection)")
 
-    print(f"🔥 Grand Total Trainable Parameters: {moshi_params + embedder_params_count:,}")
+        print(f"🔥 Grand Total Trainable Parameters: {moshi_params + embedder_params_count:,}")
 
-    # もし other_params に何か残っていたら、それも学習対象に加えるべきですが、
-    # 上記の修正で norm_cross は CrossAttn に入るため、基本的には空になるはずです。
+        # もし other_params に何か残っていたら、それも学習対象に加えるべきですが、
+        # 上記の修正で norm_cross は CrossAttn に入るため、基本的には空になるはずです。
 
     optimizer = torch.optim.AdamW(
         [
-            {"params": cross_attn_params, "lr": 1e-5, "weight_decay": 0.0},
-            {"params": gate_params,       "lr": 1e-6, "weight_decay": 0.01},
-            {"params": embedder_params,   "lr": 1e-5, "weight_decay": 0.0},
-            # 必要なら {"params": other_params, ...}
+            {"params": cross_attn_params, "lr": 3e-5,"weight_decay": 0.0},
+            {"params": gate_params,       "lr": 1e-5,"weight_decay": 0.01},
+            {"params": embedder_params,   "lr": 5e-5,"weight_decay": 0.0},
         ],
         fused=True
     )
+    moshi_vis.forward = moshi_vis.forward_speech
+
+    if accelerator.is_main_process:
+        writer = WandBMetricsWriter(project_name="J-MoshiVis-Training",
+                                    model_name="j-moshivis")
+
 
     # DDP準備
     moshi_vis, image_embedder, optimizer, data_loader = accelerator.prepare(
         moshi_vis, image_embedder, optimizer, data_loader
     )
 
-    writer = WandBMetricsWriter(project_name="J-MoshiVis-Training",
-                                model_name="j-moshivis")
+    writer = None
+    
+    # メインプロセスのみ WandB を起動し、writer に代入
+    if accelerator.is_main_process:
+        writer = WandBMetricsWriter(
+            project_name="J-MoshiVis-Training",
+            model_name="j-moshivis"
+        )
 
     # --- Trainer Setup ---
     trainer = JmoshiVisTrainer(moshi_vis, optimizer, device, args.trainer, accelerator, image_embedder=image_embedder, writer=writer, tokenizer=tokenizer)
