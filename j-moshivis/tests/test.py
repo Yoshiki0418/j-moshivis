@@ -39,7 +39,7 @@ else:
 
 # パス設定
 DATA_ROOT = "/gpu-server/user/yoshiki/j-moshivis/data/speech/data_stereo"
-CHECKPOINT_PATH = "/workspace/j-moshivis/xa_layers_26_27/step_1000.safetensors"
+CHECKPOINT_PATH = "/workspace/j-moshivis/checkpoints/step_23000.safetensors"
 TOKENIZER_PATH = "/workspace/j-moshivis/jmoshivis/tokenizer_spm_32k_3.model"
 CONFIG_PATH = "/workspace/j-moshivis/configs/j-moshi-vis.yaml"
 

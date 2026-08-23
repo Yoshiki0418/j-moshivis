@@ -382,10 +382,10 @@ class MoshiVisGen(StreamingModule):
         self,
         moshi_vis: MoshiVis,
         use_sampling: bool = True,
-        temp: float = 0.8,
-        temp_text: float = 0.7,
+        temp: float = 0.5,
+        temp_text: float = 0.5,
         top_k: int = 250,
-        top_k_text: int = 25,
+        top_k_text: int = 10,
         check: bool = False,
     ):
         assert not moshi_vis.training, "generation shouldn't be used in training mode."

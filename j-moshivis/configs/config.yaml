@@ -1,6 +1,6 @@
 repo_id: kyutai/moshika-vis-pytorch-bf16
 mimi_name: tokenizer-e351c8d8-checkpoint125.safetensors
-duration_sec: 10.0
+duration_sec: 60.0
 
 data:
   train_data: /workspace/data/speech/train_data_refined_a.jsonl
@@ -19,3 +19,23 @@ trainer:
   batch_size: 2
   text_padding_weight: 0.5
   first_codebook_weight_multiplier: 3.0
+
+# Depformerを学習したい場合
+depformer:
+  train: false                    # ← true に変更
+  learning_rate: 5e-6
+  layers: "all"                  # または "0,1,2" で特定層のみ
+  train_embedding: false          # embeddingも学習
+  train_linear: true             # audio_linearsも学習
+
+# Gate設定
+gate:
+  freeze: false                   # Gateを凍結 (実験用)
+  init_alpha: 0.0               # 99.3% open
+  learning_rate: 1.0e-4           # Gate専用の学習率 (振り分けバグ修正で有効化。現状の実効値1e-4を維持)
+
+# Cross-Attention 初期化設定
+cross_attention:
+  # false: ランダム初期化 (std=0.02) で学習開始 — 現状と完全に同じ挙動
+  # true : model_merged_bf16.safetensors の Cross-Attention/Gate を継承して学習開始
+  inherit_from_pretrained: true

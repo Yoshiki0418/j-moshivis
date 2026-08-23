@@ -39,7 +39,18 @@ def main(args: DictConfig):
     for p in mimi.parameters():
         p.requires_grad = False
 
+    # Config からDepformer/Gate/CrossAttention設定を取得
+    depformer_config = dict(args.get("depformer", {})) if "depformer" in args else None
+    gate_config = dict(args.get("gate", {})) if "gate" in args else None
+    cross_attention_config = (
+        dict(args.get("cross_attention", {})) if "cross_attention" in args else None
+    )
+
     print("Start get_moshi_vis_train")
+    print(f"  Depformer config: {depformer_config}")
+    print(f"  Gate config: {gate_config}")
+    print(f"  CrossAttention config: {cross_attention_config}")
+
     moshi_vis, image_embedder = get_moshi_vis_train(
         kyuteye_config=kyuteye_config,
         moshivis_weight="/workspace/j-moshivis/model_merged_bf16.safetensors",
@@ -47,6 +58,9 @@ def main(args: DictConfig):
         dtype=torch.bfloat16,
         strict=False,
         freeze_backbone=True,
+        depformer_config=depformer_config,
+        gate_config=gate_config,
+        cross_attention_config=cross_attention_config,
     )
 
     interleaver = Interleaver(
@@ -108,7 +122,7 @@ def main(args: DictConfig):
         image_root=args.data.image_root,
         image_embedder=image_embedder,
         device=device,
-        mode="speech",
+        mode="mixed",
         text_tokenizer=tokenizer,
         target_len=target_len
     )
@@ -135,16 +149,20 @@ def main(args: DictConfig):
 
     cross_attn_params = []
     gate_params = []
+    depformer_params = []
     # other_params は今回空になるのが理想ですが、念のため残します
     other_params = []
 
     for name, p in moshi_vis.named_parameters():
         if not p.requires_grad:
             continue
-
-        # 【修正1】 先に Gate を判定する (名前に "cross_attention" が含まれていても Gate として扱うため)
-        if "gate" in name or "xa_gate" in name:
+        # Gate パラメータ (実際の名前は cross_attention.gate.alpha.*)
+        if "gate" in name and "alpha" in name:
             gate_params.append(p)
+        # Depformer パラメータ
+        elif "depformer" in name or "audio_linears" in name:
+            depformer_params.append(p)
+        # Cross-Attention パラメータ
 
         # 【修正2】 norm_cross も CrossAttention グループに含める
         elif "cross_attention" in name or "xa" in name or "norm_cross" in name:
@@ -157,7 +175,7 @@ def main(args: DictConfig):
 
     embedder_params = [p for p in image_embedder.parameters() if p.requires_grad]
 
-    print(f"Trainable params: CrossAttn={len(cross_attn_params)}, Gate={len(gate_params)}, Embedder={len(embedder_params)}")
+    print(f"Trainable params: CrossAttn={len(cross_attn_params)}, Gate={len(gate_params)}, Depformer={len(depformer_params)}, Embedder={len(embedder_params)}")
 
     if accelerator.is_main_process:
         def print_trainable_parameters(model, model_name="Model"):
@@ -182,20 +200,31 @@ def main(args: DictConfig):
         # もし other_params に何か残っていたら、それも学習対象に加えるべきですが、
         # 上記の修正で norm_cross は CrossAttn に入るため、基本的には空になるはずです。
 
-    optimizer = torch.optim.AdamW(
-        [
-            {"params": cross_attn_params, "lr": 3e-5,"weight_decay": 0.0},
-            {"params": gate_params,       "lr": 1e-5,"weight_decay": 0.01},
-            {"params": embedder_params,   "lr": 5e-5,"weight_decay": 0.0},
-        ],
-        fused=True
-    )
+    # オプティマイザのパラメータグループを構築
+    param_groups = [
+        {"params": cross_attn_params, "lr": 1e-4, "weight_decay": 0.0},
+        {"params": embedder_params,   "lr": 1e-4, "weight_decay": 0.0},
+    ]
+
+    # Gate パラメータ (凍結されていなければ追加)
+    if gate_params:
+        gate_lr = gate_config.get("learning_rate", 1e-5) if gate_config else 1e-5
+        param_groups.append({"params": gate_params, "lr": gate_lr, "weight_decay": 0.0})
+        print(f"🔧 Gate params added to optimizer (lr={gate_lr})")
+
+    # Depformer パラメータ (設定されていれば追加)
+    if depformer_params:
+        depformer_lr = depformer_config.get("learning_rate", 5e-6) if depformer_config else 5e-6
+        param_groups.append({"params": depformer_params, "lr": depformer_lr, "weight_decay": 0.0})
+        print(f"🔧 Depformer params added to optimizer (lr={depformer_lr})")
+
+    optimizer = torch.optim.AdamW(param_groups, fused=True)
+
     moshi_vis.forward = moshi_vis.forward_speech
 
     if accelerator.is_main_process:
         writer = WandBMetricsWriter(project_name="J-MoshiVis-Training",
                                     model_name="j-moshivis")
-
 
     # DDP準備
     moshi_vis, image_embedder, optimizer, data_loader = accelerator.prepare(
@@ -203,7 +232,7 @@ def main(args: DictConfig):
     )
 
     writer = None
-    
+
     # メインプロセスのみ WandB を起動し、writer に代入
     if accelerator.is_main_process:
         writer = WandBMetricsWriter(

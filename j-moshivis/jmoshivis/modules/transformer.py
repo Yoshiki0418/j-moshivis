@@ -324,7 +324,10 @@ class Transformer(StreamingModule):
         _, seq_len, channels = x.shape
 
         if self.positional_embedding in {"sin", "sin_rope"}:
-            positions = torch.arange(seq_len, device=x.device).view(1, -1, 1)
+            start_pos = 0
+            if self.is_streaming:
+                start_pos = self.streaming_offset
+            positions = torch.arange(start_pos, start_pos + seq_len, device=x.device).view(1, -1, 1)
             pos_emb = create_sin_embedding(
                 positions, channels, max_period=self.max_period, dtype=x.dtype
             )
@@ -335,5 +338,8 @@ class Transformer(StreamingModule):
             x, gate_weight = layer(x, *args, **kwargs)
             if gate_weight is not None and layer_idx >= len(self.layers) - 10:
                 alpha += torch.mean(gate_weight).cpu().item()
+
+        if self.is_streaming:
+            self.streaming_offset += seq_len
 
         return x, alpha / min(10, len(self.layers))

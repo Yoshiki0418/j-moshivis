@@ -199,7 +199,8 @@ class JmoshiVisTrainer:
                     )
 
                     text_logits = outputs["text_logits"]
-                    audio_logits = outputs["audio_logits"]
+                    audio_logits_full = outputs["audio_logits"]
+                    audio_logits = audio_logits_full[:, :2, :, :].contiguous()
 
                     if DEBUG:
                         print(f"🔍 [CHECK 4] Outputs & Masks")
@@ -234,7 +235,10 @@ class JmoshiVisTrainer:
 
                     # --- Loss Calculation ---
                     text_target = codes[:, :self.model.audio_offset]
-                    audio_target = codes[:, self.model.audio_offset:self.model.audio_offset + self.model.dep_q]
+                    # 🚀 MoshiVis style: Use only first 2 codebooks for audio loss (faster training)
+                    # Original uses all dep_q (8), but first 2 carry most of the semantic information
+                    num_audio_codebooks_for_loss = 2  # MoshiVis default
+                    audio_target = codes[:, self.model.audio_offset:self.model.audio_offset + num_audio_codebooks_for_loss]
 
                     # =========================================================================
                     # ▼ デバッグ用コード: ここから ▼
@@ -264,7 +268,7 @@ class JmoshiVisTrainer:
 
                             print(f"Target IDs (First 50): {target_sample[:50]}")
                             print(f"Pred   IDs (First 50): {pred_sample[:50]}")
-                            print(f"Mask       (First 50): {mask_sample[:-1]}")
+                            # print(f"Mask       (First 50): {mask_sample[:50]}")
 
                             # 4. (もしtokenizerを持っていれば) デコードして文字で確認
                             # self.tokenizer が Trainerにあると仮定しています
@@ -287,8 +291,12 @@ class JmoshiVisTrainer:
                         text_padding_weight=self.args.text_padding_weight,
                         text_padding_ids={self.model.text_padding_token_id, self.model.end_of_text_padding_id},
                     )
+                    # 🚀 Slice mask to first 2 codebooks (matching audio_target)
+                    audio_mask = outputs["logits_mask"]
+                    if audio_mask.dim() == 3 and audio_mask.size(1) > 2:
+                        audio_mask = audio_mask[:, :2, :]  # [B, 2, T]
                     audio_loss = compute_loss_with_mask(
-                        audio_logits, audio_target, outputs["logits_mask"],
+                        audio_logits, audio_target, audio_mask,
                         mode="audio",
                         first_codebook_weight_multiplier=self.args.first_codebook_weight_multiplier,
                     )
@@ -338,6 +346,59 @@ class JmoshiVisTrainer:
                 self.accelerator.backward(loss)
 
                 if self.accelerator.sync_gradients:
+                    # =========================================================
+                    # 🔬 勾配ロギング（MHA学習確認用）
+                    # =========================================================
+                    if self.global_step % 50 == 0 and self.accelerator.is_main_process:
+                        print(f"\n🔬 [Gradient Check] Step {self.global_step}")
+                        mha_grad_found = False
+                        gate_grad_found = False
+                        
+                        for name, param in self.model.named_parameters():
+                            if param.grad is None:
+                                continue
+                            
+                            # MHA勾配チェック (layer 0のみ)
+                            if "cross_attention.mha" in name and "layers.0" in name and not mha_grad_found:
+                                grad_norm = param.grad.norm().item()
+                                grad_mean = param.grad.abs().mean().item()
+                                print(f"   MHA ({name[:50]}...): norm={grad_norm:.8f}, mean={grad_mean:.8f}")
+                                mha_grad_found = True
+                            
+                            # Gate勾配チェック (layer 0のみ)
+                            if "gate" in name and "layers.0" in name and not gate_grad_found:
+                                grad_norm = param.grad.norm().item()
+                                grad_mean = param.grad.abs().mean().item()
+                                print(f"   Gate ({name[:50]}...): norm={grad_norm:.8f}, mean={grad_mean:.8f}")
+                                gate_grad_found = True
+                            
+                            if mha_grad_found and gate_grad_found:
+                                break
+                        
+                        if not mha_grad_found:
+                            print("   ⚠️ WARNING: No MHA gradient found!")
+                        if not gate_grad_found:
+                            print("   ⚠️ WARNING: No Gate gradient found!")
+
+                        # 🔬 Gate値の監視（閉じていないか確認）
+                        for name, param in self.model.named_parameters():
+                            if "gate.alpha" in name and "layers.0" in name:
+                                gate_alpha = param.data.mean().item()
+                                gate_sigmoid = 1 / (1 + (-gate_alpha).__abs__())  # 簡易sigmoid
+                                print(f"   Gate alpha: {gate_alpha:.4f} → sigmoid ≈ {gate_sigmoid:.4f}")
+                                if gate_alpha < -6:
+                                    print(f"   ⚠️ WARNING: Gate is closing! (alpha < -6)")
+                                break
+
+                        # 🔬 MHA重みの変化を確認（optimizer.step前に記録）
+                        mha_weight_before = None
+                        mha_param = None
+                        for name, param in self.model.named_parameters():
+                            if "cross_attention.mha.in_proj_weight" in name and "layers.0" in name:
+                                mha_weight_before = param.data.clone()
+                                mha_param = param
+                                break
+                    
                     # 勾配クリッピング
                     self.accelerator.clip_grad_norm_(self.model.parameters(), 1.0)
                     self.accelerator.clip_grad_norm_(self.image_embedder.parameters(), 1.0)
@@ -345,6 +406,18 @@ class JmoshiVisTrainer:
                     self.optimizer.step()
                     self.optimizer.zero_grad(set_to_none=True)       
                     self.global_step += 1  # 更新した回数だけカウントアップ
+
+                    # 🔬 optimizer.step後のMHA重みを確認
+                    if self.global_step % 50 == 1 and self.accelerator.is_main_process:
+                        if mha_weight_before is not None:
+                            after = mha_param.data
+                            diff = (after - mha_weight_before).abs().mean().item()
+                            print(f"   📊 MHA weight change after step {self.global_step}:")
+                            print(f"      Before mean: {mha_weight_before.mean().item():.10f}")
+                            print(f"      After mean:  {after.mean().item():.10f}")
+                            print(f"      Abs diff mean: {diff:.12f}")
+                            if diff < 1e-12:
+                                print(f"      ❌ CRITICAL: MHA weights did NOT change!")
 
                     # --- Logging (更新時のみ行う) ---
                     # 正解率計算などは負荷削減のため更新時のみでOK
@@ -365,46 +438,67 @@ class JmoshiVisTrainer:
 
                         # (C) PAD Acc (楽をしてるかチェック)
                         correct_pad = (pred_text == text_target) & is_pad
-                        acc_text_pad = correct_pad.sum() / is_pad.sum().clamp(min=1)
+                        if is_pad.sum() > 0:
+                            acc_text_pad = correct_pad.sum() / is_pad.sum()
+                        else:
+                            # speechless バッチの場合は NaN (移動平均から除外される)
+                            acc_text_pad = torch.tensor(float('nan'))
 
                         # Audio Acc (マスク考慮)
                         audio_mask = outputs["logits_mask"]
                         # --- 2. Audio Metrics ---
-                        pred_audio = audio_logits.argmax(-1) # [B, 8, T]
-                        
+                        pred_audio = audio_logits.argmax(-1) # [B, 2, T] になっています
+
                         # ★重要: マスクの形状を正規化する処理
                         # audio_mask が [B, T] なのか [B, 8, T] なのかを判定して統一します
                         if audio_mask.dim() == 2:
-                            # [B, T] の場合 -> [B, 8, T] に拡張して Global計算用に使う
+                            # [B, T] の場合 -> [B, 2, T] に拡張して Global計算用に使う
+                            # audio_target は既に [B, 2, T] なので、expand_as で合わせるのが正解
                             real_audio_mask = audio_mask.unsqueeze(1).expand_as(audio_target)
                             # Codebook 0 用はそのまま [B, T] を使う
                             cb0_mask = audio_mask
+                        
                         elif audio_mask.dim() == 3:
-                            # [B, 8, T] の場合 -> そのまま Global計算用に使う
-                            real_audio_mask = audio_mask
+                            # [B, 8, T] の場合 -> [B, 2, T] にスライスして使う
+                            # 修正前: real_audio_mask = audio_mask  <-- これがエラーの原因
+                            
+                            # ▼▼▼ 修正後 ▼▼▼
+                            # 予測(pred_audio)と正解(audio_target)のチャンネル数(2)に合わせる
+                            if audio_mask.size(1) > audio_target.size(1):
+                                real_audio_mask = audio_mask[:, :audio_target.size(1), :]
+                            else:
+                                real_audio_mask = audio_mask
+                            # ▲▲▲ 修正ここまで ▲▲▲
+
                             # Codebook 0 用は 0チャンネル目を取り出して [B, T] にする
                             cb0_mask = audio_mask[:, 0, :]
+                        
                         elif audio_mask.dim() == 4: # 万が一 [B, 1, 8, T] などの場合
-                            real_audio_mask = audio_mask.squeeze(1)
-                            cb0_mask = real_audio_mask[:, 0, :]
-                        else:
-                            # 想定外だが、とりあえずそのまま
-                            real_audio_mask = audio_mask
-                            cb0_mask = audio_mask[:, 0, :]
+                             # ... (同様にスライスが必要ですが、稀なケースです)
+                             real_audio_mask = audio_mask.squeeze(1)[:, :audio_target.size(1), :]
+                             cb0_mask = real_audio_mask[:, 0, :]
 
                         # (A) Global Audio Acc
                         # 形状が [B, 8, T] で揃ったので安全に計算可能
                         correct_audio = (pred_audio == audio_target) & real_audio_mask
-                        acc_audio_global = correct_audio.sum() / real_audio_mask.sum().clamp(min=1)
+                        if real_audio_mask.sum() > 0:
+                            acc_audio_global = correct_audio.sum() / real_audio_mask.sum()
+                        else:
+                            # speechless バッチの場合は NaN (移動平均から除外される)
+                            acc_audio_global = torch.tensor(float('nan'))
 
                         # (B) Codebook 0 Acc (★最重要: 骨格があっているか)
                         # Channel 0 だけを取り出す
                         cb0_target = audio_target[:, 0, :] # [B, T]
                         cb0_pred = pred_audio[:, 0, :]     # [B, T]
-                        
+
                         # マスクも [B, T] になっているのでエラーにならない
                         correct_cb0 = (cb0_pred == cb0_target) & cb0_mask
-                        acc_audio_cb0 = correct_cb0.sum() / cb0_mask.sum().clamp(min=1)
+                        if cb0_mask.sum() > 0:
+                            acc_audio_cb0 = correct_cb0.sum() / cb0_mask.sum()
+                        else:
+                            # speechless バッチの場合は NaN (移動平均から除外される)
+                            acc_audio_cb0 = torch.tensor(float('nan'))
 
                         # --- Update Windows ---
                         current_loss_val = loss.item() * accumulation_steps
@@ -418,12 +512,16 @@ class JmoshiVisTrainer:
                         audio_acc_cb0_window.append(float(acc_audio_cb0))
 
                         if self.global_step % log_interval == 0:
-                            # 平均計算
+                            # 平均計算 (NaN はスキップ)
                             s_loss = sum(loss_window) / len(loss_window)
-                            s_txt_gl = sum(text_acc_global_window) / len(text_acc_global_window)
-                            s_txt_ct = sum(text_acc_content_window) / len(text_acc_content_window) # Content
-                            s_aud_gl = sum(audio_acc_global_window) / len(audio_acc_global_window)
-                            s_aud_c0 = sum(audio_acc_cb0_window) / len(audio_acc_cb0_window)       # CB0
+                            # NaN をスキップして平均を計算するヘルパー
+                            def nanmean(arr):
+                                valid = [x for x in arr if not (isinstance(x, float) and x != x)]  # NaN を除外
+                                return sum(valid) / len(valid) if valid else 0.0
+                            s_txt_gl = nanmean(text_acc_global_window)
+                            s_txt_ct = nanmean(text_acc_content_window)
+                            s_aud_gl = nanmean(audio_acc_global_window)
+                            s_aud_c0 = nanmean(audio_acc_cb0_window)
 
                             # tqdmには重要なものだけ表示
                             pbar.set_postfix({
@@ -435,22 +533,27 @@ class JmoshiVisTrainer:
                             })
 
                             if self.writer is not None:
+                                # NaN をフィルタリング (None に変換して W&B は無視するようにする)
+                                def to_float_or_none(val):
+                                    f = float(val)
+                                    return None if (f != f) else f  # NaN check
+
                                 self.writer.log_step(
                                     step=self.global_step,
                                     loss=current_loss_val,
                                     text_loss=text_loss.item(),
                                     audio_loss=audio_loss.item(),
                                     # Text詳細
-                                    text_acc_global=float(acc_text_global),
-                                    text_acc_content=float(acc_text_content), # WandBでこれをグラフ化！
-                                    text_acc_pad=float(acc_text_pad),
+                                    text_acc_global=to_float_or_none(acc_text_global),
+                                    text_acc_content=to_float_or_none(acc_text_content),
+                                    text_acc_pad=to_float_or_none(acc_text_pad),
                                     # Audio詳細
-                                    audio_acc_global=float(acc_audio_global),
-                                    audio_acc_codebook0=float(acc_audio_cb0), # WandBでこれをグラフ化！
+                                    audio_acc_global=to_float_or_none(acc_audio_global),
+                                    audio_acc_codebook0=to_float_or_none(acc_audio_cb0),
                                 )
 
                     # --- Save Checkpoint ---
-                    if self.global_step % 1000 == 0 and self.global_step > 0:
+                    if self.global_step % 5000 == 0 and self.global_step > 0:
                         if self.accelerator.is_main_process:
                             self.save_checkpoint(f"./checkpoints/step_{self.global_step}.safetensors")
 

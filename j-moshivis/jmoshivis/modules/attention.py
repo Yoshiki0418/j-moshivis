@@ -318,8 +318,13 @@ class MultiheadAttention(StreamingModule):
 
         # Attention
         q, k, v = [x.transpose(1, 2) for x in [q, k, v]]
+        
+        is_causal = self.causal
+        if self._is_streaming:
+            is_causal = False
+            
         x = torch.nn.functional.scaled_dot_product_attention(  # pylint: disable=not-callable
-            q, k, v, is_causal=False, attn_mask=attention_mask
+            q, k, v, is_causal=is_causal, attn_mask=attention_mask
         )
         x = x.transpose(1, 2)
 

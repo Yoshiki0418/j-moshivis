@@ -21,9 +21,9 @@ def compute_loss_with_mask(
         for id in text_padding_ids:
             weights[target == id] *= text_padding_weight
 
-    logits = logits.view(-1, logits.size(-1)).float()
-    target = target.view(-1)
-    weights = weights.view(-1)
+    logits = logits.reshape(-1, logits.size(-1)).float()
+    target = target.reshape(-1)
+    weights = weights.reshape(-1)
 
     denom = torch.sum(weights)
     if denom == 0:
