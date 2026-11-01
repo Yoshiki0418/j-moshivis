@@ -32,6 +32,7 @@ class XAGate(torch.nn.Module):
         conditional_gating: bool = False,
         dims: Optional[int] = None,
         hidden_dims_factor: float = 0.125,
+        sigmoid_shift: float = 4.0,
         dtype: Optional[torch.dtype] = None,
     ) -> None:
         super().__init__()
@@ -49,12 +50,15 @@ class XAGate(torch.nn.Module):
             self.alpha = torch.nn.Parameter(
                 torch.full((1, 1, 1), 0.0, device=device, dtype=dtype)
             )
+        self.sigmoid_shift = float(sigmoid_shift)
         self.act: Callable
         if activation == "tanh":
             self.act = torch.tanh
         elif activation == "sigmoid":
-            # shift left to mimic initialization ~ close to 0
-            self.act = lambda x: torch.sigmoid(x - 5.3)
+            # Match the public MoshiVis implementation. With a zero preactivation,
+            # sigmoid(x - 4) starts at ~1.8%, keeping the visual residual small
+            # without changing the activation used by inherited adapter weights.
+            self.act = lambda x: torch.sigmoid(x - self.sigmoid_shift)
         else:
             raise NotImplementedError("Unknown activation function", activation)
 
@@ -95,6 +99,7 @@ class GatedCrossAttention(StreamingModule):
         embed_dim: int,
         xa_gating: Literal["tanh", "sigmoid", "none"] = "tanh",
         xa_conditional_gating: bool = False,
+        xa_sigmoid_shift: float = 4.0,
         xa_shared: bool = True,
         xa_gate_shared: bool = False,
         xa_delay: int = 0,
@@ -145,6 +150,7 @@ class GatedCrossAttention(StreamingModule):
                 dtype=dtype,
                 dims=embed_dim,
                 conditional_gating=xa_conditional_gating,
+                sigmoid_shift=xa_sigmoid_shift,
             )
 
         # If the XA module AND gates are shared, we add a per-layer

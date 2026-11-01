@@ -21,9 +21,15 @@ def build_data_loader(
     mode: str = "speech",          # "speech" | "speechless" | "mixed"
     text_tokenizer: Any | None = None,
     target_len: int = 125,
+    modality_window_size: int | None = None,
+    start_sample_index: int = 0,
 ) -> Iterator[Batch]:
     if is_eval:
         assert args.eval_data != "", "No eval data provided."
+    if start_sample_index and mode != "mixed":
+        raise ValueError(
+            "exact data-position resume is currently supported only for mixed mode"
+        )
 
     if mode == "speech":
         pretrain_data = args.train_data if not is_eval else args.eval_data
@@ -38,6 +44,8 @@ def build_data_loader(
             image_root=image_root,
             image_embedder=image_embedder,
             device=device,
+            speech_chunk_policy=args.speech_chunk_policy,
+            speech_decode_workers=args.speech_decode_workers,
         )
 
     elif mode == "speechless":
@@ -76,6 +84,11 @@ def build_data_loader(
             image_embedder=image_embedder,
             speech_ratio=args.speech_ratio,             # 例: 0.5 とか
             target_len=target_len,
+            local_batch_size=batch_size,
+            effective_window_size=modality_window_size,
+            speech_chunk_policy=args.speech_chunk_policy,
+            speech_decode_workers=args.speech_decode_workers,
+            start_sample_index=start_sample_index,
         )
 
     else:

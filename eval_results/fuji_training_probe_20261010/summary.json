@@ -1,0 +1,65 @@
+{
+  "question": "この画像に写っている山は、何という山ですか？",
+  "decoding": "greedy",
+  "voice": "jvnv-M1",
+  "num_tested": 5,
+  "num_mentions_fuji": 0,
+  "cases": [
+    {
+      "case": 1,
+      "uid": "93e0c6b4c50eaf80cc894633ea749125eef7f3c41cce12bbfb16ccb5a239c5f2",
+      "training_line": 5196,
+      "image": "/gpu-server/yamamoto/j-moshivis/data/speech_v3/data_stereo/93e0c6b4c50eaf80cc894633ea749125eef7f3c41cce12bbfb16ccb5a239c5f2/image.jpg",
+      "question": "この画像に写っている山は、何という山ですか？",
+      "answer": "手前に緑の山がすごく大きく写ってますね。山っていうより、山がすごく大きくて、すごくきれいな景色です。",
+      "mentions_fuji": false,
+      "generated_text_all": "手前に緑の山がすごく大きく写ってますね。山っていうより、山がすごく大きくて、すごくきれいな景色です。",
+      "stereo": "/gpu-server/yamamoto/j-moshivis/eval_results/fuji_training_probe_20261010/case_01/conversation_stereo.wav"
+    },
+    {
+      "case": 2,
+      "uid": "a622474c415e55855e53537821b7ebbbfe0a4375e104bcf9276d3d8b0346be1b",
+      "training_line": 5408,
+      "image": "/gpu-server/yamamoto/j-moshivis/data/speech_v3/data_stereo/a622474c415e55855e53537821b7ebbbfe0a4375e104bcf9276d3d8b0346be1b/image.jpg",
+      "question": "この画像に写っている山は、何という山ですか？",
+      "answer": "すごく遠くに山が広がっていて、その奥に海が広がっていますね。かなり大きな山が何本か見えますよ。",
+      "mentions_fuji": false,
+      "generated_text_all": "すごく遠くに山が広がっていて、その奥に海が広がっていますね。かなり大きな山が何本か見えますよ。",
+      "stereo": "/gpu-server/yamamoto/j-moshivis/eval_results/fuji_training_probe_20261010/case_02/conversation_stereo.wav"
+    },
+    {
+      "case": 3,
+      "uid": "a203b7664fafc62c1d18ac426d0fef832672a53d5ed5eee5bbd0e1a5aac74130",
+      "training_line": 8418,
+      "image": "/gpu-server/yamamoto/j-moshivis/data/speech_v3/data_stereo/a203b7664fafc62c1d18ac426d0fef832672a53d5ed5eee5bbd0e1a5aac74130/image.jpg",
+      "question": "この画像に写っている山は、何という山ですか？",
+      "answer": "山がすごく高いので、山っていう名前が付いてますね。山の上には大きな山が立ってます。",
+      "mentions_fuji": false,
+      "generated_text_all": "山がすごく高いので、山っていう名前が付いてますね。山の上には大きな山が立ってます。",
+      "stereo": "/gpu-server/yamamoto/j-moshivis/eval_results/fuji_training_probe_20261010/case_03/conversation_stereo.wav"
+    },
+    {
+      "case": 4,
+      "uid": "ccc3a7bf0650bc62ed7a97532e8ae35665b25d2b6a5df6111aba8ee61c9442a1",
+      "training_line": 11094,
+      "image": "/gpu-server/yamamoto/j-moshivis/data/speech_v3/data_stereo/ccc3a7bf0650bc62ed7a97532e8ae35665b25d2b6a5df6111aba8ee61c9442a1/image.jpg",
+      "question": "この画像に写っている山は、何という山ですか？",
+      "answer": "山が連なって、手前に雪が残ってるんですよ。雪山って感じですね。",
+      "mentions_fuji": false,
+      "generated_text_all": "山が連なって、手前に雪が残ってるんですよ。雪山って感じですね。",
+      "stereo": "/gpu-server/yamamoto/j-moshivis/eval_results/fuji_training_probe_20261010/case_04/conversation_stereo.wav"
+    },
+    {
+      "case": 5,
+      "uid": "ba58e662afb57bba0f87e3ab3fef4bc6f9c4c27e7d6558146af720fa5c29e47a",
+      "training_line": 13309,
+      "image": "/gpu-server/yamamoto/j-moshivis/data/speech_v3/data_stereo/ba58e662afb57bba0f87e3ab3fef4bc6f9c4c27e7d6558146af720fa5c29e47a/image.jpg",
+      "question": "この画像に写っている山は、何という山ですか？",
+      "answer": "山と木が広がってる風景ですね。紫の花がたくさん咲いていますよ。",
+      "mentions_fuji": false,
+      "generated_text_all": "山と木が広がってる風景ですね。紫の花がたくさん咲いていますよ。",
+      "stereo": "/gpu-server/yamamoto/j-moshivis/eval_results/fuji_training_probe_20261010/case_05/conversation_stereo.wav"
+    }
+  ],
+  "scope": "Visually selected five training-manifest images. Not an independent generalization metric."
+}

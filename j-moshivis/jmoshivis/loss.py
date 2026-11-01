@@ -10,6 +10,7 @@ def compute_loss_with_mask(
     first_codebook_weight_multiplier: float = 1.0,
     text_padding_weight: float = 1.0,
     text_padding_ids: set[int] | None = None,
+    text_token_weights: dict[int, float] | None = None,
 ):
     target = torch.where(target_mask, target, torch.zeros_like(target))
 
@@ -17,9 +18,19 @@ def compute_loss_with_mask(
     if mode == "audio":
         weights[:, 0] *= first_codebook_weight_multiplier
     elif mode == "text":
-        assert text_padding_ids is not None
-        for id in text_padding_ids:
-            weights[target == id] *= text_padding_weight
+        if text_token_weights is not None:
+            for token_id, token_weight in text_token_weights.items():
+                if token_weight < 0:
+                    raise ValueError(
+                        f"text token weight must be non-negative, got "
+                        f"{token_weight} for token {token_id}"
+                    )
+                weights[target == token_id] *= token_weight
+        else:
+            # Backward-compatible path used by existing callers and configs.
+            assert text_padding_ids is not None
+            for token_id in text_padding_ids:
+                weights[target == token_id] *= text_padding_weight
 
     logits = logits.reshape(-1, logits.size(-1)).float()
     target = target.reshape(-1)
@@ -27,11 +38,19 @@ def compute_loss_with_mask(
 
     denom = torch.sum(weights)
     if denom == 0:
-        # 勾配は 0（audio 側は一切更新されない）
-        return logits.new_tensor(0.0)
+        # Keep a zero-valued graph connection so DDP sees trainable Depformer
+        # parameters as used on all-speechless microbatches.  Delayed padding
+        # logits may be NaN, hence nan_to_num before forming the graph-zero.
+        return torch.nan_to_num(logits, nan=0.0).sum() * 0.0
 
-    mb_loss = F.cross_entropy(logits, target, reduction="none")
-    mb_loss = torch.where(weights > 0.0, mb_loss * weights, torch.zeros_like(mb_loss))
-    mb_loss = torch.sum(mb_loss) / torch.sum(weights)
+    # Delayed/undelayed sequences deliberately fill invalid rows with NaN.
+    # Exclude them before cross_entropy: masking a NaN loss afterwards does not
+    # guarantee finite gradients through the softmax backward.
+    valid = weights > 0.0
+    valid_logits = logits[valid]
+    valid_target = target[valid]
+    valid_weights = weights[valid]
+    mb_loss = F.cross_entropy(valid_logits, valid_target, reduction="none")
+    mb_loss = torch.sum(mb_loss * valid_weights) / torch.sum(valid_weights)
 
     return mb_loss

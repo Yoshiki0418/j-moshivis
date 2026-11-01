@@ -1,0 +1,4 @@
+# MoshiVis/Babillage classical benchmark scorer.
+# pycocoevalcap supplies the official COCO PTB tokenizer and CIDEr scorer.
+# A Java runtime is also required by PTBTokenizer.
+pycocoevalcap==1.2

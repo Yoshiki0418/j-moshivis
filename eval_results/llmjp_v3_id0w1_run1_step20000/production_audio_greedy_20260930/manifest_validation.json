@@ -1,0 +1,67 @@
+{
+  "audio": {
+    "max_duration_sec": 38.002875,
+    "min_duration_sec": 1.5127083333333333,
+    "num_files": 734,
+    "required": true,
+    "total_hours": 1.9295954398148147
+  },
+  "benchmarks": {
+    "ja-vg-vqa-500": 258,
+    "jammeval-cc-ocr-ja-refined": 145,
+    "jammeval-cvqa-ja-refined": 194,
+    "jammeval-heron-bench-refined": 88,
+    "jammeval-ja-vlm-bench-refined": 49
+  },
+  "domains": {
+    "general_world": 258,
+    "japan": 476
+  },
+  "manifest": "/gpu-server/yamamoto/j-moshivis/data/evaluation/vision_v1/manifest_audio.jsonl",
+  "manifest_sha256": "f11cc0952e00f5bd299635ab97b0254406269aedfea17a189d033367b2f18a72",
+  "num_questions": 734,
+  "num_unique_images": 557,
+  "overlap_status": {
+    "clean": 734
+  },
+  "question_types": {
+    "Brands / products / companies": 3,
+    "Cooking and food": 18,
+    "Geography / buildings / landmarks": 24,
+    "Objects / materials / clothing": 29,
+    "People and everyday life": 11,
+    "Plants and animal": 9,
+    "Public Figure and pop culture": 45,
+    "Sports and recreation": 12,
+    "Traditions / art / history": 39,
+    "Vehicles and Transportation": 4,
+    "anime": 10,
+    "art": 19,
+    "color": 17,
+    "count": 47,
+    "culture": 14,
+    "food": 9,
+    "how": 44,
+    "japanese_cultural_knowledge": 49,
+    "landmark": 17,
+    "landscape": 10,
+    "ocr": 145,
+    "traffic": 9,
+    "what_other": 59,
+    "when": 4,
+    "where": 70,
+    "who": 8,
+    "yes_no_or_attribute": 9
+  },
+  "schema_version": "jmoshivis.image-eval.validation.v1",
+  "strict_checksums": {
+    "enabled": true,
+    "verified_unique_audio": 734,
+    "verified_unique_images": 557
+  },
+  "tasks": {
+    "multiple_choice": 194,
+    "vqa": 540
+  },
+  "valid": true
+}

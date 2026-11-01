@@ -228,12 +228,21 @@ class Interleaver:
         alignments: list[Alignment] | None,
         segment_duration: float,
         main_speaker: str | None = None,
+        pretokenized: bool = False,
     ) -> torch.Tensor:
-        """Responsible with processing the alignments and calling `build_token_stream`."""
+        """Responsible with processing the alignments and calling `build_token_stream`.
+
+        pretokenized=True のとき alignments は (token_ids: list[int], (start, end), speaker) 形式で、
+        再トークナイズせずそのまま使う (refine_alignments.py が出力する token_alignments 用)。
+        """
         if alignments is None:
             tokenized = None
         else:
-            tokenized = self._tokenize(sorted(alignments, key=lambda x: x[1][0]))
+            srt = sorted(alignments, key=lambda x: x[1][0])
+            if pretokenized:
+                tokenized = [(list(a[0]), a[1], a[2]) for a in srt]
+            else:
+                tokenized = self._tokenize(srt)
             if self.keep_main_only:
                 main_speaker = main_speaker or self.main_speaker_label
                 tokenized = self._keep_main_only(tokenized, main_speaker)
@@ -258,6 +267,46 @@ def dicho(alignment, val, i=0, j=None):
         return dicho(alignment, val, i, k)
 
 
+def slice_overlapping_alignments(
+    alignments: list,
+    *,
+    start_sec: float,
+    duration_sec: float,
+) -> list:
+    """Slice alignments by interval overlap and make timestamps crop-relative.
+
+    A random crop may begin in the middle of a token.  Select by interval
+    overlap rather than token start, so the boundary token remains present.
+    Negative relative starts are intentional: ``build_token_stream`` places
+    them at frame zero.
+
+    v3 can contain genuine full-duplex overlap where a USER turn starts before
+    the preceding ASSISTANT token ends.  Some refined files retain dialogue
+    order rather than timestamp order, so sort before filtering instead of
+    silently relying on input order.  The linear scan is deliberate: with
+    overlapping speech, an old long interval can remain active after several
+    newer short intervals have ended, which a local backward search can miss.
+    """
+
+    # Python's sort is stable, so genuinely simultaneous items keep the source
+    # file's dialogue ordering.
+    alignments = sorted(alignments, key=lambda alignment: float(alignment[1][0]))
+    end_sec = start_sec + duration_sec
+    return [
+        (
+            alignment[0],
+            (
+                float(alignment[1][0]) - start_sec,
+                float(alignment[1][1]) - start_sec,
+            ),
+            alignment[2],
+        )
+        for alignment in alignments
+        if float(alignment[1][1]) > start_sec
+        and float(alignment[1][0]) < end_sec
+    ]
+
+
 class InterleavedTokenizer:
     def __init__(self, mimi, interleaver, duration_sec: float):
         self.mimi = mimi
@@ -267,7 +316,13 @@ class InterleavedTokenizer:
 
     def __call__(self, wav: np.ndarray, start_sec: float, path: str) -> Sample:
         with torch.no_grad():
-            audio_tensor = torch.Tensor(wav).cuda()
+            try:
+                mimi_device = next(self.mimi.parameters()).device
+            except StopIteration as error:
+                raise RuntimeError("Mimi has no parameter from which to resolve its device") from error
+            audio_tensor = torch.as_tensor(
+                wav, dtype=torch.float32, device=mimi_device
+            )
             audio_tokens = self.mimi.encode(audio_tensor[:, None])
             audio_tokens = audio_tokens[..., : self.num_audio_frames]
             this_num_audio_frames = audio_tokens.shape[-1]
@@ -283,19 +338,21 @@ class InterleavedTokenizer:
             refined_json_path = os.path.join(directory, "assistant_dialogue.refined.json")
             with open(refined_json_path) as f:
                 data = json.load(f)
-                alignments = data["alignments"]
+                # SPMトークン単位に精緻化済み (refine_alignments.py) なら token id 列をそのまま使う。
+                # whisper単語を個別に再トークナイズすると '▁' の混入・境界不一致が起きるため。
+                pretokenized = "token_alignments" in data
+                alignments = data["token_alignments"] if pretokenized else data["alignments"]
 
-            start_alignment = dicho(alignments, start_sec)
-            end_alignment = dicho(alignments, start_sec + self.duration_sec)
-            alignments = [
-                (a[0], (a[1][0] - start_sec, a[1][1] - start_sec), a[2])
-                for a in alignments[start_alignment:end_alignment]
-            ]
+            alignments = slice_overlapping_alignments(
+                alignments,
+                start_sec=start_sec,
+                duration_sec=self.duration_sec,
+            )
 
             current_duration = this_num_audio_frames / self.mimi.frame_rate
 
             ext_tokens = self.interleaver.prepare_item(
-                alignments, current_duration
+                alignments, current_duration, pretokenized=pretokenized
             )
             text_tokens = torch.nn.functional.pad(
                 ext_tokens,

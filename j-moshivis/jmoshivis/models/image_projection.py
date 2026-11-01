@@ -1,6 +1,6 @@
 """Image encoders  (CLIP, SigLIP)"""
 
-from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Tuple
+from typing import TYPE_CHECKING, Any, Callable, Dict, List, Literal, Optional, Tuple
 
 import torch
 from torchvision import transforms
@@ -194,9 +194,42 @@ class ImageProjection(torch.nn.Module):
 
 
 class ImageProcessor:
-    def __init__(self, size=(448, 448), mean=None, std=None, device="cuda"):
+    """Shared image preprocessing used by training, evaluation, and demos.
+
+    Resize interpolation is explicit because torchvision's implicit default is
+    bilinear, whereas MoshiVis and the checked-in model configs use bicubic.
+    """
+
+    def __init__(
+        self,
+        size: tuple[int, int] = (448, 448),
+        mean: Optional[List[float]] = None,
+        std: Optional[List[float]] = None,
+        device: str | torch.device = "cuda",
+        interpolation: Literal["bicubic", "bilinear", "nearest", "nearest_exact"] = "bicubic",
+    ):
+        supported_interpolations = {
+            "bicubic",
+            "bilinear",
+            "nearest",
+            "nearest_exact",
+        }
+        if interpolation not in supported_interpolations:
+            raise ValueError(f"Unsupported image interpolation: {interpolation}")
+        try:
+            interpolation_mode = getattr(
+                transforms.InterpolationMode, interpolation.upper()
+            )
+        except AttributeError as exc:
+            raise ValueError(f"Unsupported image interpolation: {interpolation}") from exc
+        self.size = tuple(size)
+        self.interpolation = interpolation
         self.transform = transforms.Compose([
-            transforms.Resize(size),
+            transforms.Resize(
+                self.size,
+                interpolation=interpolation_mode,
+                antialias=True,
+            ),
             transforms.ToTensor(),
             transforms.Normalize(
                 mean or [0.5, 0.5, 0.5],
@@ -205,7 +238,22 @@ class ImageProcessor:
         ])
         self.device = device
 
-    def __call__(self, image_path: str) -> torch.Tensor:
+    @classmethod
+    def from_config(
+        cls,
+        config: "KyuteyeConfig",
+        device: str | torch.device,
+        *,
+        size: Optional[tuple[int, int]] = None,
+    ) -> "ImageProcessor":
+        configured_size = (config.image_size, config.image_size)
+        return cls(
+            size=size or configured_size,
+            device=device,
+            interpolation=config.interpolation,
+        )
+
+    def __call__(self, image_path: str) -> Optional[torch.Tensor]:
         try:
             image = Image.open(image_path).convert("RGB")
         except Exception:

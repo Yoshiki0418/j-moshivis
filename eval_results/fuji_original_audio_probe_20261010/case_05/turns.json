@@ -1,0 +1,56 @@
+[
+  {
+    "turn": 1,
+    "question": "ねえ、今見てる写真ってどんな場所が写ってるの?",
+    "question_start_sec": 0.368,
+    "question_speech_end_sec": 4.123,
+    "question_wav": "/gpu-server/yamamoto/j-moshivis/eval_results/fuji_original_audio_probe_20261010/case_05/original_training_user.wav",
+    "voice": "mao",
+    "question_contains_fuji": false
+  },
+  {
+    "turn": 2,
+    "question": "山って言うと、大きいの?雪とか積もってる?",
+    "question_start_sec": 9.783,
+    "question_speech_end_sec": 13.873,
+    "question_wav": "/gpu-server/yamamoto/j-moshivis/eval_results/fuji_original_audio_probe_20261010/case_05/original_training_user.wav",
+    "voice": "mao",
+    "question_contains_fuji": false
+  },
+  {
+    "turn": 3,
+    "question": "花畑のピンクってどれくらい広いの?",
+    "question_start_sec": 20.172,
+    "question_speech_end_sec": 23.172,
+    "question_wav": "/gpu-server/yamamoto/j-moshivis/eval_results/fuji_original_audio_probe_20261010/case_05/original_training_user.wav",
+    "voice": "mao",
+    "question_contains_fuji": false
+  },
+  {
+    "turn": 4,
+    "question": "空とかはどんな雰囲気?",
+    "question_start_sec": 31.143,
+    "question_speech_end_sec": 33.063,
+    "question_wav": "/gpu-server/yamamoto/j-moshivis/eval_results/fuji_original_audio_probe_20261010/case_05/original_training_user.wav",
+    "voice": "mao",
+    "question_contains_fuji": false
+  },
+  {
+    "turn": 5,
+    "question": "人とかは写ってるの?",
+    "question_start_sec": 39.322,
+    "question_speech_end_sec": 41.052,
+    "question_wav": "/gpu-server/yamamoto/j-moshivis/eval_results/fuji_original_audio_probe_20261010/case_05/original_training_user.wav",
+    "voice": "mao",
+    "question_contains_fuji": false
+  },
+  {
+    "turn": 6,
+    "question": "へえ、なんか観光地っぽいね",
+    "question_start_sec": 47.86,
+    "question_speech_end_sec": 50.51,
+    "question_wav": "/gpu-server/yamamoto/j-moshivis/eval_results/fuji_original_audio_probe_20261010/case_05/original_training_user.wav",
+    "voice": "mao",
+    "question_contains_fuji": false
+  }
+]

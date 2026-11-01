@@ -18,6 +18,7 @@ xa_start: start
 xa_end: end
 xa_gate_shared: false
 xa_gating: sigmoid
+xa_sigmoid_shift: 4.0
 xa_layers: []
 xa_shared: true
 xa_step: 1

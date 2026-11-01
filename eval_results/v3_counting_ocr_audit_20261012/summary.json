@@ -1,0 +1,111 @@
+{
+  "schema": "text-only task-candidate audit v1",
+  "train_dialogues": 166621,
+  "train_manifest_sha256": "611e26588ae489ae66424b3d2eff3a35cb4913a7893f5478b026959326aede30",
+  "dialogue_file": "/gpu-server/yamamoto/j-moshivis/data/dialogues_merged/dialogues_final_v3.jsonl",
+  "dialogue_sha256": "80c2beb2b443eb1bfaab165592651a1ea1552118027d952d5cb588b2a89ae83f",
+  "statistics": {
+    "user_turns": 1022439,
+    "ocr_broad_turns": 19798,
+    "ocr_broad_dialogues": 17335,
+    "ocr_direct_turns": 6307,
+    "ocr_direct_dialogues": 6160,
+    "counting_broad_turns": 7678,
+    "counting_direct_turns": 3374,
+    "counting_direct_numeric_answer_turns": 3005,
+    "counting_direct_dialogues": 3344,
+    "counting_broad_dialogues": 7503,
+    "counting_direct_numeric_answer_dialogues": 2992,
+    "counting_approximate_question_turns": 2487,
+    "counting_approximate_question_dialogues": 2466
+  },
+  "source_statistics": {
+    "ocr_broad": {
+      "alfredplpl_jp": 64,
+      "japanese_photos": 2058,
+      "wikimedia": 1227,
+      "wikimedia_tourist": 296,
+      "openverse": 412,
+      "wikimedia_sports_animals": 685,
+      "wikimedia_plants": 41,
+      "docci": 1935,
+      "coco": 10617
+    },
+    "ocr_direct": {
+      "japanese_photos": 1122,
+      "wikimedia": 534,
+      "wikimedia_tourist": 158,
+      "alfredplpl_jp": 27,
+      "openverse": 191,
+      "wikimedia_sports_animals": 267,
+      "wikimedia_plants": 21,
+      "docci": 697,
+      "coco": 3143
+    },
+    "counting_direct": {
+      "japanese_photos": 421,
+      "wikimedia": 380,
+      "wikimedia_tourist": 94,
+      "alfredplpl_jp": 36,
+      "openverse": 201,
+      "wikimedia_sports_animals": 701,
+      "wikimedia_plants": 138,
+      "docci": 110,
+      "coco": 1263
+    },
+    "counting_broad": {
+      "japanese_photos": 480,
+      "wikimedia": 443,
+      "wikimedia_tourist": 115,
+      "alfredplpl_jp": 43,
+      "openverse": 231,
+      "wikimedia_sports_animals": 783,
+      "wikimedia_plants": 159,
+      "docci": 450,
+      "coco": 4799
+    },
+    "counting_direct_numeric_answer": {
+      "japanese_photos": 364,
+      "wikimedia": 326,
+      "wikimedia_tourist": 72,
+      "alfredplpl_jp": 34,
+      "openverse": 179,
+      "wikimedia_sports_animals": 627,
+      "wikimedia_plants": 118,
+      "docci": 102,
+      "coco": 1170
+    },
+    "counting_approximate_question": {
+      "japanese_photos": 406,
+      "wikimedia": 368,
+      "wikimedia_tourist": 94,
+      "alfredplpl_jp": 36,
+      "openverse": 190,
+      "wikimedia_sports_animals": 682,
+      "wikimedia_plants": 130,
+      "docci": 47,
+      "coco": 513
+    }
+  },
+  "fields": {
+    "uid": 166621,
+    "image": 166621,
+    "dialogue": 166621,
+    "generator": 166621,
+    "cost_usd": 31451
+  },
+  "patterns": {
+    "counting_broad": "何(?:人|個|匹|頭|羽|台|本|枚|つ|脚|杯|軒|着|組|輪|冊|棟|体|足|皿)|いくつ|何[がを]?数|数(?:えて|えら|える|は|が|を)|人数|個数",
+    "counting_direct": "何(?:人|個|匹|頭|羽|台|本|枚|つ|脚|杯|軒|組|輪|冊|棟|体|足|皿)(?!か|も)|何着(?!て|か|も)|いくつ(?!か|も)|数えて|(?:人数|個数).{0,8}(?:何|どれ|教えて|わか)",
+    "ocr_broad": "(?:何|なん|なに|どう).{0,8}(?:書[かい]|読)|(?:書[かい]|文字|看板|標識|店名|ロゴ|ラベル|表示|掲示|名前|番号).{0,15}(?:読[めむん]|何|なん|なに|教えて)|(?:読[めむん]).{0,10}(?:文字|看板|標識|店名|ラベル)",
+    "ocr_direct": "(?:何[てとがを]|なん[てと]|なに[がとを]?|どんな文字).{0,8}書|(?:何|なん|なに|どう).{0,5}読|(?:文字|看板|標識|店名|ロゴ|ラベル|表示|掲示|名前|番号).{0,12}(?:読[めむん])|(?:読んで|読める|読み取).{0,12}(?:文字|看板|標識|店名|ラベル)",
+    "numeric_answer": "[0-9０-９一二三四五六七八九十百]+(?:人|個|匹|頭|羽|台|本|枚|つ|脚|杯|軒|着|組|輪|冊|棟|体|足|皿)"
+  },
+  "limitations": [
+    "Automatic text-only candidate counts; no image-grounding verification",
+    "Direct questions still include general knowledge, existence questions and approximate counts",
+    "Numeric answers are not verified correct counts",
+    "OCR includes non-Japanese writing and cannot establish Japanese OCR coverage",
+    "Task labels and answer annotations are absent in the merged v3 schema; not proof that no original image source has annotations"
+  ]
+}

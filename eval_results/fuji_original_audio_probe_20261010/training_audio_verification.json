@@ -1,0 +1,27 @@
+[
+  {
+    "path": "/gpu-server/yamamoto/j-moshivis/data/speech_v3/data_stereo/93e0c6b4c50eaf80cc894633ea749125eef7f3c41cce12bbfb16ccb5a239c5f2/stereo_dialogue.wav",
+    "sha256": "f34336c2e0ca9ab9bcc2fe0bd8e73854c3ced4d78174bc420bbe29e06ad70fb4",
+    "matches_training_asset": true
+  },
+  {
+    "path": "/gpu-server/yamamoto/j-moshivis/data/speech_v3/data_stereo/a622474c415e55855e53537821b7ebbbfe0a4375e104bcf9276d3d8b0346be1b/stereo_dialogue.wav",
+    "sha256": "5548d7af1a42c5600b720fc79ee35ad429393e96068676663178ba339c3cee63",
+    "matches_training_asset": true
+  },
+  {
+    "path": "/gpu-server/yamamoto/j-moshivis/data/speech_v3/data_stereo/a203b7664fafc62c1d18ac426d0fef832672a53d5ed5eee5bbd0e1a5aac74130/stereo_dialogue.wav",
+    "sha256": "10603d64d91103f344c2bbe16528ca58d0b31ac242058391af8c83eddf71df4e",
+    "matches_training_asset": true
+  },
+  {
+    "path": "/gpu-server/yamamoto/j-moshivis/data/speech_v3/data_stereo/ccc3a7bf0650bc62ed7a97532e8ae35665b25d2b6a5df6111aba8ee61c9442a1/stereo_dialogue.wav",
+    "sha256": "a73c785546d5597f7ed9b04f08db136b5f6422a6abd49251b0867f776bc1eeb7",
+    "matches_training_asset": true
+  },
+  {
+    "path": "/gpu-server/yamamoto/j-moshivis/data/speech_v3/data_stereo/ba58e662afb57bba0f87e3ab3fef4bc6f9c4c27e7d6558146af720fa5c29e47a/stereo_dialogue.wav",
+    "sha256": "75bc7268725a61154255a4a499c9cde12e3da080f5f9730eb5b78bfc16165123",
+    "matches_training_asset": true
+  }
+]

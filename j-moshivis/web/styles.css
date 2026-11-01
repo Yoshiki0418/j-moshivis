@@ -11,6 +11,14 @@
   --ok: #1f8a4c;
 }
 
+.sample-images { padding: 14px; border-top: 1px solid var(--line); }
+.sample-images h2 { font-size: 15px; margin: 0 0 12px; }
+#sample-images { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.sample-image { padding: 5px; background: white; color: var(--text); border: 2px solid var(--line); cursor: pointer; }
+.sample-image img { width: 100%; height: 75px; object-fit: contain; display: block; }
+.sample-image span { display: block; font-size: 12px; overflow-wrap: anywhere; }
+.sample-image.selected { border-color: var(--accent); background: #edf4ff; }
+
 * {
   box-sizing: border-box;
 }
@@ -64,8 +72,8 @@ input {
   display: grid;
   place-items: center;
   width: 100%;
-  height: 100%;
-  min-height: 420px;
+  height: 380px;
+  min-height: 320px;
   cursor: pointer;
   background: #eef1f5;
 }

@@ -1,0 +1,57 @@
+[
+  {
+    "path": "/gpu-server/yamamoto/j-moshivis/data/speech_v3/data_stereo/e8222b70c11895d92b09678c6592c73d1ef037b0468bef41d7f7226d12fe35a2/stereo_dialogue.wav",
+    "duration": 65.019,
+    "text": "今見てる写真って、全体的にどんな色合いなの? 黒いお皿の上に、オレンジ色とか白とか、鮮やかな色が並んでる感じですよ オレンジ色って、結構目立つ感じ? はい、真ん中あたりに鮮やかなオレンジのお刺身が二切れあって、そこが一番目を引きますね へえ、それ何のお刺身なんだろう サーモンっぽいですね、つやつやしていて美味しそうです 他にはどんなものが乗ってるの? 巻き寿司が何種類か並んでますよ。あと端っこに緑のわさびと、ピンク色のガリもありますね 巻き寿司は同じ種類ばっかり? いえ、見た目が違うのがいくつかあって、白いクリームみたいなのが乗ってるのもありますよ お皿とか背景の感じはどう? 黒い長方形のお皿で、周りは真っ白なテーブルです。光がかなり強く当たっていて、影もくっきり写ってますね なんだか屋外で撮った感じなのかな 日差しの強さからすると、屋外か窓際で撮ったのかもしれませんね",
+    "image": "/gpu-server/yamamoto/j-moshivis/data/speech_v3/data_stereo/e8222b70c11895d92b09678c6592c73d1ef037b0468bef41d7f7226d12fe35a2/image.jpg",
+    "uid": "e8222b70c11895d92b09678c6592c73d1ef037b0468bef41d7f7226d12fe35a2",
+    "generator": "claude-sonnet-5",
+    "user_voice": "shinjou",
+    "train_line": 625,
+    "image_sha256": "796e03bcd8608cc61a83f47d4118d009b9a6d90606bad0a2c6a92a77c676b966"
+  },
+  {
+    "path": "/gpu-server/yamamoto/j-moshivis/data/speech_v3/data_stereo/a2c528e405ab5bce4bd2cb7800e5ec7c65a737b32f01e74e8d82307ee8e4ddd0/stereo_dialogue.wav",
+    "duration": 58.606,
+    "text": "ねえ、今なんの写真を送ってくれたの? 海苔巻きのお寿司ですよ。切ったばかりみたいに、断面が並んでます 断面ってことは、中身が見えてる感じ? そうです。白いご飯の中に、サーモンとアボカドが入ってますね へえ、サーモンとアボカドの組み合わせなんだ。上には何かかかってる? はい、ご飯の表面に白い胡麻がたくさんまぶしてあります なるほどね。全部で何個くらい並んでるの? 手前に三つ、奥にも数個あって、六個ほど写ってますよ けっこうな量だね。お皿とかは写ってる? 白いお皿の上に乗せられてて、清潔な感じの盛り付けです サーモンの色ってどんな感じ? オレンジがかったピンク色で、つやつやして新鮮そうに見えますね うわ、想像しただけでお腹すいてきた ですよね、見てるだけで食べたくなる一枚だと思います",
+    "image": "/gpu-server/yamamoto/j-moshivis/data/speech_v3/data_stereo/a2c528e405ab5bce4bd2cb7800e5ec7c65a737b32f01e74e8d82307ee8e4ddd0/image.jpg",
+    "uid": "a2c528e405ab5bce4bd2cb7800e5ec7c65a737b32f01e74e8d82307ee8e4ddd0",
+    "generator": "claude-sonnet-5",
+    "user_voice": "kohaku",
+    "train_line": 1197,
+    "image_sha256": "3cbf862237001d9cac53983b506fb42e6c08c15d785cb5c5eadf4e306792f3ee"
+  },
+  {
+    "path": "/gpu-server/yamamoto/j-moshivis/data/speech_v3/data_stereo/c00b769199b4738ea56dc13eeab8f02ababfba390cf2e2ae765f3ee32f77b227/stereo_dialogue.wav",
+    "duration": 68.105,
+    "text": "これってどういう場所で撮った写真なの?お店とか? はい、お寿司屋さんのテーブルみたいですね。木目のテーブルにお皿がのっています へえ、寿司屋か。カウンター席とか個室とか、そのへんの雰囲気って分かる? 写真だとテーブルとお皿しか写ってないので、そこまでは分からないんです。でも木のテーブルなので落ち着いた感じのお店だと思います なるほどね。テーブルの上にはどんなものが並んでるの? 細長い白いお皿に、いろんな種類のお寿司がたくさん盛られていますよ おお、何種類くらいあるの? 赤身のお刺身が何貫かと、海苔巻き、玉子焼きの寿司なんかが並んでいて、十種類近くありそうです 海苔巻きの中身って見える? はい、切り口が見えていて、赤身のお魚が巻かれた海苔巻きになっていますね ガリとか薬味みたいなのも置いてある? ありますよ、お皿の端に生姜の甘酢漬けが添えてありますし、奥のほうにも別皿でたくさん盛られています 美味しそうだね、それだけあったらお腹いっぱいになりそう 本当に豪華な盛り合わせで、見ているだけでお腹が空いてきますね",
+    "image": "/gpu-server/yamamoto/j-moshivis/data/speech_v3/data_stereo/c00b769199b4738ea56dc13eeab8f02ababfba390cf2e2ae765f3ee32f77b227/image.jpg",
+    "uid": "c00b769199b4738ea56dc13eeab8f02ababfba390cf2e2ae765f3ee32f77b227",
+    "generator": "claude-sonnet-5",
+    "user_voice": "karin",
+    "train_line": 1557,
+    "image_sha256": "7eb25ab4265f92484c6b3a1c47a770ed14ea33fd9a80d7b9a4c51dffc64744c3"
+  },
+  {
+    "path": "/gpu-server/yamamoto/j-moshivis/data/speech_v3/data_stereo/339783e2c5c18b82000ab03984b4c97b07d2c2b6bf4240bca7b4a93f1390a6ba/stereo_dialogue.wav",
+    "duration": 59.261,
+    "text": "ねえ、今見てる写真って何が写ってるの? お寿司の写真ですよ。木のまな板みたいなものの上に、握りがたくさん並んでます おお、寿司か。ネタは何種類くらいあるの? 手前に赤身のマグロと、白っぽい魚の握りが二つ、あとサーモンっぽいオレンジ色のネタもありますね サーモンいいね。奥のほうにも何かある? はい、奥には軍艦巻きが並んでて、いくらの赤い粒々が乗ってるのが目立ちます いくらも軍艦なんだ。他にはどんなネタが見える? 右奥にエビの握りらしきものもありますね。殻の模様がしましまで、それっぽい色合いです 彩り豊かそうだね。何か葉っぱみたいなのも見える? そうですね、手前のネタの間に緑の葉っぱが飾りとして添えられてます 盛り付けもちゃんとしてるんだね はい、見た目も鮮やかで、けっこう本格的なお寿司屋さんっぽい雰囲気ですよ",
+    "image": "/gpu-server/yamamoto/j-moshivis/data/speech_v3/data_stereo/339783e2c5c18b82000ab03984b4c97b07d2c2b6bf4240bca7b4a93f1390a6ba/image.jpg",
+    "uid": "339783e2c5c18b82000ab03984b4c97b07d2c2b6bf4240bca7b4a93f1390a6ba",
+    "generator": "claude-sonnet-5",
+    "user_voice": "koharune-ami",
+    "train_line": 2855,
+    "image_sha256": "7af27d99d4dd9190fdd2ab0c89c5117f65e111b27c99ea246229564975def02b"
+  },
+  {
+    "path": "/gpu-server/yamamoto/j-moshivis/data/speech_v3/data_stereo/5e19e886c66de4d127a7eecebc6360b74f95a22180270ab4c372bdd018156e82/stereo_dialogue.wav",
+    "duration": 50.073,
+    "text": "ねえ、今なに食べてる場面撮ったの? お寿司ですね、握りが二貫お皿にのってます へえ、ネタは何なの? 赤みがかったピンク色で、脂がのった感じなので、マグロっぽいですね 美味しそう。他になにか一緒に写ってる? はい、横に薄切りの生姜が添えてありますよ。いわゆるガリですね そのガリってどんな盛り付けなの? 緑の葉っぱみたいな飾りに包まれて、こんもり丸く盛られてます 葉っぱの飾りって笹の葉かな? 細かく切り込みが入ってて、笹細工っぽい飾り切りに見えますね お皿はどんな感じ? 淡い黄緑色で、桜の柄が描かれた和風のお皿です なんか高級なお店っぽいね そうですね、盛り付けが丁寧なので、ちゃんとしたお寿司屋さんっぽい雰囲気ですよ",
+    "image": "/gpu-server/yamamoto/j-moshivis/data/speech_v3/data_stereo/5e19e886c66de4d127a7eecebc6360b74f95a22180270ab4c372bdd018156e82/image.jpg",
+    "uid": "5e19e886c66de4d127a7eecebc6360b74f95a22180270ab4c372bdd018156e82",
+    "generator": "claude-sonnet-5",
+    "user_voice": "karin",
+    "train_line": 3819,
+    "image_sha256": "c2fd80f201a0ea03b6f26dbeebcb80ffca61442d854edc64b0549b5e6c02f229"
+  }
+]

@@ -1,0 +1,34 @@
+{
+  "assistant": {"name": "honoka", "type": "aivm", "path": "models/tts/aivis/honoka.aivm", "gender": "F"},
+  "assistant_policy": {
+    "_comment": "発話内容に応じて選択。emotive→happy、それ以外は base/intonation を半々。hedge(推測)は base",
+    "happy":      {"style": "uresii_uresii", "style_weight": 1.0},
+    "base":       {"style": "ノーマル"},
+    "intonation": {"style": "ノーマル", "intonation_scale": 1.3}
+  },
+  "user": [
+    {"name": "jvnv-M1",      "type": "sbv2", "path": "models/tts/sbv2/jvnv-M1-jp",       "gender": "M", "weight": 1.0},
+    {"name": "jvnv-M2",      "type": "sbv2", "path": "models/tts/sbv2/jvnv-M2-jp",       "gender": "M", "weight": 1.0},
+    {"name": "aida_shigeru", "type": "aivm", "path": "models/tts/aivis/aida_shigeru.aivm","gender": "M", "weight": 1.0},
+    {"name": "shinjou",      "type": "aivm", "path": "models/tts/aivis/shinjou.aivm",     "gender": "M", "weight": 1.0},
+    {"name": "fumifumi",     "type": "aivm", "path": "models/tts/aivis/fumifumi.aivm",    "gender": "M", "weight": 1.0},
+    {"name": "tategami_kei", "type": "aivm", "path": "models/tts/aivis/tategami_kei.aivm","gender": "M", "weight": 0.7},
+    {"name": "rotejin",      "type": "aivm", "path": "models/tts/aivis/rotejin.aivm",     "gender": "M", "weight": 0.5},
+    {"name": "jvnv-F1",      "type": "sbv2", "path": "models/tts/sbv2/jvnv-F1-jp",       "gender": "F", "weight": 1.0},
+    {"name": "jvnv-F2",      "type": "sbv2", "path": "models/tts/sbv2/jvnv-F2-jp",       "gender": "F", "weight": 1.0},
+    {"name": "koharune-ami", "type": "sbv2", "path": "models/tts/sbv2/koharune-ami",     "gender": "F", "weight": 0.7},
+    {"name": "amitaro",      "type": "sbv2", "path": "models/tts/sbv2/amitaro",          "gender": "F", "weight": 0.7},
+    {"name": "karin",        "type": "aivm", "path": "models/tts/aivis/karin.aivm",       "gender": "F", "weight": 1.0},
+    {"name": "wakana",       "type": "aivm", "path": "models/tts/aivis/wakana.aivm",      "gender": "F", "weight": 1.0},
+    {"name": "kohaku",       "type": "aivm", "path": "models/tts/aivis/kohaku.aivm",      "gender": "F", "weight": 0.7},
+    {"name": "mao",          "type": "aivm", "path": "models/tts/aivis/mao.aivm",         "gender": "F", "weight": 0.7},
+    {"name": "morioki",      "type": "aivm", "path": "models/tts/aivis/morioki.aivm",     "gender": "F", "weight": 1.0}
+  ],
+  "user_variation": {
+    "_comment": "ユーザー側は頑健性のため発話ごとに軽く揺らす",
+    "intonation_scale": [0.9, 1.3],
+    "length": [0.9, 1.1],
+    "sdp_ratio": [0.2, 0.5],
+    "alt_style_prob": 0.25
+  }
+}

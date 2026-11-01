@@ -8,7 +8,6 @@ import sentencepiece as spm
 from collections import Counter
 from pathlib import Path
 from tqdm import tqdm
-from scipy.stats import entropy
 from huggingface_hub import hf_hub_download
 import traceback
 from PIL import Image
@@ -197,7 +196,10 @@ def analyze_results(all_tokens, all_texts, all_clip_scores):
 
     counts = Counter(all_tokens)
     probs = np.array(list(counts.values())) / total_tokens
-    ent = entropy(probs)
+    # ``probs`` is already normalized and strictly positive, so Shannon
+    # entropy does not need SciPy.  Keeping this diagnostic NumPy-only makes
+    # the checked-in manual script importable in the locked training env.
+    ent = float(-(probs * np.log(probs)).sum())
     unique_ratio = len(counts) / total_tokens
 
     total_samples = len(all_texts)

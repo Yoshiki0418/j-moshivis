@@ -80,6 +80,7 @@ class ServerState:
     moshi_vis: "MoshiVisGen"
     image_encoder_model: "ImageProjection"
     image_size: int
+    image_interpolation: str
     xa_start: int
     lock: asyncio.Lock
     dtype: torch.dtype
@@ -95,6 +96,9 @@ class ServerState:
         dtype: torch.dtype = torch.bfloat16,
         max_msg_size: int = 0,
         image_size: int = 448,
+        image_interpolation: Literal[
+            "bicubic", "bilinear", "nearest", "nearest_exact"
+        ] = "bicubic",
         xa_start: int = 0,
     ):
         self.mimi = mimi
@@ -104,6 +108,7 @@ class ServerState:
         self.embeddings: Tuple[torch.Tensor, torch.Tensor] | torch.Tensor | None = None
         self.max_msg_size = max_msg_size
         self.image_size = image_size
+        self.image_interpolation = image_interpolation
         self.xa_start = xa_start
         self.display_gating = True
         self.device = device
@@ -298,7 +303,9 @@ class ServerState:
         image_tensor = decode_image(
             torch.frombuffer(payload, dtype=torch.uint8), mode=ImageReadMode.RGB
         )
-        image_tensor = get_minimal_transforms(self.image_size)(image_tensor)
+        image_tensor = get_minimal_transforms(
+            self.image_size, interpolation=self.image_interpolation
+        )(image_tensor)
         image_tensor = self.image_encoder_model.to_tensor_and_normalize(image_tensor)
         log("info", f"Loaded image tensor with shape {image_tensor.shape}")
         if self.image_encoder_model.encoder_type == ImageEncoder.PIXTRAL:
@@ -390,6 +397,8 @@ def start_server(
         image_encoder_model=image_embedder,
         device=device,
         dtype=torch_dtype,
+        image_size=kyuteye_config.image_size,
+        image_interpolation=kyuteye_config.interpolation,
         xa_start=kyuteye_config.xa_start,
     )
     log("info", "warming up the model")

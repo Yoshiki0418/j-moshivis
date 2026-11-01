@@ -1,0 +1,65 @@
+[
+  {
+    "turn": 1,
+    "question": "今そっちに見えてる山って、何かわかる?",
+    "question_start_sec": 0.652,
+    "question_speech_end_sec": 3.372,
+    "question_wav": "/gpu-server/yamamoto/j-moshivis/eval_results/fuji_original_audio_probe_20261010/case_02/original_training_user.wav",
+    "voice": "tategami_kei",
+    "question_contains_fuji": false
+  },
+  {
+    "turn": 2,
+    "question": "おお、富士山か。手前には何があるの?",
+    "question_start_sec": 10.543,
+    "question_speech_end_sec": 13.623,
+    "question_wav": "/gpu-server/yamamoto/j-moshivis/eval_results/fuji_original_audio_probe_20261010/case_02/original_training_user.wav",
+    "voice": "tategami_kei",
+    "question_contains_fuji": true
+  },
+  {
+    "turn": 3,
+    "question": "へえ、じゃあ海の近くに街もある感じ?",
+    "question_start_sec": 22.216,
+    "question_speech_end_sec": 25.211,
+    "question_wav": "/gpu-server/yamamoto/j-moshivis/eval_results/fuji_original_audio_probe_20261010/case_02/original_training_user.wav",
+    "voice": "tategami_kei",
+    "question_contains_fuji": false
+  },
+  {
+    "turn": 4,
+    "question": "結構な数の家だね。斜面に建ってる感じ?",
+    "question_start_sec": 33.141,
+    "question_speech_end_sec": 36.431,
+    "question_wav": "/gpu-server/yamamoto/j-moshivis/eval_results/fuji_original_audio_probe_20261010/case_02/original_training_user.wav",
+    "voice": "tategami_kei",
+    "question_contains_fuji": false
+  },
+  {
+    "turn": 5,
+    "question": "海の遠くのほうにも何か見える?",
+    "question_start_sec": 44.426,
+    "question_speech_end_sec": 46.996,
+    "question_wav": "/gpu-server/yamamoto/j-moshivis/eval_results/fuji_original_audio_probe_20261010/case_02/original_training_user.wav",
+    "voice": "tategami_kei",
+    "question_contains_fuji": false
+  },
+  {
+    "turn": 6,
+    "question": "天気は良さそうな感じ?",
+    "question_start_sec": 53.284,
+    "question_speech_end_sec": 54.809,
+    "question_wav": "/gpu-server/yamamoto/j-moshivis/eval_results/fuji_original_audio_probe_20261010/case_02/original_training_user.wav",
+    "voice": "tategami_kei",
+    "question_contains_fuji": false
+  },
+  {
+    "turn": 7,
+    "question": "それは気持ちよさそうな眺めだね",
+    "question_start_sec": 62.435,
+    "question_speech_end_sec": 64.665,
+    "question_wav": "/gpu-server/yamamoto/j-moshivis/eval_results/fuji_original_audio_probe_20261010/case_02/original_training_user.wav",
+    "voice": "tategami_kei",
+    "question_contains_fuji": false
+  }
+]

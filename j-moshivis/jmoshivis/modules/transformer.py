@@ -79,6 +79,7 @@ class TransformerLayer(StreamingModule):
         # Cross attention to image tokens parameters
         xa_gating: Literal["sigmoid", "tanh", "none"] = "tanh",
         xa_conditional_gating: bool = False,
+        xa_sigmoid_shift: float = 4.0,
         xa_shared: bool = True,
         xa_gate_shared: bool = False,
         xa_delay: int = 0,
@@ -115,6 +116,7 @@ class TransformerLayer(StreamingModule):
             self.cross_attention = GatedCrossAttention(
                 xa_gating=xa_gating,
                 xa_conditional_gating=xa_conditional_gating,
+                xa_sigmoid_shift=xa_sigmoid_shift,
                 xa_shared=xa_shared,
                 xa_gate_shared=xa_gate_shared,
                 xa_delay=xa_delay,
@@ -283,6 +285,7 @@ class Transformer(StreamingModule):
         super().__init__()
         assert d_model % num_heads == 0
 
+        self.causal = causal
         self.positional_embedding = positional_embedding
         self.max_period = max_period
         self.positional_scale = positional_scale
@@ -319,7 +322,7 @@ class Transformer(StreamingModule):
 
     def forward(
         self, x: torch.Tensor, *args: Any, **kwargs: Any
-    ) -> Tuple[torch.Tensor, float]:
+    ) -> Tuple[torch.Tensor, torch.Tensor]:
         """Forward pass"""
         _, seq_len, channels = x.shape
 
@@ -333,13 +336,27 @@ class Transformer(StreamingModule):
             )
             x = x + self.positional_scale * pos_emb
 
-        alpha = 0.0
+        gate_sum: Optional[torch.Tensor] = None
+        gate_count = 0
         for layer_idx, layer in enumerate(self.layers):
             x, gate_weight = layer(x, *args, **kwargs)
             if gate_weight is not None and layer_idx >= len(self.layers) - 10:
-                alpha += torch.mean(gate_weight).cpu().item()
+                # Monitoring must not retain the full activation graph. Keep a
+                # device scalar through all layers; callers synchronize once.
+                layer_gate_mean = gate_weight.detach().float().mean()
+                gate_sum = (
+                    layer_gate_mean
+                    if gate_sum is None
+                    else gate_sum + layer_gate_mean
+                )
+                gate_count += 1
 
         if self.is_streaming:
             self.streaming_offset += seq_len
 
-        return x, alpha / min(10, len(self.layers))
+        gate_mean = (
+            torch.zeros((), dtype=torch.float32, device=x.device)
+            if gate_sum is None
+            else gate_sum / gate_count
+        )
+        return x, gate_mean

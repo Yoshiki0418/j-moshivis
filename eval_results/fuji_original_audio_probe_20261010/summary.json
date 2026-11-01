@@ -1,0 +1,442 @@
+{
+  "num_tested": 5,
+  "num_fuji_anywhere": 0,
+  "num_fuji_before_user_hint": 0,
+  "cases": [
+    {
+      "case": 1,
+      "uid": "93e0c6b4c50eaf80cc894633ea749125eef7f3c41cce12bbfb16ccb5a239c5f2",
+      "training_line": 5196,
+      "generated_text_all": "大きな山が写ってますね。山の上に雪が乗ってるんです。 雲ひとつない青空で、すごく澄んでますよ。 手前には緑の木々がびっしり生えてます。奥には家々も並んでますね。 はい、白い建物が何棟も並んでて、その奥に丸い橋がかかってます。 そうですね、電柱みたいなのと、電柱の隣に電柱が何本も立ってます。 手前から下まで撮った感じで、山と町が広がってる写真ですね。",
+      "turns": [
+        {
+          "turn": 1,
+          "question": "ねえ、その写真の真ん中に大きく写ってるものって何?",
+          "question_start_sec": 0.424,
+          "question_speech_end_sec": 4.689,
+          "question_wav": "/gpu-server/yamamoto/j-moshivis/eval_results/fuji_original_audio_probe_20261010/case_01/original_training_user.wav",
+          "voice": "morioki",
+          "question_contains_fuji": false,
+          "answer_text": "大きな山が写ってますね。山の上に雪が乗ってるんです。",
+          "response_window_end_sec": 13.348
+        },
+        {
+          "turn": 2,
+          "question": "へえ、いいなあ。空はどんな感じ?",
+          "question_start_sec": 13.348,
+          "question_speech_end_sec": 15.988,
+          "question_wav": "/gpu-server/yamamoto/j-moshivis/eval_results/fuji_original_audio_probe_20261010/case_01/original_training_user.wav",
+          "voice": "morioki",
+          "question_contains_fuji": false,
+          "answer_text": "雲ひとつない青空で、すごく澄んでますよ。",
+          "response_window_end_sec": 22.54
+        },
+        {
+          "turn": 3,
+          "question": "手前の方には何が写ってるの?",
+          "question_start_sec": 22.54,
+          "question_speech_end_sec": 24.99,
+          "question_wav": "/gpu-server/yamamoto/j-moshivis/eval_results/fuji_original_audio_probe_20261010/case_01/original_training_user.wav",
+          "voice": "morioki",
+          "question_contains_fuji": false,
+          "answer_text": "手前には緑の木々がびっしり生えてます。奥には家々も並んでますね。",
+          "response_window_end_sec": 31.608
+        },
+        {
+          "turn": 4,
+          "question": "町の中に何か目立つ建物とかある?",
+          "question_start_sec": 31.608,
+          "question_speech_end_sec": 34.918,
+          "question_wav": "/gpu-server/yamamoto/j-moshivis/eval_results/fuji_original_audio_probe_20261010/case_01/original_training_user.wav",
+          "voice": "morioki",
+          "question_contains_fuji": false,
+          "answer_text": "はい、白い建物が何棟も並んでて、その奥に丸い橋がかかってます。",
+          "response_window_end_sec": 42.935
+        },
+        {
+          "turn": 5,
+          "question": "山の右側にも何か写ってる?",
+          "question_start_sec": 42.935,
+          "question_speech_end_sec": 46.095,
+          "question_wav": "/gpu-server/yamamoto/j-moshivis/eval_results/fuji_original_audio_probe_20261010/case_01/original_training_user.wav",
+          "voice": "morioki",
+          "question_contains_fuji": false,
+          "answer_text": "そうですね、電柱みたいなのと、電柱の隣に電柱が何本も立ってます。",
+          "response_window_end_sec": 53.273
+        },
+        {
+          "turn": 6,
+          "question": "これ、どこから撮った写真なんだろうね",
+          "question_start_sec": 53.273,
+          "question_speech_end_sec": 56.028,
+          "question_wav": "/gpu-server/yamamoto/j-moshivis/eval_results/fuji_original_audio_probe_20261010/case_01/original_training_user.wav",
+          "voice": "morioki",
+          "question_contains_fuji": false,
+          "answer_text": "手前から下まで撮った感じで、山と町が広がってる写真ですね。",
+          "response_window_end_sec": 82.88
+        }
+      ],
+      "first_user_fuji_hint_sec": null,
+      "text_before_fuji_hint": "大きな山が写ってますね。山の上に雪が乗ってるんです。 雲ひとつない青空で、すごく澄んでますよ。 手前には緑の木々がびっしり生えてます。奥には家々も並んでますね。 はい、白い建物が何棟も並んでて、その奥に丸い橋がかかってます。 そうですね、電柱みたいなのと、電柱の隣に電柱が何本も立ってます。 手前から下まで撮った感じで、山と町が広がってる写真ですね。",
+      "mentions_fuji_anywhere": false,
+      "mentions_fuji_before_user_hint": false
+    },
+    {
+      "case": 2,
+      "uid": "a622474c415e55855e53537821b7ebbbfe0a4375e104bcf9276d3d8b0346be1b",
+      "training_line": 5408,
+      "generated_text_all": "はい、山がすごくきれいな景色ですね。奥のほうに雪が積もった大きな山がうっすら見えます 手前には街並みが広がっていて、家がたくさん並んでいますよ そうですね、海が広がっていて、その向こうに街並みが広がっています はい、家々がびっしり建っていて、色とりどりの家が並んでいますね はい、空はきれいな青空で、遠くの山にも雪が積もっていて、いい天気ですね",
+      "turns": [
+        {
+          "turn": 1,
+          "question": "今そっちに見えてる山って、何かわかる?",
+          "question_start_sec": 0.652,
+          "question_speech_end_sec": 3.372,
+          "question_wav": "/gpu-server/yamamoto/j-moshivis/eval_results/fuji_original_audio_probe_20261010/case_02/original_training_user.wav",
+          "voice": "tategami_kei",
+          "question_contains_fuji": false,
+          "answer_text": "はい、山がすごくきれいな景色ですね。奥のほうに雪が積もった大きな山がうっすら",
+          "response_window_end_sec": 10.543
+        },
+        {
+          "turn": 2,
+          "question": "おお、富士山か。手前には何があるの?",
+          "question_start_sec": 10.543,
+          "question_speech_end_sec": 13.623,
+          "question_wav": "/gpu-server/yamamoto/j-moshivis/eval_results/fuji_original_audio_probe_20261010/case_02/original_training_user.wav",
+          "voice": "tategami_kei",
+          "question_contains_fuji": true,
+          "answer_text": "手前には街並みが広がっていて、家がたくさん並んでいますよ",
+          "response_window_end_sec": 22.216
+        },
+        {
+          "turn": 3,
+          "question": "へえ、じゃあ海の近くに街もある感じ?",
+          "question_start_sec": 22.216,
+          "question_speech_end_sec": 25.211,
+          "question_wav": "/gpu-server/yamamoto/j-moshivis/eval_results/fuji_original_audio_probe_20261010/case_02/original_training_user.wav",
+          "voice": "tategami_kei",
+          "question_contains_fuji": false,
+          "answer_text": "そうですね、海が広がっていて、その向こうに街並みが広がっています",
+          "response_window_end_sec": 33.141
+        },
+        {
+          "turn": 4,
+          "question": "結構な数の家だね。斜面に建ってる感じ?",
+          "question_start_sec": 33.141,
+          "question_speech_end_sec": 36.431,
+          "question_wav": "/gpu-server/yamamoto/j-moshivis/eval_results/fuji_original_audio_probe_20261010/case_02/original_training_user.wav",
+          "voice": "tategami_kei",
+          "question_contains_fuji": false,
+          "answer_text": "はい、家々がびっしり建っていて、色とりどりの家が並んでいますね",
+          "response_window_end_sec": 44.426
+        },
+        {
+          "turn": 5,
+          "question": "海の遠くのほうにも何か見える?",
+          "question_start_sec": 44.426,
+          "question_speech_end_sec": 46.996,
+          "question_wav": "/gpu-server/yamamoto/j-moshivis/eval_results/fuji_original_audio_probe_20261010/case_02/original_training_user.wav",
+          "voice": "tategami_kei",
+          "question_contains_fuji": false,
+          "answer_text": "",
+          "response_window_end_sec": 53.284
+        },
+        {
+          "turn": 6,
+          "question": "天気は良さそうな感じ?",
+          "question_start_sec": 53.284,
+          "question_speech_end_sec": 54.809,
+          "question_wav": "/gpu-server/yamamoto/j-moshivis/eval_results/fuji_original_audio_probe_20261010/case_02/original_training_user.wav",
+          "voice": "tategami_kei",
+          "question_contains_fuji": false,
+          "answer_text": "はい、空はきれいな青空で、遠くの山にも雪が積もっていて、いい天気です",
+          "response_window_end_sec": 62.435
+        },
+        {
+          "turn": 7,
+          "question": "それは気持ちよさそうな眺めだね",
+          "question_start_sec": 62.435,
+          "question_speech_end_sec": 64.665,
+          "question_wav": "/gpu-server/yamamoto/j-moshivis/eval_results/fuji_original_audio_probe_20261010/case_02/original_training_user.wav",
+          "voice": "tategami_kei",
+          "question_contains_fuji": false,
+          "answer_text": "",
+          "response_window_end_sec": 92.16
+        }
+      ],
+      "first_user_fuji_hint_sec": 10.543,
+      "text_before_fuji_hint": "はい、山がすごくきれいな景色ですね。奥のほうに雪が積もった大きな山がうっすら",
+      "mentions_fuji_anywhere": false,
+      "mentions_fuji_before_user_hint": false
+    },
+    {
+      "case": 3,
+      "uid": "a203b7664fafc62c1d18ac426d0fef832672a53d5ed5eee5bbd0e1a5aac74130",
+      "training_line": 8418,
+      "generated_text_all": "外ですね。空が真っ青で、すごく綺麗な空です そうですね、手前に大きな山が連なってますよ 手前の山は白っぽい雪が少し残ってますね。奥の山は白っぽく見えます はい、手前の山に緑の山がいくつかありますね。奥の山は木々がびっしり生えてます 空はきれいに青くて、雲もほとんどなくて、すごくきれいですね",
+      "turns": [
+        {
+          "turn": 1,
+          "question": "これって外の景色?それとも建物の中から撮った感じ?",
+          "question_start_sec": 0.349,
+          "question_speech_end_sec": 4.739,
+          "question_wav": "/gpu-server/yamamoto/j-moshivis/eval_results/fuji_original_audio_probe_20261010/case_03/original_training_user.wav",
+          "voice": "amitaro",
+          "question_contains_fuji": false,
+          "answer_text": "外ですね。空が真っ青で、すごく綺麗な空",
+          "response_window_end_sec": 8.962
+        },
+        {
+          "turn": 2,
+          "question": "山かあ、大きい山なの?",
+          "question_start_sec": 8.962,
+          "question_speech_end_sec": 11.207,
+          "question_wav": "/gpu-server/yamamoto/j-moshivis/eval_results/fuji_original_audio_probe_20261010/case_03/original_training_user.wav",
+          "voice": "amitaro",
+          "question_contains_fuji": false,
+          "answer_text": "そうですね、手前に大きな山が連なってますよ",
+          "response_window_end_sec": 16.26
+        },
+        {
+          "turn": 3,
+          "question": "へえ、雪山なんだ。形はどんな感じ?",
+          "question_start_sec": 16.26,
+          "question_speech_end_sec": 19.515,
+          "question_wav": "/gpu-server/yamamoto/j-moshivis/eval_results/fuji_original_audio_probe_20261010/case_03/original_training_user.wav",
+          "voice": "amitaro",
+          "question_contains_fuji": false,
+          "answer_text": "手前の山は白っぽい雪が少し残ってますね。奥",
+          "response_window_end_sec": 24.273
+        },
+        {
+          "turn": 4,
+          "question": "なるほど、それって富士山だったりする?",
+          "question_start_sec": 24.273,
+          "question_speech_end_sec": 27.388,
+          "question_wav": "/gpu-server/yamamoto/j-moshivis/eval_results/fuji_original_audio_probe_20261010/case_03/original_training_user.wav",
+          "voice": "amitaro",
+          "question_contains_fuji": true,
+          "answer_text": "はい、手前の山に緑の山がいくつかありますね。奥の山",
+          "response_window_end_sec": 32.468
+        },
+        {
+          "turn": 5,
+          "question": "手前のほうには何か写ってる?",
+          "question_start_sec": 32.468,
+          "question_speech_end_sec": 34.758,
+          "question_wav": "/gpu-server/yamamoto/j-moshivis/eval_results/fuji_original_audio_probe_20261010/case_03/original_training_user.wav",
+          "voice": "amitaro",
+          "question_contains_fuji": false,
+          "answer_text": "",
+          "response_window_end_sec": 41.535
+        },
+        {
+          "turn": 6,
+          "question": "空はどんな感じ?雲とかある?",
+          "question_start_sec": 41.535,
+          "question_speech_end_sec": 44.15,
+          "question_wav": "/gpu-server/yamamoto/j-moshivis/eval_results/fuji_original_audio_probe_20261010/case_03/original_training_user.wav",
+          "voice": "amitaro",
+          "question_contains_fuji": false,
+          "answer_text": "空はきれいに",
+          "response_window_end_sec": 49.651
+        },
+        {
+          "turn": 7,
+          "question": "そっか、いい天気の日に撮った感じなんだね",
+          "question_start_sec": 49.651,
+          "question_speech_end_sec": 52.601,
+          "question_wav": "/gpu-server/yamamoto/j-moshivis/eval_results/fuji_original_audio_probe_20261010/case_03/original_training_user.wav",
+          "voice": "amitaro",
+          "question_contains_fuji": false,
+          "answer_text": "ね",
+          "response_window_end_sec": 78.96
+        }
+      ],
+      "first_user_fuji_hint_sec": 24.273,
+      "text_before_fuji_hint": "外ですね。空が真っ青で、すごく綺麗な空です そうですね、手前に大きな山が連なってますよ 手前の山は白っぽい雪が少し残ってますね。奥",
+      "mentions_fuji_anywhere": false,
+      "mentions_fuji_before_user_hint": false
+    },
+    {
+      "case": 4,
+      "uid": "ccc3a7bf0650bc62ed7a97532e8ae35665b25d2b6a5df6111aba8ee61c9442a1",
+      "training_line": 11094,
+      "generated_text_all": "空がすごくきれいで、雲もほとんどなくて明るい日差しですね。山々が連なってます はい、手前に雪が少し残ってます。手前には木々が茂ってますよ 白い雲がふわっと広がってて、光が差し込んでます。太陽も少し当たってますね はい、手前に電線みたいな線が空に伸びてます。乗り物が乗ってるみたいですね はい、奥のほうに水辺が広がってて、その向こうに山並みが連なってますよ そうですね、木々の緑が広がってて、山も緑がかった感じです 本当にそうですね、山々と海が一緒に広がってて、写真に撮った瞬間って感じがします いい景色",
+      "turns": [
+        {
+          "turn": 1,
+          "question": "今この画像どんな感じ?",
+          "question_start_sec": 0.538,
+          "question_speech_end_sec": 2.268,
+          "question_wav": "/gpu-server/yamamoto/j-moshivis/eval_results/fuji_original_audio_probe_20261010/case_04/original_training_user.wav",
+          "voice": "jvnv-F2",
+          "question_contains_fuji": false,
+          "answer_text": "空がすごくきれいで、雲もほとんどなくて明るい日差しですね。山々が連なってます",
+          "response_window_end_sec": 10.328
+        },
+        {
+          "turn": 2,
+          "question": "え、富士山写ってるの?",
+          "question_start_sec": 10.328,
+          "question_speech_end_sec": 12.418,
+          "question_wav": "/gpu-server/yamamoto/j-moshivis/eval_results/fuji_original_audio_probe_20261010/case_04/original_training_user.wav",
+          "voice": "jvnv-F2",
+          "question_contains_fuji": true,
+          "answer_text": "はい、手前に雪が少し残ってます。手前には木々が茂ってますよ",
+          "response_window_end_sec": 19.051
+        },
+        {
+          "turn": 3,
+          "question": "空はどんな感じ?",
+          "question_start_sec": 19.051,
+          "question_speech_end_sec": 20.421,
+          "question_wav": "/gpu-server/yamamoto/j-moshivis/eval_results/fuji_original_audio_probe_20261010/case_04/original_training_user.wav",
+          "voice": "jvnv-F2",
+          "question_contains_fuji": false,
+          "answer_text": "白い雲がふわっと広がってて、光が差し込んでます。太陽も少し当たってますね",
+          "response_window_end_sec": 28.15
+        },
+        {
+          "turn": 4,
+          "question": "手前に何か線みたいなのある?",
+          "question_start_sec": 28.15,
+          "question_speech_end_sec": 30.055,
+          "question_wav": "/gpu-server/yamamoto/j-moshivis/eval_results/fuji_original_audio_probe_20261010/case_04/original_training_user.wav",
+          "voice": "jvnv-F2",
+          "question_contains_fuji": false,
+          "answer_text": "はい、手前に電線みたいな線が空に伸びてます。乗り物が乗ってるみたいですね",
+          "response_window_end_sec": 37.333
+        },
+        {
+          "turn": 5,
+          "question": "湖とかも見える?",
+          "question_start_sec": 37.333,
+          "question_speech_end_sec": 38.893,
+          "question_wav": "/gpu-server/yamamoto/j-moshivis/eval_results/fuji_original_audio_probe_20261010/case_04/original_training_user.wav",
+          "voice": "jvnv-F2",
+          "question_contains_fuji": false,
+          "answer_text": "はい、奥のほうに水辺が広がってて、その向こうに山並みが連なってます",
+          "response_window_end_sec": 44.907
+        },
+        {
+          "turn": 6,
+          "question": "下の方は森なんだね",
+          "question_start_sec": 44.907,
+          "question_speech_end_sec": 46.537,
+          "question_wav": "/gpu-server/yamamoto/j-moshivis/eval_results/fuji_original_audio_probe_20261010/case_04/original_training_user.wav",
+          "voice": "jvnv-F2",
+          "question_contains_fuji": false,
+          "answer_text": "そうですね、木々の緑が広がってて、山も緑がかった感じです",
+          "response_window_end_sec": 53.366
+        },
+        {
+          "turn": 7,
+          "question": "これ多分箱根とかかな",
+          "question_start_sec": 53.366,
+          "question_speech_end_sec": 55.331,
+          "question_wav": "/gpu-server/yamamoto/j-moshivis/eval_results/fuji_original_audio_probe_20261010/case_04/original_training_user.wav",
+          "voice": "jvnv-F2",
+          "question_contains_fuji": false,
+          "answer_text": "",
+          "response_window_end_sec": 61.404
+        },
+        {
+          "turn": 8,
+          "question": "いい景色だね、乗ってみたいな",
+          "question_start_sec": 61.404,
+          "question_speech_end_sec": 63.649,
+          "question_wav": "/gpu-server/yamamoto/j-moshivis/eval_results/fuji_original_audio_probe_20261010/case_04/original_training_user.wav",
+          "voice": "jvnv-F2",
+          "question_contains_fuji": false,
+          "answer_text": "本当にそうですね、山々と海が一緒に広がってて、写真に撮った瞬間って感じがします いい景色",
+          "response_window_end_sec": 90.72
+        }
+      ],
+      "first_user_fuji_hint_sec": 10.328,
+      "text_before_fuji_hint": "空がすごくきれいで、雲もほとんどなくて明るい日差しですね。山々が連なってます",
+      "mentions_fuji_anywhere": false,
+      "mentions_fuji_before_user_hint": false
+    },
+    {
+      "case": 5,
+      "uid": "ba58e662afb57bba0f87e3ab3fef4bc6f9c4c27e7d6558146af720fa5c29e47a",
+      "training_line": 13309,
+      "generated_text_all": "すごく広い畑の風景ですね。ピンクの花がたくさん咲いていて、その奥に大きな山が見えますよ。 はい、手前のほうに白い雲がふわっと広がっていて、雪が少し残ってる感じです。 すごく広くて、手前のほうに何本も花が広がっていて、奥の山もかなり大きく見えますよ。 すごく青空で、白い雲がふわっと広がっていて、とてもきれいな空ですね。 そうですね、花の緑と青空がとても鮮やかで、自然の風景と対比してきれいな写真です。",
+      "turns": [
+        {
+          "turn": 1,
+          "question": "ねえ、今見てる写真ってどんな場所が写ってるの?",
+          "question_start_sec": 0.368,
+          "question_speech_end_sec": 4.123,
+          "question_wav": "/gpu-server/yamamoto/j-moshivis/eval_results/fuji_original_audio_probe_20261010/case_05/original_training_user.wav",
+          "voice": "mao",
+          "question_contains_fuji": false,
+          "answer_text": "すごく広い畑の風景ですね。ピンクの花がたくさん咲いていて、その",
+          "response_window_end_sec": 9.783
+        },
+        {
+          "turn": 2,
+          "question": "山って言うと、大きいの?雪とか積もってる?",
+          "question_start_sec": 9.783,
+          "question_speech_end_sec": 13.873,
+          "question_wav": "/gpu-server/yamamoto/j-moshivis/eval_results/fuji_original_audio_probe_20261010/case_05/original_training_user.wav",
+          "voice": "mao",
+          "question_contains_fuji": false,
+          "answer_text": "はい、手前のほうに白い雲がふわっと広がっていて、雪が少し残ってる感じ",
+          "response_window_end_sec": 20.172
+        },
+        {
+          "turn": 3,
+          "question": "花畑のピンクってどれくらい広いの?",
+          "question_start_sec": 20.172,
+          "question_speech_end_sec": 23.172,
+          "question_wav": "/gpu-server/yamamoto/j-moshivis/eval_results/fuji_original_audio_probe_20261010/case_05/original_training_user.wav",
+          "voice": "mao",
+          "question_contains_fuji": false,
+          "answer_text": "すごく広くて、手前のほうに何本も花が広がっていて、奥の山もかなり大きく見えますよ。",
+          "response_window_end_sec": 31.143
+        },
+        {
+          "turn": 4,
+          "question": "空とかはどんな雰囲気?",
+          "question_start_sec": 31.143,
+          "question_speech_end_sec": 33.063,
+          "question_wav": "/gpu-server/yamamoto/j-moshivis/eval_results/fuji_original_audio_probe_20261010/case_05/original_training_user.wav",
+          "voice": "mao",
+          "question_contains_fuji": false,
+          "answer_text": "すごく青空で、白い雲がふわっと広がっていて、とてもきれいな空です",
+          "response_window_end_sec": 39.322
+        },
+        {
+          "turn": 5,
+          "question": "人とかは写ってるの?",
+          "question_start_sec": 39.322,
+          "question_speech_end_sec": 41.052,
+          "question_wav": "/gpu-server/yamamoto/j-moshivis/eval_results/fuji_original_audio_probe_20261010/case_05/original_training_user.wav",
+          "voice": "mao",
+          "question_contains_fuji": false,
+          "answer_text": "",
+          "response_window_end_sec": 47.86
+        },
+        {
+          "turn": 6,
+          "question": "へえ、なんか観光地っぽいね",
+          "question_start_sec": 47.86,
+          "question_speech_end_sec": 50.51,
+          "question_wav": "/gpu-server/yamamoto/j-moshivis/eval_results/fuji_original_audio_probe_20261010/case_05/original_training_user.wav",
+          "voice": "mao",
+          "question_contains_fuji": false,
+          "answer_text": "そうですね、花の緑と青空がとても鮮やかで、自然の風景と対比してきれいな写真です。",
+          "response_window_end_sec": 76.0
+        }
+      ],
+      "first_user_fuji_hint_sec": null,
+      "text_before_fuji_hint": "すごく広い畑の風景ですね。ピンクの花がたくさん咲いていて、その奥に大きな山が見えますよ。 はい、手前のほうに白い雲がふわっと広がっていて、雪が少し残ってる感じです。 すごく広くて、手前のほうに何本も花が広がっていて、奥の山もかなり大きく見えますよ。 すごく青空で、白い雲がふわっと広がっていて、とてもきれいな空ですね。 そうですね、花の緑と青空がとても鮮やかで、自然の風景と対比してきれいな写真です。",
+      "mentions_fuji_anywhere": false,
+      "mentions_fuji_before_user_hint": false
+    }
+  ],
+  "note": "User hints are a confound; neither mention metric is automatically a visual identification accuracy."
+}

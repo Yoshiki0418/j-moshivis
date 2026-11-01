@@ -1,0 +1,169 @@
+{
+  "text": "キシがたくさんいますね緑のシバハの上にいますよ",
+  "segments": [
+    {
+      "id": 0,
+      "seek": 0,
+      "start": 8.42,
+      "end": 9.84,
+      "text": "キシがたくさんいますね",
+      "tokens": [
+        50365,
+        15535,
+        11054,
+        5142,
+        3368,
+        6134,
+        15567,
+        11267,
+        5555,
+        50861
+      ],
+      "temperature": 0.0,
+      "avg_logprob": -0.2371476689974467,
+      "compression_ratio": 1.0298507462686568,
+      "no_speech_prob": 1.1223350374067742e-11,
+      "confidence": 0.644,
+      "words": [
+        {
+          "text": "キ",
+          "start": 8.42,
+          "end": 8.56,
+          "confidence": 0.059
+        },
+        {
+          "text": "シ",
+          "start": 8.56,
+          "end": 8.7,
+          "confidence": 0.58
+        },
+        {
+          "text": "が",
+          "start": 8.7,
+          "end": 8.84,
+          "confidence": 0.903
+        },
+        {
+          "text": "た",
+          "start": 8.84,
+          "end": 9.02,
+          "confidence": 0.983
+        },
+        {
+          "text": "く",
+          "start": 9.02,
+          "end": 9.14,
+          "confidence": 0.999
+        },
+        {
+          "text": "さん",
+          "start": 9.14,
+          "end": 9.28,
+          "confidence": 0.998
+        },
+        {
+          "text": "います",
+          "start": 9.28,
+          "end": 9.52,
+          "confidence": 0.995
+        },
+        {
+          "text": "ね",
+          "start": 9.52,
+          "end": 9.84,
+          "confidence": 0.997
+        }
+      ]
+    },
+    {
+      "id": 1,
+      "seek": 0,
+      "start": 10.08,
+      "end": 11.86,
+      "text": "緑のシバハの上にいますよ",
+      "tokens": [
+        50861,
+        12608,
+        239,
+        2972,
+        11054,
+        18593,
+        15927,
+        2972,
+        5708,
+        4108,
+        11267,
+        5591,
+        50961
+      ],
+      "temperature": 0.0,
+      "avg_logprob": -0.2371476689974467,
+      "compression_ratio": 1.0298507462686568,
+      "no_speech_prob": 1.1223350374067742e-11,
+      "confidence": 0.799,
+      "words": [
+        {
+          "text": "緑",
+          "start": 10.08,
+          "end": 10.4,
+          "confidence": 0.965
+        },
+        {
+          "text": "の",
+          "start": 10.4,
+          "end": 10.64,
+          "confidence": 0.999
+        },
+        {
+          "text": "シ",
+          "start": 10.64,
+          "end": 10.76,
+          "confidence": 0.111
+        },
+        {
+          "text": "バ",
+          "start": 10.76,
+          "end": 10.88,
+          "confidence": 0.922
+        },
+        {
+          "text": "ハ",
+          "start": 10.88,
+          "end": 10.98,
+          "confidence": 0.897
+        },
+        {
+          "text": "の",
+          "start": 10.98,
+          "end": 11.12,
+          "confidence": 0.999
+        },
+        {
+          "text": "上",
+          "start": 11.12,
+          "end": 11.26,
+          "confidence": 0.999
+        },
+        {
+          "text": "に",
+          "start": 11.26,
+          "end": 11.4,
+          "confidence": 1.0
+        },
+        {
+          "text": "います",
+          "start": 11.4,
+          "end": 11.66,
+          "confidence": 0.993
+        },
+        {
+          "text": "よ",
+          "start": 11.66,
+          "end": 11.86,
+          "confidence": 0.996
+        }
+      ]
+    }
+  ],
+  "language": "ja"
+}

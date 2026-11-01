@@ -1,0 +1,74 @@
+[
+  {
+    "turn": 1,
+    "question": "今この画像どんな感じ?",
+    "question_start_sec": 0.538,
+    "question_speech_end_sec": 2.268,
+    "question_wav": "/gpu-server/yamamoto/j-moshivis/eval_results/fuji_original_audio_probe_20261010/case_04/original_training_user.wav",
+    "voice": "jvnv-F2",
+    "question_contains_fuji": false
+  },
+  {
+    "turn": 2,
+    "question": "え、富士山写ってるの?",
+    "question_start_sec": 10.328,
+    "question_speech_end_sec": 12.418,
+    "question_wav": "/gpu-server/yamamoto/j-moshivis/eval_results/fuji_original_audio_probe_20261010/case_04/original_training_user.wav",
+    "voice": "jvnv-F2",
+    "question_contains_fuji": true
+  },
+  {
+    "turn": 3,
+    "question": "空はどんな感じ?",
+    "question_start_sec": 19.051,
+    "question_speech_end_sec": 20.421,
+    "question_wav": "/gpu-server/yamamoto/j-moshivis/eval_results/fuji_original_audio_probe_20261010/case_04/original_training_user.wav",
+    "voice": "jvnv-F2",
+    "question_contains_fuji": false
+  },
+  {
+    "turn": 4,
+    "question": "手前に何か線みたいなのある?",
+    "question_start_sec": 28.15,
+    "question_speech_end_sec": 30.055,
+    "question_wav": "/gpu-server/yamamoto/j-moshivis/eval_results/fuji_original_audio_probe_20261010/case_04/original_training_user.wav",
+    "voice": "jvnv-F2",
+    "question_contains_fuji": false
+  },
+  {
+    "turn": 5,
+    "question": "湖とかも見える?",
+    "question_start_sec": 37.333,
+    "question_speech_end_sec": 38.893,
+    "question_wav": "/gpu-server/yamamoto/j-moshivis/eval_results/fuji_original_audio_probe_20261010/case_04/original_training_user.wav",
+    "voice": "jvnv-F2",
+    "question_contains_fuji": false
+  },
+  {
+    "turn": 6,
+    "question": "下の方は森なんだね",
+    "question_start_sec": 44.907,
+    "question_speech_end_sec": 46.537,
+    "question_wav": "/gpu-server/yamamoto/j-moshivis/eval_results/fuji_original_audio_probe_20261010/case_04/original_training_user.wav",
+    "voice": "jvnv-F2",
+    "question_contains_fuji": false
+  },
+  {
+    "turn": 7,
+    "question": "これ多分箱根とかかな",
+    "question_start_sec": 53.366,
+    "question_speech_end_sec": 55.331,
+    "question_wav": "/gpu-server/yamamoto/j-moshivis/eval_results/fuji_original_audio_probe_20261010/case_04/original_training_user.wav",
+    "voice": "jvnv-F2",
+    "question_contains_fuji": false
+  },
+  {
+    "turn": 8,
+    "question": "いい景色だね、乗ってみたいな",
+    "question_start_sec": 61.404,
+    "question_speech_end_sec": 63.649,
+    "question_wav": "/gpu-server/yamamoto/j-moshivis/eval_results/fuji_original_audio_probe_20261010/case_04/original_training_user.wav",
+    "voice": "jvnv-F2",
+    "question_contains_fuji": false
+  }
+]

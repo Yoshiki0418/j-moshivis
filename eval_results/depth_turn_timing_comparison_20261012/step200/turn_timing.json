@@ -1,0 +1,10 @@
+{
+  "window_sec": 0.08,
+  "rms_threshold": 0.01,
+  "first_user_energy_sec": 0.4,
+  "assistant_active_before_first_user_sec": 0.0,
+  "total_energy_overlap_sec": 0.0,
+  "longest_continuous_energy_overlap_sec": 0.0,
+  "early_text_events": [],
+  "note": "Energy proxy only; not speech VAD. Brief full-duplex backchannels are not errors."
+}

@@ -1,0 +1,7 @@
+{
+  "train_manifest": "/gpu-server/yamamoto/j-moshivis/data/speech_v3/train.jsonl",
+  "verified_train_sha256": "611e26588ae489ae66424b3d2eff3a35cb4913a7893f5478b026959326aede30",
+  "matched_rows": 185,
+  "unique_available_images": 185,
+  "selection_note": "Text mentions Fuji; image verification is required. Training membership does not prove a sampled exposure."
+}

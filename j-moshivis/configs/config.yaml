@@ -2,22 +2,58 @@ repo_id: kyutai/moshika-vis-pytorch-bf16
 mimi_name: tokenizer-e351c8d8-checkpoint125.safetensors
 duration_sec: 60.0
 
+# 新サーバー (gpu-server) 用パス設定
+# 注意: tokenizer は必ず日本語SPM (j-moshi / llm-jp-moshi-v1 同梱、両者同一ハッシュ) を使うこと。
+#       kyutai リポジトリの同名ファイルは英語版で中身が異なる。
+paths:
+  kyuteye_config: /gpu-server/yamamoto/j-moshivis/j-moshivis/configs/j-moshi-vis.yaml
+  tokenizer: /gpu-server/yamamoto/j-moshivis/models/j-moshi/tokenizer_spm_32k_3.model
+  # 基盤モデル: LLM-jp-Moshi版 (J-Moshi版との比較時は別run/configへ明示変更)
+  moshivis_weight: /gpu-server/yamamoto/j-moshivis/models/model_merged_llmjp_bf16.safetensors
+
 data:
-  train_data: /workspace/data/speech/train_data_refined_a.jsonl
-  # train_data: /workspace/train_data_refined.jsonl
-  eval_data: /workspace/data/speech/train_data_refined_a.jsonl
-  image_root: /mnt/sub_storage/images/
+  # 本番 v3 データ (完成済み: train 166,621件 / eval 3,400件)
+  train_data: /gpu-server/yamamoto/j-moshivis/data/speech_v3/train.jsonl
+  eval_data: /gpu-server/yamamoto/j-moshivis/data/speech_v3/eval.jsonl
+  # 未生成のまま本番学習を開始しないため、起動時に必須・全件照合する。
+  # 作成手順は ASSET_MANIFEST.md を参照。fast は path+size+mtime、full は全SHA再計算。
+  asset_manifest: /gpu-server/yamamoto/j-moshivis/data/speech_v3/asset_manifest.v1.jsonl
+  asset_manifest_verification: fast
+  # legacy API互換用。v3は誤画像fallbackを避けるためwav親/image.jpgのみを正本とする。
+  image_root: /gpu-server/yamamoto/j-moshivis/data/images/
   shuffle: true
   speech_ratio: 0.25
+  # 1 JSONL row = 1 speech sample/epoch. 60秒超はseed+epoch+stable UIDで
+  # 決定的な一様random crop、evalは先頭60秒。短い第2tailは生成しない。
+  speech_chunk_policy: one_random_crop_per_row
+  # sphn.readのCPU decodeだけをbounded prefetch（GPU tokenizationはmain thread）。
+  speech_decode_workers: 4
 
 train:
-  batch_size: 2
+  # --- 2×A6000 (48GB, 他ユーザーと共有で実質 ~40GB) 向け設定 ---
+  batch_size: 1                  # GPU1枚あたりの物理バッチ (60秒×17コードブック)
+  target_batch_size: 16          # 実効バッチ = batch_size × GPU数 × 累積ステップ (trainer が自動計算)
+  learning_rate: 5.0e-5          # 実効バッチ16 & 事前学習済み Cross-Attn 継承のため 1e-4 より控えめ
+  weight_decay: 0.0
+  warmup_steps: 500              # 線形 warmup
+  max_steps: 20000               # optimizer step 数 (cosine で min_lr_ratio まで減衰)。実測 1.3s/micro-step → 1step≈10.5s → 約2.4日
+  min_lr_ratio: 0.1
+  save_every: 1000               # checkpoint 間隔 (optimizer step)
+  keep_last: 3                   # 完全stateは大容量。直近3個だけを保持
+  checkpoint_dir: /gpu-server/yamamoto/j-moshivis/checkpoints/llmjp_v3_run1
+  # null: always start a fresh run; use "latest" or an explicit complete
+  # step_N directory to opt into strict, fingerprint-checked resume.
+  resume_from: null
+  log_interval: 10
   seed: 42
   num_workers: 0
 
 trainer:
-  batch_size: 2
+  batch_size: 1  # legacy mirror; runtime batch size is train.batch_size
+  # ID3 (通常の時刻合わせPAD) と ID0 (語彙直前の境界) を個別に設定する。
+  # 両方0.5なら従来実装と同一。境界重み実験では後者だけCLIで1.0にする。
   text_padding_weight: 0.5
+  end_of_text_padding_weight: ${.text_padding_weight}
   first_codebook_weight_multiplier: 3.0
 
 # Depformerを学習したい場合
@@ -31,11 +67,13 @@ depformer:
 # Gate設定
 gate:
   freeze: false                   # Gateを凍結 (実験用)
-  init_alpha: 0.0               # 99.3% open
+  # random_visual_adapter + scalar Gate時のみ使用。shift=4ではalpha=0 → 約1.8% open。
+  # 現行のconditional Gateは小さいランダム重みで初期化し、この値は直接使わない。
+  init_alpha: 0.0
   learning_rate: 1.0e-4           # Gate専用の学習率 (振り分けバグ修正で有効化。現状の実効値1e-4を維持)
 
-# Cross-Attention 初期化設定
+# Visual Adapter 初期化設定
 cross_attention:
-  # false: ランダム初期化 (std=0.02) で学習開始 — 現状と完全に同じ挙動
-  # true : model_merged_bf16.safetensors の Cross-Attention/Gate を継承して学習開始
-  inherit_from_pretrained: true
+  # inherit_visual_adapter: 画像projection + norm_cross + Cross-Attention + Gateを継承
+  # random_visual_adapter : 上記をすべて初期化（日本語Moshi backboneと画像encoderは共通）
+  visual_adapter_init: inherit_visual_adapter

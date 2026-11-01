@@ -1,0 +1,32 @@
+[
+  {
+    "id": "fuji_cows",
+    "label": "富士山と牛",
+    "url": "/samples/fuji_cows.png",
+    "source_filename": "fdda4ed4-2a7b-4589-a425-6fad66319128.jpg"
+  },
+  {
+    "id": "probe_webp",
+    "label": "検証画像：20230713",
+    "url": "/samples/probe_webp.png",
+    "source_filename": "20230713_145512_23239672_w1920.webp"
+  },
+  {
+    "id": "probe_960",
+    "label": "検証画像：960.png",
+    "url": "/samples/probe_960.png",
+    "source_filename": "960.png"
+  },
+  {
+    "id": "probe_avif",
+    "label": "検証画像：追加AVIF",
+    "url": "/samples/probe_avif.png",
+    "source_filename": "c0ac1b57078410974e0c8929cfa999e527fe1a514c08dcc79f6a66aed5cda49e.avif"
+  },
+  {
+    "id": "test3",
+    "label": "日本の町並み：test3",
+    "url": "/samples/test3.png",
+    "source_filename": "test3.jpg"
+  }
+]

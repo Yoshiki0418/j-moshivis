@@ -1,0 +1,12 @@
+{
+  "health": {
+    "ok": true,
+    "sample_rate": 24000,
+    "frame_size": 1920
+  },
+  "sample_images": 5,
+  "generated_audio_packets": 160,
+  "text": "  すごく落ち着いた雰囲気ですね。木の柱や屋根が並んでいて、古いお店が並んでいます。",
+  "errors": [],
+  "elapsed_sec": 10.168409672100097
+}

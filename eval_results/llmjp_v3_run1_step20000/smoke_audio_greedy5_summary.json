@@ -1,0 +1,699 @@
+{
+  "by_benchmark": {
+    "ja-vg-vqa-500": {
+      "answer_in_response": 0.0,
+      "answer_in_response_ci95": [
+        0.0,
+        0.014670934228657465
+      ],
+      "char_f1": 0.0,
+      "domain": "general_world",
+      "exact_match": 0.0,
+      "exact_match_ci95": [
+        0.0,
+        0.014670934228657465
+      ],
+      "normalized_edit_similarity": 0.0,
+      "num_samples": 258,
+      "sakana_mecab_rouge_percent": {
+        "rouge1": 0.0,
+        "rouge1_ja": 0.0,
+        "rouge2": 0.0,
+        "rouge2_ja": 0.0,
+        "rougeL": 0.0,
+        "rougeL_ja": 0.0
+      }
+    },
+    "jammeval-cc-ocr-ja-refined": {
+      "answer_in_response": 0.0,
+      "answer_in_response_ci95": [
+        1.734723475976807e-18,
+        0.02580906456528246
+      ],
+      "char_f1": 0.0,
+      "domain": "japan",
+      "exact_match": 0.0,
+      "exact_match_ci95": [
+        1.734723475976807e-18,
+        0.02580906456528246
+      ],
+      "normalized_edit_similarity": 0.0,
+      "num_samples": 145
+    },
+    "jammeval-cvqa-ja-refined": {
+      "answer_in_response": 0.0,
+      "answer_in_response_ci95": [
+        0.0,
+        0.019416854503563286
+      ],
+      "char_f1": 0.0,
+      "choice_accuracy": 0.0,
+      "choice_accuracy_ci95": [
+        0.0,
+        0.019416854503563286
+      ],
+      "domain": "japan",
+      "exact_match": 0.0,
+      "exact_match_ci95": [
+        0.0,
+        0.019416854503563286
+      ],
+      "normalized_edit_similarity": 0.0,
+      "num_multiple_choice": 194,
+      "num_samples": 194
+    },
+    "jammeval-heron-bench-refined": {
+      "answer_in_response": 0.0,
+      "answer_in_response_ci95": [
+        0.0,
+        0.0418270666648922
+      ],
+      "char_f1": 0.0,
+      "domain": "japan",
+      "exact_match": 0.0,
+      "exact_match_ci95": [
+        0.0,
+        0.0418270666648922
+      ],
+      "normalized_edit_similarity": 0.0,
+      "num_samples": 88
+    },
+    "jammeval-ja-vlm-bench-refined": {
+      "answer_in_response": 0.0,
+      "answer_in_response_ci95": [
+        6.938893903907228e-18,
+        0.07269781922049637
+      ],
+      "char_f1": 0.0,
+      "domain": "japan",
+      "exact_match": 0.0,
+      "exact_match_ci95": [
+        6.938893903907228e-18,
+        0.07269781922049637
+      ],
+      "normalized_edit_similarity": 0.0,
+      "num_samples": 49
+    }
+  },
+  "by_domain_dataset_macro": {
+    "general_world": {
+      "macro_answer_in_response": 0.0,
+      "macro_char_f1": 0.0,
+      "macro_exact_match": 0.0,
+      "macro_normalized_edit_similarity": 0.0,
+      "num_datasets": 1,
+      "num_samples": 258
+    },
+    "japan": {
+      "macro_answer_in_response": 0.0,
+      "macro_char_f1": 0.0,
+      "macro_choice_accuracy": 0.0,
+      "macro_exact_match": 0.0,
+      "macro_normalized_edit_similarity": 0.0,
+      "num_datasets": 4,
+      "num_samples": 476
+    }
+  },
+  "by_question_type": {
+    "ja-vg-vqa-500/color": {
+      "answer_in_response": 0.0,
+      "answer_in_response_ci95": [
+        0.0,
+        0.1843181350088518
+      ],
+      "char_f1": 0.0,
+      "exact_match": 0.0,
+      "exact_match_ci95": [
+        0.0,
+        0.1843181350088518
+      ],
+      "normalized_edit_similarity": 0.0,
+      "num_samples": 17
+    },
+    "ja-vg-vqa-500/count": {
+      "answer_in_response": 0.0,
+      "answer_in_response_ci95": [
+        0.0,
+        0.07555760416399632
+      ],
+      "char_f1": 0.0,
+      "exact_match": 0.0,
+      "exact_match_ci95": [
+        0.0,
+        0.07555760416399632
+      ],
+      "normalized_edit_similarity": 0.0,
+      "num_samples": 47
+    },
+    "ja-vg-vqa-500/how": {
+      "answer_in_response": 0.0,
+      "answer_in_response_ci95": [
+        0.0,
+        0.08029560375848066
+      ],
+      "char_f1": 0.0,
+      "exact_match": 0.0,
+      "exact_match_ci95": [
+        0.0,
+        0.08029560375848066
+      ],
+      "normalized_edit_similarity": 0.0,
+      "num_samples": 44
+    },
+    "ja-vg-vqa-500/what_other": {
+      "answer_in_response": 0.0,
+      "answer_in_response_ci95": [
+        0.0,
+        0.061129370526788386
+      ],
+      "char_f1": 0.0,
+      "exact_match": 0.0,
+      "exact_match_ci95": [
+        0.0,
+        0.061129370526788386
+      ],
+      "normalized_edit_similarity": 0.0,
+      "num_samples": 59
+    },
+    "ja-vg-vqa-500/when": {
+      "answer_in_response": 0.0,
+      "answer_in_response_ci95": [
+        0.0,
+        0.4898908364545973
+      ],
+      "char_f1": 0.0,
+      "exact_match": 0.0,
+      "exact_match_ci95": [
+        0.0,
+        0.4898908364545973
+      ],
+      "normalized_edit_similarity": 0.0,
+      "num_samples": 4
+    },
+    "ja-vg-vqa-500/where": {
+      "answer_in_response": 0.0,
+      "answer_in_response_ci95": [
+        0.0,
+        0.05202306241026692
+      ],
+      "char_f1": 0.0,
+      "exact_match": 0.0,
+      "exact_match_ci95": [
+        0.0,
+        0.05202306241026692
+      ],
+      "normalized_edit_similarity": 0.0,
+      "num_samples": 70
+    },
+    "ja-vg-vqa-500/who": {
+      "answer_in_response": 0.0,
+      "answer_in_response_ci95": [
+        0.0,
+        0.32440756488388023
+      ],
+      "char_f1": 0.0,
+      "exact_match": 0.0,
+      "exact_match_ci95": [
+        0.0,
+        0.32440756488388023
+      ],
+      "normalized_edit_similarity": 0.0,
+      "num_samples": 8
+    },
+    "ja-vg-vqa-500/yes_no_or_attribute": {
+      "answer_in_response": 0.0,
+      "answer_in_response_ci95": [
+        0.0,
+        0.2991450484195441
+      ],
+      "char_f1": 0.0,
+      "exact_match": 0.0,
+      "exact_match_ci95": [
+        0.0,
+        0.2991450484195441
+      ],
+      "normalized_edit_similarity": 0.0,
+      "num_samples": 9
+    },
+    "jammeval-cc-ocr-ja-refined/ocr": {
+      "answer_in_response": 0.0,
+      "answer_in_response_ci95": [
+        1.734723475976807e-18,
+        0.02580906456528246
+      ],
+      "char_f1": 0.0,
+      "exact_match": 0.0,
+      "exact_match_ci95": [
+        1.734723475976807e-18,
+        0.02580906456528246
+      ],
+      "normalized_edit_similarity": 0.0,
+      "num_samples": 145
+    },
+    "jammeval-cvqa-ja-refined/Brands / products / companies": {
+      "answer_in_response": 0.0,
+      "answer_in_response_ci95": [
+        5.551115123125783e-17,
+        0.5614970317550454
+      ],
+      "char_f1": 0.0,
+      "choice_accuracy": 0.0,
+      "choice_accuracy_ci95": [
+        5.551115123125783e-17,
+        0.5614970317550454
+      ],
+      "exact_match": 0.0,
+      "exact_match_ci95": [
+        5.551115123125783e-17,
+        0.5614970317550454
+      ],
+      "normalized_edit_similarity": 0.0,
+      "num_multiple_choice": 3,
+      "num_samples": 3
+    },
+    "jammeval-cvqa-ja-refined/Cooking and food": {
+      "answer_in_response": 0.0,
+      "answer_in_response_ci95": [
+        0.0,
+        0.17587922364665765
+      ],
+      "char_f1": 0.0,
+      "choice_accuracy": 0.0,
+      "choice_accuracy_ci95": [
+        0.0,
+        0.17587922364665765
+      ],
+      "exact_match": 0.0,
+      "exact_match_ci95": [
+        0.0,
+        0.17587922364665765
+      ],
+      "normalized_edit_similarity": 0.0,
+      "num_multiple_choice": 18,
+      "num_samples": 18
+    },
+    "jammeval-cvqa-ja-refined/Geography / buildings / landmarks": {
+      "answer_in_response": 0.0,
+      "answer_in_response_ci95": [
+        1.3877787807814457e-17,
+        0.13797620467498017
+      ],
+      "char_f1": 0.0,
+      "choice_accuracy": 0.0,
+      "choice_accuracy_ci95": [
+        1.3877787807814457e-17,
+        0.13797620467498017
+      ],
+      "exact_match": 0.0,
+      "exact_match_ci95": [
+        1.3877787807814457e-17,
+        0.13797620467498017
+      ],
+      "normalized_edit_similarity": 0.0,
+      "num_multiple_choice": 24,
+      "num_samples": 24
+    },
+    "jammeval-cvqa-ja-refined/Objects / materials / clothing": {
+      "answer_in_response": 0.0,
+      "answer_in_response_ci95": [
+        0.0,
+        0.11696979849974075
+      ],
+      "char_f1": 0.0,
+      "choice_accuracy": 0.0,
+      "choice_accuracy_ci95": [
+        0.0,
+        0.11696979849974075
+      ],
+      "exact_match": 0.0,
+      "exact_match_ci95": [
+        0.0,
+        0.11696979849974075
+      ],
+      "normalized_edit_similarity": 0.0,
+      "num_multiple_choice": 29,
+      "num_samples": 29
+    },
+    "jammeval-cvqa-ja-refined/People and everyday life": {
+      "answer_in_response": 0.0,
+      "answer_in_response_ci95": [
+        0.0,
+        0.2588329669680317
+      ],
+      "char_f1": 0.0,
+      "choice_accuracy": 0.0,
+      "choice_accuracy_ci95": [
+        0.0,
+        0.2588329669680317
+      ],
+      "exact_match": 0.0,
+      "exact_match_ci95": [
+        0.0,
+        0.2588329669680317
+      ],
+      "normalized_edit_similarity": 0.0,
+      "num_multiple_choice": 11,
+      "num_samples": 11
+    },
+    "jammeval-cvqa-ja-refined/Plants and animal": {
+      "answer_in_response": 0.0,
+      "answer_in_response_ci95": [
+        0.0,
+        0.2991450484195441
+      ],
+      "char_f1": 0.0,
+      "choice_accuracy": 0.0,
+      "choice_accuracy_ci95": [
+        0.0,
+        0.2991450484195441
+      ],
+      "exact_match": 0.0,
+      "exact_match_ci95": [
+        0.0,
+        0.2991450484195441
+      ],
+      "normalized_edit_similarity": 0.0,
+      "num_multiple_choice": 9,
+      "num_samples": 9
+    },
+    "jammeval-cvqa-ja-refined/Public Figure and pop culture": {
+      "answer_in_response": 0.0,
+      "answer_in_response_ci95": [
+        0.0,
+        0.07865159873288836
+      ],
+      "char_f1": 0.0,
+      "choice_accuracy": 0.0,
+      "choice_accuracy_ci95": [
+        0.0,
+        0.07865159873288836
+      ],
+      "exact_match": 0.0,
+      "exact_match_ci95": [
+        0.0,
+        0.07865159873288836
+      ],
+      "normalized_edit_similarity": 0.0,
+      "num_multiple_choice": 45,
+      "num_samples": 45
+    },
+    "jammeval-cvqa-ja-refined/Sports and recreation": {
+      "answer_in_response": 0.0,
+      "answer_in_response_ci95": [
+        2.7755575615628914e-17,
+        0.24249400665524085
+      ],
+      "char_f1": 0.0,
+      "choice_accuracy": 0.0,
+      "choice_accuracy_ci95": [
+        2.7755575615628914e-17,
+        0.24249400665524085
+      ],
+      "exact_match": 0.0,
+      "exact_match_ci95": [
+        2.7755575615628914e-17,
+        0.24249400665524085
+      ],
+      "normalized_edit_similarity": 0.0,
+      "num_multiple_choice": 12,
+      "num_samples": 12
+    },
+    "jammeval-cvqa-ja-refined/Traditions / art / history": {
+      "answer_in_response": 0.0,
+      "answer_in_response_ci95": [
+        0.0,
+        0.08966685370757142
+      ],
+      "char_f1": 0.0,
+      "choice_accuracy": 0.0,
+      "choice_accuracy_ci95": [
+        0.0,
+        0.08966685370757142
+      ],
+      "exact_match": 0.0,
+      "exact_match_ci95": [
+        0.0,
+        0.08966685370757142
+      ],
+      "normalized_edit_similarity": 0.0,
+      "num_multiple_choice": 39,
+      "num_samples": 39
+    },
+    "jammeval-cvqa-ja-refined/Vehicles and Transportation": {
+      "answer_in_response": 0.0,
+      "answer_in_response_ci95": [
+        0.0,
+        0.4898908364545973
+      ],
+      "char_f1": 0.0,
+      "choice_accuracy": 0.0,
+      "choice_accuracy_ci95": [
+        0.0,
+        0.4898908364545973
+      ],
+      "exact_match": 0.0,
+      "exact_match_ci95": [
+        0.0,
+        0.4898908364545973
+      ],
+      "normalized_edit_similarity": 0.0,
+      "num_multiple_choice": 4,
+      "num_samples": 4
+    },
+    "jammeval-heron-bench-refined/anime": {
+      "answer_in_response": 0.0,
+      "answer_in_response_ci95": [
+        0.0,
+        0.2775327998628892
+      ],
+      "char_f1": 0.0,
+      "exact_match": 0.0,
+      "exact_match_ci95": [
+        0.0,
+        0.2775327998628892
+      ],
+      "normalized_edit_similarity": 0.0,
+      "num_samples": 10
+    },
+    "jammeval-heron-bench-refined/art": {
+      "answer_in_response": 0.0,
+      "answer_in_response_ci95": [
+        0.0,
+        0.16817922405261626
+      ],
+      "char_f1": 0.0,
+      "exact_match": 0.0,
+      "exact_match_ci95": [
+        0.0,
+        0.16817922405261626
+      ],
+      "normalized_edit_similarity": 0.0,
+      "num_samples": 19
+    },
+    "jammeval-heron-bench-refined/culture": {
+      "answer_in_response": 0.0,
+      "answer_in_response_ci95": [
+        1.3877787807814457e-17,
+        0.2153108027376358
+      ],
+      "char_f1": 0.0,
+      "exact_match": 0.0,
+      "exact_match_ci95": [
+        1.3877787807814457e-17,
+        0.2153108027376358
+      ],
+      "normalized_edit_similarity": 0.0,
+      "num_samples": 14
+    },
+    "jammeval-heron-bench-refined/food": {
+      "answer_in_response": 0.0,
+      "answer_in_response_ci95": [
+        0.0,
+        0.2991450484195441
+      ],
+      "char_f1": 0.0,
+      "exact_match": 0.0,
+      "exact_match_ci95": [
+        0.0,
+        0.2991450484195441
+      ],
+      "normalized_edit_similarity": 0.0,
+      "num_samples": 9
+    },
+    "jammeval-heron-bench-refined/landmark": {
+      "answer_in_response": 0.0,
+      "answer_in_response_ci95": [
+        0.0,
+        0.1843181350088518
+      ],
+      "char_f1": 0.0,
+      "exact_match": 0.0,
+      "exact_match_ci95": [
+        0.0,
+        0.1843181350088518
+      ],
+      "normalized_edit_similarity": 0.0,
+      "num_samples": 17
+    },
+    "jammeval-heron-bench-refined/landscape": {
+      "answer_in_response": 0.0,
+      "answer_in_response_ci95": [
+        0.0,
+        0.2775327998628892
+      ],
+      "char_f1": 0.0,
+      "exact_match": 0.0,
+      "exact_match_ci95": [
+        0.0,
+        0.2775327998628892
+      ],
+      "normalized_edit_similarity": 0.0,
+      "num_samples": 10
+    },
+    "jammeval-heron-bench-refined/traffic": {
+      "answer_in_response": 0.0,
+      "answer_in_response_ci95": [
+        0.0,
+        0.2991450484195441
+      ],
+      "char_f1": 0.0,
+      "exact_match": 0.0,
+      "exact_match_ci95": [
+        0.0,
+        0.2991450484195441
+      ],
+      "normalized_edit_similarity": 0.0,
+      "num_samples": 9
+    },
+    "jammeval-ja-vlm-bench-refined/japanese_cultural_knowledge": {
+      "answer_in_response": 0.0,
+      "answer_in_response_ci95": [
+        6.938893903907228e-18,
+        0.07269781922049637
+      ],
+      "char_f1": 0.0,
+      "exact_match": 0.0,
+      "exact_match_ci95": [
+        6.938893903907228e-18,
+        0.07269781922049637
+      ],
+      "normalized_edit_similarity": 0.0,
+      "num_samples": 49
+    }
+  },
+  "extra_prediction_ids": [],
+  "language_id_model": {
+    "path": "/gpu-server/yamamoto/j-moshivis/models/evaluation/lid.176.ftz",
+    "sha256": "8f3472cfe8738a7b6099e8e999c3cbfae0dcd15696aac7d7738a8039db603e83"
+  },
+  "manifest": "/gpu-server/yamamoto/j-moshivis/data/evaluation/vision_v1/manifest_audio.jsonl",
+  "manifest_sha256": "f11cc0952e00f5bd299635ab97b0254406269aedfea17a189d033367b2f18a72",
+  "metric_notes": {
+    "answer_in_response": "diagnostic only: NFKC-normalized reference substring with common Japanese negation guard",
+    "choice_accuracy": "strict full-response choice-label accuracy; CVQA requires one numeric label 1-4 and does not credit option-text fallback",
+    "confidence_intervals": "Wilson 95% interval for binary metrics",
+    "exact_match": "primary dependency-free short-answer metric: strict normalized full-string match",
+    "official_ja_vg_comparison": "MeCab ROUGE-L when --official-rouge-ja is enabled; clean-subset scores are not directly comparable to the public 500-item score",
+    "primary_short_answer": "exact_match (or the benchmark's frozen official metric/judge)"
+  },
+  "num_extra_predictions": 0,
+  "num_failed_predictions": 0,
+  "num_missing_predictions": 729,
+  "overall_micro": {
+    "answer_in_response": 0.0,
+    "answer_in_response_ci95": [
+      0.0,
+      0.005206347210190657
+    ],
+    "char_f1": 0.0,
+    "choice_accuracy": 0.0,
+    "choice_accuracy_ci95": [
+      0.0,
+      0.019416854503563286
+    ],
+    "exact_match": 0.0,
+    "exact_match_ci95": [
+      0.0,
+      0.005206347210190657
+    ],
+    "normalized_edit_similarity": 0.0,
+    "num_multiple_choice": 194,
+    "num_samples": 734
+  },
+  "paper_guard": "Do not report as a paper result until the frozen suite and scorer protocol match, the run is complete/greedy/fully hashed/non-diagnostic, and missing/failed/extra prediction counts are all zero.",
+  "prediction_run": {
+    "checkpoint": "/gpu-server/yamamoto/j-moshivis/checkpoints/llmjp_v3_run1/final_step_20000.safetensors",
+    "checkpoint_hash_skipped": true,
+    "checkpoint_sha256": null,
+    "diagnostic": true,
+    "generation": "greedy",
+    "path": "/gpu-server/yamamoto/j-moshivis/eval_results/llmjp_v3_run1_step20000/smoke_audio_greedy5.jsonl.run.json",
+    "run_fingerprint": "839d4877d0b91f86bd1ea7ee997eb0d5a48635a8c46f6fa42c248dc8efa4c6b9",
+    "sha256": "671645ce4c5d125b7cf43a42aaf166bf01cd129041dd5da8d7d8ef4594852965",
+    "status": "incomplete"
+  },
+  "predictions": "/gpu-server/yamamoto/j-moshivis/eval_results/llmjp_v3_run1_step20000/smoke_audio_greedy5.jsonl",
+  "predictions_sha256": "608f7f46cf07e1fd50690317949a0f7fd56e4f2f01715729ad8f58f4752992c6",
+  "ready_for_local_metrics": false,
+  "result_scope": "local_metrics_only",
+  "schema_version": "jmoshivis.image-eval.score.v1",
+  "scoring_protocol_verified": true,
+  "scoring_provenance": {
+    "bootstrap_seed": 42,
+    "dependency_versions": {
+      "emoji": "2.10.1",
+      "fasttext-wheel": "0.9.2",
+      "fugashi": "1.3.1",
+      "neologdn": "0.5.2",
+      "numpy": "1.26.4",
+      "rouge-score": "0.1.2",
+      "unidic-lite": "1.0.8"
+    },
+    "implementation_file_sha256": {
+      "j-moshivis/jmoshivis/evaluation/metrics.py": "efda35203356614e8797dd1cc0d7e7abacd0be84cf8f89b2a0189728f01d75ac",
+      "j-moshivis/jmoshivis/evaluation/official_rouge_ja.py": "46d5d92ae412329e776ec14153667e7ed10900e8bbec0da74f2e0b3edcaa57b3",
+      "j-moshivis/jmoshivis/evaluation/schema.py": "ccc2eb6fda4adb5f82be2007f30953a680e967113ad7180a4678535f31048d7f",
+      "j-moshivis/jmoshivis/evaluation/score.py": "584ecbb50ebb343e9fba991384df2edb0aa3d1f5b40dd57a95767b8c8a2e919d",
+      "j-moshivis/jmoshivis/evaluation/suite.py": "a542572e550e0e5e7c945ee7a400fb0882124eca8d5299be07e4b69cbe0bc15c"
+    }
+  },
+  "suite_contract": {
+    "frozen_manifest_sha256": "f11cc0952e00f5bd299635ab97b0254406269aedfea17a189d033367b2f18a72",
+    "frozen_num_questions": 734,
+    "judge_implementation_file_sha256": {
+      "j-moshivis/jmoshivis/evaluation/judge.py": "59c2a2c56160abc21c775e2831f88ba8dfcb2827002939a8ccdb1766e5b62751",
+      "j-moshivis/jmoshivis/evaluation/schema.py": "ccc2eb6fda4adb5f82be2007f30953a680e967113ad7180a4678535f31048d7f",
+      "j-moshivis/jmoshivis/evaluation/score.py": "584ecbb50ebb343e9fba991384df2edb0aa3d1f5b40dd57a95767b8c8a2e919d",
+      "j-moshivis/jmoshivis/evaluation/suite.py": "a542572e550e0e5e7c945ee7a400fb0882124eca8d5299be07e4b69cbe0bc15c"
+    },
+    "judge_model": "gpt-5.1-2025-11-13",
+    "judge_n_repeats": 3,
+    "judge_template_sha256": "e49100c04e850eb156e49c81730958863c895b04498a7b152f4ec2ea341f35b5",
+    "language_id_model_sha256": "8f3472cfe8738a7b6099e8e999c3cbfae0dcd15696aac7d7738a8039db603e83",
+    "paper_generation": "greedy",
+    "response_overlap_seconds": 0.32,
+    "response_tail_seconds": 10.0,
+    "scoring_protocol": {
+      "bootstrap_seed": 42,
+      "dependency_versions": {
+        "emoji": "2.10.1",
+        "fasttext-wheel": "0.9.2",
+        "fugashi": "1.3.1",
+        "neologdn": "0.5.2",
+        "numpy": "1.26.4",
+        "rouge-score": "0.1.2",
+        "unidic-lite": "1.0.8"
+      },
+      "implementation_file_sha256": {
+        "j-moshivis/jmoshivis/evaluation/metrics.py": "efda35203356614e8797dd1cc0d7e7abacd0be84cf8f89b2a0189728f01d75ac",
+        "j-moshivis/jmoshivis/evaluation/official_rouge_ja.py": "46d5d92ae412329e776ec14153667e7ed10900e8bbec0da74f2e0b3edcaa57b3",
+        "j-moshivis/jmoshivis/evaluation/schema.py": "ccc2eb6fda4adb5f82be2007f30953a680e967113ad7180a4678535f31048d7f",
+        "j-moshivis/jmoshivis/evaluation/score.py": "584ecbb50ebb343e9fba991384df2edb0aa3d1f5b40dd57a95767b8c8a2e919d",
+        "j-moshivis/jmoshivis/evaluation/suite.py": "a542572e550e0e5e7c945ee7a400fb0882124eca8d5299be07e4b69cbe0bc15c"
+      }
+    },
+    "suite_id": "vision_v1",
+    "suite_lock": "/gpu-server/yamamoto/j-moshivis/j-moshivis/evaluation/suite_v1.lock.json",
+    "suite_lock_sha256": "bda3dd04d50585b623024304d7d52663e26f1cf7297775b182c065f2fb7c2bb4"
+  }
+}

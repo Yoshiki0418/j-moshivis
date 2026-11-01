@@ -12,8 +12,12 @@ hf_cache/
 **.jpg
 **.jsonl
 .env
+.venv-eval/
+.java-eval/
 outputs/
 **.safetensors
 **.model
 **.deb
 wandb/
+handoff/
+models/tts/aivis/*.aivm

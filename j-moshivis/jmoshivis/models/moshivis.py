@@ -1,7 +1,7 @@
 """Moshi the little AI"""
 
 from functools import partial
-from typing import Any, Dict, List, Literal, Optional, Tuple
+from typing import Any, Callable, Dict, List, Literal, Optional, Tuple
 
 import torch
 from jmoshivis.config.kyuteye_config import KyuteyeConfig
@@ -180,9 +180,23 @@ class MoshiVis(StreamingModule):
         """Offset in the audio codebook. Returns 1 because we always generate with text"""
         return 1
 
-    def forward_speech(self, input_ids, cross_attention_src):
+    def forward_speech(
+        self,
+        input_ids,
+        cross_attention_src,
+        *,
+        num_audio_codebooks: Optional[int] = None,
+        compute_audio: bool = True,
+    ):
         B, K, T = input_ids.shape
         assert K == self.num_codebooks, (K, self.num_codebooks)
+        audio_codebooks = (
+            self.dep_q if num_audio_codebooks is None else int(num_audio_codebooks)
+        )
+        if not 1 <= audio_codebooks <= self.dep_q:
+            raise ValueError(
+                f"num_audio_codebooks must be in [1, {self.dep_q}], got {audio_codebooks}"
+            )
 
         initial = self.get_initial_token().expand(B, -1, -1)
         delayed = _delay_sequence(self.delays, input_ids, initial)
@@ -195,13 +209,30 @@ class MoshiVis(StreamingModule):
         assert transformer_out.shape[0] == delayed.shape[0]
         assert transformer_out.shape[1] == delayed.shape[2] - 1
 
-        audio_logits = self.forward_depformer_training(
-            delayed[:, :, 1:], transformer_out
-        )
-        audio_logits, logits_mask = _undelay_sequence(
-            self.delays[self.audio_offset:self.audio_offset + self.dep_q],
-            audio_logits, fill_value=float('NaN'))
-        logits_mask &= (input_ids[:, self.audio_offset: self.audio_offset + self.dep_q] != self.zero_token_id)
+        if compute_audio:
+            audio_logits = self.forward_depformer_training(
+                delayed[:, :, 1:],
+                transformer_out,
+                num_audio_codebooks=audio_codebooks,
+            )
+            audio_logits, logits_mask = _undelay_sequence(
+                self.delays[
+                    self.audio_offset : self.audio_offset + audio_codebooks
+                ],
+                audio_logits,
+                fill_value=float("NaN"),
+            )
+            logits_mask &= (
+                input_ids[
+                    :, self.audio_offset : self.audio_offset + audio_codebooks
+                ]
+                != self.zero_token_id
+            )
+        else:
+            audio_logits = None
+            logits_mask = torch.zeros(
+                (B, 0, T), dtype=torch.bool, device=input_ids.device
+            )
         text_logits, text_logits_mask = _undelay_sequence(self.delays[:1], text_logits, fill_value=float('NaN'))
         text_logits_mask &= (input_ids[:, :1] != self.zero_token_id)
         return {"text_logits": text_logits, "audio_logits": audio_logits, "logits_mask": logits_mask, "text_logits_mask": text_logits_mask, "gate": gate}
@@ -214,7 +245,7 @@ class MoshiVis(StreamingModule):
         ] = None,
         cross_attention_mask: Optional[torch.Tensor] = None,
         attention_mask: Optional[torch.Tensor] = None,
-    ) -> Tuple[torch.Tensor, torch.Tensor, float]:
+    ) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
         """Forward pass for Moshi
 
         :param input_ids: Text + audio tokens of shape (batch, codebooks, seq length)
@@ -297,6 +328,7 @@ class MoshiVis(StreamingModule):
         self,
         sequence: torch.Tensor,          # [B, K, T]. 正解トークン全体
         transformer_out: torch.Tensor,   # [B, T, D]. Heliumから得た特徴
+        num_audio_codebooks: Optional[int] = None,
     ) -> torch.Tensor:
         """Training-time depformer forward (non-streaming)."""
 
@@ -305,7 +337,23 @@ class MoshiVis(StreamingModule):
         assert self.depformer is not None
 
         B, K, T = sequence.shape
-        Ka = self.num_audio_codebooks_out  # dep_q
+        Ka = (
+            self.num_audio_codebooks_out
+            if num_audio_codebooks is None
+            else int(num_audio_codebooks)
+        )
+        if not 1 <= Ka <= self.num_audio_codebooks_out:
+            raise ValueError(
+                "num_audio_codebooks must be between 1 and "
+                f"{self.num_audio_codebooks_out}, got {Ka}"
+            )
+        # The codebook axis is autoregressive.  A prefix produces exactly the
+        # same first-Ka activations only when the Depformer is causal.
+        depformer_is_causal = bool(self.depformer.layers) and all(
+            getattr(layer, "causal", False) for layer in self.depformer.layers
+        )
+        if Ka < self.num_audio_codebooks_out and not depformer_is_causal:
+            raise RuntimeError("cannot truncate a non-causal Depformer safely")
 
         assert (
             K == self.num_codebooks
@@ -375,6 +423,52 @@ class MoshiVis(StreamingModule):
         )
 
 
+def _select_output_audio_tokens(
+    forced_tokens: Optional[torch.Tensor],
+    *,
+    batch_size: int,
+    num_codebooks: int,
+    audio_card: int,
+    device: torch.device,
+    generate: Callable[[], torch.Tensor],
+) -> torch.Tensor:
+    """Select generated or teacher-forced assistant audio for one frame.
+
+    The public streaming input remains the user audio stream.  A forced tensor
+    is therefore deliberately a separate argument and can never be mistaken
+    for user audio.  Shape ``[B, K_audio_out, 1]`` mirrors the frame-oriented
+    ``step`` API; the returned tensor has the internal ``[B, K_audio_out]``
+    shape used by the delay cache.
+    """
+
+    if forced_tokens is None:
+        return generate()
+    expected = (batch_size, num_codebooks, 1)
+    if tuple(forced_tokens.shape) != expected:
+        raise ValueError(
+            "forced_output_audio_tokens must have shape "
+            f"{expected}, got {tuple(forced_tokens.shape)}"
+        )
+    if forced_tokens.device != device:
+        raise ValueError(
+            "forced_output_audio_tokens must be on the model device "
+            f"{device}, got {forced_tokens.device}"
+        )
+    if forced_tokens.dtype not in (
+        torch.int8,
+        torch.int16,
+        torch.int32,
+        torch.int64,
+        torch.uint8,
+    ):
+        raise TypeError("forced_output_audio_tokens must contain integer codec IDs")
+    if bool(((forced_tokens < 0) | (forced_tokens >= audio_card)).any().item()):
+        raise ValueError(
+            "forced_output_audio_tokens contains IDs outside the codec vocabulary"
+        )
+    return forced_tokens[:, :, 0].to(dtype=torch.long)
+
+
 class MoshiVisGen(StreamingModule):
     """MoshiVis for autoregressive generation at inference"""
 
@@ -405,6 +499,47 @@ class MoshiVisGen(StreamingModule):
             moshi_vis.delays, device=self.lm_model.device, dtype=torch.long
         )
         self.initial_token = self.lm_model.get_initial_token()
+        # リアルタイム推論用の高速化 (学習には影響しない):
+        #  - depformer_step は 1フレームに8回の小さなforwardでkernel起動オーバーヘッドが支配的なため
+        #    CUDA Graph で録画・再生する (本家 moshi の LMGen と同じ手法)
+        self._graphed_depformer = None
+
+    def enable_cuda_graph(self) -> None:
+        """depformer_step を CUDA Graph 化する (推論サーバー用)"""
+        from moshi.utils.compile import CUDAGraphed
+
+        if self._graphed_depformer is None:
+            disable = self.lm_model.device.type != "cuda"
+            self._graphed_depformer = CUDAGraphed(self.depformer_step, disable=disable)
+
+    def precompute_ca_kv(
+        self, ca_src: torch.Tensor
+    ) -> Tuple[torch.Tensor, torch.Tensor]:
+        """画像トークンの K/V 射影を事前計算する。
+
+        Cross-Attention は全層共有 (SharedCrossAttention) かつ norm_cross は
+        query 側にのみ適用されるため、K/V は全層・全ステップで同一。
+        毎フレーム32層分再計算する代わりに (k, v) タプルを ca_src として渡せる。
+        """
+        cross_attention = next(
+            (
+                layer.cross_attention
+                for layer in self.lm_model.llm.transformer.layers
+                if layer.cross_attention is not None
+            ),
+            None,
+        )
+        if cross_attention is None:
+            raise RuntimeError("cannot precompute image K/V: model has no cross-attention layer")
+        mha = cross_attention.mha
+        d = mha.embed_dim
+        if mha.in_proj_weight is not None:
+            k = torch.nn.functional.linear(ca_src, mha.in_proj_weight[d : 2 * d])
+            v = torch.nn.functional.linear(ca_src, mha.in_proj_weight[2 * d :])
+        else:
+            k = torch.nn.functional.linear(ca_src, mha.in_proj_weight_kv[:d])
+            v = torch.nn.functional.linear(ca_src, mha.in_proj_weight_kv[d:])
+        return (k, v)
 
     def update_gen_kwargs(
         self,
@@ -414,10 +549,17 @@ class MoshiVisGen(StreamingModule):
         top_k_text: Optional[int] = None,
     ) -> None:
         """update params for sampling during generation"""
+        audio_changed = (temp is not None and temp != self.temp) or (
+            top_k is not None and top_k != self.top_k
+        )
         self.temp = temp or self.temp
         self.temp_text = temp_text or self.temp_text
         self.top_k = top_k or self.top_k
         self.top_k_text = top_k_text or self.top_k_text
+        # CUDA Graph は録画時の temp/top_k を焼き込むため、音声系パラメータが変わったら録画し直す
+        if audio_changed and self._graphed_depformer is not None:
+            self._graphed_depformer = None
+            self.enable_cuda_graph()
 
     @property
     def model_dim(self) -> int:
@@ -480,8 +622,17 @@ class MoshiVisGen(StreamingModule):
         self,
         input_tokens: torch.Tensor,
         ca_src: Optional[Tuple[torch.Tensor, torch.Tensor] | torch.Tensor] = None,
+        *,
+        forced_output_audio_tokens: Optional[torch.Tensor] = None,
     ) -> Tuple[torch.Tensor | None, float]:
-        """One step of generation"""
+        """One step of generation.
+
+        ``input_tokens`` always belongs to the user/input stream.  The optional
+        ``forced_output_audio_tokens`` teacher-forces exactly one frame on the
+        assistant/output stream.  Text remains model-generated; callers must
+        not claim synchronized prelude text unless they provide a separately
+        aligned text-forcing implementation.
+        """
         state = self._streaming_state
         if state is None:
             raise RuntimeError(
@@ -541,6 +692,10 @@ class MoshiVisGen(StreamingModule):
         transformer_out, text_logits, gate_weight = self.lm_model.forward_text(
             input_, cross_attention_src=ca_src
         )
+        # Keep the distribution that produced this frame's text decision for
+        # evaluator-side diagnostics.  This does not alter sampling or the
+        # public ``step`` return value, and the tensor is replaced every frame.
+        self.add_streaming_attribute("text_logits", text_logits.detach())
 
         # Sample text tokens
         # Shape of text_logits should be [B, K_text=1, T=1, Card_text]
@@ -555,8 +710,21 @@ class MoshiVisGen(StreamingModule):
         assert text_token.shape[1] == 1, "Only one text stream supported."
         text_token = text_token[:, 0, 0]  # shape is [B]
 
-        # Generate and sample audio tokens
-        audio_tokens = self.depformer_step(text_token, transformer_out)
+        # Generate and sample audio tokens, unless an evaluator explicitly
+        # teacher-forces assistant audio on the separate output stream.
+        def generate_audio_tokens() -> torch.Tensor:
+            if self._graphed_depformer is not None:
+                return self._graphed_depformer(text_token, transformer_out)
+            return self.depformer_step(text_token, transformer_out)
+
+        audio_tokens = _select_output_audio_tokens(
+            forced_output_audio_tokens,
+            batch_size=batch_size,
+            num_codebooks=lm_model.num_audio_codebooks_out,
+            audio_card=lm_model.audio_card,
+            device=lm_model.device,
+            generate=generate_audio_tokens,
+        )
 
         # Write generated tokens
         current_offset += 1
@@ -574,7 +742,6 @@ class MoshiVisGen(StreamingModule):
         if current_offset <= self.max_delay:
             self.add_streaming_attribute("cache", current_input_cache)
             self.add_streaming_attribute("offset", current_offset)
-            self.add_streaming_attribute("text_logits", text_logits)
             return None, 0.0
 
         # otherwise, retrieve tokens with the correct delay
@@ -589,7 +756,7 @@ class MoshiVisGen(StreamingModule):
         out = current_input_cache.gather(dim=2, index=index)
         self.add_streaming_attribute("offset", current_offset)
         self.add_streaming_attribute("cache", current_input_cache)
-        return out, gate_weight
+        return out, float(gate_weight.detach().item())
 
     def depformer_step(
         self,

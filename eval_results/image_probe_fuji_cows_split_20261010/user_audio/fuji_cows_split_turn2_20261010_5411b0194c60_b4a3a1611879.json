@@ -1,0 +1,65 @@
+{
+  "bert_model_id": "ku-nlp/deberta-v2-large-japanese-char-wwm",
+  "bert_revision": "547b0e8b044fba3f9b84d0ab9f990440bd130c8b",
+  "cache_config_sha256": "b4a3a16118790e119606e006e8e77749d9f2b04df02ef4bdd11244ca5068ca24",
+  "dependency_versions": {
+    "numpy": "2.4.6",
+    "scipy": "1.17.1",
+    "soundfile": "0.14.0",
+    "style-bert-vits2": "2.5.0",
+    "torch": "2.13.0",
+    "transformers": "5.16.1"
+  },
+  "duration_sec": 3.99725,
+  "engine": "Style-Bert-VITS2/AIVM",
+  "leading_silence_sec": 0.35,
+  "pool_sha256": "e9d7cf045cce61d46bc9a3c76746da5ef1b8d69c3dfffed1f46480adce7eedf3",
+  "prepare_tts_sha256": "370c1543db87e9c8572d06ef4f9b4c7c5598afce56d186ebce657d509b256149",
+  "prompt_style": "verbatim",
+  "prompt_text": "では、奥に見える山は何という山ですか？",
+  "python_version": "3.11.16 | packaged by conda-forge | (main, Aug 21 2026, 22:44:51) [GCC 14.4.0]",
+  "question_sha256": "5411b0194c60ab2d0a46a5c583fde63768730338a7c9f0f035e99699c57dfd73",
+  "rng_seed_implementation_sha256": "5a59be1bb10bdc1880581e5ae8407984ed75ae0cb31052136779fd63c8a8bb12",
+  "sample_id": "fuji_cows_split_turn2_20261010",
+  "sample_rate": 24000,
+  "speech_end_sec": 3.64725,
+  "speech_start_sec": 0.35,
+  "style": "Neutral",
+  "synthesis_seed": 323519795,
+  "trailing_silence_sec": 0.35,
+  "tts_engine_sha256": "7cd31e35e224657c5288f147bc494abcef47d766efd073fd6a3311c198d574b1",
+  "tts_params": {
+    "intonation_scale": 1.0,
+    "length": 1.0,
+    "line_split": false,
+    "noise": 0.6,
+    "noise_w": 0.8,
+    "pitch_scale": 1.0,
+    "sdp_ratio": 0.2,
+    "style_weight": 1.0
+  },
+  "voice": "jvnv-F1",
+  "voice_assets": [
+    {
+      "path": "config.json",
+      "sha256": "d310da5c1e9b095a833591b4bc07209631d6edece263da88e597aaf7f9984d3d"
+    },
+    {
+      "path": "jvnv-F1-jp_e160_s14000.safetensors",
+      "sha256": "a90fa6c9444d9235c9ec4db99daf7c5c6a21cc26ca141b4c48455d66a3257d01"
+    },
+    {
+      "path": "style_vectors.npy",
+      "sha256": "1f959bb45ed0922efc31ff24e9147253814f42cb1d2d1e2bb10391a9df368489"
+    }
+  ],
+  "voice_assets_sha256": "e9d58d457b784ec188afe2671c7d53234fd224ec2adf35e0b4dedec1aabb65dd",
+  "voice_spec": {
+    "gender": "F",
+    "name": "jvnv-F1",
+    "path": "models/tts/sbv2/jvnv-F1-jp",
+    "type": "sbv2",
+    "weight": 1.0
+  },
+  "wav_sha256": "329bc59947231416f4cc226cd03a766dd91e1f424c42573fbb861a3de1f8ad77"
+}

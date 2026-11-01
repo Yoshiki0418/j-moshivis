@@ -2,9 +2,12 @@
 # This source code is licensed under the license found in the
 # LICENSE file in the root directory of this source tree.
 
-"""Load moshi-vis neccessary components."""
+"""Load MoshiVis components with auditable visual-adapter initialization."""
 
-from typing import Any, Dict, Optional, Tuple
+import hashlib
+import json
+import re
+from typing import Any, Dict, Literal, Optional, Tuple
 
 import torch
 from safetensors.torch import load_file
@@ -12,6 +15,178 @@ from safetensors.torch import load_file
 from jmoshivis.config.kyuteye_config import KyuteyeConfig
 from jmoshivis.models.image_projection import ImageProjection
 from jmoshivis.models.moshivis import MoshiVisGen, MoshiVis
+
+
+VisualAdapterInit = Literal[
+    "inherit_visual_adapter",
+    "random_visual_adapter",
+]
+VISUAL_ADAPTER_INIT_MODES = {
+    "inherit_visual_adapter",
+    "random_visual_adapter",
+}
+
+
+def _clean_checkpoint_key(key: str) -> str:
+    """Remove wrappers introduced by DDP/torch.compile from a state-dict key."""
+
+    while key.startswith(("module.", "_orig_mod.")):
+        key = key.split(".", 1)[1]
+    return key
+
+
+def _is_model_visual_adapter_key(key: str) -> bool:
+    """Model-side visual adapter = cross-attention, gate, and its input norm."""
+
+    return "cross_attention" in key or "norm_cross" in key
+
+
+def _is_allowed_shared_mha_alias_missing(key: str) -> bool:
+    """Return whether ``key`` is an expected alias of the shared layer-0 MHA.
+
+    ``safetensors.save_model`` stores a shared tensor once.  In the checked-in
+    MoshiVis configuration, layer 0 is the canonical cross-attention MHA owner
+    and layers 1..N expose aliases to those same tensors.  Only those aliases
+    may be absent when an inherited visual adapter is loaded; a missing gate,
+    ``norm_cross``, or layer-0 MHA tensor means the adapter is incomplete.
+    """
+
+    match = re.search(r"(?:^|\.)layers\.(\d+)\.cross_attention\.mha(?:\.|$)", key)
+    return match is not None and int(match.group(1)) > 0
+
+
+def _resolve_visual_adapter_init_mode(
+    cross_attention_config: Optional[dict],
+) -> VisualAdapterInit:
+    """Resolve the explicit mode, with the old boolean accepted for compatibility."""
+
+    config = cross_attention_config or {}
+    explicit = config.get("visual_adapter_init")
+    legacy = config.get("inherit_from_pretrained")
+    if explicit is None:
+        # Preserve the loader's historical default when neither option exists.
+        return "inherit_visual_adapter" if bool(legacy) else "random_visual_adapter"
+    if explicit not in VISUAL_ADAPTER_INIT_MODES:
+        choices = ", ".join(sorted(VISUAL_ADAPTER_INIT_MODES))
+        raise ValueError(f"visual_adapter_init must be one of: {choices}; got {explicit!r}")
+    if legacy is not None:
+        legacy_mode = (
+            "inherit_visual_adapter" if bool(legacy) else "random_visual_adapter"
+        )
+        if explicit != legacy_mode:
+            raise ValueError(
+                "Conflicting visual-adapter initialization settings: "
+                f"visual_adapter_init={explicit!r}, "
+                f"inherit_from_pretrained={legacy!r}"
+            )
+    return explicit
+
+
+def _partition_training_checkpoint(
+    weights: Dict[str, torch.Tensor],
+    *,
+    inherit_visual_adapter: bool,
+) -> tuple[Dict[str, torch.Tensor], Dict[str, torch.Tensor], Dict[str, list[str]]]:
+    """Split image/model state and exclude the *whole* adapter in random mode."""
+
+    image_proj_state: Dict[str, torch.Tensor] = {}
+    model_state: Dict[str, torch.Tensor] = {}
+    source_group_keys: Dict[str, list[str]] = {
+        "moshi_backbone": [],
+        "cross_attention_and_gate": [],
+        "norm_cross": [],
+        "image_encoder": [],
+        "image_projection_and_norm": [],
+    }
+    for raw_key, value in weights.items():
+        key = _clean_checkpoint_key(raw_key)
+        if key.startswith("image_prefix."):
+            image_key = key[len("image_prefix."):]
+            image_proj_state[image_key] = value
+            group = (
+                "image_encoder"
+                if image_key.startswith("enc.")
+                else "image_projection_and_norm"
+            )
+            source_group_keys[group].append(key)
+            continue
+
+        if "norm_cross" in key:
+            source_group_keys["norm_cross"].append(key)
+        elif "cross_attention" in key:
+            source_group_keys["cross_attention_and_gate"].append(key)
+        else:
+            source_group_keys["moshi_backbone"].append(key)
+
+        if _is_model_visual_adapter_key(key) and not inherit_visual_adapter:
+            continue
+        model_state[key] = value
+
+    return image_proj_state, model_state, source_group_keys
+
+
+def _reset_image_projection_adapter(image_embedder: ImageProjection) -> None:
+    """Reset learned image projection/norms while preserving the frozen encoder."""
+
+    for module_name in ("proj_extra", "proj_xa"):
+        module = getattr(image_embedder, module_name, None)
+        if module is not None and hasattr(module, "reset_parameters"):
+            module.reset_parameters()
+    for module_name in ("norm_extra", "norm_xa"):
+        module = getattr(image_embedder, module_name, None)
+        if module is None:
+            continue
+        if hasattr(module, "reset_parameters"):
+            module.reset_parameters()
+        else:
+            # The local RMSNorm has no reset_parameters method and is initialized
+            # with an all-ones scale.
+            for parameter in module.parameters():
+                torch.nn.init.ones_(parameter)
+
+
+def _sampled_parameter_fingerprint(
+    named_parameters: list[tuple[str, torch.nn.Parameter]],
+) -> str:
+    """Cheap, deterministic signature for startup audits (not a full weight hash)."""
+
+    digest = hashlib.sha256()
+    seen: set[int] = set()
+    for name, parameter in sorted(named_parameters):
+        if id(parameter) in seen:
+            continue
+        seen.add(id(parameter))
+        tensor = parameter.detach().reshape(-1)
+        digest.update(name.encode("utf-8"))
+        digest.update(str(tuple(parameter.shape)).encode("ascii"))
+        digest.update(str(parameter.dtype).encode("ascii"))
+        if tensor.numel():
+            indices = sorted({0, tensor.numel() // 2, tensor.numel() - 1})
+            sample = tensor[indices].float().cpu().numpy()
+            digest.update(sample.tobytes())
+    return digest.hexdigest()
+
+
+def _unique_parameter_summary(
+    named_parameters: list[tuple[str, torch.nn.Parameter]],
+) -> Dict[str, Any]:
+    seen: set[int] = set()
+    tensors = trainable_tensors = numel = trainable_numel = 0
+    for _, parameter in named_parameters:
+        if id(parameter) in seen:
+            continue
+        seen.add(id(parameter))
+        tensors += 1
+        numel += parameter.numel()
+        if parameter.requires_grad:
+            trainable_tensors += 1
+            trainable_numel += parameter.numel()
+    return {
+        "parameter_tensors": tensors,
+        "parameters": numel,
+        "trainable_parameter_tensors": trainable_tensors,
+        "trainable_parameters": trainable_numel,
+    }
 
 
 def get_moshi_vis(
@@ -47,7 +222,10 @@ def get_moshi_vis(
             print("  ❌ No cross_attention keys found!")
         print("=========================================================\n")
 
-        for key, v in load_file(moshi_weight, device=device).items():  # type: ignore
+        # Reuse the CPU checkpoint already read above. from_config copies it
+        # into the destination modules; loading a second full copy onto CUDA
+        # can exhaust shared GPUs before the image encoder is constructed.
+        for key, v in loaded_weights.items():
             clean_key = key
             is_image_proj = False
 
@@ -108,11 +286,21 @@ def get_moshi_vis(
     target_keywords = ["cross_attention", "gate", "xa"]
     important_params = [k for k in moshi_keys if any(x in k for x in target_keywords)]
 
-    missing_important = [k for k in important_params if k not in loaded_moshi_keys]
+    # Cross-attention MHA is one shared module referenced from every layer.
+    # safetensors stores the shared tensor once (layer 0), while state_dict()
+    # enumerates all alias paths.  Do not misreport those aliases as missing.
+    missing_important = [
+        k for k in important_params
+        if k not in loaded_moshi_keys
+        and not (
+            "cross_attention.mha" in k
+            and ".layers.0.cross_attention.mha" not in k
+        )
+    ]
 
     if missing_important:
         print(f"❌ [CRITICAL] Cross-Attention/Gate weights MISSING! ({len(missing_important)} params)")
-        print(f"   Example missing: {missing_important[:-1]}")
+        print(f"   Example missing: {missing_important[:3]}")
         print("   -> モデルは画像情報を無視してテキストのみで生成します。")
     else:
         print(f"✅ Cross-Attention & Gate weights loaded ({len(important_params)} params).")
@@ -153,9 +341,12 @@ def get_moshi_vis_train(
             - freeze: bool, Gateを凍結するか
             - init_alpha: float, α初期値
         cross_attention_config (dict): Cross-Attention初期化設定
-            - inherit_from_pretrained: bool
-              False=ランダム初期化で学習開始 (現状の挙動),
-              True =MoshiVisのCross-Attention/Gateを継承して学習開始
+            - visual_adapter_init: str
+              ``inherit_visual_adapter`` = projection / norm_cross /
+              cross-attention / gateをMoshiVisから継承
+              ``random_visual_adapter`` = 上記全体をランダム初期化
+              （どちらも日本語Moshi backboneと画像encoderは継承）
+            - inherit_from_pretrained: bool (deprecated compatibility alias)
 
     Returns:
         Tuple[MoshiVis, ImageProjection]: モデル本体と画像埋め込みモジュール。
@@ -164,52 +355,57 @@ def get_moshi_vis_train(
     # --- ステート分離用ディクショナリ ---
     image_proj_state: Dict[str, torch.Tensor] = {}
     model_state: Dict[str, torch.Tensor] = {}
-
-    # Cross-Attention/Gate の初期化方針 (config駆動)
-    #   False (デフォルト): ロードから除外し、後段でランダム初期化 → 現状と完全に同じ挙動
-    #   True             : MoshiVis の Cross-Attention/Gate を継承して学習開始
-    inherit_ca = bool(
-        cross_attention_config
-        and cross_attention_config.get("inherit_from_pretrained", False)
-    )
+    init_mode = _resolve_visual_adapter_init_mode(cross_attention_config)
+    inherit_visual_adapter = init_mode == "inherit_visual_adapter"
+    model_load_report: Dict[str, Any] = {
+        "missing_visual_adapter_keys": 0,
+        "missing_non_visual_keys": 0,
+        "unexpected_checkpoint_keys": 0,
+    }
+    source_group_keys: Dict[str, list[str]] = {}
 
     if moshivis_weight is not None:
         print(f"🔹 Loading pretrained weights from {moshivis_weight}")
         weights = load_file(moshivis_weight, device="cpu")
 
-        # チェックポイント内に Cross-Attention の重みが存在するか確認
-        ca_keys_in_file = [k for k in weights.keys() if "cross_attention" in k]
-        if inherit_ca and len(ca_keys_in_file) == 0:
-            print(
-                "⚠️ inherit_from_pretrained=True ですが、チェックポイントに "
-                "Cross-Attention の重みがありません。ランダム初期化にフォールバックします。"
+        image_proj_state, model_state, source_group_keys = (
+            _partition_training_checkpoint(
+                weights,
+                inherit_visual_adapter=inherit_visual_adapter,
             )
-            inherit_ca = False
+        )
 
-        if inherit_ca:
-            print(
-                f"🧬 Cross-Attention: MoshiVis から継承して学習開始 "
-                f"({len(ca_keys_in_file)} keys)"
-            )
-        else:
-            print("🎲 Cross-Attention: ランダム初期化で学習開始 (現状と同じ挙動)")
+        if inherit_visual_adapter:
+            missing_source_groups = [
+                group
+                for group in (
+                    "cross_attention_and_gate",
+                    "norm_cross",
+                    "image_projection_and_norm",
+                )
+                if not source_group_keys[group]
+            ]
+            if missing_source_groups:
+                raise RuntimeError(
+                    "inherit_visual_adapter requires all adapter groups in the "
+                    "source checkpoint; missing: " + ", ".join(missing_source_groups)
+                )
+    elif inherit_visual_adapter:
+        raise ValueError("inherit_visual_adapter requires moshivis_weight")
+    else:
+        source_group_keys = {
+            "moshi_backbone": [],
+            "cross_attention_and_gate": [],
+            "norm_cross": [],
+            "image_encoder": [],
+            "image_projection_and_norm": [],
+        }
 
-        for key, v in weights.items():
-            if key.startswith("image_prefix."):
-                image_proj_state[key[len("image_prefix."):]] = v
-            else:
-                # Cross-Attention/Gate の重み:
-                #   inherit_ca=False → ロードから除外 (後段でランダム初期化)
-                #   inherit_ca=True  → ロードして MoshiVis の重みを継承
-                if "cross_attention" in key and not inherit_ca:
-                    continue
-
-                model_state[key] = v
-
+    print(f"🧪 Visual adapter initialization: {init_mode}")
     print("🔍 Num image_prefix params:", len(image_proj_state))
     print(
         f"🔍 Model params to load: {len(model_state)} "
-        f"(Cross-Attention {'included' if inherit_ca else 'excluded'})"
+        f"(visual adapter {'included' if inherit_visual_adapter else 'excluded'})"
     )
 
     # --- モデル構築 ---
@@ -218,26 +414,52 @@ def get_moshi_vis_train(
 
     # --- 重みロード ---
     if model_state:
-        # Cross-Attentionのキーが model_state に無いため、missing_keys に含まれることになる
-        # strict=False なのでエラーにはならない
-        missing, unexpected = moshi_vis.load_state_dict(model_state, strict=False)
+        missing, unexpected = moshi_vis.load_state_dict(model_state, strict=strict)
 
-        # Cross-Attention の missing 状況を確認
-        #   inherit_ca=False → cross_attention は意図的に missing になる
-        #   inherit_ca=True  → cross_attention も継承されるため missing は ~0
-        ca_missing = [k for k in missing if "cross_attention" in k]
+        adapter_missing = [k for k in missing if _is_model_visual_adapter_key(k)]
+        non_adapter_missing = [k for k in missing if not _is_model_visual_adapter_key(k)]
         print("✅ MoshiVis loaded.")
         print(f"   - Total Missing: {len(missing)}")
         print(
-            f"   - Cross-Attention Missing: {len(ca_missing)} "
-            f"({'inherited' if inherit_ca else 'random-init予定'})"
+            f"   - Visual-adapter Missing: {len(adapter_missing)} "
+            f"({'inherited/shared aliases' if inherit_visual_adapter else 'intentionally random'})"
         )
+        print(f"   - Unexpected non-adapter Missing: {len(non_adapter_missing)}")
         print(f"   - Unexpected: {len(unexpected)}")
+        model_load_report = {
+            "missing_visual_adapter_keys": len(adapter_missing),
+            "missing_non_visual_keys": len(non_adapter_missing),
+            "unexpected_checkpoint_keys": len(unexpected),
+        }
+        if non_adapter_missing:
+            raise RuntimeError(
+                "Checkpoint/model mismatch outside the visual adapter: "
+                f"missing={non_adapter_missing[:5]}"
+            )
+        if inherit_visual_adapter:
+            incomplete_adapter = [
+                key
+                for key in adapter_missing
+                if not _is_allowed_shared_mha_alias_missing(key)
+            ]
+            if incomplete_adapter:
+                raise RuntimeError(
+                    "Inherited visual adapter is incomplete; only non-layer-0 "
+                    "aliases of the shared cross-attention MHA may be missing: "
+                    f"missing={incomplete_adapter[:5]}"
+                )
 
     if image_proj_state:
         image_embedder = ImageProjection.from_config(
             kyuteye_config, moshi_vis.llm.dim, image_proj_state, device
         )
+    else:
+        image_embedder = ImageProjection.from_config(
+            kyuteye_config, moshi_vis.llm.dim, None, device
+        )
+
+    if not inherit_visual_adapter:
+        _reset_image_projection_adapter(image_embedder)
 
     # ----------------------------------------------------
     # 3. Freeze / unfreeze strategy
@@ -320,14 +542,12 @@ def get_moshi_vis_train(
 
         print(f"🔥 Trainable params count: Moshi(CA)={trainable_count}, Depformer={depformer_trainable_count}, Embedder(Proj)={embedder_trainable_count}")
 
-        # Cross-Attention初期化
-        #   inherit_ca=True  → MoshiVis から継承済みのため再初期化しない
-        #   inherit_ca=False → ランダム初期化 (現状の挙動)
-        if inherit_ca:
-            print("🧬 Cross-Attention weights inherited from MoshiVis "
-                  "(skip random init).")
+        # Model-side visual adapter initialization. norm_cross stays at the
+        # constructor default in random mode because it was excluded from load.
+        if inherit_visual_adapter:
+            print("🧬 Visual adapter inherited from MoshiVis (skip random init).")
         else:
-            print("😎 Initializing Cross-Attention weights (random)...")
+            print("🎲 Initializing cross-attention and gates from scratch...")
             for name, p in moshi_vis.named_parameters():
                 if "cross_attention" in name and "weight" in name and p.requires_grad:
                     if "in_proj" in name or "out_proj" in name or "linear" in name:
@@ -340,24 +560,36 @@ def get_moshi_vis_train(
         # =========================================================
         gate_freeze = gate_config.get("freeze", False)
         gate_init_alpha = gate_config.get("init_alpha", 0.0)
+        gate_shift = float(kyuteye_config.xa_sigmoid_shift)
         
         if gate_freeze:
-            print(f"🔓 Gate: Freezing at alpha={gate_init_alpha} (gate ≈ {1/(1+2.718**(-(gate_init_alpha-5.3))):.1%})")
+            if inherit_visual_adapter:
+                print("🔒 Gate: inherited weights frozen")
+            else:
+                initial_gate = torch.sigmoid(
+                    torch.tensor(gate_init_alpha - gate_shift)
+                ).item()
+                print(
+                    f"🔒 Gate: random-init scalar alpha={gate_init_alpha} "
+                    f"(sigmoid gate ≈ {initial_gate:.1%}); conditional MLP uses "
+                    "small random weights"
+                )
         else:
-            print(f"� Gate: Trainable, init_alpha={gate_init_alpha}")
+            source = "inherited" if inherit_visual_adapter else "random-init"
+            print(f"🔧 Gate: trainable ({source}, sigmoid_shift={gate_shift})")
         
         for name, p in moshi_vis.named_parameters():
             if "gate" in name and "alpha" in name:
-                # inherit_ca=True のときは MoshiVis から継承した Gate 重みを保持し、
+                # inherit_visual_adapter のときは継承した Gate 重みを保持し、
                 # 再初期化しない (requires_grad / freeze 設定のみ適用)
-                if not inherit_ca:
-                    if p.ndim > 0:
+                if not inherit_visual_adapter:
+                    if name.endswith("gate.alpha"):
+                        # Scalar gating parameter has shape [1, 1, 1].
+                        torch.nn.init.constant_(p, gate_init_alpha)
+                    else:
                         # For Conditional Gating (MLP), we must NOT set weights to 0.0 (kills gradient).
                         # Initialize with small noise to keep output small (~0) but allow gradient flow.
                         torch.nn.init.normal_(p, mean=0.0, std=0.01)
-                    else:
-                        # For Scalar Gating, set to the desired initial alpha value.
-                        torch.nn.init.constant_(p, gate_init_alpha)
                 if gate_freeze:
                     p.requires_grad = False
                     print(f"   Frozen: {name}")
@@ -374,5 +606,54 @@ def get_moshi_vis_train(
     # --- モード設定 ---
     moshi_vis.train()
     image_embedder.eval()
+
+    model_adapter_parameters = [
+        (name, parameter)
+        for name, parameter in moshi_vis.named_parameters()
+        if _is_model_visual_adapter_key(name)
+    ]
+    image_adapter_parameters = [
+        (f"image_prefix.{name}", parameter)
+        for name, parameter in image_embedder.named_parameters()
+        if not name.startswith("enc.")
+    ]
+    visual_adapter_parameters = model_adapter_parameters + image_adapter_parameters
+    audit: Dict[str, Any] = {
+        "schema_version": "jmoshivis.visual-adapter-init.v1",
+        "mode": init_mode,
+        "source_checkpoint": str(moshivis_weight) if moshivis_weight else None,
+        "xa_sigmoid_shift": float(kyuteye_config.xa_sigmoid_shift),
+        "image_preprocessing": {
+            "size": int(kyuteye_config.image_size),
+            "interpolation": kyuteye_config.interpolation,
+        },
+        "source_checkpoint_key_counts": {
+            group: len(keys) for group, keys in source_group_keys.items()
+        },
+        "model_load_report": model_load_report,
+        "effective_group_source": {
+            "moshi_backbone": "checkpoint" if moshivis_weight else "constructor",
+            "image_encoder": "checkpoint" if image_proj_state else "pretrained_encoder",
+            "image_projection_and_norm": (
+                "checkpoint" if inherit_visual_adapter else "random"
+            ),
+            "cross_attention_and_gate": (
+                "checkpoint" if inherit_visual_adapter else "random"
+            ),
+            "norm_cross": "checkpoint" if inherit_visual_adapter else "random",
+        },
+        "model_visual_adapter": _unique_parameter_summary(model_adapter_parameters),
+        "image_visual_adapter": _unique_parameter_summary(image_adapter_parameters),
+        "visual_adapter_sampled_sha256": _sampled_parameter_fingerprint(
+            visual_adapter_parameters
+        ),
+    }
+    # Plain dict attributes are intentionally not part of state_dict, but allow
+    # the trainer/checkpoint layer to persist the exact startup audit as metadata.
+    moshi_vis.visual_adapter_init_audit = audit
+    image_embedder.visual_adapter_init_audit = audit
+    print("\n=== Visual Adapter Startup Audit ===")
+    print(json.dumps(audit, ensure_ascii=False, sort_keys=True, indent=2))
+    print("====================================\n")
 
     return moshi_vis.to(dtype=dtype), image_embedder.to(dtype=dtype)

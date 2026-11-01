@@ -1,0 +1,42 @@
+{
+  "num_tested": 5,
+  "num_mentions_sushi": 0,
+  "cases": [
+    {
+      "case": 1,
+      "image": "/gpu-server/yamamoto/j-moshivis/data/speech_v3/data_stereo/e8222b70c11895d92b09678c6592c73d1ef037b0468bef41d7f7226d12fe35a2/image.jpg",
+      "answer": "白いお皿の上に、お皿の盛り合わせみたいなのが並んでますね。お肉とかお魚、あとお弁当みたいなのもありますよ。",
+      "mentions_sushi": false,
+      "training_line": 625
+    },
+    {
+      "case": 2,
+      "image": "/gpu-server/yamamoto/j-moshivis/data/speech_v3/data_stereo/a2c528e405ab5bce4bd2cb7800e5ec7c65a737b32f01e74e8d82307ee8e4ddd0/image.jpg",
+      "answer": "おにぎりみたいなのが、黒いお皿に並んで並んでますね。巻き目がすごくきれいです。",
+      "mentions_sushi": false,
+      "training_line": 1197
+    },
+    {
+      "case": 3,
+      "image": "/gpu-server/yamamoto/j-moshivis/data/speech_v3/data_stereo/c00b769199b4738ea56dc13eeab8f02ababfba390cf2e2ae765f3ee32f77b227/image.jpg",
+      "answer": "白いお皿の上に、いろんな種類のお料理が並んでますね。お刺身みたいなのと、お刺身の隣にお刺身の盛り合わせみたいなのもありますよ。",
+      "mentions_sushi": false,
+      "training_line": 1557
+    },
+    {
+      "case": 4,
+      "image": "/gpu-server/yamamoto/j-moshivis/data/speech_v3/data_stereo/339783e2c5c18b82000ab03984b4c97b07d2c2b6bf4240bca7b4a93f1390a6ba/image.jpg",
+      "answer": "魚の盛り付けみたいですね。木の板の上に、いろんな種類の魚が並んでますよ。",
+      "mentions_sushi": false,
+      "training_line": 2855
+    },
+    {
+      "case": 5,
+      "image": "/gpu-server/yamamoto/j-moshivis/data/speech_v3/data_stereo/5e19e886c66de4d127a7eecebc6360b74f95a22180270ab4c372bdd018156e82/image.jpg",
+      "answer": "はい、お皿の上にお肉が乗っています。ピンク色のお肉ですね。",
+      "mentions_sushi": false,
+      "training_line": 3819
+    }
+  ],
+  "note": "Mention detection is not automatically an accuracy score."
+}

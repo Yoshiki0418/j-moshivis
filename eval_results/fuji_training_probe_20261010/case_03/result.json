@@ -1,0 +1,6965 @@
+{
+  "answer_text": "山がすごく高いので、山っていう名前が付いてますね。山の上には大きな山が立ってます。",
+  "generated_text_all": "山がすごく高いので、山っていう名前が付いてますね。山の上には大きな山が立ってます。",
+  "answer_token_ids": [
+    9,
+    84,
+    12,
+    263,
+    4660,
+    1398,
+    10,
+    19,
+    7,
+    84,
+    341,
+    10168,
+    1515,
+    12,
+    10905,
+    3418,
+    969,
+    8,
+    84,
+    5017,
+    11,
+    622,
+    84,
+    12,
+    15050,
+    3418,
+    8
+  ],
+  "raw_text_events": [
+    {
+      "frame": 1,
+      "time_sec": 0.08,
+      "token_id": 9,
+      "piece": "▁",
+      "gate": 0.018551845103502274,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 2,
+      "time_sec": 0.16,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.019929785281419754,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 3,
+      "time_sec": 0.24,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.016804605722427368,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 4,
+      "time_sec": 0.32,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.018429243937134743,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 5,
+      "time_sec": 0.4,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.018098710104823112,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 6,
+      "time_sec": 0.48,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.01969802938401699,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 7,
+      "time_sec": 0.56,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.020218992605805397,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 8,
+      "time_sec": 0.64,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.02131769247353077,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 9,
+      "time_sec": 0.72,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.02107432298362255,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 10,
+      "time_sec": 0.8,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.020416049286723137,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 11,
+      "time_sec": 0.88,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.021159416064620018,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 12,
+      "time_sec": 0.96,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.021981028839945793,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 13,
+      "time_sec": 1.04,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.022522877901792526,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 14,
+      "time_sec": 1.12,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.022548669949173927,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 15,
+      "time_sec": 1.2,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.021873408928513527,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 16,
+      "time_sec": 1.28,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.020279986783862114,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 17,
+      "time_sec": 1.36,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.021837731823325157,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 18,
+      "time_sec": 1.44,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.022417232394218445,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 19,
+      "time_sec": 1.52,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.022129042074084282,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 20,
+      "time_sec": 1.6,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.023142874240875244,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 21,
+      "time_sec": 1.68,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.0229299645870924,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 22,
+      "time_sec": 1.76,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.021309688687324524,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 23,
+      "time_sec": 1.84,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.020289210602641106,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 24,
+      "time_sec": 1.92,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.02045624516904354,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 25,
+      "time_sec": 2.0,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.022490298375487328,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 26,
+      "time_sec": 2.08,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.021976357325911522,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 27,
+      "time_sec": 2.16,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.020985478535294533,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 28,
+      "time_sec": 2.24,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.020844990387558937,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 29,
+      "time_sec": 2.32,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.020490530878305435,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 30,
+      "time_sec": 2.4,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.021024391055107117,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 31,
+      "time_sec": 2.48,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.019705239683389664,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 32,
+      "time_sec": 2.56,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.01949397660791874,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 33,
+      "time_sec": 2.64,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.02076072432100773,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 34,
+      "time_sec": 2.72,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.020521460101008415,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 35,
+      "time_sec": 2.8,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.020014286041259766,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 36,
+      "time_sec": 2.88,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.01977631263434887,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 37,
+      "time_sec": 2.96,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.019439367577433586,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 38,
+      "time_sec": 3.04,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.018818354234099388,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 39,
+      "time_sec": 3.12,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.01874801330268383,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 40,
+      "time_sec": 3.2,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.020850300788879395,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 41,
+      "time_sec": 3.28,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.021655941382050514,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 42,
+      "time_sec": 3.36,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.02157939039170742,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 43,
+      "time_sec": 3.44,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.020114628598093987,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 44,
+      "time_sec": 3.52,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.01894318126142025,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 45,
+      "time_sec": 3.6,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.019841497763991356,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 46,
+      "time_sec": 3.68,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.020642917603254318,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 47,
+      "time_sec": 3.76,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.022158225998282433,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 48,
+      "time_sec": 3.84,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.022252390161156654,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 49,
+      "time_sec": 3.92,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.02344096079468727,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 50,
+      "time_sec": 4.0,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.0225084088742733,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 51,
+      "time_sec": 4.08,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.020916307345032692,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 52,
+      "time_sec": 4.16,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.02199508808553219,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 53,
+      "time_sec": 4.24,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.02141205221414566,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 54,
+      "time_sec": 4.32,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.020979152992367744,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 55,
+      "time_sec": 4.4,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.019261592999100685,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 56,
+      "time_sec": 4.48,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.02067652717232704,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 57,
+      "time_sec": 4.56,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.019940022379159927,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 58,
+      "time_sec": 4.64,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.019197950139641762,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 59,
+      "time_sec": 4.72,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.02008887752890587,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 60,
+      "time_sec": 4.8,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.020021960139274597,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 61,
+      "time_sec": 4.88,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.020492276176810265,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 62,
+      "time_sec": 4.96,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.018577223643660545,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 63,
+      "time_sec": 5.04,
+      "token_id": 0,
+      "piece": "<unk>",
+      "gate": 0.032336827367544174,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 64,
+      "time_sec": 5.12,
+      "token_id": 9,
+      "piece": "▁",
+      "gate": 0.030001914128661156,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 65,
+      "time_sec": 5.2,
+      "token_id": 84,
+      "piece": "山",
+      "gate": 0.016337919980287552,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 66,
+      "time_sec": 5.28,
+      "token_id": 0,
+      "piece": "<unk>",
+      "gate": 0.01968812197446823,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 67,
+      "time_sec": 5.36,
+      "token_id": 12,
+      "piece": "が",
+      "gate": 0.019948814064264297,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 68,
+      "time_sec": 5.44,
+      "token_id": 0,
+      "piece": "<unk>",
+      "gate": 0.031049182638525963,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 69,
+      "time_sec": 5.52,
+      "token_id": 263,
+      "piece": "す",
+      "gate": 0.0158600565046072,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 70,
+      "time_sec": 5.6,
+      "token_id": 4660,
+      "piece": "ごく",
+      "gate": 0.015578758902847767,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 71,
+      "time_sec": 5.68,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.016350267454981804,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 72,
+      "time_sec": 5.76,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.017787199467420578,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 73,
+      "time_sec": 5.84,
+      "token_id": 0,
+      "piece": "<unk>",
+      "gate": 0.029465315863490105,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 74,
+      "time_sec": 5.92,
+      "token_id": 1398,
+      "piece": "高い",
+      "gate": 0.014853491447865963,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 75,
+      "time_sec": 6.0,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.015516504645347595,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 76,
+      "time_sec": 6.08,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.016014015302062035,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 77,
+      "time_sec": 6.16,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.017368823289871216,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 78,
+      "time_sec": 6.24,
+      "token_id": 0,
+      "piece": "<unk>",
+      "gate": 0.024907400831580162,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 79,
+      "time_sec": 6.32,
+      "token_id": 10,
+      "piece": "の",
+      "gate": 0.017789775505661964,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 80,
+      "time_sec": 6.4,
+      "token_id": 19,
+      "piece": "で",
+      "gate": 0.023023704066872597,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 81,
+      "time_sec": 6.48,
+      "token_id": 0,
+      "piece": "<unk>",
+      "gate": 0.026698419824242592,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 82,
+      "time_sec": 6.56,
+      "token_id": 7,
+      "piece": "、",
+      "gate": 0.026164144277572632,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 83,
+      "time_sec": 6.64,
+      "token_id": 84,
+      "piece": "山",
+      "gate": 0.01444727461785078,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 84,
+      "time_sec": 6.72,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.017565157264471054,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 85,
+      "time_sec": 6.8,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.01581001654267311,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 86,
+      "time_sec": 6.88,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.014913964085280895,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 87,
+      "time_sec": 6.96,
+      "token_id": 0,
+      "piece": "<unk>",
+      "gate": 0.017048390582203865,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 88,
+      "time_sec": 7.04,
+      "token_id": 341,
+      "piece": "って",
+      "gate": 0.01794089749455452,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 89,
+      "time_sec": 7.12,
+      "token_id": 0,
+      "piece": "<unk>",
+      "gate": 0.0190342515707016,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 90,
+      "time_sec": 7.2,
+      "token_id": 10168,
+      "piece": "いう",
+      "gate": 0.015286663547158241,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 91,
+      "time_sec": 7.28,
+      "token_id": 0,
+      "piece": "<unk>",
+      "gate": 0.018496457487344742,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 92,
+      "time_sec": 7.36,
+      "token_id": 1515,
+      "piece": "名前",
+      "gate": 0.012951994314789772,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 93,
+      "time_sec": 7.44,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.014893029816448689,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 94,
+      "time_sec": 7.52,
+      "token_id": 0,
+      "piece": "<unk>",
+      "gate": 0.01540065836161375,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 95,
+      "time_sec": 7.6,
+      "token_id": 12,
+      "piece": "が",
+      "gate": 0.01613544300198555,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 96,
+      "time_sec": 7.68,
+      "token_id": 0,
+      "piece": "<unk>",
+      "gate": 0.017933430150151253,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 97,
+      "time_sec": 7.76,
+      "token_id": 10905,
+      "piece": "付いて",
+      "gate": 0.012207976542413235,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 98,
+      "time_sec": 7.84,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.01586220972239971,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 99,
+      "time_sec": 7.92,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.016073662787675858,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 100,
+      "time_sec": 8.0,
+      "token_id": 0,
+      "piece": "<unk>",
+      "gate": 0.017078697681427002,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 101,
+      "time_sec": 8.08,
+      "token_id": 3418,
+      "piece": "ます",
+      "gate": 0.014795399270951748,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 102,
+      "time_sec": 8.16,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.016654791310429573,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 103,
+      "time_sec": 8.24,
+      "token_id": 0,
+      "piece": "<unk>",
+      "gate": 0.01675790175795555,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 104,
+      "time_sec": 8.32,
+      "token_id": 969,
+      "piece": "ね",
+      "gate": 0.022988341748714447,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 105,
+      "time_sec": 8.4,
+      "token_id": 0,
+      "piece": "<unk>",
+      "gate": 0.022313255816698074,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 106,
+      "time_sec": 8.48,
+      "token_id": 8,
+      "piece": "。",
+      "gate": 0.021937644109129906,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 107,
+      "time_sec": 8.56,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.021976234391331673,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 108,
+      "time_sec": 8.64,
+      "token_id": 0,
+      "piece": "<unk>",
+      "gate": 0.02982017956674099,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 109,
+      "time_sec": 8.72,
+      "token_id": 84,
+      "piece": "山",
+      "gate": 0.014947245828807354,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 110,
+      "time_sec": 8.8,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.01820307970046997,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 111,
+      "time_sec": 8.88,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.015447891317307949,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 112,
+      "time_sec": 8.96,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.014255980029702187,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 113,
+      "time_sec": 9.04,
+      "token_id": 0,
+      "piece": "<unk>",
+      "gate": 0.017438843846321106,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 114,
+      "time_sec": 9.12,
+      "token_id": 5017,
+      "piece": "の上に",
+      "gate": 0.013209952972829342,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 115,
+      "time_sec": 9.2,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.015799177810549736,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 116,
+      "time_sec": 9.28,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.015634242445230484,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 117,
+      "time_sec": 9.36,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.01727483607828617,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 118,
+      "time_sec": 9.44,
+      "token_id": 0,
+      "piece": "<unk>",
+      "gate": 0.027109295129776,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 119,
+      "time_sec": 9.52,
+      "token_id": 11,
+      "piece": "は",
+      "gate": 0.02412494271993637,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 120,
+      "time_sec": 9.6,
+      "token_id": 0,
+      "piece": "<unk>",
+      "gate": 0.030086934566497803,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 121,
+      "time_sec": 9.68,
+      "token_id": 622,
+      "piece": "大きな",
+      "gate": 0.013844330795109272,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 122,
+      "time_sec": 9.76,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.016784653067588806,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 123,
+      "time_sec": 9.84,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.01606992818415165,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 124,
+      "time_sec": 9.92,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.015077933669090271,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 125,
+      "time_sec": 10.0,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.015775388106703758,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 126,
+      "time_sec": 10.08,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.018644988536834717,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 127,
+      "time_sec": 10.16,
+      "token_id": 0,
+      "piece": "<unk>",
+      "gate": 0.02951793186366558,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 128,
+      "time_sec": 10.24,
+      "token_id": 84,
+      "piece": "山",
+      "gate": 0.01538878120481968,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 129,
+      "time_sec": 10.32,
+      "token_id": 0,
+      "piece": "<unk>",
+      "gate": 0.017811739817261696,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 130,
+      "time_sec": 10.4,
+      "token_id": 12,
+      "piece": "が",
+      "gate": 0.0249490886926651,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 131,
+      "time_sec": 10.48,
+      "token_id": 0,
+      "piece": "<unk>",
+      "gate": 0.02757871150970459,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 132,
+      "time_sec": 10.56,
+      "token_id": 15050,
+      "piece": "立って",
+      "gate": 0.015892330557107925,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 133,
+      "time_sec": 10.64,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.017669228836894035,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 134,
+      "time_sec": 10.72,
+      "token_id": 0,
+      "piece": "<unk>",
+      "gate": 0.019693659618496895,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 135,
+      "time_sec": 10.8,
+      "token_id": 3418,
+      "piece": "ます",
+      "gate": 0.01625639945268631,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 136,
+      "time_sec": 10.88,
+      "token_id": 0,
+      "piece": "<unk>",
+      "gate": 0.016559584066271782,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 137,
+      "time_sec": 10.96,
+      "token_id": 8,
+      "piece": "。",
+      "gate": 0.01929478719830513,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 138,
+      "time_sec": 11.04,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.02304508164525032,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 139,
+      "time_sec": 11.12,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.02427295222878456,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 140,
+      "time_sec": 11.2,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.02179018221795559,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 141,
+      "time_sec": 11.28,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.019496917724609375,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 142,
+      "time_sec": 11.36,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.019714897498488426,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 143,
+      "time_sec": 11.44,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.01938818208873272,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 144,
+      "time_sec": 11.52,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.01972668059170246,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 145,
+      "time_sec": 11.6,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.020215777680277824,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 146,
+      "time_sec": 11.68,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.019807757809758186,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 147,
+      "time_sec": 11.76,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.01995694637298584,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 148,
+      "time_sec": 11.84,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.019670218229293823,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 149,
+      "time_sec": 11.92,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.01963518187403679,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 150,
+      "time_sec": 12.0,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.020444443449378014,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 151,
+      "time_sec": 12.08,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.020572906360030174,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 152,
+      "time_sec": 12.16,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.020713115110993385,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 153,
+      "time_sec": 12.24,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.021224582567811012,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 154,
+      "time_sec": 12.32,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.018879590556025505,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 155,
+      "time_sec": 12.4,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.020781783387064934,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 156,
+      "time_sec": 12.48,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.01985367201268673,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 157,
+      "time_sec": 12.56,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.02089507319033146,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 158,
+      "time_sec": 12.64,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.021085649728775024,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 159,
+      "time_sec": 12.72,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.020618565380573273,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 160,
+      "time_sec": 12.8,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.020039550960063934,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 161,
+      "time_sec": 12.88,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.020658602938055992,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 162,
+      "time_sec": 12.96,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.02025969885289669,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 163,
+      "time_sec": 13.04,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.020104533061385155,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 164,
+      "time_sec": 13.12,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.020154517143964767,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 165,
+      "time_sec": 13.2,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.02042703703045845,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 166,
+      "time_sec": 13.28,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.019385693594813347,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 167,
+      "time_sec": 13.36,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.021015478298068047,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 168,
+      "time_sec": 13.44,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.020897358655929565,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 169,
+      "time_sec": 13.52,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.020678753033280373,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 170,
+      "time_sec": 13.6,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.020177824422717094,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 171,
+      "time_sec": 13.68,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.02051195502281189,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 172,
+      "time_sec": 13.76,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.020269906148314476,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 173,
+      "time_sec": 13.84,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.020373081788420677,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 174,
+      "time_sec": 13.92,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.02050706557929516,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 175,
+      "time_sec": 14.0,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.020651808008551598,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 176,
+      "time_sec": 14.08,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.020930614322423935,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 177,
+      "time_sec": 14.16,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.020210135728120804,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 178,
+      "time_sec": 14.24,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.020055284723639488,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 179,
+      "time_sec": 14.32,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.02115105651319027,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 180,
+      "time_sec": 14.4,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.020188331604003906,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 181,
+      "time_sec": 14.48,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.020247865468263626,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 182,
+      "time_sec": 14.56,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.020246734842658043,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 183,
+      "time_sec": 14.64,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.020188162103295326,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 184,
+      "time_sec": 14.72,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.020192397758364677,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 185,
+      "time_sec": 14.8,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.020253855735063553,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 186,
+      "time_sec": 14.88,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.02023463509976864,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 187,
+      "time_sec": 14.96,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.02017207443714142,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 188,
+      "time_sec": 15.04,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.01996379904448986,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 189,
+      "time_sec": 15.12,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.020340686663985252,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 190,
+      "time_sec": 15.2,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.0204045157879591,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 191,
+      "time_sec": 15.28,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.02034248225390911,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 192,
+      "time_sec": 15.36,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.020419318228960037,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 193,
+      "time_sec": 15.44,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.02049787901341915,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 194,
+      "time_sec": 15.52,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.020377768203616142,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 195,
+      "time_sec": 15.6,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.020243072882294655,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 196,
+      "time_sec": 15.68,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.020132044330239296,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 197,
+      "time_sec": 15.76,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.020227564498782158,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 198,
+      "time_sec": 15.84,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.02054886892437935,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 199,
+      "time_sec": 15.92,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.021128935739398003,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 200,
+      "time_sec": 16.0,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.020245885476469994,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 201,
+      "time_sec": 16.08,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.020098665729165077,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 202,
+      "time_sec": 16.16,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.020070938393473625,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 203,
+      "time_sec": 16.24,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.019992103800177574,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 204,
+      "time_sec": 16.32,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.020034028217196465,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 205,
+      "time_sec": 16.4,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.020015276968479156,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 206,
+      "time_sec": 16.48,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.020186031237244606,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 207,
+      "time_sec": 16.56,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.020093007013201714,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 208,
+      "time_sec": 16.64,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.02003438211977482,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 209,
+      "time_sec": 16.72,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.01958196796476841,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 210,
+      "time_sec": 16.8,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.020160436630249023,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 211,
+      "time_sec": 16.88,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.020147735252976418,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 212,
+      "time_sec": 16.96,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.0203295536339283,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 213,
+      "time_sec": 17.04,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.020322337746620178,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 214,
+      "time_sec": 17.12,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.020226769149303436,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 215,
+      "time_sec": 17.2,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.02013009786605835,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 216,
+      "time_sec": 17.28,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.020259704440832138,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 217,
+      "time_sec": 17.36,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.02036675065755844,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 218,
+      "time_sec": 17.44,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.020454032346606255,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 219,
+      "time_sec": 17.52,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.02030712366104126,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 220,
+      "time_sec": 17.6,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.020222891122102737,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 221,
+      "time_sec": 17.68,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.019696293398737907,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 222,
+      "time_sec": 17.76,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.0202135369181633,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 223,
+      "time_sec": 17.84,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.019874220713973045,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 224,
+      "time_sec": 17.92,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.020068461075425148,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 225,
+      "time_sec": 18.0,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.02015562355518341,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 226,
+      "time_sec": 18.08,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.019928205758333206,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 227,
+      "time_sec": 18.16,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.01989183947443962,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 228,
+      "time_sec": 18.24,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.02020150236785412,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 229,
+      "time_sec": 18.32,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.020169159397482872,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 230,
+      "time_sec": 18.4,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.020271027460694313,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 231,
+      "time_sec": 18.48,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.020318688824772835,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 232,
+      "time_sec": 18.56,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.02037576399743557,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 233,
+      "time_sec": 18.64,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.02037258818745613,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 234,
+      "time_sec": 18.72,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.020387498661875725,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 235,
+      "time_sec": 18.8,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.020645003765821457,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 236,
+      "time_sec": 18.88,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.02086060121655464,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 237,
+      "time_sec": 18.96,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.020818468183279037,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 238,
+      "time_sec": 19.04,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.020479220896959305,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 239,
+      "time_sec": 19.12,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.02045026794075966,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 240,
+      "time_sec": 19.2,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.020486673340201378,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 241,
+      "time_sec": 19.28,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.020579978823661804,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 242,
+      "time_sec": 19.36,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.020670926198363304,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 243,
+      "time_sec": 19.44,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.0206373929977417,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 244,
+      "time_sec": 19.52,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.020581228658556938,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 245,
+      "time_sec": 19.6,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.020456381142139435,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 246,
+      "time_sec": 19.68,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.020612504333257675,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 247,
+      "time_sec": 19.76,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.020538074895739555,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 248,
+      "time_sec": 19.84,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.02049667201936245,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 249,
+      "time_sec": 19.92,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.02020491473376751,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 250,
+      "time_sec": 20.0,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.01994013972580433,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 251,
+      "time_sec": 20.08,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.01995016075670719,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 252,
+      "time_sec": 20.16,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.019639471545815468,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 253,
+      "time_sec": 20.24,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.01983686164021492,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 254,
+      "time_sec": 20.32,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.019887499511241913,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 255,
+      "time_sec": 20.4,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.01995721459388733,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 256,
+      "time_sec": 20.48,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.01992635242640972,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 257,
+      "time_sec": 20.56,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.02028791420161724,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 258,
+      "time_sec": 20.64,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.01987210288643837,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 259,
+      "time_sec": 20.72,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.01987043209373951,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 260,
+      "time_sec": 20.8,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.01972479186952114,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 261,
+      "time_sec": 20.88,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.01988375559449196,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 262,
+      "time_sec": 20.96,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.020105764269828796,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 263,
+      "time_sec": 21.04,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.02001333050429821,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 264,
+      "time_sec": 21.12,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.019750718027353287,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 265,
+      "time_sec": 21.2,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.019786741584539413,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 266,
+      "time_sec": 21.28,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.01967831887304783,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 267,
+      "time_sec": 21.36,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.01970180869102478,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 268,
+      "time_sec": 21.44,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.019658010452985764,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 269,
+      "time_sec": 21.52,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.019751785323023796,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 270,
+      "time_sec": 21.6,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.019512757658958435,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 271,
+      "time_sec": 21.68,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.019538352265954018,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 272,
+      "time_sec": 21.76,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.019547883421182632,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 273,
+      "time_sec": 21.84,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.019534306600689888,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 274,
+      "time_sec": 21.92,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.01950554922223091,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 275,
+      "time_sec": 22.0,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.019516894593834877,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 276,
+      "time_sec": 22.08,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.019765470176935196,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 277,
+      "time_sec": 22.16,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.020063403993844986,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 278,
+      "time_sec": 22.24,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.02003053016960621,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 279,
+      "time_sec": 22.32,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.020055143162608147,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 280,
+      "time_sec": 22.4,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.01982313022017479,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 281,
+      "time_sec": 22.48,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.019785776734352112,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 282,
+      "time_sec": 22.56,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.019699567928910255,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 283,
+      "time_sec": 22.64,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.01958346553146839,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 284,
+      "time_sec": 22.72,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.01952272467315197,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 285,
+      "time_sec": 22.8,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.019525079056620598,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 286,
+      "time_sec": 22.88,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.01949954591691494,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 287,
+      "time_sec": 22.96,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.019526951014995575,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 288,
+      "time_sec": 23.04,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.019289538264274597,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 289,
+      "time_sec": 23.12,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.019210657104849815,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 290,
+      "time_sec": 23.2,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.019263124093413353,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 291,
+      "time_sec": 23.28,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.019166449084877968,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 292,
+      "time_sec": 23.36,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.01919715665280819,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 293,
+      "time_sec": 23.44,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.01921267807483673,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 294,
+      "time_sec": 23.52,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.01923186518251896,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 295,
+      "time_sec": 23.6,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.019033828750252724,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 296,
+      "time_sec": 23.68,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.018893806263804436,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 297,
+      "time_sec": 23.76,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.018992392346262932,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 298,
+      "time_sec": 23.84,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.01897069811820984,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 299,
+      "time_sec": 23.92,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.01885264366865158,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 300,
+      "time_sec": 24.0,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.01883682981133461,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 301,
+      "time_sec": 24.08,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.01881949044764042,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 302,
+      "time_sec": 24.16,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.01885797455906868,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 303,
+      "time_sec": 24.24,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.018823936581611633,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 304,
+      "time_sec": 24.32,
+      "token_id": 3,
+      "piece": "[PAD]",
+      "gate": 0.018768033012747765,
+      "phase": "question_and_response"
+    }
+  ],
+  "raw_text_decisions": [
+    {
+      "decision_frame": 47,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 128,
+      "probability": {
+        "alignment_pad_id_3": 0.957901120185852,
+        "end_pad_id_0": 0.042087238281965256,
+        "all_special_ids_0_to_6": 0.9999885559082031,
+        "best_lexical": 5.420402260369883e-08
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 16.6875,
+        "end_pad_id_0": 13.5625,
+        "best_of_ids_0_and_3": 16.6875
+      }
+    },
+    {
+      "decision_frame": 48,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 128,
+      "probability": {
+        "alignment_pad_id_3": 0.9148833155632019,
+        "end_pad_id_0": 0.08509740233421326,
+        "all_special_ids_0_to_6": 0.9999809265136719,
+        "best_lexical": 6.052503209730276e-08
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 16.53125,
+        "end_pad_id_0": 14.15625,
+        "best_of_ids_0_and_3": 16.53125
+      }
+    },
+    {
+      "decision_frame": 49,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 8,
+      "probability": {
+        "alignment_pad_id_3": 0.835429310798645,
+        "end_pad_id_0": 0.16450579464435577,
+        "all_special_ids_0_to_6": 0.9999351501464844,
+        "best_lexical": 1.5992522151009325e-07
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 15.46875,
+        "end_pad_id_0": 13.84375,
+        "best_of_ids_0_and_3": 15.46875
+      }
+    },
+    {
+      "decision_frame": 50,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 8,
+      "probability": {
+        "alignment_pad_id_3": 0.8175269961357117,
+        "end_pad_id_0": 0.1824149340391159,
+        "all_special_ids_0_to_6": 0.9999427795410156,
+        "best_lexical": 1.3385999864112819e-07
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 15.625,
+        "end_pad_id_0": 14.125,
+        "best_of_ids_0_and_3": 15.625
+      }
+    },
+    {
+      "decision_frame": 51,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 8,
+      "probability": {
+        "alignment_pad_id_3": 0.7981444001197815,
+        "end_pad_id_0": 0.20180250704288483,
+        "all_special_ids_0_to_6": 0.9999465942382812,
+        "best_lexical": 1.083427818571181e-07
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 15.8125,
+        "end_pad_id_0": 14.4375,
+        "best_of_ids_0_and_3": 15.8125
+      }
+    },
+    {
+      "decision_frame": 52,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 8,
+      "probability": {
+        "alignment_pad_id_3": 0.7772530317306519,
+        "end_pad_id_0": 0.2226867377758026,
+        "all_special_ids_0_to_6": 0.99993896484375,
+        "best_lexical": 1.3547355592891108e-07
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 15.5625,
+        "end_pad_id_0": 14.3125,
+        "best_of_ids_0_and_3": 15.5625
+      }
+    },
+    {
+      "decision_frame": 53,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 8,
+      "probability": {
+        "alignment_pad_id_3": 0.7057733535766602,
+        "end_pad_id_0": 0.2942101061344147,
+        "all_special_ids_0_to_6": 0.9999828338623047,
+        "best_lexical": 6.381923611797902e-08
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 16.21875,
+        "end_pad_id_0": 15.34375,
+        "best_of_ids_0_and_3": 16.21875
+      }
+    },
+    {
+      "decision_frame": 54,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 8,
+      "probability": {
+        "alignment_pad_id_3": 0.67914217710495,
+        "end_pad_id_0": 0.32080405950546265,
+        "all_special_ids_0_to_6": 0.9999465942382812,
+        "best_lexical": 1.1473109395865322e-07
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 15.59375,
+        "end_pad_id_0": 14.84375,
+        "best_of_ids_0_and_3": 15.59375
+      }
+    },
+    {
+      "decision_frame": 55,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 8,
+      "probability": {
+        "alignment_pad_id_3": 0.6791681051254272,
+        "end_pad_id_0": 0.320816308259964,
+        "all_special_ids_0_to_6": 0.9999847412109375,
+        "best_lexical": 4.3548674000248866e-08
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 16.5625,
+        "end_pad_id_0": 15.8125,
+        "best_of_ids_0_and_3": 16.5625
+      }
+    },
+    {
+      "decision_frame": 56,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 8,
+      "probability": {
+        "alignment_pad_id_3": 0.651310920715332,
+        "end_pad_id_0": 0.34862157702445984,
+        "all_special_ids_0_to_6": 0.9999333024024963,
+        "best_lexical": 1.4576528428733582e-07
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 15.3125,
+        "end_pad_id_0": 14.6875,
+        "best_of_ids_0_and_3": 15.3125
+      }
+    },
+    {
+      "decision_frame": 57,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 8,
+      "probability": {
+        "alignment_pad_id_3": 0.5926318764686584,
+        "end_pad_id_0": 0.40730950236320496,
+        "all_special_ids_0_to_6": 0.9999408721923828,
+        "best_lexical": 1.2855205966388894e-07
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 15.34375,
+        "end_pad_id_0": 14.96875,
+        "best_of_ids_0_and_3": 15.34375
+      }
+    },
+    {
+      "decision_frame": 58,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 8,
+      "probability": {
+        "alignment_pad_id_3": 0.6224389672279358,
+        "end_pad_id_0": 0.3775283396244049,
+        "all_special_ids_0_to_6": 0.9999675750732422,
+        "best_lexical": 7.004628344020603e-08
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 16.0,
+        "end_pad_id_0": 15.5,
+        "best_of_ids_0_and_3": 16.0
+      }
+    },
+    {
+      "decision_frame": 59,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 8,
+      "probability": {
+        "alignment_pad_id_3": 0.5621284246444702,
+        "end_pad_id_0": 0.4377860426902771,
+        "all_special_ids_0_to_6": 0.9999141693115234,
+        "best_lexical": 1.8304660898138536e-07
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 14.9375,
+        "end_pad_id_0": 14.6875,
+        "best_of_ids_0_and_3": 14.9375
+      }
+    },
+    {
+      "decision_frame": 60,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 8,
+      "probability": {
+        "alignment_pad_id_3": 0.5621326565742493,
+        "end_pad_id_0": 0.4377893805503845,
+        "all_special_ids_0_to_6": 0.9999217987060547,
+        "best_lexical": 1.615392903886459e-07
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 15.0625,
+        "end_pad_id_0": 14.8125,
+        "best_of_ids_0_and_3": 15.0625
+      }
+    },
+    {
+      "decision_frame": 61,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 8,
+      "probability": {
+        "alignment_pad_id_3": 0.5621284246444702,
+        "end_pad_id_0": 0.4377860426902771,
+        "all_special_ids_0_to_6": 0.9999141693115234,
+        "best_lexical": 1.7195638690736814e-07
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 15.0,
+        "end_pad_id_0": 14.75,
+        "best_of_ids_0_and_3": 15.0
+      }
+    },
+    {
+      "decision_frame": 62,
+      "argmax_id": 0,
+      "argmax_class": "end_pad",
+      "best_lexical_id": 8,
+      "probability": {
+        "alignment_pad_id_3": 0.4999740421772003,
+        "end_pad_id_0": 0.4999740421772003,
+        "all_special_ids_0_to_6": 0.9999485611915588,
+        "best_lexical": 1.0511622861031356e-07
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 15.375,
+        "end_pad_id_0": 15.375,
+        "best_of_ids_0_and_3": 15.375
+      }
+    },
+    {
+      "decision_frame": 63,
+      "argmax_id": 9,
+      "argmax_class": "lexical",
+      "best_lexical_id": 9,
+      "probability": {
+        "alignment_pad_id_3": 1.8287657610471797e-08,
+        "end_pad_id_0": 1.42424410043418e-08,
+        "all_special_ids_0_to_6": 0.0001963503164006397,
+        "best_lexical": 0.9063864350318909
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": -17.71875,
+        "end_pad_id_0": -17.96875,
+        "best_of_ids_0_and_3": -17.71875
+      }
+    },
+    {
+      "decision_frame": 64,
+      "argmax_id": 84,
+      "argmax_class": "lexical",
+      "best_lexical_id": 84,
+      "probability": {
+        "alignment_pad_id_3": 0.012559087947010994,
+        "end_pad_id_0": 0.017711153253912926,
+        "all_special_ids_0_to_6": 0.030297625809907913,
+        "best_lexical": 0.22261516749858856
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": -2.875,
+        "end_pad_id_0": -2.53125,
+        "best_of_ids_0_and_3": -2.53125
+      }
+    },
+    {
+      "decision_frame": 65,
+      "argmax_id": 0,
+      "argmax_class": "end_pad",
+      "best_lexical_id": 12,
+      "probability": {
+        "alignment_pad_id_3": 0.18551263213157654,
+        "end_pad_id_0": 0.6475027203559875,
+        "all_special_ids_0_to_6": 0.833024263381958,
+        "best_lexical": 0.030284104868769646
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 1.8125,
+        "end_pad_id_0": 3.0625,
+        "best_of_ids_0_and_3": 3.0625
+      }
+    },
+    {
+      "decision_frame": 66,
+      "argmax_id": 12,
+      "argmax_class": "lexical",
+      "best_lexical_id": 12,
+      "probability": {
+        "alignment_pad_id_3": 1.0147362445422914e-05,
+        "end_pad_id_0": 0.00010089584975503385,
+        "all_special_ids_0_to_6": 0.00012766745931003243,
+        "best_lexical": 0.26542532444000244
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": -10.171875,
+        "end_pad_id_0": -7.875,
+        "best_of_ids_0_and_3": -7.875
+      }
+    },
+    {
+      "decision_frame": 67,
+      "argmax_id": 0,
+      "argmax_class": "end_pad",
+      "best_lexical_id": 84,
+      "probability": {
+        "alignment_pad_id_3": 0.20109666883945465,
+        "end_pad_id_0": 0.7953526973724365,
+        "all_special_ids_0_to_6": 0.9964491128921509,
+        "best_lexical": 5.9533605963224545e-05
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 8.125,
+        "end_pad_id_0": 9.5,
+        "best_of_ids_0_and_3": 9.5
+      }
+    },
+    {
+      "decision_frame": 68,
+      "argmax_id": 263,
+      "argmax_class": "lexical",
+      "best_lexical_id": 263,
+      "probability": {
+        "alignment_pad_id_3": 9.082929864234757e-06,
+        "end_pad_id_0": 6.633238081121817e-05,
+        "all_special_ids_0_to_6": 8.709004760021344e-05,
+        "best_lexical": 0.2877013087272644
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": -10.36328125,
+        "end_pad_id_0": -8.375,
+        "best_of_ids_0_and_3": -8.375
+      }
+    },
+    {
+      "decision_frame": 69,
+      "argmax_id": 4660,
+      "argmax_class": "lexical",
+      "best_lexical_id": 4660,
+      "probability": {
+        "alignment_pad_id_3": 0.004409650806337595,
+        "end_pad_id_0": 0.19959603250026703,
+        "all_special_ids_0_to_6": 0.2040061056613922,
+        "best_lexical": 0.7894176840782166
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": -5.1875,
+        "end_pad_id_0": -1.375,
+        "best_of_ids_0_and_3": -1.375
+      }
+    },
+    {
+      "decision_frame": 70,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 58,
+      "probability": {
+        "alignment_pad_id_3": 0.9979631304740906,
+        "end_pad_id_0": 0.0019265220034867525,
+        "all_special_ids_0_to_6": 0.9998893737792969,
+        "best_lexical": 3.4937359032483073e-06
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 12.5625,
+        "end_pad_id_0": 6.3125,
+        "best_of_ids_0_and_3": 12.5625
+      }
+    },
+    {
+      "decision_frame": 71,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 7,
+      "probability": {
+        "alignment_pad_id_3": 0.9241258502006531,
+        "end_pad_id_0": 0.07585687190294266,
+        "all_special_ids_0_to_6": 0.9999828338623047,
+        "best_lexical": 4.912454443228853e-08
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 16.75,
+        "end_pad_id_0": 14.25,
+        "best_of_ids_0_and_3": 16.75
+      }
+    },
+    {
+      "decision_frame": 72,
+      "argmax_id": 0,
+      "argmax_class": "end_pad",
+      "best_lexical_id": 7,
+      "probability": {
+        "alignment_pad_id_3": 0.007576399948447943,
+        "end_pad_id_0": 0.992312490940094,
+        "all_special_ids_0_to_6": 0.9998893737792969,
+        "best_lexical": 9.062350727617741e-07
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 9.03125,
+        "end_pad_id_0": 13.90625,
+        "best_of_ids_0_and_3": 13.90625
+      }
+    },
+    {
+      "decision_frame": 73,
+      "argmax_id": 1398,
+      "argmax_class": "lexical",
+      "best_lexical_id": 1398,
+      "probability": {
+        "alignment_pad_id_3": 1.373471059196163e-05,
+        "end_pad_id_0": 0.0001127750365412794,
+        "all_special_ids_0_to_6": 0.00015136586443986744,
+        "best_lexical": 0.058418914675712585
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": -8.35546875,
+        "end_pad_id_0": -6.25,
+        "best_of_ids_0_and_3": -6.25
+      }
+    },
+    {
+      "decision_frame": 74,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 2767,
+      "probability": {
+        "alignment_pad_id_3": 0.9971640110015869,
+        "end_pad_id_0": 0.0024717224296182394,
+        "all_special_ids_0_to_6": 0.9996357560157776,
+        "best_lexical": 1.4697398910357151e-05
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 11.125,
+        "end_pad_id_0": 5.125,
+        "best_of_ids_0_and_3": 11.125
+      }
+    },
+    {
+      "decision_frame": 75,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 150,
+      "probability": {
+        "alignment_pad_id_3": 0.992405354976654,
+        "end_pad_id_0": 0.0075771077536046505,
+        "all_special_ids_0_to_6": 0.9999828338623047,
+        "best_lexical": 1.0168625408368825e-07
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 16.09375,
+        "end_pad_id_0": 11.21875,
+        "best_of_ids_0_and_3": 16.09375
+      }
+    },
+    {
+      "decision_frame": 76,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 150,
+      "probability": {
+        "alignment_pad_id_3": 0.9465895891189575,
+        "end_pad_id_0": 0.05340293049812317,
+        "all_special_ids_0_to_6": 0.9999923706054688,
+        "best_lexical": 3.351946276097806e-08
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 17.15625,
+        "end_pad_id_0": 14.28125,
+        "best_of_ids_0_and_3": 17.15625
+      }
+    },
+    {
+      "decision_frame": 77,
+      "argmax_id": 0,
+      "argmax_class": "end_pad",
+      "best_lexical_id": 10,
+      "probability": {
+        "alignment_pad_id_3": 0.004609469324350357,
+        "end_pad_id_0": 0.995368242263794,
+        "all_special_ids_0_to_6": 0.999977171421051,
+        "best_lexical": 7.461737538960733e-08
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 11.03125,
+        "end_pad_id_0": 16.40625,
+        "best_of_ids_0_and_3": 16.40625
+      }
+    },
+    {
+      "decision_frame": 78,
+      "argmax_id": 10,
+      "argmax_class": "lexical",
+      "best_lexical_id": 10,
+      "probability": {
+        "alignment_pad_id_3": 1.631442501093261e-06,
+        "end_pad_id_0": 5.412349764810642e-06,
+        "all_special_ids_0_to_6": 2.8671523978118785e-05,
+        "best_lexical": 0.14894607663154602
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": -11.421875,
+        "end_pad_id_0": -10.22265625,
+        "best_of_ids_0_and_3": -10.22265625
+      }
+    },
+    {
+      "decision_frame": 79,
+      "argmax_id": 19,
+      "argmax_class": "lexical",
+      "best_lexical_id": 19,
+      "probability": {
+        "alignment_pad_id_3": 0.0003235818585380912,
+        "end_pad_id_0": 0.021310435608029366,
+        "all_special_ids_0_to_6": 0.021638182923197746,
+        "best_lexical": 0.9061427712440491
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": -7.9375,
+        "end_pad_id_0": -3.75,
+        "best_of_ids_0_and_3": -3.75
+      }
+    },
+    {
+      "decision_frame": 80,
+      "argmax_id": 0,
+      "argmax_class": "end_pad",
+      "best_lexical_id": 7,
+      "probability": {
+        "alignment_pad_id_3": 0.011415653862059116,
+        "end_pad_id_0": 0.516711950302124,
+        "all_special_ids_0_to_6": 0.5281347036361694,
+        "best_lexical": 0.45599669218063354
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": -3.6875,
+        "end_pad_id_0": 0.125,
+        "best_of_ids_0_and_3": 0.125
+      }
+    },
+    {
+      "decision_frame": 81,
+      "argmax_id": 7,
+      "argmax_class": "lexical",
+      "best_lexical_id": 7,
+      "probability": {
+        "alignment_pad_id_3": 2.791007602809259e-07,
+        "end_pad_id_0": 1.4257201428335975e-06,
+        "all_special_ids_0_to_6": 2.3712653273832984e-05,
+        "best_lexical": 0.9845988154411316
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": -15.076171875,
+        "end_pad_id_0": -13.4453125,
+        "best_of_ids_0_and_3": -13.4453125
+      }
+    },
+    {
+      "decision_frame": 82,
+      "argmax_id": 84,
+      "argmax_class": "lexical",
+      "best_lexical_id": 84,
+      "probability": {
+        "alignment_pad_id_3": 0.012959412299096584,
+        "end_pad_id_0": 0.07938601821660995,
+        "all_special_ids_0_to_6": 0.09238707274198532,
+        "best_lexical": 0.24452616274356842
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": -2.9375,
+        "end_pad_id_0": -1.125,
+        "best_of_ids_0_and_3": -1.125
+      }
+    },
+    {
+      "decision_frame": 83,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 341,
+      "probability": {
+        "alignment_pad_id_3": 0.9428452253341675,
+        "end_pad_id_0": 0.04409746080636978,
+        "all_special_ids_0_to_6": 0.986944317817688,
+        "best_lexical": 0.0009742397232912481
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 6.875,
+        "end_pad_id_0": 3.8125,
+        "best_of_ids_0_and_3": 6.875
+      }
+    },
+    {
+      "decision_frame": 84,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 155,
+      "probability": {
+        "alignment_pad_id_3": 0.8667014837265015,
+        "end_pad_id_0": 0.13291297852993011,
+        "all_special_ids_0_to_6": 0.9996148347854614,
+        "best_lexical": 9.850625701801619e-07
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 13.6875,
+        "end_pad_id_0": 11.8125,
+        "best_of_ids_0_and_3": 13.6875
+      }
+    },
+    {
+      "decision_frame": 85,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 84,
+      "probability": {
+        "alignment_pad_id_3": 0.5311547517776489,
+        "end_pad_id_0": 0.4687424302101135,
+        "all_special_ids_0_to_6": 0.9998970031738281,
+        "best_lexical": 1.6930958963712328e-06
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 12.65625,
+        "end_pad_id_0": 12.53125,
+        "best_of_ids_0_and_3": 12.65625
+      }
+    },
+    {
+      "decision_frame": 86,
+      "argmax_id": 0,
+      "argmax_class": "end_pad",
+      "best_lexical_id": 84,
+      "probability": {
+        "alignment_pad_id_3": 0.015906136482954025,
+        "end_pad_id_0": 0.9840777516365051,
+        "all_special_ids_0_to_6": 0.9999847412109375,
+        "best_lexical": 1.883808096181383e-07
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 11.34375,
+        "end_pad_id_0": 15.46875,
+        "best_of_ids_0_and_3": 15.46875
+      }
+    },
+    {
+      "decision_frame": 87,
+      "argmax_id": 341,
+      "argmax_class": "lexical",
+      "best_lexical_id": 341,
+      "probability": {
+        "alignment_pad_id_3": 4.777456979354611e-06,
+        "end_pad_id_0": 1.6772954040789045e-05,
+        "all_special_ids_0_to_6": 4.7438221372431144e-05,
+        "best_lexical": 0.05721282586455345
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": -9.390625,
+        "end_pad_id_0": -8.134765625,
+        "best_of_ids_0_and_3": -8.134765625
+      }
+    },
+    {
+      "decision_frame": 88,
+      "argmax_id": 0,
+      "argmax_class": "end_pad",
+      "best_lexical_id": 10168,
+      "probability": {
+        "alignment_pad_id_3": 0.011203709989786148,
+        "end_pad_id_0": 0.8900208473205566,
+        "all_special_ids_0_to_6": 0.9012261033058167,
+        "best_lexical": 0.03910478577017784
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": -1.25,
+        "end_pad_id_0": 3.125,
+        "best_of_ids_0_and_3": 3.125
+      }
+    },
+    {
+      "decision_frame": 89,
+      "argmax_id": 10168,
+      "argmax_class": "lexical",
+      "best_lexical_id": 10168,
+      "probability": {
+        "alignment_pad_id_3": 8.392329618800431e-06,
+        "end_pad_id_0": 4.905505556962453e-05,
+        "all_special_ids_0_to_6": 7.553320756414905e-05,
+        "best_lexical": 0.21611548960208893
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": -10.15625,
+        "end_pad_id_0": -8.390625,
+        "best_of_ids_0_and_3": -8.390625
+      }
+    },
+    {
+      "decision_frame": 90,
+      "argmax_id": 0,
+      "argmax_class": "end_pad",
+      "best_lexical_id": 94,
+      "probability": {
+        "alignment_pad_id_3": 0.013447284698486328,
+        "end_pad_id_0": 0.3257978856563568,
+        "all_special_ids_0_to_6": 0.3392559885978699,
+        "best_lexical": 0.1976063996553421
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": -2.6875,
+        "end_pad_id_0": 0.5,
+        "best_of_ids_0_and_3": 0.5
+      }
+    },
+    {
+      "decision_frame": 91,
+      "argmax_id": 1515,
+      "argmax_class": "lexical",
+      "best_lexical_id": 1515,
+      "probability": {
+        "alignment_pad_id_3": 1.240062374563422e-05,
+        "end_pad_id_0": 3.532608752720989e-05,
+        "all_special_ids_0_to_6": 8.280824113171548e-05,
+        "best_lexical": 0.1395072191953659
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": -9.328125,
+        "end_pad_id_0": -8.28125,
+        "best_of_ids_0_and_3": -8.28125
+      }
+    },
+    {
+      "decision_frame": 92,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 19,
+      "probability": {
+        "alignment_pad_id_3": 0.9739364981651306,
+        "end_pad_id_0": 0.025954527780413628,
+        "all_special_ids_0_to_6": 0.9998912811279297,
+        "best_lexical": 4.660400463762926e-06
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 12.25,
+        "end_pad_id_0": 8.625,
+        "best_of_ids_0_and_3": 12.25
+      }
+    },
+    {
+      "decision_frame": 93,
+      "argmax_id": 0,
+      "argmax_class": "end_pad",
+      "best_lexical_id": 7,
+      "probability": {
+        "alignment_pad_id_3": 0.46877461671829224,
+        "end_pad_id_0": 0.5311912298202515,
+        "all_special_ids_0_to_6": 0.9999656677246094,
+        "best_lexical": 1.389873034440825e-07
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 15.03125,
+        "end_pad_id_0": 15.15625,
+        "best_of_ids_0_and_3": 15.15625
+      }
+    },
+    {
+      "decision_frame": 94,
+      "argmax_id": 12,
+      "argmax_class": "lexical",
+      "best_lexical_id": 12,
+      "probability": {
+        "alignment_pad_id_3": 6.4414989537908696e-06,
+        "end_pad_id_0": 6.404822488548234e-05,
+        "all_special_ids_0_to_6": 9.316216164734215e-05,
+        "best_lexical": 0.17935749888420105
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": -10.234375,
+        "end_pad_id_0": -7.9375,
+        "best_of_ids_0_and_3": -7.9375
+      }
+    },
+    {
+      "decision_frame": 95,
+      "argmax_id": 0,
+      "argmax_class": "end_pad",
+      "best_lexical_id": 10905,
+      "probability": {
+        "alignment_pad_id_3": 0.13223101198673248,
+        "end_pad_id_0": 0.8622545003890991,
+        "all_special_ids_0_to_6": 0.9944858551025391,
+        "best_lexical": 0.001144022331573069
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 4.75,
+        "end_pad_id_0": 6.625,
+        "best_of_ids_0_and_3": 6.625
+      }
+    },
+    {
+      "decision_frame": 96,
+      "argmax_id": 10905,
+      "argmax_class": "lexical",
+      "best_lexical_id": 10905,
+      "probability": {
+        "alignment_pad_id_3": 2.245047471660655e-05,
+        "end_pad_id_0": 0.000226741743972525,
+        "all_special_ids_0_to_6": 0.00025809466023929417,
+        "best_lexical": 0.5964863896369934
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": -10.1875,
+        "end_pad_id_0": -7.875,
+        "best_of_ids_0_and_3": -7.875
+      }
+    },
+    {
+      "decision_frame": 97,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 3418,
+      "probability": {
+        "alignment_pad_id_3": 0.9996281862258911,
+        "end_pad_id_0": 0.0002611613890621811,
+        "all_special_ids_0_to_6": 0.9998893737792969,
+        "best_lexical": 1.2214681191835552e-05
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 11.3125,
+        "end_pad_id_0": 3.0625,
+        "best_of_ids_0_and_3": 11.3125
+      }
+    },
+    {
+      "decision_frame": 98,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 8,
+      "probability": {
+        "alignment_pad_id_3": 0.9975254535675049,
+        "end_pad_id_0": 0.0024726183619350195,
+        "all_special_ids_0_to_6": 0.9999980330467224,
+        "best_lexical": 6.3330896082902655e-09
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 18.875,
+        "end_pad_id_0": 12.875,
+        "best_of_ids_0_and_3": 18.875
+      }
+    },
+    {
+      "decision_frame": 99,
+      "argmax_id": 0,
+      "argmax_class": "end_pad",
+      "best_lexical_id": 68,
+      "probability": {
+        "alignment_pad_id_3": 0.26893851161003113,
+        "end_pad_id_0": 0.7310507297515869,
+        "all_special_ids_0_to_6": 0.9999885559082031,
+        "best_lexical": 4.98986238994803e-08
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 15.5,
+        "end_pad_id_0": 16.5,
+        "best_of_ids_0_and_3": 16.5
+      }
+    },
+    {
+      "decision_frame": 100,
+      "argmax_id": 3418,
+      "argmax_class": "lexical",
+      "best_lexical_id": 3418,
+      "probability": {
+        "alignment_pad_id_3": 6.39458733076026e-07,
+        "end_pad_id_0": 2.9399914637906477e-05,
+        "all_special_ids_0_to_6": 3.266356361564249e-05,
+        "best_lexical": 0.48881614208221436
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": -13.546875,
+        "end_pad_id_0": -9.71875,
+        "best_of_ids_0_and_3": -9.71875
+      }
+    },
+    {
+      "decision_frame": 101,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 969,
+      "probability": {
+        "alignment_pad_id_3": 0.8800159692764282,
+        "end_pad_id_0": 0.11909720301628113,
+        "all_special_ids_0_to_6": 0.9991135001182556,
+        "best_lexical": 0.0008024707203730941
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 7.0,
+        "end_pad_id_0": 5.0,
+        "best_of_ids_0_and_3": 7.0
+      }
+    },
+    {
+      "decision_frame": 102,
+      "argmax_id": 0,
+      "argmax_class": "end_pad",
+      "best_lexical_id": 8,
+      "probability": {
+        "alignment_pad_id_3": 0.11920220404863358,
+        "end_pad_id_0": 0.8807917237281799,
+        "all_special_ids_0_to_6": 0.9999943375587463,
+        "best_lexical": 5.358379553399573e-07
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 12.3125,
+        "end_pad_id_0": 14.3125,
+        "best_of_ids_0_and_3": 14.3125
+      }
+    },
+    {
+      "decision_frame": 103,
+      "argmax_id": 969,
+      "argmax_class": "lexical",
+      "best_lexical_id": 969,
+      "probability": {
+        "alignment_pad_id_3": 3.558809424930587e-08,
+        "end_pad_id_0": 5.566914751398144e-07,
+        "all_special_ids_0_to_6": 8.479607345179829e-07,
+        "best_lexical": 0.9740869998931885
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": -17.125,
+        "end_pad_id_0": -14.375,
+        "best_of_ids_0_and_3": -14.375
+      }
+    },
+    {
+      "decision_frame": 104,
+      "argmax_id": 0,
+      "argmax_class": "end_pad",
+      "best_lexical_id": 8,
+      "probability": {
+        "alignment_pad_id_3": 0.07727603614330292,
+        "end_pad_id_0": 0.5709969401359558,
+        "all_special_ids_0_to_6": 0.6482892632484436,
+        "best_lexical": 0.34632715582847595
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": -1.5,
+        "end_pad_id_0": 0.5,
+        "best_of_ids_0_and_3": 0.5
+      }
+    },
+    {
+      "decision_frame": 105,
+      "argmax_id": 8,
+      "argmax_class": "lexical",
+      "best_lexical_id": 8,
+      "probability": {
+        "alignment_pad_id_3": 3.949395704694325e-06,
+        "end_pad_id_0": 5.746337137679802e-06,
+        "all_special_ids_0_to_6": 3.313234628876671e-05,
+        "best_lexical": 0.995561957359314
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": -12.4375,
+        "end_pad_id_0": -12.0625,
+        "best_of_ids_0_and_3": -12.0625
+      }
+    },
+    {
+      "decision_frame": 106,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 8,
+      "probability": {
+        "alignment_pad_id_3": 0.8760035037994385,
+        "end_pad_id_0": 0.1046236976981163,
+        "all_special_ids_0_to_6": 0.9806301593780518,
+        "best_lexical": 0.0014019584050402045
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 6.4375,
+        "end_pad_id_0": 4.3125,
+        "best_of_ids_0_and_3": 6.4375
+      }
+    },
+    {
+      "decision_frame": 107,
+      "argmax_id": 0,
+      "argmax_class": "end_pad",
+      "best_lexical_id": 8,
+      "probability": {
+        "alignment_pad_id_3": 0.37746137380599976,
+        "end_pad_id_0": 0.6223285794258118,
+        "all_special_ids_0_to_6": 0.9997902512550354,
+        "best_lexical": 3.3744202028174186e-06
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 11.625,
+        "end_pad_id_0": 12.125,
+        "best_of_ids_0_and_3": 12.125
+      }
+    },
+    {
+      "decision_frame": 108,
+      "argmax_id": 84,
+      "argmax_class": "lexical",
+      "best_lexical_id": 84,
+      "probability": {
+        "alignment_pad_id_3": 7.720579014858231e-05,
+        "end_pad_id_0": 0.000291371630737558,
+        "all_special_ids_0_to_6": 0.0004007496463600546,
+        "best_lexical": 0.11572529375553131
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": -7.3125,
+        "end_pad_id_0": -5.984375,
+        "best_of_ids_0_and_3": -5.984375
+      }
+    },
+    {
+      "decision_frame": 109,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 341,
+      "probability": {
+        "alignment_pad_id_3": 0.9700432419776917,
+        "end_pad_id_0": 0.025850778445601463,
+        "all_special_ids_0_to_6": 0.9958942532539368,
+        "best_lexical": 0.000392523332266137
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 7.8125,
+        "end_pad_id_0": 4.1875,
+        "best_of_ids_0_and_3": 7.8125
+      }
+    },
+    {
+      "decision_frame": 110,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 8,
+      "probability": {
+        "alignment_pad_id_3": 0.8805884718894958,
+        "end_pad_id_0": 0.11917469650506973,
+        "all_special_ids_0_to_6": 0.9997634887695312,
+        "best_lexical": 1.000846054921567e-06
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 13.6875,
+        "end_pad_id_0": 11.6875,
+        "best_of_ids_0_and_3": 13.6875
+      }
+    },
+    {
+      "decision_frame": 111,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 84,
+      "probability": {
+        "alignment_pad_id_3": 0.5621197819709778,
+        "end_pad_id_0": 0.43777936697006226,
+        "all_special_ids_0_to_6": 0.9998989105224609,
+        "best_lexical": 7.706432256782136e-07
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 13.5,
+        "end_pad_id_0": 13.25,
+        "best_of_ids_0_and_3": 13.5
+      }
+    },
+    {
+      "decision_frame": 112,
+      "argmax_id": 0,
+      "argmax_class": "end_pad",
+      "best_lexical_id": 84,
+      "probability": {
+        "alignment_pad_id_3": 0.033085163682699203,
+        "end_pad_id_0": 0.9668900966644287,
+        "all_special_ids_0_to_6": 0.9999752640724182,
+        "best_lexical": 2.4520520014448266e-07
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 11.8125,
+        "end_pad_id_0": 15.1875,
+        "best_of_ids_0_and_3": 15.1875
+      }
+    },
+    {
+      "decision_frame": 113,
+      "argmax_id": 5017,
+      "argmax_class": "lexical",
+      "best_lexical_id": 5017,
+      "probability": {
+        "alignment_pad_id_3": 7.087075573508628e-06,
+        "end_pad_id_0": 6.632725853705779e-05,
+        "all_special_ids_0_to_6": 8.875067578628659e-05,
+        "best_lexical": 0.12372922897338867
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": -9.767578125,
+        "end_pad_id_0": -7.53125,
+        "best_of_ids_0_and_3": -7.53125
+      }
+    },
+    {
+      "decision_frame": 114,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 11,
+      "probability": {
+        "alignment_pad_id_3": 0.9996510744094849,
+        "end_pad_id_0": 0.00029594142688438296,
+        "all_special_ids_0_to_6": 0.9999465942382812,
+        "best_lexical": 3.499644890325726e-06
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 12.5625,
+        "end_pad_id_0": 4.4375,
+        "best_of_ids_0_and_3": 12.5625
+      }
+    },
+    {
+      "decision_frame": 115,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 8,
+      "probability": {
+        "alignment_pad_id_3": 0.9990792274475098,
+        "end_pad_id_0": 0.0009110423270612955,
+        "all_special_ids_0_to_6": 0.9999904632568359,
+        "best_lexical": 1.8353945918647696e-08
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 17.8125,
+        "end_pad_id_0": 10.8125,
+        "best_of_ids_0_and_3": 17.8125
+      }
+    },
+    {
+      "decision_frame": 116,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 113,
+      "probability": {
+        "alignment_pad_id_3": 0.9875638484954834,
+        "end_pad_id_0": 0.012431594543159008,
+        "all_special_ids_0_to_6": 0.9999962449073792,
+        "best_lexical": 1.4129315495381434e-08
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 18.0625,
+        "end_pad_id_0": 13.6875,
+        "best_of_ids_0_and_3": 18.0625
+      }
+    },
+    {
+      "decision_frame": 117,
+      "argmax_id": 0,
+      "argmax_class": "end_pad",
+      "best_lexical_id": 7,
+      "probability": {
+        "alignment_pad_id_3": 0.182422935962677,
+        "end_pad_id_0": 0.8175628781318665,
+        "all_special_ids_0_to_6": 0.9999866485595703,
+        "best_lexical": 4.9246501987454394e-08
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 15.125,
+        "end_pad_id_0": 16.625,
+        "best_of_ids_0_and_3": 16.625
+      }
+    },
+    {
+      "decision_frame": 118,
+      "argmax_id": 11,
+      "argmax_class": "lexical",
+      "best_lexical_id": 11,
+      "probability": {
+        "alignment_pad_id_3": 2.7277015760773793e-05,
+        "end_pad_id_0": 0.00021792901679873466,
+        "all_special_ids_0_to_6": 0.0002753951121121645,
+        "best_lexical": 0.37015214562416077
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": -9.515625,
+        "end_pad_id_0": -7.4375,
+        "best_of_ids_0_and_3": -7.4375
+      }
+    },
+    {
+      "decision_frame": 119,
+      "argmax_id": 0,
+      "argmax_class": "end_pad",
+      "best_lexical_id": 7,
+      "probability": {
+        "alignment_pad_id_3": 0.08279130607843399,
+        "end_pad_id_0": 0.8900904655456543,
+        "all_special_ids_0_to_6": 0.9728838205337524,
+        "best_lexical": 0.006795924622565508
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 2.5,
+        "end_pad_id_0": 4.875,
+        "best_of_ids_0_and_3": 4.875
+      }
+    },
+    {
+      "decision_frame": 120,
+      "argmax_id": 622,
+      "argmax_class": "lexical",
+      "best_lexical_id": 622,
+      "probability": {
+        "alignment_pad_id_3": 6.142294296296313e-05,
+        "end_pad_id_0": 0.00043989383266307414,
+        "all_special_ids_0_to_6": 0.00053498859051615,
+        "best_lexical": 0.2351040244102478
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": -8.25,
+        "end_pad_id_0": -6.28125,
+        "best_of_ids_0_and_3": -6.28125
+      }
+    },
+    {
+      "decision_frame": 121,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 8,
+      "probability": {
+        "alignment_pad_id_3": 0.9993574619293213,
+        "end_pad_id_0": 0.00048778162454254925,
+        "all_special_ids_0_to_6": 0.9998455047607422,
+        "best_lexical": 1.8726748294284334e-06
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 13.1875,
+        "end_pad_id_0": 5.5625,
+        "best_of_ids_0_and_3": 13.1875
+      }
+    },
+    {
+      "decision_frame": 122,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 8,
+      "probability": {
+        "alignment_pad_id_3": 0.9996300935745239,
+        "end_pad_id_0": 0.0003353385254740715,
+        "all_special_ids_0_to_6": 0.9999656677246094,
+        "best_lexical": 1.0242654013836727e-07
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 16.09375,
+        "end_pad_id_0": 8.09375,
+        "best_of_ids_0_and_3": 16.09375
+      }
+    },
+    {
+      "decision_frame": 123,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 8,
+      "probability": {
+        "alignment_pad_id_3": 0.9997139573097229,
+        "end_pad_id_0": 0.0002780287468340248,
+        "all_special_ids_0_to_6": 0.9999923706054688,
+        "best_lexical": 1.6207591713168767e-08
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 17.9375,
+        "end_pad_id_0": 9.75,
+        "best_of_ids_0_and_3": 17.9375
+      }
+    },
+    {
+      "decision_frame": 124,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 13586,
+      "probability": {
+        "alignment_pad_id_3": 0.9990849494934082,
+        "end_pad_id_0": 0.0009110475075431168,
+        "all_special_ids_0_to_6": 0.9999962449073792,
+        "best_lexical": 5.2585238385916e-09
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 19.0625,
+        "end_pad_id_0": 12.0625,
+        "best_of_ids_0_and_3": 19.0625
+      }
+    },
+    {
+      "decision_frame": 125,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 3017,
+      "probability": {
+        "alignment_pad_id_3": 0.9889983534812927,
+        "end_pad_id_0": 0.010986778885126114,
+        "all_special_ids_0_to_6": 0.9999847412109375,
+        "best_lexical": 1.1369714947306875e-08
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 18.28125,
+        "end_pad_id_0": 13.78125,
+        "best_of_ids_0_and_3": 18.28125
+      }
+    },
+    {
+      "decision_frame": 126,
+      "argmax_id": 0,
+      "argmax_class": "end_pad",
+      "best_lexical_id": 7,
+      "probability": {
+        "alignment_pad_id_3": 0.012430883012712002,
+        "end_pad_id_0": 0.9875073432922363,
+        "all_special_ids_0_to_6": 0.99993896484375,
+        "best_lexical": 2.7504771082931256e-07
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 10.71875,
+        "end_pad_id_0": 15.09375,
+        "best_of_ids_0_and_3": 15.09375
+      }
+    },
+    {
+      "decision_frame": 127,
+      "argmax_id": 84,
+      "argmax_class": "lexical",
+      "best_lexical_id": 84,
+      "probability": {
+        "alignment_pad_id_3": 1.0342647328798193e-05,
+        "end_pad_id_0": 0.0001119566586567089,
+        "all_special_ids_0_to_6": 0.00015223548689391464,
+        "best_lexical": 0.20884795486927032
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": -9.9130859375,
+        "end_pad_id_0": -7.53125,
+        "best_of_ids_0_and_3": -7.53125
+      }
+    },
+    {
+      "decision_frame": 128,
+      "argmax_id": 0,
+      "argmax_class": "end_pad",
+      "best_lexical_id": 12,
+      "probability": {
+        "alignment_pad_id_3": 0.06008400022983551,
+        "end_pad_id_0": 0.7319729924201965,
+        "all_special_ids_0_to_6": 0.79206383228302,
+        "best_lexical": 0.11225168406963348
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": -0.625,
+        "end_pad_id_0": 1.875,
+        "best_of_ids_0_and_3": 1.875
+      }
+    },
+    {
+      "decision_frame": 129,
+      "argmax_id": 12,
+      "argmax_class": "lexical",
+      "best_lexical_id": 12,
+      "probability": {
+        "alignment_pad_id_3": 3.183738272127812e-06,
+        "end_pad_id_0": 9.579434845363721e-06,
+        "all_special_ids_0_to_6": 1.9682960555655882e-05,
+        "best_lexical": 0.6811198592185974
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": -12.2734375,
+        "end_pad_id_0": -11.171875,
+        "best_of_ids_0_and_3": -11.171875
+      }
+    },
+    {
+      "decision_frame": 130,
+      "argmax_id": 0,
+      "argmax_class": "end_pad",
+      "best_lexical_id": 27541,
+      "probability": {
+        "alignment_pad_id_3": 0.01752758026123047,
+        "end_pad_id_0": 0.6374817490577698,
+        "all_special_ids_0_to_6": 0.6550197005271912,
+        "best_lexical": 0.06311924010515213
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": -1.28125,
+        "end_pad_id_0": 2.3125,
+        "best_of_ids_0_and_3": 2.3125
+      }
+    },
+    {
+      "decision_frame": 131,
+      "argmax_id": 15050,
+      "argmax_class": "lexical",
+      "best_lexical_id": 15050,
+      "probability": {
+        "alignment_pad_id_3": 1.7709386156639084e-05,
+        "end_pad_id_0": 6.976891017984599e-05,
+        "all_special_ids_0_to_6": 0.00010758236749097705,
+        "best_lexical": 0.2231280505657196
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": -9.44140625,
+        "end_pad_id_0": -8.0703125,
+        "best_of_ids_0_and_3": -8.0703125
+      }
+    },
+    {
+      "decision_frame": 132,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 3418,
+      "probability": {
+        "alignment_pad_id_3": 0.998481035232544,
+        "end_pad_id_0": 0.0015011555515229702,
+        "all_special_ids_0_to_6": 0.9999828338623047,
+        "best_lexical": 1.7576724076207029e-06
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 13.25,
+        "end_pad_id_0": 6.75,
+        "best_of_ids_0_and_3": 13.25
+      }
+    },
+    {
+      "decision_frame": 133,
+      "argmax_id": 0,
+      "argmax_class": "end_pad",
+      "best_lexical_id": 56,
+      "probability": {
+        "alignment_pad_id_3": 0.06754472106695175,
+        "end_pad_id_0": 0.9324261546134949,
+        "all_special_ids_0_to_6": 0.9999714493751526,
+        "best_lexical": 3.132653318971279e-07
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 12.28125,
+        "end_pad_id_0": 14.90625,
+        "best_of_ids_0_and_3": 14.90625
+      }
+    },
+    {
+      "decision_frame": 134,
+      "argmax_id": 3418,
+      "argmax_class": "lexical",
+      "best_lexical_id": 3418,
+      "probability": {
+        "alignment_pad_id_3": 2.4316108238053857e-07,
+        "end_pad_id_0": 1.0835673492692877e-05,
+        "all_special_ids_0_to_6": 1.1501714652695227e-05,
+        "best_lexical": 0.43217843770980835
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": -14.390625,
+        "end_pad_id_0": -10.59375,
+        "best_of_ids_0_and_3": -10.59375
+      }
+    },
+    {
+      "decision_frame": 135,
+      "argmax_id": 0,
+      "argmax_class": "end_pad",
+      "best_lexical_id": 8,
+      "probability": {
+        "alignment_pad_id_3": 0.28837764263153076,
+        "end_pad_id_0": 0.6917819380760193,
+        "all_special_ids_0_to_6": 0.9801607728004456,
+        "best_lexical": 0.016269151121377945
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 2.875,
+        "end_pad_id_0": 3.75,
+        "best_of_ids_0_and_3": 3.75
+      }
+    },
+    {
+      "decision_frame": 136,
+      "argmax_id": 8,
+      "argmax_class": "lexical",
+      "best_lexical_id": 8,
+      "probability": {
+        "alignment_pad_id_3": 1.3981241409055656e-06,
+        "end_pad_id_0": 3.570235321603832e-06,
+        "all_special_ids_0_to_6": 1.2452601367840543e-05,
+        "best_lexical": 0.5458675026893616
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": -12.875,
+        "end_pad_id_0": -11.9375,
+        "best_of_ids_0_and_3": -11.9375
+      }
+    },
+    {
+      "decision_frame": 137,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 8,
+      "probability": {
+        "alignment_pad_id_3": 0.99709552526474,
+        "end_pad_id_0": 0.0021811374463140965,
+        "all_special_ids_0_to_6": 0.9992773532867432,
+        "best_lexical": 5.129543933435343e-05
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 9.875,
+        "end_pad_id_0": 3.75,
+        "best_of_ids_0_and_3": 9.875
+      }
+    },
+    {
+      "decision_frame": 138,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 8,
+      "probability": {
+        "alignment_pad_id_3": 0.9940496683120728,
+        "end_pad_id_0": 0.005910835228860378,
+        "all_special_ids_0_to_6": 0.9999599456787109,
+        "best_lexical": 8.798907060736383e-07
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 13.9375,
+        "end_pad_id_0": 8.8125,
+        "best_of_ids_0_and_3": 13.9375
+      }
+    },
+    {
+      "decision_frame": 139,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 8,
+      "probability": {
+        "alignment_pad_id_3": 0.9971373677253723,
+        "end_pad_id_0": 0.0028007535729557276,
+        "all_special_ids_0_to_6": 0.99993896484375,
+        "best_lexical": 2.8654602601818624e-07
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 15.0625,
+        "end_pad_id_0": 9.1875,
+        "best_of_ids_0_and_3": 15.0625
+      }
+    },
+    {
+      "decision_frame": 140,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 8,
+      "probability": {
+        "alignment_pad_id_3": 0.9997883439064026,
+        "end_pad_id_0": 0.00020342529751360416,
+        "all_special_ids_0_to_6": 0.9999923706054688,
+        "best_lexical": 2.6723789403604314e-08
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 17.4375,
+        "end_pad_id_0": 8.9375,
+        "best_of_ids_0_and_3": 17.4375
+      }
+    },
+    {
+      "decision_frame": 141,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 8,
+      "probability": {
+        "alignment_pad_id_3": 0.9998188614845276,
+        "end_pad_id_0": 0.0001795276766642928,
+        "all_special_ids_0_to_6": 0.9999980330467224,
+        "best_lexical": 6.152353293487067e-09
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 18.90625,
+        "end_pad_id_0": 10.28125,
+        "best_of_ids_0_and_3": 18.90625
+      }
+    },
+    {
+      "decision_frame": 142,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 8,
+      "probability": {
+        "alignment_pad_id_3": 0.9996987581253052,
+        "end_pad_id_0": 0.0002959555422421545,
+        "all_special_ids_0_to_6": 0.9999943375587463,
+        "best_lexical": 1.4756954769268305e-08
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 18.03125,
+        "end_pad_id_0": 9.90625,
+        "best_of_ids_0_and_3": 18.03125
+      }
+    },
+    {
+      "decision_frame": 143,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 8,
+      "probability": {
+        "alignment_pad_id_3": 0.999815046787262,
+        "end_pad_id_0": 0.00017952699272427708,
+        "all_special_ids_0_to_6": 0.9999943375587463,
+        "best_lexical": 8.676175333732772e-09
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 18.5625,
+        "end_pad_id_0": 9.9375,
+        "best_of_ids_0_and_3": 18.5625
+      }
+    },
+    {
+      "decision_frame": 144,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 8,
+      "probability": {
+        "alignment_pad_id_3": 0.9995061159133911,
+        "end_pad_id_0": 0.0004878541803918779,
+        "all_special_ids_0_to_6": 0.9999943375587463,
+        "best_lexical": 7.418833547490067e-09
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 18.71875,
+        "end_pad_id_0": 11.09375,
+        "best_of_ids_0_and_3": 18.71875
+      }
+    },
+    {
+      "decision_frame": 145,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 8,
+      "probability": {
+        "alignment_pad_id_3": 0.9996148347854614,
+        "end_pad_id_0": 0.00037998254992999136,
+        "all_special_ids_0_to_6": 0.9999943375587463,
+        "best_lexical": 5.261312718829458e-09
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 19.0625,
+        "end_pad_id_0": 11.1875,
+        "best_of_ids_0_and_3": 19.0625
+      }
+    },
+    {
+      "decision_frame": 146,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 25580,
+      "probability": {
+        "alignment_pad_id_3": 0.9993269443511963,
+        "end_pad_id_0": 0.0006666980916634202,
+        "all_special_ids_0_to_6": 0.9999943375587463,
+        "best_lexical": 5.25979793053466e-09
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 19.0625,
+        "end_pad_id_0": 11.75,
+        "best_of_ids_0_and_3": 19.0625
+      }
+    },
+    {
+      "decision_frame": 147,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 25580,
+      "probability": {
+        "alignment_pad_id_3": 0.9989629983901978,
+        "end_pad_id_0": 0.0010322261368855834,
+        "all_special_ids_0_to_6": 0.9999943375587463,
+        "best_lexical": 6.342216085641894e-09
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 18.875,
+        "end_pad_id_0": 12.0,
+        "best_of_ids_0_and_3": 18.875
+      }
+    },
+    {
+      "decision_frame": 148,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 22420,
+      "probability": {
+        "alignment_pad_id_3": 0.9982943534851074,
+        "end_pad_id_0": 0.0017007141141220927,
+        "all_special_ids_0_to_6": 0.9999943375587463,
+        "best_lexical": 8.138115958900016e-09
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 18.625,
+        "end_pad_id_0": 12.25,
+        "best_of_ids_0_and_3": 18.625
+      }
+    },
+    {
+      "decision_frame": 149,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 8,
+      "probability": {
+        "alignment_pad_id_3": 0.9971886873245239,
+        "end_pad_id_0": 0.002800897927954793,
+        "all_special_ids_0_to_6": 0.9999904632568359,
+        "best_lexical": 9.805569689547156e-09
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 18.4375,
+        "end_pad_id_0": 12.5625,
+        "best_of_ids_0_and_3": 18.4375
+      }
+    },
+    {
+      "decision_frame": 150,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 8,
+      "probability": {
+        "alignment_pad_id_3": 0.9986677169799805,
+        "end_pad_id_0": 0.0013250127667561173,
+        "all_special_ids_0_to_6": 0.9999923706054688,
+        "best_lexical": 1.045345499051109e-08
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 18.375,
+        "end_pad_id_0": 11.75,
+        "best_of_ids_0_and_3": 18.375
+      }
+    },
+    {
+      "decision_frame": 151,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 8,
+      "probability": {
+        "alignment_pad_id_3": 0.9986696243286133,
+        "end_pad_id_0": 0.0013250152114778757,
+        "all_special_ids_0_to_6": 0.9999943375587463,
+        "best_lexical": 5.09461717257409e-09
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 19.09375,
+        "end_pad_id_0": 12.46875,
+        "best_of_ids_0_and_3": 19.09375
+      }
+    },
+    {
+      "decision_frame": 152,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 106,
+      "probability": {
+        "alignment_pad_id_3": 0.9984962344169617,
+        "end_pad_id_0": 0.00150117848534137,
+        "all_special_ids_0_to_6": 0.9999980330467224,
+        "best_lexical": 4.2228527341592326e-09
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 19.28125,
+        "end_pad_id_0": 12.78125,
+        "best_of_ids_0_and_3": 19.28125
+      }
+    },
+    {
+      "decision_frame": 153,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 8,
+      "probability": {
+        "alignment_pad_id_3": 0.9933048486709595,
+        "end_pad_id_0": 0.006692835129797459,
+        "all_special_ids_0_to_6": 0.9999980330467224,
+        "best_lexical": 4.613783133322613e-09
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 19.1875,
+        "end_pad_id_0": 14.1875,
+        "best_of_ids_0_and_3": 19.1875
+      }
+    },
+    {
+      "decision_frame": 154,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 8,
+      "probability": {
+        "alignment_pad_id_3": 0.9959285259246826,
+        "end_pad_id_0": 0.004070132039487362,
+        "all_special_ids_0_to_6": 0.9999980330467224,
+        "best_lexical": 1.989604703211967e-09
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 20.03125,
+        "end_pad_id_0": 14.53125,
+        "best_of_ids_0_and_3": 20.03125
+      }
+    },
+    {
+      "decision_frame": 155,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 6660,
+      "probability": {
+        "alignment_pad_id_3": 0.9978146553039551,
+        "end_pad_id_0": 0.0021827106829732656,
+        "all_special_ids_0_to_6": 0.9999980330467224,
+        "best_lexical": 2.724617642613225e-09
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 19.71875,
+        "end_pad_id_0": 13.59375,
+        "best_of_ids_0_and_3": 19.71875
+      }
+    },
+    {
+      "decision_frame": 156,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 8,
+      "probability": {
+        "alignment_pad_id_3": 0.9980716705322266,
+        "end_pad_id_0": 0.001926731551066041,
+        "all_special_ids_0_to_6": 0.9999980330467224,
+        "best_lexical": 2.057178871694987e-09
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 20.0,
+        "end_pad_id_0": 13.75,
+        "best_of_ids_0_and_3": 20.0
+      }
+    },
+    {
+      "decision_frame": 157,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 128,
+      "probability": {
+        "alignment_pad_id_3": 0.9997959733009338,
+        "end_pad_id_0": 0.00020342684001661837,
+        "all_special_ids_0_to_6": 1.0,
+        "best_lexical": 1.6049005457929866e-09
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 20.25,
+        "end_pad_id_0": 11.75,
+        "best_of_ids_0_and_3": 20.25
+      }
+    },
+    {
+      "decision_frame": 158,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 128,
+      "probability": {
+        "alignment_pad_id_3": 0.9995690584182739,
+        "end_pad_id_0": 0.0004305568872950971,
+        "all_special_ids_0_to_6": 1.0,
+        "best_lexical": 8.588463829006798e-10
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 20.875,
+        "end_pad_id_0": 13.125,
+        "best_of_ids_0_and_3": 20.875
+      }
+    },
+    {
+      "decision_frame": 159,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 6660,
+      "probability": {
+        "alignment_pad_id_3": 0.9995118379592896,
+        "end_pad_id_0": 0.0004878570034634322,
+        "all_special_ids_0_to_6": 1.0,
+        "best_lexical": 1.1738366945124312e-09
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 20.5625,
+        "end_pad_id_0": 12.9375,
+        "best_of_ids_0_and_3": 20.5625
+      }
+    },
+    {
+      "decision_frame": 160,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 6660,
+      "probability": {
+        "alignment_pad_id_3": 0.9992888569831848,
+        "end_pad_id_0": 0.0007096693152561784,
+        "all_special_ids_0_to_6": 0.9999980330467224,
+        "best_lexical": 1.7075409974864897e-09
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 20.1875,
+        "end_pad_id_0": 12.9375,
+        "best_of_ids_0_and_3": 20.1875
+      }
+    },
+    {
+      "decision_frame": 161,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 128,
+      "probability": {
+        "alignment_pad_id_3": 0.9980716705322266,
+        "end_pad_id_0": 0.001926731551066041,
+        "all_special_ids_0_to_6": 0.9999980330467224,
+        "best_lexical": 3.7250700302138284e-09
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 19.40625,
+        "end_pad_id_0": 13.15625,
+        "best_of_ids_0_and_3": 19.40625
+      }
+    },
+    {
+      "decision_frame": 162,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 6660,
+      "probability": {
+        "alignment_pad_id_3": 0.995924711227417,
+        "end_pad_id_0": 0.004070116672664881,
+        "all_special_ids_0_to_6": 0.9999943375587463,
+        "best_lexical": 6.944376629292037e-09
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 18.78125,
+        "end_pad_id_0": 13.28125,
+        "best_of_ids_0_and_3": 18.78125
+      }
+    },
+    {
+      "decision_frame": 163,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 6660,
+      "probability": {
+        "alignment_pad_id_3": 0.9964035153388977,
+        "end_pad_id_0": 0.003593592206016183,
+        "all_special_ids_0_to_6": 0.9999962449073792,
+        "best_lexical": 5.410885961509848e-09
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 19.03125,
+        "end_pad_id_0": 13.40625,
+        "best_of_ids_0_and_3": 19.03125
+      }
+    },
+    {
+      "decision_frame": 164,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 8,
+      "probability": {
+        "alignment_pad_id_3": 0.9984981417655945,
+        "end_pad_id_0": 0.001501181279309094,
+        "all_special_ids_0_to_6": 1.0,
+        "best_lexical": 1.9333665779441844e-09
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 20.0625,
+        "end_pad_id_0": 13.5625,
+        "best_of_ids_0_and_3": 20.0625
+      }
+    },
+    {
+      "decision_frame": 165,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 8,
+      "probability": {
+        "alignment_pad_id_3": 0.9984981417655945,
+        "end_pad_id_0": 0.001501181279309094,
+        "all_special_ids_0_to_6": 1.0,
+        "best_lexical": 1.3287821953866796e-09
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 20.4375,
+        "end_pad_id_0": 13.9375,
+        "best_of_ids_0_and_3": 20.4375
+      }
+    },
+    {
+      "decision_frame": 166,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 8,
+      "probability": {
+        "alignment_pad_id_3": 0.9964054226875305,
+        "end_pad_id_0": 0.003593598958104849,
+        "all_special_ids_0_to_6": 0.9999980330467224,
+        "best_lexical": 1.3259972009294074e-09
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 20.4375,
+        "end_pad_id_0": 14.8125,
+        "best_of_ids_0_and_3": 20.4375
+      }
+    },
+    {
+      "decision_frame": 167,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 8,
+      "probability": {
+        "alignment_pad_id_3": 0.9964054226875305,
+        "end_pad_id_0": 0.003593598958104849,
+        "all_special_ids_0_to_6": 0.9999980330467224,
+        "best_lexical": 2.3271975457817007e-09
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 19.875,
+        "end_pad_id_0": 14.25,
+        "best_of_ids_0_and_3": 19.875
+      }
+    },
+    {
+      "decision_frame": 168,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 128,
+      "probability": {
+        "alignment_pad_id_3": 0.9988276958465576,
+        "end_pad_id_0": 0.0011695069260895252,
+        "all_special_ids_0_to_6": 0.9999980330467224,
+        "best_lexical": 4.09428801972922e-09
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 19.3125,
+        "end_pad_id_0": 12.5625,
+        "best_of_ids_0_and_3": 19.3125
+      }
+    },
+    {
+      "decision_frame": 169,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 8,
+      "probability": {
+        "alignment_pad_id_3": 0.994778037071228,
+        "end_pad_id_0": 0.00522011611610651,
+        "all_special_ids_0_to_6": 0.9999980330467224,
+        "best_lexical": 3.380522084484028e-09
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 19.5,
+        "end_pad_id_0": 14.25,
+        "best_of_ids_0_and_3": 19.5
+      }
+    },
+    {
+      "decision_frame": 170,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 8,
+      "probability": {
+        "alignment_pad_id_3": 0.9959266185760498,
+        "end_pad_id_0": 0.004070124123245478,
+        "all_special_ids_0_to_6": 0.9999962449073792,
+        "best_lexical": 6.3229390612207226e-09
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 18.875,
+        "end_pad_id_0": 13.375,
+        "best_of_ids_0_and_3": 18.875
+      }
+    },
+    {
+      "decision_frame": 171,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 8,
+      "probability": {
+        "alignment_pad_id_3": 0.9947761297225952,
+        "end_pad_id_0": 0.005220105871558189,
+        "all_special_ids_0_to_6": 0.9999962449073792,
+        "best_lexical": 8.10943490137106e-09
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 18.625,
+        "end_pad_id_0": 13.375,
+        "best_of_ids_0_and_3": 18.625
+      }
+    },
+    {
+      "decision_frame": 172,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 8,
+      "probability": {
+        "alignment_pad_id_3": 0.9924166798591614,
+        "end_pad_id_0": 0.00757719436660409,
+        "all_special_ids_0_to_6": 0.9999943375587463,
+        "best_lexical": 7.600040596855706e-09
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 18.6875,
+        "end_pad_id_0": 13.8125,
+        "best_of_ids_0_and_3": 18.6875
+      }
+    },
+    {
+      "decision_frame": 173,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 8,
+      "probability": {
+        "alignment_pad_id_3": 0.9964035153388977,
+        "end_pad_id_0": 0.003593592206016183,
+        "all_special_ids_0_to_6": 0.9999962449073792,
+        "best_lexical": 3.7188441215363355e-09
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 19.40625,
+        "end_pad_id_0": 13.78125,
+        "best_of_ids_0_and_3": 19.40625
+      }
+    },
+    {
+      "decision_frame": 174,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 8,
+      "probability": {
+        "alignment_pad_id_3": 0.9959266185760498,
+        "end_pad_id_0": 0.004070124123245478,
+        "all_special_ids_0_to_6": 0.9999962449073792,
+        "best_lexical": 3.835056272549764e-09
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 19.375,
+        "end_pad_id_0": 13.875,
+        "best_of_ids_0_and_3": 19.375
+      }
+    },
+    {
+      "decision_frame": 175,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 8,
+      "probability": {
+        "alignment_pad_id_3": 0.9968255162239075,
+        "end_pad_id_0": 0.003172677243128419,
+        "all_special_ids_0_to_6": 0.9999980330467224,
+        "best_lexical": 3.838517947940545e-09
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 19.375,
+        "end_pad_id_0": 13.625,
+        "best_of_ids_0_and_3": 19.375
+      }
+    },
+    {
+      "decision_frame": 176,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 128,
+      "probability": {
+        "alignment_pad_id_3": 0.9982943534851074,
+        "end_pad_id_0": 0.0017007141141220927,
+        "all_special_ids_0_to_6": 0.9999943375587463,
+        "best_lexical": 9.816441881582705e-09
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 18.4375,
+        "end_pad_id_0": 12.0625,
+        "best_of_ids_0_and_3": 18.4375
+      }
+    },
+    {
+      "decision_frame": 177,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 128,
+      "probability": {
+        "alignment_pad_id_3": 0.9975235462188721,
+        "end_pad_id_0": 0.0024726137053221464,
+        "all_special_ids_0_to_6": 0.9999962449073792,
+        "best_lexical": 5.250305967763325e-09
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 19.0625,
+        "end_pad_id_0": 13.0625,
+        "best_of_ids_0_and_3": 19.0625
+      }
+    },
+    {
+      "decision_frame": 178,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 6660,
+      "probability": {
+        "alignment_pad_id_3": 0.9947761297225952,
+        "end_pad_id_0": 0.005220105871558189,
+        "all_special_ids_0_to_6": 0.9999962449073792,
+        "best_lexical": 7.156551795617361e-09
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 18.75,
+        "end_pad_id_0": 13.5,
+        "best_of_ids_0_and_3": 18.75
+      }
+    },
+    {
+      "decision_frame": 179,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 8,
+      "probability": {
+        "alignment_pad_id_3": 0.9924166798591614,
+        "end_pad_id_0": 0.00757719436660409,
+        "all_special_ids_0_to_6": 0.9999943375587463,
+        "best_lexical": 9.16739839595948e-09
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 18.5,
+        "end_pad_id_0": 13.625,
+        "best_of_ids_0_and_3": 18.5
+      }
+    },
+    {
+      "decision_frame": 180,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 128,
+      "probability": {
+        "alignment_pad_id_3": 0.9964054226875305,
+        "end_pad_id_0": 0.003593598958104849,
+        "all_special_ids_0_to_6": 0.9999980330467224,
+        "best_lexical": 2.9881808139009536e-09
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 19.625,
+        "end_pad_id_0": 14.0,
+        "best_of_ids_0_and_3": 19.625
+      }
+    },
+    {
+      "decision_frame": 181,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 128,
+      "probability": {
+        "alignment_pad_id_3": 0.9953891038894653,
+        "end_pad_id_0": 0.004609566181898117,
+        "all_special_ids_0_to_6": 0.9999980330467224,
+        "best_lexical": 3.3825990897184965e-09
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 19.5,
+        "end_pad_id_0": 14.125,
+        "best_of_ids_0_and_3": 19.5
+      }
+    },
+    {
+      "decision_frame": 182,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 8,
+      "probability": {
+        "alignment_pad_id_3": 0.9933048486709595,
+        "end_pad_id_0": 0.006692835129797459,
+        "all_special_ids_0_to_6": 0.9999980330467224,
+        "best_lexical": 3.1710036818566323e-09
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 19.5625,
+        "end_pad_id_0": 14.5625,
+        "best_of_ids_0_and_3": 19.5625
+      }
+    },
+    {
+      "decision_frame": 183,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 8,
+      "probability": {
+        "alignment_pad_id_3": 0.9924204349517822,
+        "end_pad_id_0": 0.00757722370326519,
+        "all_special_ids_0_to_6": 0.9999980330467224,
+        "best_lexical": 4.068024139769477e-09
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 19.3125,
+        "end_pad_id_0": 14.4375,
+        "best_of_ids_0_and_3": 19.3125
+      }
+    },
+    {
+      "decision_frame": 184,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 8,
+      "probability": {
+        "alignment_pad_id_3": 0.9924185276031494,
+        "end_pad_id_0": 0.007577208802103996,
+        "all_special_ids_0_to_6": 0.9999962449073792,
+        "best_lexical": 5.7368225725440425e-09
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 18.96875,
+        "end_pad_id_0": 14.09375,
+        "best_of_ids_0_and_3": 18.96875
+      }
+    },
+    {
+      "decision_frame": 185,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 128,
+      "probability": {
+        "alignment_pad_id_3": 0.9914177060127258,
+        "end_pad_id_0": 0.008577443659305573,
+        "all_special_ids_0_to_6": 0.9999943375587463,
+        "best_lexical": 8.082057689762223e-09
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 18.625,
+        "end_pad_id_0": 13.875,
+        "best_of_ids_0_and_3": 18.625
+      }
+    },
+    {
+      "decision_frame": 186,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 8,
+      "probability": {
+        "alignment_pad_id_3": 0.9890077710151672,
+        "end_pad_id_0": 0.010986884124577045,
+        "all_special_ids_0_to_6": 0.9999943375587463,
+        "best_lexical": 8.582393462575055e-09
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 18.5625,
+        "end_pad_id_0": 14.0625,
+        "best_of_ids_0_and_3": 18.5625
+      }
+    },
+    {
+      "decision_frame": 187,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 8,
+      "probability": {
+        "alignment_pad_id_3": 0.9740349650382996,
+        "end_pad_id_0": 0.025957154110074043,
+        "all_special_ids_0_to_6": 0.9999923706054688,
+        "best_lexical": 1.1197693439157774e-08
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 18.28125,
+        "end_pad_id_0": 14.65625,
+        "best_of_ids_0_and_3": 18.28125
+      }
+    },
+    {
+      "decision_frame": 188,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 8,
+      "probability": {
+        "alignment_pad_id_3": 0.977013885974884,
+        "end_pad_id_0": 0.02297716587781906,
+        "all_special_ids_0_to_6": 0.9999904632568359,
+        "best_lexical": 1.4422095517829803e-08
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 18.03125,
+        "end_pad_id_0": 14.28125,
+        "best_of_ids_0_and_3": 18.03125
+      }
+    },
+    {
+      "decision_frame": 189,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 8,
+      "probability": {
+        "alignment_pad_id_3": 0.9740386605262756,
+        "end_pad_id_0": 0.025957252830266953,
+        "all_special_ids_0_to_6": 0.9999962449073792,
+        "best_lexical": 8.997633749174838e-09
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 18.5,
+        "end_pad_id_0": 14.875,
+        "best_of_ids_0_and_3": 18.5
+      }
+    },
+    {
+      "decision_frame": 190,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 8,
+      "probability": {
+        "alignment_pad_id_3": 0.9740386605262756,
+        "end_pad_id_0": 0.025957252830266953,
+        "all_special_ids_0_to_6": 0.9999962449073792,
+        "best_lexical": 7.459300732648444e-09
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 18.6875,
+        "end_pad_id_0": 15.0625,
+        "best_of_ids_0_and_3": 18.6875
+      }
+    },
+    {
+      "decision_frame": 191,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 8,
+      "probability": {
+        "alignment_pad_id_3": 0.9890096783638,
+        "end_pad_id_0": 0.010986905544996262,
+        "all_special_ids_0_to_6": 0.9999962449073792,
+        "best_lexical": 5.205494257864984e-09
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 19.0625,
+        "end_pad_id_0": 14.5625,
+        "best_of_ids_0_and_3": 19.0625
+      }
+    },
+    {
+      "decision_frame": 192,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 8,
+      "probability": {
+        "alignment_pad_id_3": 0.9669103622436523,
+        "end_pad_id_0": 0.03308585286140442,
+        "all_special_ids_0_to_6": 0.9999962449073792,
+        "best_lexical": 8.132484019540698e-09
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 18.59375,
+        "end_pad_id_0": 15.21875,
+        "best_of_ids_0_and_3": 18.59375
+      }
+    },
+    {
+      "decision_frame": 193,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 8,
+      "probability": {
+        "alignment_pad_id_3": 0.9579066634178162,
+        "end_pad_id_0": 0.042087480425834656,
+        "all_special_ids_0_to_6": 0.9999943375587463,
+        "best_lexical": 1.1361845686508332e-08
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 18.25,
+        "end_pad_id_0": 15.125,
+        "best_of_ids_0_and_3": 18.25
+      }
+    },
+    {
+      "decision_frame": 194,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 8,
+      "probability": {
+        "alignment_pad_id_3": 0.9669103622436523,
+        "end_pad_id_0": 0.03308585286140442,
+        "all_special_ids_0_to_6": 0.9999962449073792,
+        "best_lexical": 8.390636629940218e-09
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 18.5625,
+        "end_pad_id_0": 15.1875,
+        "best_of_ids_0_and_3": 18.5625
+      }
+    },
+    {
+      "decision_frame": 195,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 8,
+      "probability": {
+        "alignment_pad_id_3": 0.9626688361167908,
+        "end_pad_id_0": 0.037326715886592865,
+        "all_special_ids_0_to_6": 0.9999962449073792,
+        "best_lexical": 9.46612832564142e-09
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 18.4375,
+        "end_pad_id_0": 15.1875,
+        "best_of_ids_0_and_3": 18.4375
+      }
+    },
+    {
+      "decision_frame": 196,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 8,
+      "probability": {
+        "alignment_pad_id_3": 0.9626688361167908,
+        "end_pad_id_0": 0.037326715886592865,
+        "all_special_ids_0_to_6": 0.9999962449073792,
+        "best_lexical": 9.174885740037553e-09
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 18.46875,
+        "end_pad_id_0": 15.21875,
+        "best_of_ids_0_and_3": 18.46875
+      }
+    },
+    {
+      "decision_frame": 197,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 8,
+      "probability": {
+        "alignment_pad_id_3": 0.9525682330131531,
+        "end_pad_id_0": 0.04742558300495148,
+        "all_special_ids_0_to_6": 0.9999943375587463,
+        "best_lexical": 1.3209316307438712e-08
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 18.09375,
+        "end_pad_id_0": 15.09375,
+        "best_of_ids_0_and_3": 18.09375
+      }
+    },
+    {
+      "decision_frame": 198,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 8,
+      "probability": {
+        "alignment_pad_id_3": 0.9525664448738098,
+        "end_pad_id_0": 0.047425489872694016,
+        "all_special_ids_0_to_6": 0.9999923706054688,
+        "best_lexical": 1.9219404734371892e-08
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 17.71875,
+        "end_pad_id_0": 14.71875,
+        "best_of_ids_0_and_3": 17.71875
+      }
+    },
+    {
+      "decision_frame": 199,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 128,
+      "probability": {
+        "alignment_pad_id_3": 0.9947723150253296,
+        "end_pad_id_0": 0.0052200863137841225,
+        "all_special_ids_0_to_6": 0.9999923706054688,
+        "best_lexical": 1.2958791373307577e-08
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 18.15625,
+        "end_pad_id_0": 12.90625,
+        "best_of_ids_0_and_3": 18.15625
+      }
+    },
+    {
+      "decision_frame": 200,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 8,
+      "probability": {
+        "alignment_pad_id_3": 0.979661762714386,
+        "end_pad_id_0": 0.020332232117652893,
+        "all_special_ids_0_to_6": 0.9999943375587463,
+        "best_lexical": 1.0254513682639299e-08
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 18.375,
+        "end_pad_id_0": 14.5,
+        "best_of_ids_0_and_3": 18.375
+      }
+    },
+    {
+      "decision_frame": 201,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 8,
+      "probability": {
+        "alignment_pad_id_3": 0.9902895092964172,
+        "end_pad_id_0": 0.009708456695079803,
+        "all_special_ids_0_to_6": 0.9999980330467224,
+        "best_lexical": 5.5483906358233526e-09
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 19.0,
+        "end_pad_id_0": 14.375,
+        "best_of_ids_0_and_3": 19.0
+      }
+    },
+    {
+      "decision_frame": 202,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 8,
+      "probability": {
+        "alignment_pad_id_3": 0.9902895092964172,
+        "end_pad_id_0": 0.009708456695079803,
+        "all_special_ids_0_to_6": 0.9999980330467224,
+        "best_lexical": 4.599777003733152e-09
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 19.1875,
+        "end_pad_id_0": 14.5625,
+        "best_of_ids_0_and_3": 19.1875
+      }
+    },
+    {
+      "decision_frame": 203,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 8,
+      "probability": {
+        "alignment_pad_id_3": 0.9890115261077881,
+        "end_pad_id_0": 0.010986926034092903,
+        "all_special_ids_0_to_6": 0.9999980330467224,
+        "best_lexical": 4.452503699070576e-09
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 19.21875,
+        "end_pad_id_0": 14.71875,
+        "best_of_ids_0_and_3": 19.21875
+      }
+    },
+    {
+      "decision_frame": 204,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 8,
+      "probability": {
+        "alignment_pad_id_3": 0.9875656962394714,
+        "end_pad_id_0": 0.012431618757545948,
+        "all_special_ids_0_to_6": 0.9999980330467224,
+        "best_lexical": 5.037972261590085e-09
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 19.09375,
+        "end_pad_id_0": 14.71875,
+        "best_of_ids_0_and_3": 19.09375
+      }
+    },
+    {
+      "decision_frame": 205,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 8,
+      "probability": {
+        "alignment_pad_id_3": 0.9840909242630005,
+        "end_pad_id_0": 0.015906348824501038,
+        "all_special_ids_0_to_6": 0.9999980330467224,
+        "best_lexical": 5.6886837462855055e-09
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 18.96875,
+        "end_pad_id_0": 14.84375,
+        "best_of_ids_0_and_3": 18.96875
+      }
+    },
+    {
+      "decision_frame": 206,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 8,
+      "probability": {
+        "alignment_pad_id_3": 0.9820096492767334,
+        "end_pad_id_0": 0.017986135557293892,
+        "all_special_ids_0_to_6": 0.9999962449073792,
+        "best_lexical": 7.520342570899174e-09
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 18.6875,
+        "end_pad_id_0": 14.6875,
+        "best_of_ids_0_and_3": 18.6875
+      }
+    },
+    {
+      "decision_frame": 207,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 8,
+      "probability": {
+        "alignment_pad_id_3": 0.9770195484161377,
+        "end_pad_id_0": 0.022977298125624657,
+        "all_special_ids_0_to_6": 0.9999962449073792,
+        "best_lexical": 8.47836112427558e-09
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 18.5625,
+        "end_pad_id_0": 14.8125,
+        "best_of_ids_0_and_3": 18.5625
+      }
+    },
+    {
+      "decision_frame": 208,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 8,
+      "probability": {
+        "alignment_pad_id_3": 0.9579066634178162,
+        "end_pad_id_0": 0.042087480425834656,
+        "all_special_ids_0_to_6": 0.9999943375587463,
+        "best_lexical": 1.3283343314185458e-08
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 18.09375,
+        "end_pad_id_0": 14.96875,
+        "best_of_ids_0_and_3": 18.09375
+      }
+    },
+    {
+      "decision_frame": 209,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 8,
+      "probability": {
+        "alignment_pad_id_3": 0.9914177060127258,
+        "end_pad_id_0": 0.008577443659305573,
+        "all_special_ids_0_to_6": 0.9999943375587463,
+        "best_lexical": 7.592390716126829e-09
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 18.6875,
+        "end_pad_id_0": 13.9375,
+        "best_of_ids_0_and_3": 18.6875
+      }
+    },
+    {
+      "decision_frame": 210,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 8,
+      "probability": {
+        "alignment_pad_id_3": 0.9525682330131531,
+        "end_pad_id_0": 0.04742558300495148,
+        "all_special_ids_0_to_6": 0.9999943375587463,
+        "best_lexical": 1.3209316307438712e-08
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 18.09375,
+        "end_pad_id_0": 15.09375,
+        "best_of_ids_0_and_3": 18.09375
+      }
+    },
+    {
+      "decision_frame": 211,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 8,
+      "probability": {
+        "alignment_pad_id_3": 0.966906726360321,
+        "end_pad_id_0": 0.03308572992682457,
+        "all_special_ids_0_to_6": 0.9999923706054688,
+        "best_lexical": 1.4272899306888576e-08
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 18.03125,
+        "end_pad_id_0": 14.65625,
+        "best_of_ids_0_and_3": 18.03125
+      }
+    },
+    {
+      "decision_frame": 212,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 8,
+      "probability": {
+        "alignment_pad_id_3": 0.9579048156738281,
+        "end_pad_id_0": 0.04208740219473839,
+        "all_special_ids_0_to_6": 0.9999923706054688,
+        "best_lexical": 1.994062159837995e-08
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 17.6875,
+        "end_pad_id_0": 14.5625,
+        "best_of_ids_0_and_3": 17.6875
+      }
+    },
+    {
+      "decision_frame": 213,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 8,
+      "probability": {
+        "alignment_pad_id_3": 0.9399041533470154,
+        "end_pad_id_0": 0.06008606031537056,
+        "all_special_ids_0_to_6": 0.9999904632568359,
+        "best_lexical": 2.5123117808334428e-08
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 17.4375,
+        "end_pad_id_0": 14.6875,
+        "best_of_ids_0_and_3": 17.4375
+      }
+    },
+    {
+      "decision_frame": 214,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 8,
+      "probability": {
+        "alignment_pad_id_3": 0.9241328835487366,
+        "end_pad_id_0": 0.07585744559764862,
+        "all_special_ids_0_to_6": 0.9999904632568359,
+        "best_lexical": 2.548567223925602e-08
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 17.40625,
+        "end_pad_id_0": 14.90625,
+        "best_of_ids_0_and_3": 17.40625
+      }
+    },
+    {
+      "decision_frame": 215,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 8,
+      "probability": {
+        "alignment_pad_id_3": 0.9324457049369812,
+        "end_pad_id_0": 0.06754613667726517,
+        "all_special_ids_0_to_6": 0.9999923706054688,
+        "best_lexical": 2.269333876370183e-08
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 17.53125,
+        "end_pad_id_0": 14.90625,
+        "best_of_ids_0_and_3": 17.53125
+      }
+    },
+    {
+      "decision_frame": 216,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 8,
+      "probability": {
+        "alignment_pad_id_3": 0.9046403169631958,
+        "end_pad_id_0": 0.09534838795661926,
+        "all_special_ids_0_to_6": 0.9999885559082031,
+        "best_lexical": 2.740013727020596e-08
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 17.3125,
+        "end_pad_id_0": 15.0625,
+        "best_of_ids_0_and_3": 17.3125
+      }
+    },
+    {
+      "decision_frame": 217,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 8,
+      "probability": {
+        "alignment_pad_id_3": 0.8807850480079651,
+        "end_pad_id_0": 0.11920128762722015,
+        "all_special_ids_0_to_6": 0.9999866485595703,
+        "best_lexical": 3.11892733861896e-08
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 17.15625,
+        "end_pad_id_0": 15.15625,
+        "best_of_ids_0_and_3": 17.15625
+      }
+    },
+    {
+      "decision_frame": 218,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 8,
+      "probability": {
+        "alignment_pad_id_3": 0.8807833790779114,
+        "end_pad_id_0": 0.11920106410980225,
+        "all_special_ids_0_to_6": 0.9999847412109375,
+        "best_lexical": 3.7621372683815935e-08
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 16.96875,
+        "end_pad_id_0": 14.96875,
+        "best_of_ids_0_and_3": 16.96875
+      }
+    },
+    {
+      "decision_frame": 219,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 8,
+      "probability": {
+        "alignment_pad_id_3": 0.8519408106803894,
+        "end_pad_id_0": 0.1480451077222824,
+        "all_special_ids_0_to_6": 0.9999866485595703,
+        "best_lexical": 3.99659398908625e-08
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 16.875,
+        "end_pad_id_0": 15.125,
+        "best_of_ids_0_and_3": 16.875
+      }
+    },
+    {
+      "decision_frame": 220,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 8,
+      "probability": {
+        "alignment_pad_id_3": 0.8354707360267639,
+        "end_pad_id_0": 0.1645139455795288,
+        "all_special_ids_0_to_6": 0.9999847412109375,
+        "best_lexical": 4.44118306575092e-08
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 16.75,
+        "end_pad_id_0": 15.125,
+        "best_of_ids_0_and_3": 16.75
+      }
+    },
+    {
+      "decision_frame": 221,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 8,
+      "probability": {
+        "alignment_pad_id_3": 0.9148885607719421,
+        "end_pad_id_0": 0.08509789407253265,
+        "all_special_ids_0_to_6": 0.9999866485595703,
+        "best_lexical": 3.787581448477795e-08
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 17.0,
+        "end_pad_id_0": 14.625,
+        "best_of_ids_0_and_3": 17.0
+      }
+    },
+    {
+      "decision_frame": 222,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 8,
+      "probability": {
+        "alignment_pad_id_3": 0.8354722857475281,
+        "end_pad_id_0": 0.16451425850391388,
+        "all_special_ids_0_to_6": 0.9999866485595703,
+        "best_lexical": 3.352387167865345e-08
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 17.03125,
+        "end_pad_id_0": 15.40625,
+        "best_of_ids_0_and_3": 17.03125
+      }
+    },
+    {
+      "decision_frame": 223,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 8,
+      "probability": {
+        "alignment_pad_id_3": 0.8807833790779114,
+        "end_pad_id_0": 0.11920106410980225,
+        "all_special_ids_0_to_6": 0.9999847412109375,
+        "best_lexical": 3.7621372683815935e-08
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 16.96875,
+        "end_pad_id_0": 14.96875,
+        "best_of_ids_0_and_3": 16.96875
+      }
+    },
+    {
+      "decision_frame": 224,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 8,
+      "probability": {
+        "alignment_pad_id_3": 0.8519408106803894,
+        "end_pad_id_0": 0.1480451077222824,
+        "all_special_ids_0_to_6": 0.9999866485595703,
+        "best_lexical": 3.418467997562402e-08
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 17.03125,
+        "end_pad_id_0": 15.28125,
+        "best_of_ids_0_and_3": 17.03125
+      }
+    },
+    {
+      "decision_frame": 225,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 8,
+      "probability": {
+        "alignment_pad_id_3": 0.8354722857475281,
+        "end_pad_id_0": 0.16451425850391388,
+        "all_special_ids_0_to_6": 0.9999866485595703,
+        "best_lexical": 3.798752246098047e-08
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 16.90625,
+        "end_pad_id_0": 15.28125,
+        "best_of_ids_0_and_3": 16.90625
+      }
+    },
+    {
+      "decision_frame": 226,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 8,
+      "probability": {
+        "alignment_pad_id_3": 0.8354722857475281,
+        "end_pad_id_0": 0.16451425850391388,
+        "all_special_ids_0_to_6": 0.9999866485595703,
+        "best_lexical": 3.798752246098047e-08
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 16.90625,
+        "end_pad_id_0": 15.28125,
+        "best_of_ids_0_and_3": 16.90625
+      }
+    },
+    {
+      "decision_frame": 227,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 8,
+      "probability": {
+        "alignment_pad_id_3": 0.8519408106803894,
+        "end_pad_id_0": 0.1480451077222824,
+        "all_special_ids_0_to_6": 0.9999866485595703,
+        "best_lexical": 4.123459262928009e-08
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 16.84375,
+        "end_pad_id_0": 15.09375,
+        "best_of_ids_0_and_3": 16.84375
+      }
+    },
+    {
+      "decision_frame": 228,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 8,
+      "probability": {
+        "alignment_pad_id_3": 0.8519375324249268,
+        "end_pad_id_0": 0.14804454147815704,
+        "all_special_ids_0_to_6": 0.9999828338623047,
+        "best_lexical": 4.820794075044432e-08
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 16.6875,
+        "end_pad_id_0": 14.9375,
+        "best_of_ids_0_and_3": 16.6875
+      }
+    },
+    {
+      "decision_frame": 229,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 8,
+      "probability": {
+        "alignment_pad_id_3": 0.835467517375946,
+        "end_pad_id_0": 0.16451331973075867,
+        "all_special_ids_0_to_6": 0.9999809265136719,
+        "best_lexical": 5.032500283164154e-08
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 16.625,
+        "end_pad_id_0": 15.0,
+        "best_of_ids_0_and_3": 16.625
+      }
+    },
+    {
+      "decision_frame": 230,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 8,
+      "probability": {
+        "alignment_pad_id_3": 0.798170268535614,
+        "end_pad_id_0": 0.20180904865264893,
+        "all_special_ids_0_to_6": 0.9999790787696838,
+        "best_lexical": 5.7993588598037604e-08
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 16.4375,
+        "end_pad_id_0": 15.0625,
+        "best_of_ids_0_and_3": 16.4375
+      }
+    },
+    {
+      "decision_frame": 231,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 8,
+      "probability": {
+        "alignment_pad_id_3": 0.798170268535614,
+        "end_pad_id_0": 0.20180904865264893,
+        "all_special_ids_0_to_6": 0.9999790787696838,
+        "best_lexical": 6.571534783006427e-08
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 16.3125,
+        "end_pad_id_0": 14.9375,
+        "best_of_ids_0_and_3": 16.3125
+      }
+    },
+    {
+      "decision_frame": 232,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 8,
+      "probability": {
+        "alignment_pad_id_3": 0.7981718182563782,
+        "end_pad_id_0": 0.20180942118167877,
+        "all_special_ids_0_to_6": 0.9999809265136719,
+        "best_lexical": 5.620942644668503e-08
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 16.46875,
+        "end_pad_id_0": 15.09375,
+        "best_of_ids_0_and_3": 16.46875
+      }
+    },
+    {
+      "decision_frame": 233,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 8,
+      "probability": {
+        "alignment_pad_id_3": 0.7548971772193909,
+        "end_pad_id_0": 0.24507923424243927,
+        "all_special_ids_0_to_6": 0.999977171421051,
+        "best_lexical": 6.826124376857479e-08
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 16.21875,
+        "end_pad_id_0": 15.09375,
+        "best_of_ids_0_and_3": 16.21875
+      }
+    },
+    {
+      "decision_frame": 234,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 8,
+      "probability": {
+        "alignment_pad_id_3": 0.754892885684967,
+        "end_pad_id_0": 0.24507783353328705,
+        "all_special_ids_0_to_6": 0.9999714493751526,
+        "best_lexical": 8.495200631841726e-08
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 16.0,
+        "end_pad_id_0": 14.875,
+        "best_of_ids_0_and_3": 16.0
+      }
+    },
+    {
+      "decision_frame": 235,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 8,
+      "probability": {
+        "alignment_pad_id_3": 0.7548885941505432,
+        "end_pad_id_0": 0.24507644772529602,
+        "all_special_ids_0_to_6": 0.9999656677246094,
+        "best_lexical": 1.0247109116789943e-07
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 15.8125,
+        "end_pad_id_0": 14.6875,
+        "best_of_ids_0_and_3": 15.8125
+      }
+    },
+    {
+      "decision_frame": 236,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 8,
+      "probability": {
+        "alignment_pad_id_3": 0.7548842430114746,
+        "end_pad_id_0": 0.2450750321149826,
+        "all_special_ids_0_to_6": 0.9999599456787109,
+        "best_lexical": 1.2752660438763996e-07
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 15.59375,
+        "end_pad_id_0": 14.46875,
+        "best_of_ids_0_and_3": 15.59375
+      }
+    },
+    {
+      "decision_frame": 237,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 8,
+      "probability": {
+        "alignment_pad_id_3": 0.7772678732872009,
+        "end_pad_id_0": 0.22269096970558167,
+        "all_special_ids_0_to_6": 0.9999580383300781,
+        "best_lexical": 1.3130797071880806e-07
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 15.59375,
+        "end_pad_id_0": 14.34375,
+        "best_of_ids_0_and_3": 15.59375
+      }
+    },
+    {
+      "decision_frame": 238,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 8,
+      "probability": {
+        "alignment_pad_id_3": 0.7772707939147949,
+        "end_pad_id_0": 0.2226918339729309,
+        "all_special_ids_0_to_6": 0.9999618530273438,
+        "best_lexical": 1.272685494768666e-07
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 15.625,
+        "end_pad_id_0": 14.375,
+        "best_of_ids_0_and_3": 15.625
+      }
+    },
+    {
+      "decision_frame": 239,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 8,
+      "probability": {
+        "alignment_pad_id_3": 0.7772722840309143,
+        "end_pad_id_0": 0.22269225120544434,
+        "all_special_ids_0_to_6": 0.9999637603759766,
+        "best_lexical": 1.1955796708207345e-07
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 15.6875,
+        "end_pad_id_0": 14.4375,
+        "best_of_ids_0_and_3": 15.6875
+      }
+    },
+    {
+      "decision_frame": 240,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 8,
+      "probability": {
+        "alignment_pad_id_3": 0.7772722840309143,
+        "end_pad_id_0": 0.22269225120544434,
+        "all_special_ids_0_to_6": 0.9999637603759766,
+        "best_lexical": 1.1231431784608503e-07
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 15.75,
+        "end_pad_id_0": 14.5,
+        "best_of_ids_0_and_3": 15.75
+      }
+    },
+    {
+      "decision_frame": 241,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 8,
+      "probability": {
+        "alignment_pad_id_3": 0.7548885941505432,
+        "end_pad_id_0": 0.24507644772529602,
+        "all_special_ids_0_to_6": 0.9999656677246094,
+        "best_lexical": 1.1611495409624695e-07
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 15.6875,
+        "end_pad_id_0": 14.5625,
+        "best_of_ids_0_and_3": 15.6875
+      }
+    },
+    {
+      "decision_frame": 242,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 8,
+      "probability": {
+        "alignment_pad_id_3": 0.7548914551734924,
+        "end_pad_id_0": 0.24507737159729004,
+        "all_special_ids_0_to_6": 0.999969482421875,
+        "best_lexical": 1.0572427555644026e-07
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 15.78125,
+        "end_pad_id_0": 14.65625,
+        "best_of_ids_0_and_3": 15.78125
+      }
+    },
+    {
+      "decision_frame": 243,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 8,
+      "probability": {
+        "alignment_pad_id_3": 0.754892885684967,
+        "end_pad_id_0": 0.24507783353328705,
+        "all_special_ids_0_to_6": 0.9999714493751526,
+        "best_lexical": 9.626322849953795e-08
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 15.875,
+        "end_pad_id_0": 14.75,
+        "best_of_ids_0_and_3": 15.875
+      }
+    },
+    {
+      "decision_frame": 244,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 8,
+      "probability": {
+        "alignment_pad_id_3": 0.7548957467079163,
+        "end_pad_id_0": 0.24507877230644226,
+        "all_special_ids_0_to_6": 0.9999752640724182,
+        "best_lexical": 8.495232606264835e-08
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 16.0,
+        "end_pad_id_0": 14.875,
+        "best_of_ids_0_and_3": 16.0
+      }
+    },
+    {
+      "decision_frame": 245,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 8,
+      "probability": {
+        "alignment_pad_id_3": 0.754892885684967,
+        "end_pad_id_0": 0.24507783353328705,
+        "all_special_ids_0_to_6": 0.9999714493751526,
+        "best_lexical": 9.626322849953795e-08
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 15.875,
+        "end_pad_id_0": 14.75,
+        "best_of_ids_0_and_3": 15.875
+      }
+    },
+    {
+      "decision_frame": 246,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 8,
+      "probability": {
+        "alignment_pad_id_3": 0.7772678732872009,
+        "end_pad_id_0": 0.22269096970558167,
+        "all_special_ids_0_to_6": 0.9999580383300781,
+        "best_lexical": 1.442136010609829e-07
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 15.5,
+        "end_pad_id_0": 14.25,
+        "best_of_ids_0_and_3": 15.5
+      }
+    },
+    {
+      "decision_frame": 247,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 8,
+      "probability": {
+        "alignment_pad_id_3": 0.7772782444953918,
+        "end_pad_id_0": 0.22269394993782043,
+        "all_special_ids_0_to_6": 0.9999714493751526,
+        "best_lexical": 8.217153180112291e-08
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 16.0625,
+        "end_pad_id_0": 14.8125,
+        "best_of_ids_0_and_3": 16.0625
+      }
+    },
+    {
+      "decision_frame": 248,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 8,
+      "probability": {
+        "alignment_pad_id_3": 0.7548900246620178,
+        "end_pad_id_0": 0.24507690966129303,
+        "all_special_ids_0_to_6": 0.9999675750732422,
+        "best_lexical": 9.626286612274271e-08
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 15.875,
+        "end_pad_id_0": 14.75,
+        "best_of_ids_0_and_3": 15.875
+      }
+    },
+    {
+      "decision_frame": 249,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 8,
+      "probability": {
+        "alignment_pad_id_3": 0.9324278831481934,
+        "end_pad_id_0": 0.0675448477268219,
+        "all_special_ids_0_to_6": 0.9999733567237854,
+        "best_lexical": 8.43143723727735e-08
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 16.21875,
+        "end_pad_id_0": 13.59375,
+        "best_of_ids_0_and_3": 16.21875
+      }
+    },
+    {
+      "decision_frame": 250,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 8,
+      "probability": {
+        "alignment_pad_id_3": 0.7981671690940857,
+        "end_pad_id_0": 0.20180827379226685,
+        "all_special_ids_0_to_6": 0.9999752640724182,
+        "best_lexical": 6.995335866122332e-08
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 16.25,
+        "end_pad_id_0": 14.875,
+        "best_of_ids_0_and_3": 16.25
+      }
+    },
+    {
+      "decision_frame": 251,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 8,
+      "probability": {
+        "alignment_pad_id_3": 0.8175581693649292,
+        "end_pad_id_0": 0.18242187798023224,
+        "all_special_ids_0_to_6": 0.9999809265136719,
+        "best_lexical": 5.580327666621088e-08
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 16.5,
+        "end_pad_id_0": 15.0,
+        "best_of_ids_0_and_3": 16.5
+      }
+    },
+    {
+      "decision_frame": 252,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 8,
+      "probability": {
+        "alignment_pad_id_3": 0.8175581693649292,
+        "end_pad_id_0": 0.18242187798023224,
+        "all_special_ids_0_to_6": 0.9999809265136719,
+        "best_lexical": 5.580327666621088e-08
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 16.5,
+        "end_pad_id_0": 15.0,
+        "best_of_ids_0_and_3": 16.5
+      }
+    },
+    {
+      "decision_frame": 253,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 8,
+      "probability": {
+        "alignment_pad_id_3": 0.8175581693649292,
+        "end_pad_id_0": 0.18242187798023224,
+        "all_special_ids_0_to_6": 0.9999809265136719,
+        "best_lexical": 5.4086395806507426e-08
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 16.53125,
+        "end_pad_id_0": 15.03125,
+        "best_of_ids_0_and_3": 16.53125
+      }
+    },
+    {
+      "decision_frame": 254,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 8,
+      "probability": {
+        "alignment_pad_id_3": 0.835464358329773,
+        "end_pad_id_0": 0.16451267898082733,
+        "all_special_ids_0_to_6": 0.999977171421051,
+        "best_lexical": 6.461834090032426e-08
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 16.375,
+        "end_pad_id_0": 14.75,
+        "best_of_ids_0_and_3": 16.375
+      }
+    },
+    {
+      "decision_frame": 255,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 8,
+      "probability": {
+        "alignment_pad_id_3": 0.8175550699234009,
+        "end_pad_id_0": 0.18242119252681732,
+        "all_special_ids_0_to_6": 0.999977171421051,
+        "best_lexical": 6.731134760684654e-08
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 16.3125,
+        "end_pad_id_0": 14.8125,
+        "best_of_ids_0_and_3": 16.3125
+      }
+    },
+    {
+      "decision_frame": 256,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 8,
+      "probability": {
+        "alignment_pad_id_3": 0.8175550699234009,
+        "end_pad_id_0": 0.18242119252681732,
+        "all_special_ids_0_to_6": 0.999977171421051,
+        "best_lexical": 6.944804198383281e-08
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 16.28125,
+        "end_pad_id_0": 14.78125,
+        "best_of_ids_0_and_3": 16.28125
+      }
+    },
+    {
+      "decision_frame": 257,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 8,
+      "probability": {
+        "alignment_pad_id_3": 0.7981687784194946,
+        "end_pad_id_0": 0.20180866122245789,
+        "all_special_ids_0_to_6": 0.999977171421051,
+        "best_lexical": 5.280366721649443e-08
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 16.53125,
+        "end_pad_id_0": 15.15625,
+        "best_of_ids_0_and_3": 16.53125
+      }
+    },
+    {
+      "decision_frame": 258,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 8,
+      "probability": {
+        "alignment_pad_id_3": 0.835467517375946,
+        "end_pad_id_0": 0.16451331973075867,
+        "all_special_ids_0_to_6": 0.9999809265136719,
+        "best_lexical": 5.032500283164154e-08
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 16.625,
+        "end_pad_id_0": 15.0,
+        "best_of_ids_0_and_3": 16.625
+      }
+    },
+    {
+      "decision_frame": 259,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 8,
+      "probability": {
+        "alignment_pad_id_3": 0.817556619644165,
+        "end_pad_id_0": 0.18242153525352478,
+        "all_special_ids_0_to_6": 0.9999790787696838,
+        "best_lexical": 5.580317363751419e-08
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 16.5,
+        "end_pad_id_0": 15.0,
+        "best_of_ids_0_and_3": 16.5
+      }
+    },
+    {
+      "decision_frame": 260,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 8,
+      "probability": {
+        "alignment_pad_id_3": 0.8175550699234009,
+        "end_pad_id_0": 0.18242119252681732,
+        "all_special_ids_0_to_6": 0.999977171421051,
+        "best_lexical": 6.524039264377279e-08
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 16.34375,
+        "end_pad_id_0": 14.84375,
+        "best_of_ids_0_and_3": 16.34375
+      }
+    },
+    {
+      "decision_frame": 261,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 8,
+      "probability": {
+        "alignment_pad_id_3": 0.7981626391410828,
+        "end_pad_id_0": 0.20180712640285492,
+        "all_special_ids_0_to_6": 0.999969482421875,
+        "best_lexical": 8.178329125030359e-08
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 16.09375,
+        "end_pad_id_0": 14.71875,
+        "best_of_ids_0_and_3": 16.09375
+      }
+    },
+    {
+      "decision_frame": 262,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 8,
+      "probability": {
+        "alignment_pad_id_3": 0.7981595993041992,
+        "end_pad_id_0": 0.20180633664131165,
+        "all_special_ids_0_to_6": 0.9999656677246094,
+        "best_lexical": 1.0501142355678894e-07
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 15.84375,
+        "end_pad_id_0": 14.46875,
+        "best_of_ids_0_and_3": 15.84375
+      }
+    },
+    {
+      "decision_frame": 263,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 8,
+      "probability": {
+        "alignment_pad_id_3": 0.7772648930549622,
+        "end_pad_id_0": 0.22269012033939362,
+        "all_special_ids_0_to_6": 0.9999542832374573,
+        "best_lexical": 1.4421304683764902e-07
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 15.5,
+        "end_pad_id_0": 14.25,
+        "best_of_ids_0_and_3": 15.5
+      }
+    },
+    {
+      "decision_frame": 264,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 8,
+      "probability": {
+        "alignment_pad_id_3": 0.8175317049026489,
+        "end_pad_id_0": 0.18241597712039948,
+        "all_special_ids_0_to_6": 0.9999485611915588,
+        "best_lexical": 1.829659765917313e-07
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 15.3125,
+        "end_pad_id_0": 13.8125,
+        "best_of_ids_0_and_3": 15.3125
+      }
+    },
+    {
+      "decision_frame": 265,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 8,
+      "probability": {
+        "alignment_pad_id_3": 0.7981489300727844,
+        "end_pad_id_0": 0.20180365443229675,
+        "all_special_ids_0_to_6": 0.9999523758888245,
+        "best_lexical": 1.4353167898661923e-07
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 15.53125,
+        "end_pad_id_0": 14.15625,
+        "best_of_ids_0_and_3": 15.53125
+      }
+    },
+    {
+      "decision_frame": 266,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 8,
+      "probability": {
+        "alignment_pad_id_3": 0.7981458902359009,
+        "end_pad_id_0": 0.20180289447307587,
+        "all_special_ids_0_to_6": 0.9999485611915588,
+        "best_lexical": 1.5763811234137393e-07
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 15.4375,
+        "end_pad_id_0": 14.0625,
+        "best_of_ids_0_and_3": 15.4375
+      }
+    },
+    {
+      "decision_frame": 267,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 8,
+      "probability": {
+        "alignment_pad_id_3": 0.7772604823112488,
+        "end_pad_id_0": 0.22268885374069214,
+        "all_special_ids_0_to_6": 0.9999485611915588,
+        "best_lexical": 1.5351311333233753e-07
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 15.4375,
+        "end_pad_id_0": 14.1875,
+        "best_of_ids_0_and_3": 15.4375
+      }
+    },
+    {
+      "decision_frame": 268,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 8,
+      "probability": {
+        "alignment_pad_id_3": 0.7981565594673157,
+        "end_pad_id_0": 0.20180557668209076,
+        "all_special_ids_0_to_6": 0.9999618530273438,
+        "best_lexical": 1.117836490038826e-07
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 15.78125,
+        "end_pad_id_0": 14.40625,
+        "best_of_ids_0_and_3": 15.78125
+      }
+    },
+    {
+      "decision_frame": 269,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 8,
+      "probability": {
+        "alignment_pad_id_3": 0.7772693037986755,
+        "end_pad_id_0": 0.2226913869380951,
+        "all_special_ids_0_to_6": 0.9999599456787109,
+        "best_lexical": 1.158791036459661e-07
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 15.71875,
+        "end_pad_id_0": 14.46875,
+        "best_of_ids_0_and_3": 15.71875
+      }
+    },
+    {
+      "decision_frame": 270,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 8,
+      "probability": {
+        "alignment_pad_id_3": 0.7981595993041992,
+        "end_pad_id_0": 0.20180633664131165,
+        "all_special_ids_0_to_6": 0.9999656677246094,
+        "best_lexical": 1.0501142355678894e-07
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 15.84375,
+        "end_pad_id_0": 14.46875,
+        "best_of_ids_0_and_3": 15.84375
+      }
+    },
+    {
+      "decision_frame": 271,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 8,
+      "probability": {
+        "alignment_pad_id_3": 0.7981595993041992,
+        "end_pad_id_0": 0.20180633664131165,
+        "all_special_ids_0_to_6": 0.9999656677246094,
+        "best_lexical": 1.0178056442100569e-07
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 15.875,
+        "end_pad_id_0": 14.5,
+        "best_of_ids_0_and_3": 15.875
+      }
+    },
+    {
+      "decision_frame": 272,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 8,
+      "probability": {
+        "alignment_pad_id_3": 0.7981565594673157,
+        "end_pad_id_0": 0.20180557668209076,
+        "all_special_ids_0_to_6": 0.9999618530273438,
+        "best_lexical": 1.117836490038826e-07
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 15.78125,
+        "end_pad_id_0": 14.40625,
+        "best_of_ids_0_and_3": 15.78125
+      }
+    },
+    {
+      "decision_frame": 273,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 8,
+      "probability": {
+        "alignment_pad_id_3": 0.7981565594673157,
+        "end_pad_id_0": 0.20180557668209076,
+        "all_special_ids_0_to_6": 0.9999618530273438,
+        "best_lexical": 1.117836490038826e-07
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 15.78125,
+        "end_pad_id_0": 14.40625,
+        "best_of_ids_0_and_3": 15.78125
+      }
+    },
+    {
+      "decision_frame": 274,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 8,
+      "probability": {
+        "alignment_pad_id_3": 0.7772634029388428,
+        "end_pad_id_0": 0.222689688205719,
+        "all_special_ids_0_to_6": 0.9999523758888245,
+        "best_lexical": 1.3130723175436287e-07
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 15.59375,
+        "end_pad_id_0": 14.34375,
+        "best_of_ids_0_and_3": 15.59375
+      }
+    },
+    {
+      "decision_frame": 275,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 8,
+      "probability": {
+        "alignment_pad_id_3": 0.7981489300727844,
+        "end_pad_id_0": 0.20180365443229675,
+        "all_special_ids_0_to_6": 0.9999523758888245,
+        "best_lexical": 1.3068708426544617e-07
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 15.625,
+        "end_pad_id_0": 14.25,
+        "best_of_ids_0_and_3": 15.625
+      }
+    },
+    {
+      "decision_frame": 276,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 8,
+      "probability": {
+        "alignment_pad_id_3": 0.7981550693511963,
+        "end_pad_id_0": 0.20180518925189972,
+        "all_special_ids_0_to_6": 0.9999599456787109,
+        "best_lexical": 1.1178343584106187e-07
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 15.78125,
+        "end_pad_id_0": 14.40625,
+        "best_of_ids_0_and_3": 15.78125
+      }
+    },
+    {
+      "decision_frame": 277,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 8,
+      "probability": {
+        "alignment_pad_id_3": 0.7981550693511963,
+        "end_pad_id_0": 0.20180518925189972,
+        "all_special_ids_0_to_6": 0.9999599456787109,
+        "best_lexical": 9.864854177976667e-08
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 15.90625,
+        "end_pad_id_0": 14.53125,
+        "best_of_ids_0_and_3": 15.90625
+      }
+    },
+    {
+      "decision_frame": 278,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 8,
+      "probability": {
+        "alignment_pad_id_3": 0.7981520295143127,
+        "end_pad_id_0": 0.20180442929267883,
+        "all_special_ids_0_to_6": 0.9999561309814453,
+        "best_lexical": 1.0834381214408495e-07
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 15.8125,
+        "end_pad_id_0": 14.4375,
+        "best_of_ids_0_and_3": 15.8125
+      }
+    },
+    {
+      "decision_frame": 279,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 8,
+      "probability": {
+        "alignment_pad_id_3": 0.8175457119941711,
+        "end_pad_id_0": 0.18241910636425018,
+        "all_special_ids_0_to_6": 0.9999656677246094,
+        "best_lexical": 8.642849991247203e-08
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 16.0625,
+        "end_pad_id_0": 14.5625,
+        "best_of_ids_0_and_3": 16.0625
+      }
+    },
+    {
+      "decision_frame": 280,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 8,
+      "probability": {
+        "alignment_pad_id_3": 0.7981550693511963,
+        "end_pad_id_0": 0.20180518925189972,
+        "all_special_ids_0_to_6": 0.9999599456787109,
+        "best_lexical": 1.0501081959546354e-07
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 15.84375,
+        "end_pad_id_0": 14.46875,
+        "best_of_ids_0_and_3": 15.84375
+      }
+    },
+    {
+      "decision_frame": 281,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 8,
+      "probability": {
+        "alignment_pad_id_3": 0.7981595993041992,
+        "end_pad_id_0": 0.20180633664131165,
+        "all_special_ids_0_to_6": 0.9999656677246094,
+        "best_lexical": 8.982103594235014e-08
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 16.0,
+        "end_pad_id_0": 14.625,
+        "best_of_ids_0_and_3": 16.0
+      }
+    },
+    {
+      "decision_frame": 282,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 8,
+      "probability": {
+        "alignment_pad_id_3": 0.7981581091880798,
+        "end_pad_id_0": 0.2018059641122818,
+        "all_special_ids_0_to_6": 0.9999637603759766,
+        "best_lexical": 1.0834463637365843e-07
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 15.8125,
+        "end_pad_id_0": 14.4375,
+        "best_of_ids_0_and_3": 15.8125
+      }
+    },
+    {
+      "decision_frame": 283,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 8,
+      "probability": {
+        "alignment_pad_id_3": 0.7772767543792725,
+        "end_pad_id_0": 0.2226935178041458,
+        "all_special_ids_0_to_6": 0.999969482421875,
+        "best_lexical": 8.747097268724247e-08
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 16.0,
+        "end_pad_id_0": 14.75,
+        "best_of_ids_0_and_3": 16.0
+      }
+    },
+    {
+      "decision_frame": 284,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 8,
+      "probability": {
+        "alignment_pad_id_3": 0.7981595993041992,
+        "end_pad_id_0": 0.20180633664131165,
+        "all_special_ids_0_to_6": 0.9999656677246094,
+        "best_lexical": 1.0834484953647916e-07
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 15.8125,
+        "end_pad_id_0": 14.4375,
+        "best_of_ids_0_and_3": 15.8125
+      }
+    },
+    {
+      "decision_frame": 285,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 8,
+      "probability": {
+        "alignment_pad_id_3": 0.7772722840309143,
+        "end_pad_id_0": 0.22269225120544434,
+        "all_special_ids_0_to_6": 0.9999637603759766,
+        "best_lexical": 1.1231431784608503e-07
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 15.75,
+        "end_pad_id_0": 14.5,
+        "best_of_ids_0_and_3": 15.75
+      }
+    },
+    {
+      "decision_frame": 286,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 8,
+      "probability": {
+        "alignment_pad_id_3": 0.7772693037986755,
+        "end_pad_id_0": 0.2226913869380951,
+        "all_special_ids_0_to_6": 0.9999599456787109,
+        "best_lexical": 1.3547639809985412e-07
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 15.5625,
+        "end_pad_id_0": 14.3125,
+        "best_of_ids_0_and_3": 15.5625
+      }
+    },
+    {
+      "decision_frame": 287,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 8,
+      "probability": {
+        "alignment_pad_id_3": 0.7548871636390686,
+        "end_pad_id_0": 0.24507597088813782,
+        "all_special_ids_0_to_6": 0.9999637603759766,
+        "best_lexical": 1.2360348478068772e-07
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 15.625,
+        "end_pad_id_0": 14.5,
+        "best_of_ids_0_and_3": 15.625
+      }
+    },
+    {
+      "decision_frame": 288,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 8,
+      "probability": {
+        "alignment_pad_id_3": 0.7772782444953918,
+        "end_pad_id_0": 0.22269394993782043,
+        "all_special_ids_0_to_6": 0.9999714493751526,
+        "best_lexical": 9.606825557284537e-08
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 15.90625,
+        "end_pad_id_0": 14.65625,
+        "best_of_ids_0_and_3": 15.90625
+      }
+    },
+    {
+      "decision_frame": 289,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 8,
+      "probability": {
+        "alignment_pad_id_3": 0.7548914551734924,
+        "end_pad_id_0": 0.24507737159729004,
+        "all_special_ids_0_to_6": 0.999969482421875,
+        "best_lexical": 1.0908031811140972e-07
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 15.75,
+        "end_pad_id_0": 14.625,
+        "best_of_ids_0_and_3": 15.75
+      }
+    },
+    {
+      "decision_frame": 290,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 8,
+      "probability": {
+        "alignment_pad_id_3": 0.7772767543792725,
+        "end_pad_id_0": 0.2226935178041458,
+        "all_special_ids_0_to_6": 0.999969482421875,
+        "best_lexical": 1.0885938905857984e-07
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 15.78125,
+        "end_pad_id_0": 14.53125,
+        "best_of_ids_0_and_3": 15.78125
+      }
+    },
+    {
+      "decision_frame": 291,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 8,
+      "probability": {
+        "alignment_pad_id_3": 0.7772737741470337,
+        "end_pad_id_0": 0.22269266843795776,
+        "all_special_ids_0_to_6": 0.9999656677246094,
+        "best_lexical": 1.3130897968949284e-07
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 15.59375,
+        "end_pad_id_0": 14.34375,
+        "best_of_ids_0_and_3": 15.59375
+      }
+    },
+    {
+      "decision_frame": 292,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 8,
+      "probability": {
+        "alignment_pad_id_3": 0.7548900246620178,
+        "end_pad_id_0": 0.24507690966129303,
+        "all_special_ids_0_to_6": 0.9999675750732422,
+        "best_lexical": 1.2360395373889332e-07
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 15.625,
+        "end_pad_id_0": 14.5,
+        "best_of_ids_0_and_3": 15.625
+      }
+    },
+    {
+      "decision_frame": 293,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 8,
+      "probability": {
+        "alignment_pad_id_3": 0.7548900246620178,
+        "end_pad_id_0": 0.24507690966129303,
+        "all_special_ids_0_to_6": 0.9999675750732422,
+        "best_lexical": 1.315757316433519e-07
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 15.5625,
+        "end_pad_id_0": 14.4375,
+        "best_of_ids_0_and_3": 15.5625
+      }
+    },
+    {
+      "decision_frame": 294,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 8,
+      "probability": {
+        "alignment_pad_id_3": 0.7548900246620178,
+        "end_pad_id_0": 0.24507690966129303,
+        "all_special_ids_0_to_6": 0.9999675750732422,
+        "best_lexical": 1.2360395373889332e-07
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 15.625,
+        "end_pad_id_0": 14.5,
+        "best_of_ids_0_and_3": 15.625
+      }
+    },
+    {
+      "decision_frame": 295,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 8,
+      "probability": {
+        "alignment_pad_id_3": 0.7772797346115112,
+        "end_pad_id_0": 0.22269436717033386,
+        "all_special_ids_0_to_6": 0.9999733567237854,
+        "best_lexical": 1.0551053009066891e-07
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 15.8125,
+        "end_pad_id_0": 14.5625,
+        "best_of_ids_0_and_3": 15.8125
+      }
+    },
+    {
+      "decision_frame": 296,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 8,
+      "probability": {
+        "alignment_pad_id_3": 0.7772797346115112,
+        "end_pad_id_0": 0.22269436717033386,
+        "all_special_ids_0_to_6": 0.9999733567237854,
+        "best_lexical": 1.0226432323179324e-07
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 15.84375,
+        "end_pad_id_0": 14.59375,
+        "best_of_ids_0_and_3": 15.84375
+      }
+    },
+    {
+      "decision_frame": 297,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 8,
+      "probability": {
+        "alignment_pad_id_3": 0.7548957467079163,
+        "end_pad_id_0": 0.24507877230644226,
+        "all_special_ids_0_to_6": 0.9999752640724182,
+        "best_lexical": 9.9319329649461e-08
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 15.84375,
+        "end_pad_id_0": 14.71875,
+        "best_of_ids_0_and_3": 15.84375
+      }
+    },
+    {
+      "decision_frame": 298,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 8,
+      "probability": {
+        "alignment_pad_id_3": 0.7548957467079163,
+        "end_pad_id_0": 0.24507877230644226,
+        "all_special_ids_0_to_6": 0.9999752640724182,
+        "best_lexical": 1.0572487951776566e-07
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 15.78125,
+        "end_pad_id_0": 14.65625,
+        "best_of_ids_0_and_3": 15.78125
+      }
+    },
+    {
+      "decision_frame": 299,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 8,
+      "probability": {
+        "alignment_pad_id_3": 0.7548957467079163,
+        "end_pad_id_0": 0.24507877230644226,
+        "all_special_ids_0_to_6": 0.9999752640724182,
+        "best_lexical": 1.0572487951776566e-07
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 15.78125,
+        "end_pad_id_0": 14.65625,
+        "best_of_ids_0_and_3": 15.78125
+      }
+    },
+    {
+      "decision_frame": 300,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 8,
+      "probability": {
+        "alignment_pad_id_3": 0.7772812247276306,
+        "end_pad_id_0": 0.22269479930400848,
+        "all_special_ids_0_to_6": 0.9999752640724182,
+        "best_lexical": 9.911816789553995e-08
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 15.875,
+        "end_pad_id_0": 14.625,
+        "best_of_ids_0_and_3": 15.875
+      }
+    },
+    {
+      "decision_frame": 301,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 8,
+      "probability": {
+        "alignment_pad_id_3": 0.7548986673355103,
+        "end_pad_id_0": 0.24507969617843628,
+        "all_special_ids_0_to_6": 0.9999790787696838,
+        "best_lexical": 9.043162663147086e-08
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 15.9375,
+        "end_pad_id_0": 14.8125,
+        "best_of_ids_0_and_3": 15.9375
+      }
+    },
+    {
+      "decision_frame": 302,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 8,
+      "probability": {
+        "alignment_pad_id_3": 0.7548971772193909,
+        "end_pad_id_0": 0.24507923424243927,
+        "all_special_ids_0_to_6": 0.999977171421051,
+        "best_lexical": 9.043145610121428e-08
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 15.9375,
+        "end_pad_id_0": 14.8125,
+        "best_of_ids_0_and_3": 15.9375
+      }
+    },
+    {
+      "decision_frame": 303,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 8,
+      "probability": {
+        "alignment_pad_id_3": 0.7310409545898438,
+        "end_pad_id_0": 0.2689349353313446,
+        "all_special_ids_0_to_6": 0.9999752640724182,
+        "best_lexical": 9.923393662347735e-08
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 15.8125,
+        "end_pad_id_0": 14.8125,
+        "best_of_ids_0_and_3": 15.8125
+      }
+    },
+    {
+      "decision_frame": 304,
+      "argmax_id": 3,
+      "argmax_class": "alignment_pad",
+      "best_lexical_id": 8,
+      "probability": {
+        "alignment_pad_id_3": 0.7548957467079163,
+        "end_pad_id_0": 0.24507877230644226,
+        "all_special_ids_0_to_6": 0.9999752640724182,
+        "best_lexical": 1.0247206461144742e-07
+      },
+      "logit_margin_vs_best_lexical": {
+        "alignment_pad_id_3": 15.8125,
+        "end_pad_id_0": 14.6875,
+        "best_of_ids_0_and_3": 15.8125
+      }
+    }
+  ],
+  "text_decision_diagnostics": {
+    "version": "pad-vs-lexical-logits.v1",
+    "num_response_window_frames": 258,
+    "argmax_count": {
+      "alignment_pad": 208,
+      "end_pad": 23,
+      "other_special": 0,
+      "lexical": 27
+    },
+    "argmax_rate": {
+      "alignment_pad": 0.8062015503875969,
+      "end_pad": 0.08914728682170543,
+      "other_special": 0.0,
+      "lexical": 0.10465116279069768
+    },
+    "mean_probability": {
+      "alignment_pad_id_3": 0.7211810160487583,
+      "end_pad_id_0": 0.16621057409002302,
+      "all_special_ids_0_to_6": 0.8873945512621337,
+      "best_lexical": 0.04910783632875768
+    },
+    "mean_logit_margin_vs_best_lexical": {
+      "alignment_pad_id_3": 13.0485593810562,
+      "end_pad_id_0": 10.86440921753876,
+      "best_of_ids_0_and_3": 13.472209605135658
+    },
+    "first_lexical_argmax_frame": 63,
+    "first_lexical_argmax_delay_sec": 0.96
+  },
+  "question_audio_duration_sec": 4.392,
+  "question_speech_end_sec": 4.042,
+  "question_start_frame": 0,
+  "question_end_frame": 51,
+  "response_seconds": 20.0,
+  "audio_dialogue_protocol": "bare_question_v1",
+  "assistant_prelude": {
+    "enabled": false,
+    "duration_sec": 0.0,
+    "num_samples": 0,
+    "num_frames": 0,
+    "assistant_audio_stream": "none",
+    "user_audio_stream": "question_from_frame_zero",
+    "text_stream": "model_generated"
+  },
+  "sample_seed": 5034615271451869433,
+  "processed_frames": 305,
+  "frame_rate": 12.5,
+  "gate": {
+    "mean": 0.019870374205171085,
+    "std": 0.0028874638778853116,
+    "min": 0.0,
+    "max": 0.032336827367544174
+  },
+  "timing": {
+    "image_encode_sec": 0.027243634220212698,
+    "audio_encode_sec": 0.012279219925403595,
+    "generation_sec": 23.346644970588386,
+    "total_sec": 23.386728287208825
+  },
+  "debug": {
+    "raw_ca_shape": [
+      1,
+      1024,
+      4096
+    ],
+    "cross_attention_conditioning": "cached_shared_kv",
+    "cached_k_shape": [
+      1,
+      1024,
+      4096
+    ],
+    "audio_codes_shape": [
+      1,
+      8,
+      305
+    ],
+    "assistant_prelude_codes_shape": null,
+    "silent_user_prelude_codes_shape": null
+  },
+  "question": "この画像に写っている山は、何という山ですか？",
+  "turns": [
+    {
+      "turn": 1,
+      "question": "この画像に写っている山は、何という山ですか？",
+      "question_start_sec": 0.0,
+      "question_speech_end_sec": 4.042,
+      "question_wav": "/gpu-server/yamamoto/j-moshivis/eval_results/fuji_training_probe_20261010/user_audio/fuji_train_a203b7664fafc62c_8f27abb0f52d_86fe00d02a64.wav",
+      "answer_text": "山がすごく高いので、山っていう名前が付いてますね。山の上には大きな山が立ってます。",
+      "response_window_end_sec": 24.4
+    }
+  ],
+  "continuous_session": true,
+  "inter_turn_pause_seconds": null,
+  "image": "/gpu-server/yamamoto/j-moshivis/data/speech_v3/data_stereo/a203b7664fafc62c1d18ac426d0fef832672a53d5ed5eee5bbd0e1a5aac74130/image.jpg",
+  "image_sha256": "73f3c92e8c7f4d5f0fa00f6e3e4ea3d147b1151615b9f567b4a3e62d8ae0654d",
+  "checkpoint": "/gpu-server/yamamoto/j-moshivis/checkpoints/llmjp_v3_id0w1_run1/final_step_20000.safetensors",
+  "checkpoint_sha256": "ec7b378b6ec8f9965f2dd687b87dc413f8206e6c67049b1b7cad952c781e69f1",
+  "input_modality": "audio",
+  "decoding": "greedy",
+  "sampling_config": null,
+  "question_audio_manifest": "/gpu-server/yamamoto/j-moshivis/eval_results/fuji_training_probe_20261010/case_03/manifest_audio.jsonl",
+  "question_audio_manifest_sha256": "7c33b728e2c38e865ba99c3231140274b69b4eb0e6e249c779fd88b036a23028",
+  "user_audio": "/gpu-server/yamamoto/j-moshivis/eval_results/fuji_training_probe_20261010/user_audio/fuji_train_a203b7664fafc62c_8f27abb0f52d_86fe00d02a64.wav",
+  "audio_channels": {
+    "left": "user TTS",
+    "right": "model-generated audio"
+  },
+  "assistant_audio_peak": 0.7087221741676331,
+  "saved_stereo_duration_sec": 24.4,
+  "note": "Single-image diagnostic, no ASR input and no assistant TTS/teacher forcing."
+}

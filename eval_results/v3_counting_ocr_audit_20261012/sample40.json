@@ -1,0 +1,517 @@
+{
+  "counting": [
+    {
+      "uid": "9190f50f0cb0379c1d041dc310c36512d721b805aec1c71b6caa53545f32cbd2",
+      "image": "/gpu-server/yamamoto/j-moshivis/data/images/coco/train2017/000000182104.jpg",
+      "source": "coco",
+      "question": "へえ、2台も。でも、この写真、車は全部で何台くらい？",
+      "answer": "ちょっと数えにくいんですけど、街中にはたくさんの車が走ってるようです。",
+      "flags": [
+        "counting_broad",
+        "counting_direct",
+        "counting_approximate_question"
+      ],
+      "turn_index": 4
+    },
+    {
+      "uid": "c0ad598cd784c19bf4c08e9f0ee9cff21ba2604dc244d0ee3ee2fd656a022955",
+      "image": "/gpu-server/yamamoto/j-moshivis/data/images/wikimedia/Streets_in_Kyoto/c0ad598cd784c19bf4c08e9f0ee9cff21ba2604dc244d0ee3ee2fd656a022955.jpg",
+      "source": "wikimedia",
+      "question": "車は何台くらい写ってる?",
+      "answer": "奥のほうに数台停まっていますね。手前には黒っぽいバイクも見えます。",
+      "flags": [
+        "counting_broad",
+        "counting_direct",
+        "counting_approximate_question"
+      ],
+      "turn_index": 4
+    },
+    {
+      "uid": "56df6d23d99de95fbf5794e5b7e238e387980339793e85b7e4e736fcccf09053",
+      "image": "/gpu-server/yamamoto/j-moshivis/data/images/japanese_photos/images/japanese_photos_03376.jpg",
+      "source": "japanese_photos",
+      "question": "肖像写真か。何人くらい並んでるの?",
+      "answer": "見えてるだけで八枚くらいですね。それぞれ白い額縁に入ったポラロイドっぽい写真です",
+      "flags": [
+        "counting_broad",
+        "counting_direct",
+        "counting_approximate_question",
+        "counting_direct_numeric_answer"
+      ],
+      "turn_index": 2
+    },
+    {
+      "uid": "ae569664ee83c57b0b97ca7b49c93239a5635bbc23e1ac18c34aee4fbb306f25",
+      "image": "/gpu-server/yamamoto/j-moshivis/data/images/coco/train2017/000000315961.jpg",
+      "source": "coco",
+      "question": "へえ、大きいね。何匹いるかな",
+      "answer": "左側に1匹、右側に2匹、合計3匹いますよ",
+      "flags": [
+        "counting_broad",
+        "counting_direct",
+        "counting_direct_numeric_answer"
+      ],
+      "turn_index": 2
+    },
+    {
+      "uid": "9c2c2623e38f146288462e7d4a8aa9da4b98b07985a3e6ffb3a1f418ef29887b",
+      "image": "/gpu-server/yamamoto/j-moshivis/data/images/openverse/images/9c2c2623e38f146288462e7d4a8aa9da4b98b07985a3e6ffb3a1f418ef29887b.jpg",
+      "source": "openverse",
+      "question": "へえ、何人くらいいそう?",
+      "answer": "ぱっと見でも数十人はいますね。みんな傘をさしてるので、雨が降ってる日みたいです。",
+      "flags": [
+        "counting_broad",
+        "counting_direct",
+        "counting_approximate_question",
+        "counting_direct_numeric_answer"
+      ],
+      "turn_index": 2
+    },
+    {
+      "uid": "c29cfb13f57a228ee3aee3518a5c1ba96a43d99475a98cf20df6fae33de72082",
+      "image": "/gpu-server/yamamoto/j-moshivis/data/images/wikimedia/Schools_in_Japan/c29cfb13f57a228ee3aee3518a5c1ba96a43d99475a98cf20df6fae33de72082.png",
+      "source": "wikimedia",
+      "question": "何人くらい写ってるの?",
+      "answer": "全部で十数人いますね。手前に三人、階段に四人、奥の手すりのところに大勢並んでいます。",
+      "flags": [
+        "counting_broad",
+        "counting_direct",
+        "counting_approximate_question",
+        "counting_direct_numeric_answer"
+      ],
+      "turn_index": 2
+    },
+    {
+      "uid": "28519323fbc2c0f75ec34cba3358f314285852cd2e0fe1365d71e85300771320",
+      "image": "/gpu-server/yamamoto/j-moshivis/data/images/openverse/images/28519323fbc2c0f75ec34cba3358f314285852cd2e0fe1365d71e85300771320.jpg",
+      "source": "openverse",
+      "question": "へえ、何人くらいいるの?",
+      "answer": "手前に女性と男性が並んで歩いていて、その奥にも数人歩いているのが見えますね",
+      "flags": [
+        "counting_broad",
+        "counting_direct",
+        "counting_approximate_question"
+      ],
+      "turn_index": 2
+    },
+    {
+      "uid": "93d24242f93a595817ebf8e1045ca53a3a386367a7712619ae97eb14b31accc8",
+      "image": "/gpu-server/yamamoto/j-moshivis/data/images/wikimedia/Photo_booths_in_Japan/93d24242f93a595817ebf8e1045ca53a3a386367a7712619ae97eb14b31accc8.jpg",
+      "source": "wikimedia",
+      "question": "へえ、通路か。何人くらい写ってるの?",
+      "answer": "二人ですね。マスクをした大人の女性と、その手前に子供が写っています",
+      "flags": [
+        "counting_broad",
+        "counting_direct",
+        "counting_approximate_question",
+        "counting_direct_numeric_answer"
+      ],
+      "turn_index": 2
+    },
+    {
+      "uid": "64c75b6b11a1d35bed1a8d2d95cff0a07d1dee64bb4a2e60437f437d67d1b049",
+      "image": "/gpu-server/yamamoto/j-moshivis/data/images/coco/train2017/000000298658.jpg",
+      "source": "coco",
+      "question": "牛、何頭くらいいるかな?",
+      "answer": "数えてみますと、10頭以上いるかもしれませんね。",
+      "flags": [
+        "counting_broad",
+        "counting_direct",
+        "counting_approximate_question",
+        "counting_direct_numeric_answer"
+      ],
+      "turn_index": 2
+    },
+    {
+      "uid": "f7050aa01b8f3925a0ae758655f89982e9ee1ffd03842a6ab91b3bd846f61777",
+      "image": "/gpu-server/yamamoto/j-moshivis/data/images/japanese_photos/images/japanese_photos_11670.jpg",
+      "source": "japanese_photos",
+      "question": "何人くらい描かれてるの?",
+      "answer": "十人以上はいますね。みんな昔ながらの帯を結んだ着物姿です。",
+      "flags": [
+        "counting_broad",
+        "counting_direct",
+        "counting_approximate_question",
+        "counting_direct_numeric_answer"
+      ],
+      "turn_index": 4
+    },
+    {
+      "uid": "89dc0a49b9d0e6690fd832a6452392de5b8cd09066544a6387ee2e2f5fcce4f7",
+      "image": "/gpu-server/yamamoto/j-moshivis/data/images/coco/train2017/000000016496.jpg",
+      "source": "coco",
+      "question": "え、バイクって何台あるんだろう",
+      "answer": "数えると結構多いですよ。50台以上はありそうですね",
+      "flags": [
+        "counting_broad",
+        "counting_direct",
+        "counting_direct_numeric_answer"
+      ],
+      "turn_index": 2
+    },
+    {
+      "uid": "ca9eed6b1aa5a2427d8e128515842a966ede330b0c6de0d3d08e318ea1f5a618",
+      "image": "/gpu-server/yamamoto/j-moshivis/data/images/coco/train2017/000000312143.jpg",
+      "source": "coco",
+      "question": "あ、白い椅子がいくつかあるけど、何人くらい座れるの？",
+      "answer": "中央の花の周りには、白い椅子が4つくらい見えますね。",
+      "flags": [
+        "counting_broad",
+        "counting_direct",
+        "counting_approximate_question",
+        "counting_direct_numeric_answer"
+      ],
+      "turn_index": 6
+    },
+    {
+      "uid": "7350bda28baaac06a30c313644d7e3f9ae323522b98ab8a360b22204fae85d2c",
+      "image": "/gpu-server/yamamoto/j-moshivis/data/images/coco/train2017/000000200727.jpg",
+      "source": "coco",
+      "question": "あ、後ろにも象がいるよ。何匹いるんだろう?",
+      "answer": "数えてみますね。1、2、3... あと5匹くらい見えます。全部で8匹くらいかな",
+      "flags": [
+        "counting_broad",
+        "counting_direct",
+        "counting_direct_numeric_answer"
+      ],
+      "turn_index": 6
+    },
+    {
+      "uid": "95b541707d5205774edfcff6cb43ca4fc686f9d04e47d16771a87b37c30f30d6",
+      "image": "/gpu-server/yamamoto/j-moshivis/data/images/japanese_photos/images/japanese_photos_10213.jpg",
+      "source": "japanese_photos",
+      "question": "バスは何台くらい停まってるの?",
+      "answer": "緑や黄色のバスが五、六台くらいロータリーに並んでますね。乗り場で待機してるみたいです。",
+      "flags": [
+        "counting_broad",
+        "counting_direct",
+        "counting_approximate_question",
+        "counting_direct_numeric_answer"
+      ],
+      "turn_index": 5
+    },
+    {
+      "uid": "59dd1b384d2acdd2845c6f7c4f7f1f907ba01c4d198739f74081d33757dd597b",
+      "image": "/gpu-server/yamamoto/j-moshivis/data/images/coco/train2017/000000396754.jpg",
+      "source": "coco",
+      "question": "あ、馬に乗ってるのね。何人いるかな？",
+      "answer": "4人の人が乗っています。3頭の馬が見えます。",
+      "flags": [
+        "counting_broad",
+        "counting_direct",
+        "counting_direct_numeric_answer"
+      ],
+      "turn_index": 2
+    },
+    {
+      "uid": "c01f3e7309a53b9403e765ee5d6d449fa3aea3bd3d8bc91e14ae7784119bf44a",
+      "image": "/gpu-server/yamamoto/j-moshivis/data/images/wikimedia_plants/Prunus_mume/c01f3e7309a53b9403e765ee5d6d449fa3aea3bd3d8bc91e14ae7784119bf44a.jpg",
+      "source": "wikimedia_plants",
+      "question": "実はいくつぐらい写ってる?",
+      "answer": "手前の枝だけでも七つか八つはついていますね。奥のほうにもぽつぽつ見えます",
+      "flags": [
+        "counting_broad",
+        "counting_direct",
+        "counting_approximate_question",
+        "counting_direct_numeric_answer"
+      ],
+      "turn_index": 4
+    },
+    {
+      "uid": "d50941b312121d78f4fe00af754a2ccfaa61f665a3658110519d88447025c65b",
+      "image": "/gpu-server/yamamoto/j-moshivis/data/images/japanese_photos/images/japanese_photos_03893.jpg",
+      "source": "japanese_photos",
+      "question": "何人くらいいる感じ?",
+      "answer": "手前に小さい子供も含めて六、七人くらい写ってますよ。家族連れかもしれませんね。",
+      "flags": [
+        "counting_broad",
+        "counting_direct",
+        "counting_approximate_question",
+        "counting_direct_numeric_answer"
+      ],
+      "turn_index": 6
+    },
+    {
+      "uid": "20fed13d12b6dea766a50e897511fa78020a3d12d48ca86500a08b8e9a307697",
+      "image": "/gpu-server/yamamoto/j-moshivis/data/images/japanese_photos/images/japanese_photos_03699.jpg",
+      "source": "japanese_photos",
+      "question": "絵はいくつくらい並んでるの?",
+      "answer": "写真に写っているだけでも三点はありますね。同じ木製の額縁で統一感があります",
+      "flags": [
+        "counting_broad",
+        "counting_direct",
+        "counting_approximate_question"
+      ],
+      "turn_index": 10
+    },
+    {
+      "uid": "42bfaaba148570dff4f9a94d4a67545471d97238f8d8888fb74141a27ce98f32",
+      "image": "/gpu-server/yamamoto/j-moshivis/data/images/japanese_photos/images/japanese_photos_10646.jpg",
+      "source": "japanese_photos",
+      "question": "パネルって何枚くらいあるの?",
+      "answer": "大小合わせて六枚くらいですね。四角い額縁みたいな形で並んでますよ。",
+      "flags": [
+        "counting_broad",
+        "counting_direct",
+        "counting_approximate_question",
+        "counting_direct_numeric_answer"
+      ],
+      "turn_index": 2
+    },
+    {
+      "uid": "1e55785fe778dfbc0fbcf810b73f90f3c02911dd9f6b02de6b3c8038bfcc44ba",
+      "image": "/gpu-server/yamamoto/j-moshivis/data/images/openverse/images/1e55785fe778dfbc0fbcf810b73f90f3c02911dd9f6b02de6b3c8038bfcc44ba.jpg",
+      "source": "openverse",
+      "question": "パックいくつあるの",
+      "answer": "白いトレーが二つと、その下に大きめの箱にもたくさん入ってますね",
+      "flags": [
+        "counting_broad",
+        "counting_direct",
+        "counting_direct_numeric_answer"
+      ],
+      "turn_index": 6
+    }
+  ],
+  "ocr": [
+    {
+      "uid": "2b5124cf704c642637a9f3eee52554a7e1eafc9f09e181dde8f86f8416fb615e",
+      "image": "/gpu-server/yamamoto/j-moshivis/data/images/coco/train2017/000000249176.jpg",
+      "source": "coco",
+      "question": "背景の壁、青いのに白い文字が書いてあるね。何て読むの？",
+      "answer": "J.P.モルガンと書いてあります。金融機関の名前ですね",
+      "flags": [
+        "ocr_broad",
+        "ocr_direct"
+      ],
+      "turn_index": 8
+    },
+    {
+      "uid": "67f3b04f24a2a3edbdbf167ef04043e82980d9dd3701f28c893a5d87221a336e",
+      "image": "/gpu-server/yamamoto/j-moshivis/data/images/japanese_photos/images/japanese_photos_09905.jpg",
+      "source": "japanese_photos",
+      "question": "看板って何て書いてあるの?",
+      "answer": "「魚民」って書いてありますよ。居酒屋さんみたいですね。",
+      "flags": [
+        "ocr_broad",
+        "ocr_direct"
+      ],
+      "turn_index": 2
+    },
+    {
+      "uid": "6246e15eb253aa37a44c043e5c05833bd10eabc7510eaf692fa7aded0f53df25",
+      "image": "/gpu-server/yamamoto/j-moshivis/data/images/japanese_photos/images/japanese_photos_03150.jpg",
+      "source": "japanese_photos",
+      "question": "看板になんて書いてあるの?",
+      "answer": "「AI画像展」という文字が大きく出ていて、開催日と会場の案内も書かれています",
+      "flags": [
+        "ocr_broad",
+        "ocr_direct"
+      ],
+      "turn_index": 4
+    },
+    {
+      "uid": "7a5b4765bb69de2a9908e433f5b0458c39aae815db39f002527581fcadf62047",
+      "image": "/gpu-server/yamamoto/j-moshivis/data/images/coco/train2017/000000119299.jpg",
+      "source": "coco",
+      "question": "上に緑と青の看板があるけど、何て書いてあるのかな？",
+      "answer": "緑の看板には「往落馬洲 請在此排隊」、青い看板には「往羅湖 請在此排隊」とあります。",
+      "flags": [
+        "ocr_broad",
+        "ocr_direct"
+      ],
+      "turn_index": 6
+    },
+    {
+      "uid": "c070eb86cb37c2f0ea07ee84794f7b149a3e7d583b8db5e97beb47007c8b0297",
+      "image": "/gpu-server/yamamoto/j-moshivis/data/images/wikimedia_sports_animals/Zoo_entrances_in_Japan/c070eb86cb37c2f0ea07ee84794f7b149a3e7d583b8db5e97beb47007c8b0297.jpg",
+      "source": "wikimedia_sports_animals",
+      "question": "へえ、看板には何て書いてあるの?",
+      "answer": "黄色い看板に「オミヤパーク どうぶつえん」って書いてあります。英語でZOOとも添えられてますね",
+      "flags": [
+        "ocr_broad",
+        "ocr_direct"
+      ],
+      "turn_index": 2
+    },
+    {
+      "uid": "efc4df53beef0cbc4181e30fa44ede61503a0d24493911b1c2a658f0006d4e7b",
+      "image": "/gpu-server/yamamoto/j-moshivis/data/images/wikimedia_tourist/Myoban_Onsen/efc4df53beef0cbc4181e30fa44ede61503a0d24493911b1c2a658f0006d4e7b.jpg",
+      "source": "wikimedia_tourist",
+      "question": "あ、そうなんだ。看板って何て書いてあるの?",
+      "answer": "大きな文字で「明礬地獄」って書かれた四枚の看板が並んでますよ",
+      "flags": [
+        "ocr_broad",
+        "ocr_direct"
+      ],
+      "turn_index": 2
+    },
+    {
+      "uid": "0aa6c53662ef04b9758f6a993837b313f3763d696a5797fe915f029db2dcf286",
+      "image": "/gpu-server/yamamoto/j-moshivis/data/images/openverse/images/0aa6c53662ef04b9758f6a993837b313f3763d696a5797fe915f029db2dcf286.jpg",
+      "source": "openverse",
+      "question": "看板とかはどう?文字とか読める?",
+      "answer": "大きな看板に漢字で店名らしき文字が書かれていて、和風のお店だとわかります。",
+      "flags": [
+        "ocr_broad",
+        "ocr_direct"
+      ],
+      "turn_index": 10
+    },
+    {
+      "uid": "19ea78129f0640f7a70c46d1d85e6904ee91fd939e92f633b206ab9fcb73480d",
+      "image": "/gpu-server/yamamoto/j-moshivis/data/images/japanese_photos/images/japanese_photos_11765.jpg",
+      "source": "japanese_photos",
+      "question": "ねえ、そこにある展示のパネルって何が書いてあるの?",
+      "answer": "白い壁に、キャプションみたいな紙が貼ってあるんですよ。タイトルは出所不明ってなってます",
+      "flags": [
+        "ocr_broad",
+        "ocr_direct"
+      ],
+      "turn_index": 0
+    },
+    {
+      "uid": "a853897dc018c9341590f9f85689bb43298aa4458bc950d727ac122481296a35",
+      "image": "/gpu-server/yamamoto/j-moshivis/data/images/docci/images/train_08949.jpg",
+      "source": "docci",
+      "question": "あ、でも、この文字、最後に『CION』って書いてあるけど、どう読むんだろう？",
+      "answer": "『CION』は、『SEEN』の後に続く言葉の一部かもしれませんね。でも、完全な文は見えません。",
+      "flags": [
+        "ocr_broad",
+        "ocr_direct"
+      ],
+      "turn_index": 10
+    },
+    {
+      "uid": "07de730b6a78de1a2cb329a5205c8029f3ba16147ba0c9cad188fb4a2c39bcbd",
+      "image": "/gpu-server/yamamoto/j-moshivis/data/images/japanese_photos/images/japanese_photos_09080.jpg",
+      "source": "japanese_photos",
+      "question": "文字、読める感じ?",
+      "answer": "小さい字で説明文っぽいものが書かれてますけど、この距離だとちょっと読み取りづらいですね",
+      "flags": [
+        "ocr_broad",
+        "ocr_direct"
+      ],
+      "turn_index": 12
+    },
+    {
+      "uid": "a24c6a068aeed922ec7fb777b05092c1487c7a5087b4a7e450d7d485b9e9eeee",
+      "image": "/gpu-server/yamamoto/j-moshivis/data/images/coco/train2017/000000397210.jpg",
+      "source": "coco",
+      "question": "そういえば、上に大きな看板があるよね。何と書いてある？",
+      "answer": "「CAMDEN LOCK」という文字が黄色で大きく書いてあります。",
+      "flags": [
+        "ocr_broad",
+        "ocr_direct"
+      ],
+      "turn_index": 4
+    },
+    {
+      "uid": "32b89ddca66b764b09d40881b65df2fddc24e01909d69610f294ac6cb0fe1f5c",
+      "image": "/gpu-server/yamamoto/j-moshivis/data/images/coco/train2017/000000093994.jpg",
+      "source": "coco",
+      "question": "あの、道の看板って、何と書いてあるのかな？",
+      "answer": "あ、そうですね。上の緑の看板には『Cordeau』と書いてあります。",
+      "flags": [
+        "ocr_broad",
+        "ocr_direct"
+      ],
+      "turn_index": 0
+    },
+    {
+      "uid": "79008a306b19144fa5f996d9302799bde3279b978ec6be3db2114195b4d4d4a8",
+      "image": "/gpu-server/yamamoto/j-moshivis/data/images/docci/images/train_03359.jpg",
+      "source": "docci",
+      "question": "あ、そうなんだ。でもこの店の名前は何て読むの？",
+      "answer": "「レコード・ストレージ」と読むかもしれませんね。",
+      "flags": [
+        "ocr_broad",
+        "ocr_direct"
+      ],
+      "turn_index": 6
+    },
+    {
+      "uid": "d6569bd02c56b31273f607ff39cc90ab84d0d4d2dd25b96bc6509521fc3a39f8",
+      "image": "/gpu-server/yamamoto/j-moshivis/data/images/japanese_photos/images/japanese_photos_07736.jpg",
+      "source": "japanese_photos",
+      "question": "極秘資料?なんか物々しいね、他には何て書いてあるの",
+      "answer": "「ゴジラ迎撃作戦」っていうタイトルと、スタンプラリーの案内が載ってますよ",
+      "flags": [
+        "ocr_broad",
+        "ocr_direct"
+      ],
+      "turn_index": 2
+    },
+    {
+      "uid": "853ded90547459db73ebab2bb90c4bf2f240f205074efed2df9b548c7acbcf35",
+      "image": "/gpu-server/yamamoto/j-moshivis/data/images/coco/train2017/000000084890.jpg",
+      "source": "coco",
+      "question": "ねえ、あの青い看板、何と書いてあるの？",
+      "answer": "「Victoria St」と書いてあります。800番地のようです。",
+      "flags": [
+        "ocr_broad",
+        "ocr_direct"
+      ],
+      "turn_index": 4
+    },
+    {
+      "uid": "263967bbfd622e161d19653f66469bcf8e04a210894f7b731d5bf8dcdbfbde9f",
+      "image": "/gpu-server/yamamoto/j-moshivis/data/images/coco/train2017/000000346111.jpg",
+      "source": "coco",
+      "question": "あ、そうなんだ。その上の黄色い文字は何て読むの？",
+      "answer": "「LLITHFAEN」と読むようです。地名かもしれませんね。",
+      "flags": [
+        "ocr_broad",
+        "ocr_direct"
+      ],
+      "turn_index": 2
+    },
+    {
+      "uid": "f49e239e8e898b3c10c8d8730be0a1d38288cf221373f7f15a89a92289541aa7",
+      "image": "/gpu-server/yamamoto/j-moshivis/data/images/japanese_photos/images/japanese_photos_03615.jpg",
+      "source": "japanese_photos",
+      "question": "スクリーンにはなんて書いてあるの?",
+      "answer": "AIに作曲を任せてみたら音楽性の違いで一日で解散した、っていう小話が書かれてますね。ちょっとしたジョークスライドです。",
+      "flags": [
+        "ocr_broad",
+        "ocr_direct"
+      ],
+      "turn_index": 2
+    },
+    {
+      "uid": "9556b53efbd177b92c90ba92ec39ceda8edb42a5ff89ee7dd6cf5fbdcb2655f6",
+      "image": "/gpu-server/yamamoto/j-moshivis/data/images/japanese_photos/images/japanese_photos_03507.jpg",
+      "source": "japanese_photos",
+      "question": "スライドには何が書いてあるの?",
+      "answer": "第一回AIアートグランプリという企画の応募条件が箇条書きでまとめられていますよ",
+      "flags": [
+        "ocr_broad",
+        "ocr_direct"
+      ],
+      "turn_index": 2
+    },
+    {
+      "uid": "f5fdfb93f8f3ee5bc20102e54536d387988eae7b43474e8b4b7f5d7f9c7b9d41",
+      "image": "/gpu-server/yamamoto/j-moshivis/data/images/japanese_photos/images/japanese_photos_08292.jpg",
+      "source": "japanese_photos",
+      "question": "横断幕には何て書いてあるの?",
+      "answer": "日本スタートアップ支援協会って書いてあります。何かの表彰式か発表会みたいな雰囲気ですね",
+      "flags": [
+        "ocr_broad",
+        "ocr_direct"
+      ],
+      "turn_index": 8
+    },
+    {
+      "uid": "dd0c35ed51029a59a07f56f4521e980f41c49531e594a6b14920c16b02fbc61f",
+      "image": "/gpu-server/yamamoto/j-moshivis/data/images/openverse/images/dd0c35ed51029a59a07f56f4521e980f41c49531e594a6b14920c16b02fbc61f.jpg",
+      "source": "openverse",
+      "question": "へえ、注文用紙なんだ。何が書いてあるの?",
+      "answer": "ハチベー弁当っていう名前のセットメニューで、十二ドルって書いてありますよ。",
+      "flags": [
+        "ocr_broad",
+        "ocr_direct"
+      ],
+      "turn_index": 2
+    }
+  ]
+}

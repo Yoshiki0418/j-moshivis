@@ -1,0 +1,129 @@
+{
+  "asset_inventory_verified": true,
+  "by_benchmark": {
+    "stair-captions-ja-val2014-overlap-clean-candidate": {
+      "metric": "cider_ja",
+      "num_samples": 67,
+      "paper_score": 2.8876939547686007,
+      "score": 0.02887693954768601
+    }
+  },
+  "extra_prediction_ids": [],
+  "manifest": "/gpu-server/yamamoto/j-moshivis/data/evaluation/stair_caption_v1/manifest_audio.jsonl",
+  "manifest_sha256": "9c62b84ae9b006b92b848cab6626e1e0d2cdd9419fb679e91db49228f9bd5dc9",
+  "metric_notes": {
+    "cider": "pycocoevalcap PTBTokenizer + CIDEr; score is raw, paper_score is x100",
+    "cider_ja": "NFKC + fugashi/UniDic Japanese words, punctuation removed + pycocoevalcap CIDEr; adapted metric",
+    "ocr_vqa_accuracy": "lowercase-only full-string exact match; whitespace and punctuation retained",
+    "prediction_source": "synchronized model text tokens; output audio is not transcribed",
+    "vqav2_accuracy": "official ten-annotator leave-one-out VQAv2 consensus accuracy"
+  },
+  "num_extra_predictions": 0,
+  "num_failed_predictions": 0,
+  "num_missing_predictions": 62,
+  "num_samples": 67,
+  "paper_guard": "Diagnostic result only: direct comparison requires --suite-lock and a complete non-diagnostic tracked greedy run whose suite, modality, response window, asset inventory, checkpoint hash, scorer code, and dependencies match.",
+  "paper_ready": false,
+  "prediction_run": {
+    "asset_inventory_sha256": "5ccb6314e4ca211bfc6de50445b395abf9cc0afefd4e3b2cf7c675a916693935",
+    "checkpoint": "/gpu-server/yamamoto/j-moshivis/checkpoints/llmjp_v3_id0w1_run1/final_step_20000.safetensors",
+    "checkpoint_sha256": null,
+    "generation": "greedy",
+    "input_modality": "audio",
+    "max_new_tokens": null,
+    "num_unique_audio": 67,
+    "num_unique_images": 67,
+    "path": "/gpu-server/yamamoto/j-moshivis/eval_results/llmjp_v3_id0w1_run1_step20000/stair_caption_ja_val_clean_v1/smoke_audio_greedy5.jsonl.run.json",
+    "run_fingerprint": "b747fd17d198f4a4bdd6885e9e8f8d0fa4e91cfe63d744eec75066d231737d92",
+    "sha256": "3c71838bfcdee1eb60456e18f05687ab9cc55a5674a3d91c69383976b5ebae47",
+    "status": "incomplete"
+  },
+  "predictions": "/gpu-server/yamamoto/j-moshivis/eval_results/llmjp_v3_id0w1_run1_step20000/stair_caption_ja_val_clean_v1/smoke_audio_greedy5.jsonl",
+  "predictions_sha256": "017e8e0955baea98b7eb641ab79de306a0841845adf90aa61ce34ecc8174c7f1",
+  "protocol": "MoshiVis/Babillage classical vision benchmark metrics",
+  "ready_for_scoring": false,
+  "schema_version": "jmoshivis.moshivis-eval.score.v1",
+  "scoring_protocol_verified": true,
+  "scoring_provenance": {
+    "dependency_artifact_sha256": {
+      "stanford-corenlp-3.4.1.jar": "2fcb91bb7a111f93d71e264f4ee0e3afd19ba0dde6d21b38605088df9e940399"
+    },
+    "dependency_versions": {
+      "fugashi": "1.3.1",
+      "java": null,
+      "pycocoevalcap": "1.2",
+      "unidic-lite": "1.0.8"
+    },
+    "implementation_file_sha256": {
+      "j-moshivis/jmoshivis/evaluation/cider_ja.py": "b86fcbafbbba2c7e3656df45e82d0d9ef5a52e4bba6612db3c6457764ccf7846",
+      "j-moshivis/jmoshivis/evaluation/metrics_moshivis.py": "139648258773014e6ecb240f59b20e42aa0ad491278911ea4aad8a699057d869",
+      "j-moshivis/jmoshivis/evaluation/schema.py": "ccc2eb6fda4adb5f82be2007f30953a680e967113ad7180a4678535f31048d7f",
+      "j-moshivis/jmoshivis/evaluation/score.py": "584ecbb50ebb343e9fba991384df2edb0aa3d1f5b40dd57a95767b8c8a2e919d",
+      "j-moshivis/jmoshivis/evaluation/score_moshivis.py": "2c8554e2a61ff21e9b63d0939682076840cfc28a4a583c15600f4c9c4e5a80d1",
+      "j-moshivis/jmoshivis/evaluation/suite.py": "a542572e550e0e5e7c945ee7a400fb0882124eca8d5299be07e4b69cbe0bc15c",
+      "j-moshivis/jmoshivis/evaluation/suite_moshivis.py": "ffa9f6ad9853fe52e29925cfef84133c36636ac7f19d20f141d36f867435ce4a"
+    }
+  },
+  "suite_contract": {
+    "frozen_asset_inventories": {
+      "audio": {
+        "asset_inventory_sha256": "5ccb6314e4ca211bfc6de50445b395abf9cc0afefd4e3b2cf7c675a916693935",
+        "num_unique_audio": 67,
+        "num_unique_images": 67
+      },
+      "text": {
+        "asset_inventory_sha256": "a1853170a5531bd1772006fddd2a9b00fec504671a76b3956ab8a1f74f0ff921",
+        "num_unique_audio": 0,
+        "num_unique_images": 67
+      }
+    },
+    "frozen_assistant_prelude_wav_sha256": null,
+    "frozen_audio_dialogue_protocol": "bare_question_v1",
+    "frozen_benchmark_composition": {
+      "stair-captions-ja-val2014-overlap-clean-candidate": {
+        "questions": 67,
+        "splits": {
+          "validation": 67
+        },
+        "tasks": {
+          "caption": 67
+        }
+      }
+    },
+    "frozen_manifest_sha256": "9c62b84ae9b006b92b848cab6626e1e0d2cdd9419fb679e91db49228f9bd5dc9",
+    "frozen_num_questions": 67,
+    "paper_generation": "greedy",
+    "paper_input_modalities": [
+      "audio",
+      "text"
+    ],
+    "response_overlap_seconds": 0.32,
+    "response_tail_seconds": 10.0,
+    "scoring_protocol": {
+      "dependency_artifact_sha256": {
+        "stanford-corenlp-3.4.1.jar": "2fcb91bb7a111f93d71e264f4ee0e3afd19ba0dde6d21b38605088df9e940399"
+      },
+      "dependency_versions": {
+        "fugashi": "1.3.1",
+        "java": null,
+        "pycocoevalcap": "1.2",
+        "unidic-lite": "1.0.8"
+      },
+      "implementation_file_sha256": {
+        "j-moshivis/jmoshivis/evaluation/cider_ja.py": "b86fcbafbbba2c7e3656df45e82d0d9ef5a52e4bba6612db3c6457764ccf7846",
+        "j-moshivis/jmoshivis/evaluation/metrics_moshivis.py": "139648258773014e6ecb240f59b20e42aa0ad491278911ea4aad8a699057d869",
+        "j-moshivis/jmoshivis/evaluation/schema.py": "ccc2eb6fda4adb5f82be2007f30953a680e967113ad7180a4678535f31048d7f",
+        "j-moshivis/jmoshivis/evaluation/score.py": "584ecbb50ebb343e9fba991384df2edb0aa3d1f5b40dd57a95767b8c8a2e919d",
+        "j-moshivis/jmoshivis/evaluation/score_moshivis.py": "2c8554e2a61ff21e9b63d0939682076840cfc28a4a583c15600f4c9c4e5a80d1",
+        "j-moshivis/jmoshivis/evaluation/suite.py": "a542572e550e0e5e7c945ee7a400fb0882124eca8d5299be07e4b69cbe0bc15c",
+        "j-moshivis/jmoshivis/evaluation/suite_moshivis.py": "ffa9f6ad9853fe52e29925cfef84133c36636ac7f19d20f141d36f867435ce4a"
+      }
+    },
+    "suite_id": "stair_caption_ja_val_clean_v1",
+    "suite_lock": "/gpu-server/yamamoto/j-moshivis/j-moshivis/evaluation/stair_caption_ja_val_clean_v1.lock.json",
+    "suite_lock_schema": "jmoshivis.image-eval.suite-lock.v2",
+    "suite_lock_sha256": "83922b21dc948be21ca0348c23e23985416ac394ac3125b0acf937290fe9679d",
+    "text_max_new_tokens": 96
+  },
+  "text_generation_limit_verified": true
+}

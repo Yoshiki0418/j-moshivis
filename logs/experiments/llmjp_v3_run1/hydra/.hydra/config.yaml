@@ -1,0 +1,48 @@
+repo_id: kyutai/moshika-vis-pytorch-bf16
+mimi_name: tokenizer-e351c8d8-checkpoint125.safetensors
+duration_sec: 60.0
+paths:
+  kyuteye_config: /gpu-server/yamamoto/j-moshivis/run_snapshots/llmjp_v3_run1_20260923/j-moshivis/configs/j-moshi-vis.yaml
+  tokenizer: /gpu-server/yamamoto/j-moshivis/models/j-moshi/tokenizer_spm_32k_3.model
+  moshivis_weight: /gpu-server/yamamoto/j-moshivis/models/model_merged_llmjp_bf16.safetensors
+data:
+  train_data: /gpu-server/yamamoto/j-moshivis/data/speech_v3/train.jsonl
+  eval_data: /gpu-server/yamamoto/j-moshivis/data/speech_v3/eval.jsonl
+  asset_manifest: /gpu-server/yamamoto/j-moshivis/data/speech_v3/asset_manifest.v1.jsonl
+  asset_manifest_verification: fast
+  image_root: /gpu-server/yamamoto/j-moshivis/data/images/
+  shuffle: true
+  speech_ratio: 0.25
+  speech_chunk_policy: one_random_crop_per_row
+  speech_decode_workers: 4
+train:
+  batch_size: 1
+  target_batch_size: 16
+  learning_rate: 5.0e-05
+  weight_decay: 0.0
+  warmup_steps: 500
+  max_steps: 20000
+  min_lr_ratio: 0.1
+  save_every: 1000
+  keep_last: 20
+  checkpoint_dir: /gpu-server/yamamoto/j-moshivis/checkpoints/llmjp_v3_run1
+  resume_from: null
+  log_interval: 10
+  seed: 42
+  num_workers: 0
+trainer:
+  batch_size: 1
+  text_padding_weight: 0.5
+  first_codebook_weight_multiplier: 3.0
+depformer:
+  train: false
+  learning_rate: 5.0e-06
+  layers: all
+  train_embedding: false
+  train_linear: true
+gate:
+  freeze: false
+  init_alpha: 0.0
+  learning_rate: 0.0001
+cross_attention:
+  visual_adapter_init: inherit_visual_adapter

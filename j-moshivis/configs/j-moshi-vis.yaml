@@ -13,6 +13,7 @@ xa_start: start
 xa_end: end
 xa_gate_shared: false
 xa_gating: sigmoid
+xa_sigmoid_shift: 4.0
 xa_layers: []
 # xa_layers: [0, 4, 8, 12, 16, 20, 24]
 # xa_layers: [26, 27]

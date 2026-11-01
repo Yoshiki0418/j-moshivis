@@ -1,0 +1,56 @@
+[
+  {
+    "turn": 1,
+    "question": "ねえ、その写真の真ん中に大きく写ってるものって何?",
+    "question_start_sec": 0.424,
+    "question_speech_end_sec": 4.689,
+    "question_wav": "/gpu-server/yamamoto/j-moshivis/eval_results/fuji_original_audio_probe_20261010/case_01/original_training_user.wav",
+    "voice": "morioki",
+    "question_contains_fuji": false
+  },
+  {
+    "turn": 2,
+    "question": "へえ、いいなあ。空はどんな感じ?",
+    "question_start_sec": 13.348,
+    "question_speech_end_sec": 15.988,
+    "question_wav": "/gpu-server/yamamoto/j-moshivis/eval_results/fuji_original_audio_probe_20261010/case_01/original_training_user.wav",
+    "voice": "morioki",
+    "question_contains_fuji": false
+  },
+  {
+    "turn": 3,
+    "question": "手前の方には何が写ってるの?",
+    "question_start_sec": 22.54,
+    "question_speech_end_sec": 24.99,
+    "question_wav": "/gpu-server/yamamoto/j-moshivis/eval_results/fuji_original_audio_probe_20261010/case_01/original_training_user.wav",
+    "voice": "morioki",
+    "question_contains_fuji": false
+  },
+  {
+    "turn": 4,
+    "question": "町の中に何か目立つ建物とかある?",
+    "question_start_sec": 31.608,
+    "question_speech_end_sec": 34.918,
+    "question_wav": "/gpu-server/yamamoto/j-moshivis/eval_results/fuji_original_audio_probe_20261010/case_01/original_training_user.wav",
+    "voice": "morioki",
+    "question_contains_fuji": false
+  },
+  {
+    "turn": 5,
+    "question": "山の右側にも何か写ってる?",
+    "question_start_sec": 42.935,
+    "question_speech_end_sec": 46.095,
+    "question_wav": "/gpu-server/yamamoto/j-moshivis/eval_results/fuji_original_audio_probe_20261010/case_01/original_training_user.wav",
+    "voice": "morioki",
+    "question_contains_fuji": false
+  },
+  {
+    "turn": 6,
+    "question": "これ、どこから撮った写真なんだろうね",
+    "question_start_sec": 53.273,
+    "question_speech_end_sec": 56.028,
+    "question_wav": "/gpu-server/yamamoto/j-moshivis/eval_results/fuji_original_audio_probe_20261010/case_01/original_training_user.wav",
+    "voice": "morioki",
+    "question_contains_fuji": false
+  }
+]

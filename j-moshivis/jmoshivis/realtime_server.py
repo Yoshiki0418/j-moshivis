@@ -37,6 +37,13 @@ from aiohttp import web
 from huggingface_hub import hf_hub_download
 from PIL import Image
 
+try:  # iPhone/Mac の写真 (HEIC/HEIF) も受け付ける
+    from pillow_heif import register_heif_opener
+
+    register_heif_opener()
+except ImportError:
+    pass
+
 from jmoshivis.config.kyuteye_config import KyuteyeConfig
 from jmoshivis.models.image_projection import ImageProcessor
 from jmoshivis.models.loaders import get_moshi_vis
@@ -97,13 +104,21 @@ class RealtimeState:
         self.models.moshi_vis.reset_streaming()
 
     def encode_image(self, payload: bytes) -> torch.Tensor:
-        image = Image.open(BytesIO(payload)).convert("RGB")
+        try:
+            image = Image.open(BytesIO(payload)).convert("RGB")
+        except Exception as exc:
+            head = payload[:12].hex() if payload else "(empty)"
+            log("error", f"image decode failed: {len(payload)} bytes, head={head}")
+            raise RuntimeError(
+                "画像を読み込めませんでした。JPEG または PNG 形式でアップロードしてください。"
+            ) from exc
         image_tensor = self.models.image_processor.transform(image)
         image_tensor = image_tensor.to(self.device).unsqueeze(0)
         with torch.no_grad():
             out = self.models.image_embedder(image_tensor)
-        ca_src = out["cross_attention_src"]
-        return ca_src.to(self.dtype)
+            ca_src = out["cross_attention_src"].to(self.dtype)
+            # K/V射影は全層・全ステップ共通なので画像ごとに1回だけ計算する (毎フレーム32層分の再計算を排除)
+            return self.models.moshi_vis.precompute_ca_kv(ca_src)
 
     async def process_pcm(
         self,
@@ -171,6 +186,11 @@ class RealtimeState:
                     top_k_text=_maybe_int(request, "text_topk"),
                     top_k=_maybe_int(request, "audio_topk"),
                 )
+                # update_gen_kwargs uses `or`, which discards a requested zero.
+                # Zero text temperature means argmax while audio is sampled.
+                requested_text_temp = _maybe_float(request, "text_temperature")
+                if requested_text_temp == 0:
+                    self.models.moshi_vis.temp_text = 0.0
 
                 first = await ws.receive()
                 if first.type != aiohttp.WSMsgType.BINARY:
@@ -193,7 +213,7 @@ class RealtimeState:
                     )
                 )
                 await send_text(ws, 3, "画像を読み込みました。マイク入力を開始できます。")
-                log("info", f"session ready; ca_src={tuple(ca_src.shape)}")
+                log("info", f"session ready; ca_kv={tuple(ca_src[0].shape)}")
 
                 async for message in ws:
                     if message.type == aiohttp.WSMsgType.ERROR:
@@ -264,7 +284,7 @@ def _maybe_int(request: web.Request, name: str) -> int | None:
 def load_models(args: argparse.Namespace, device: str, dtype: torch.dtype) -> LoadedModels:
     log("info", f"loading Mimi on {device}")
     mimi_weight = hf_hub_download(repo_id=MIMI_REPO, filename=MIMI_FILE)
-    mimi = get_mimi(mimi_weight, device)
+    mimi = get_mimi(mimi_weight, device=device)  # moshi 0.2.x で第2引数が mimi_config に変更
     mimi.eval()
 
     log("info", f"loading J-MoshiVis checkpoint: {args.checkpoint}")
@@ -277,11 +297,20 @@ def load_models(args: argparse.Namespace, device: str, dtype: torch.dtype) -> Lo
     )
     moshi_vis.eval()
     image_embedder.eval()
+    moshi_vis.enable_cuda_graph()  # depformer_step を CUDA Graph 化 (90ms/frame → 52ms/frame)
 
     tokenizer = spm.SentencePieceProcessor()
     tokenizer.load(args.tokenizer)
 
-    image_processor = ImageProcessor(size=(args.image_size, args.image_size), device=device)
+    configured_size = (config.image_size, config.image_size)
+    requested_size = (
+        configured_size
+        if args.image_size is None
+        else (args.image_size, args.image_size)
+    )
+    image_processor = ImageProcessor.from_config(
+        config, device=device, size=requested_size
+    )
     return LoadedModels(
         mimi=mimi,
         moshi_vis=moshi_vis,
@@ -323,7 +352,12 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--port", type=int, default=8998)
     parser.add_argument("--device", default=None)
     parser.add_argument("--dtype", choices=("float32", "bfloat16"), default="bfloat16")
-    parser.add_argument("--image-size", type=int, default=448)
+    parser.add_argument(
+        "--image-size",
+        type=int,
+        default=None,
+        help="Optional override; defaults to image_size in --config.",
+    )
     parser.add_argument("--silence-after-stop", type=float, default=8.0)
     parser.add_argument("--ssl-cert", default=None)
     parser.add_argument("--ssl-key", default=None)
@@ -332,6 +366,7 @@ def parse_args() -> argparse.Namespace:
 
 def main() -> None:
     args = parse_args()
+    torch.set_num_threads(8)
     static_dir = Path(args.static).resolve()
     if not (static_dir / "index.html").exists():
         raise FileNotFoundError(f"static UI not found: {static_dir / 'index.html'}")

@@ -1,0 +1,65 @@
+[
+  {
+    "turn": 1,
+    "question": "これって外の景色?それとも建物の中から撮った感じ?",
+    "question_start_sec": 0.349,
+    "question_speech_end_sec": 4.739,
+    "question_wav": "/gpu-server/yamamoto/j-moshivis/eval_results/fuji_original_audio_probe_20261010/case_03/original_training_user.wav",
+    "voice": "amitaro",
+    "question_contains_fuji": false
+  },
+  {
+    "turn": 2,
+    "question": "山かあ、大きい山なの?",
+    "question_start_sec": 8.962,
+    "question_speech_end_sec": 11.207,
+    "question_wav": "/gpu-server/yamamoto/j-moshivis/eval_results/fuji_original_audio_probe_20261010/case_03/original_training_user.wav",
+    "voice": "amitaro",
+    "question_contains_fuji": false
+  },
+  {
+    "turn": 3,
+    "question": "へえ、雪山なんだ。形はどんな感じ?",
+    "question_start_sec": 16.26,
+    "question_speech_end_sec": 19.515,
+    "question_wav": "/gpu-server/yamamoto/j-moshivis/eval_results/fuji_original_audio_probe_20261010/case_03/original_training_user.wav",
+    "voice": "amitaro",
+    "question_contains_fuji": false
+  },
+  {
+    "turn": 4,
+    "question": "なるほど、それって富士山だったりする?",
+    "question_start_sec": 24.273,
+    "question_speech_end_sec": 27.388,
+    "question_wav": "/gpu-server/yamamoto/j-moshivis/eval_results/fuji_original_audio_probe_20261010/case_03/original_training_user.wav",
+    "voice": "amitaro",
+    "question_contains_fuji": true
+  },
+  {
+    "turn": 5,
+    "question": "手前のほうには何か写ってる?",
+    "question_start_sec": 32.468,
+    "question_speech_end_sec": 34.758,
+    "question_wav": "/gpu-server/yamamoto/j-moshivis/eval_results/fuji_original_audio_probe_20261010/case_03/original_training_user.wav",
+    "voice": "amitaro",
+    "question_contains_fuji": false
+  },
+  {
+    "turn": 6,
+    "question": "空はどんな感じ?雲とかある?",
+    "question_start_sec": 41.535,
+    "question_speech_end_sec": 44.15,
+    "question_wav": "/gpu-server/yamamoto/j-moshivis/eval_results/fuji_original_audio_probe_20261010/case_03/original_training_user.wav",
+    "voice": "amitaro",
+    "question_contains_fuji": false
+  },
+  {
+    "turn": 7,
+    "question": "そっか、いい天気の日に撮った感じなんだね",
+    "question_start_sec": 49.651,
+    "question_speech_end_sec": 52.601,
+    "question_wav": "/gpu-server/yamamoto/j-moshivis/eval_results/fuji_original_audio_probe_20261010/case_03/original_training_user.wav",
+    "voice": "amitaro",
+    "question_contains_fuji": false
+  }
+]

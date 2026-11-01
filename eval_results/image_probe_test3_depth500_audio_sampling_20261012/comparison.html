@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="ja">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>test3：音声追加学習の前後比較</title>
+<style>body{max-width:1000px;margin:28px auto;padding:0 18px;font-family:sans-serif;line-height:1.7;color:#222}img{max-width:100%;max-height:380px}audio{width:100%}.pair{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:18px}section{border:1px solid #ddd;border-radius:10px;padding:18px}h2{margin-top:0}.note{color:#555}</style>
+<h1>test3：DepthTransformer追加学習の前後比較</h1>
+<p>同じ画像・同じユーザー音声・同じ生成設定での自由生成です。テキストはgreedy、音声はsampling（温度0.5、top-k 250、seed 42）。回答文を同一に固定した読み上げ比較ではありません。</p>
+<img src="../../test3.jpg" alt="入力画像：木造建築と塔が見える通り">
+<p>質問① この画像には、どんな建物や景色が写っていますか？<br>質問② この景色が、どこの場所か分かりますか？</p>
+<div class="pair">
+<section><h2>追加学習前</h2><p>9月27日の20kモデル</p>
+<p>モデル音声のみ</p><audio controls preload="metadata" src="../image_probe_test3_audio_sampling_20261012/assistant_generated.wav"></audio>
+<p>ステレオ：左ユーザー／右モデル</p><audio controls preload="metadata" src="../image_probe_test3_audio_sampling_20261012/conversation_stereo.wav"></audio>
+<a href="../image_probe_test3_audio_sampling_20261012/review.html">画像・生成テキスト</a></section>
+<section><h2>追加学習後</h2><p>DepthTransformer側を500更新・全8コードブック</p>
+<p>モデル音声のみ</p><audio controls preload="metadata" src="assistant_generated.wav"></audio>
+<p>ステレオ：左ユーザー／右モデル</p><audio controls preload="metadata" src="conversation_stereo.wav"></audio>
+<a href="review.html">画像・生成テキスト</a></section>
+</div>
+<p class="note">モデル音声はMimiから復号した実際の生成音声です。回答テキストを別のTTSで読み上げていません。発音の明瞭さ、音の抜けや崩れ、文末の聞き取りやすさを比較してください。生成処理・保存の検証と、聴感上の改善判定は別です。</p>
+</html>

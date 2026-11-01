@@ -1,0 +1,35 @@
+{
+  "window_sec": 0.08,
+  "rms_threshold": 0.01,
+  "first_user_energy_sec": 0.4,
+  "assistant_active_before_first_user_sec": 0.24,
+  "total_energy_overlap_sec": 3.04,
+  "longest_continuous_energy_overlap_sec": 1.04,
+  "early_text_events": [
+    {
+      "frame": 2,
+      "time_sec": 0.16,
+      "token_id": 969,
+      "piece": "ね",
+      "gate": 0.02364080213010311,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 3,
+      "time_sec": 0.24,
+      "token_id": 7,
+      "piece": "、",
+      "gate": 0.030380655080080032,
+      "phase": "question_and_response"
+    },
+    {
+      "frame": 4,
+      "time_sec": 0.32,
+      "token_id": 4547,
+      "piece": "なん",
+      "gate": 0.013768321834504604,
+      "phase": "question_and_response"
+    }
+  ],
+  "note": "Energy proxy only; not speech VAD. Brief full-duplex backchannels are not errors."
+}

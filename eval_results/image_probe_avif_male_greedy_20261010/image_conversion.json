@@ -1,0 +1,11 @@
+{
+  "source": "/gpu-server/yamamoto/j-moshivis/c0ac1b57078410974e0c8929cfa999e527fe1a514c08dcc79f6a66aed5cda49e.avif",
+  "source_sha256": "e25d256512768f1c70b0dd9b66aa836e08d88fbca6b59470b1cad04363ca601c",
+  "input_png": "/gpu-server/yamamoto/j-moshivis/eval_results/image_probe_avif_male_greedy_20261010/input.png",
+  "input_png_sha256": "c63f7bf67ad349dc3f8a635864b6ae3913297e10a9350e6c15d6ede9ce975f35",
+  "decoded_rgb_pixels_identical": true,
+  "size": [
+    750,
+    750
+  ]
+}

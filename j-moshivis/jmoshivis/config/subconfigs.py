@@ -148,6 +148,8 @@ class FusionConfig:
     xa_gate_shared: bool = False
     xa_gating: Literal["tanh", "sigmoid", "none"] = "tanh"
     xa_conditional_gating: bool = False
+    # Public MoshiVis uses sigmoid(x - 4) for visual cross-attention gates.
+    xa_sigmoid_shift: float = 4.0
     xa_layers: Tuple[int, ...] = ()
     xa_extended_layer_dims: Optional[int] = None
     xa_extended_layer_embed_dims: int = 1024
@@ -186,6 +188,8 @@ class FusionConfig:
             return "Type of multiplicative gating at the output of each cross-attention"
         if field_name == "xa_conditional_gating":
             return "Whether to make the gating input dependent"
+        if field_name == "xa_sigmoid_shift":
+            return "Subtracted offset used by sigmoid cross-attention gates"
         if field_name == "xa_layers":
             return (
                 "If given, specifies the subset of layers to apply cross-attention to"
@@ -270,6 +274,7 @@ class FusionConfig:
             # Futher passed to GatedCrossAttention construction
             "xa_gating": self.xa_gating,
             "xa_conditional_gating": self.xa_conditional_gating,
+            "xa_sigmoid_shift": self.xa_sigmoid_shift,
             "xa_shared": self.xa_shared,
             "xa_gate_shared": self.xa_gate_shared,
             "xa_start": self.xa_start,

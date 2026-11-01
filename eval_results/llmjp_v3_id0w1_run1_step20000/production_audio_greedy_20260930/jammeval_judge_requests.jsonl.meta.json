@@ -1,0 +1,4293 @@
+{
+  "batch_requests_sha256": "54392421662efecf4835c8fc6b48541cde7bd08d92b5a4fca74163ccdfdd409f",
+  "grader_template_sha256": "e49100c04e850eb156e49c81730958863c895b04498a7b152f4ec2ea341f35b5",
+  "judge_implementation_file_sha256": {
+    "j-moshivis/jmoshivis/evaluation/judge.py": "59c2a2c56160abc21c775e2831f88ba8dfcb2827002939a8ccdb1766e5b62751",
+    "j-moshivis/jmoshivis/evaluation/schema.py": "ccc2eb6fda4adb5f82be2007f30953a680e967113ad7180a4678535f31048d7f",
+    "j-moshivis/jmoshivis/evaluation/score.py": "584ecbb50ebb343e9fba991384df2edb0aa3d1f5b40dd57a95767b8c8a2e919d",
+    "j-moshivis/jmoshivis/evaluation/suite.py": "a542572e550e0e5e7c945ee7a400fb0882124eca8d5299be07e4b69cbe0bc15c"
+  },
+  "manifest": "/gpu-server/yamamoto/j-moshivis/data/evaluation/vision_v1/manifest_audio.jsonl",
+  "manifest_sha256": "f11cc0952e00f5bd299635ab97b0254406269aedfea17a189d033367b2f18a72",
+  "model": "gpt-5.1-2025-11-13",
+  "n_repeats": 3,
+  "num_model_missing_or_failed": 0,
+  "num_requests": 846,
+  "num_targets": 282,
+  "official_source": "https://github.com/llm-jp/simple-evals-mm/blob/979e030f867c0dea8da093078965b3057fdd2416/src/simple_evals_mm/common.py",
+  "prediction_run_sidecar_sha256": "ee79e6084da74f70569256d3dd8bb2981ae81e48a0d86d094e13a1e6f00e6a47",
+  "predictions": "/gpu-server/yamamoto/j-moshivis/eval_results/llmjp_v3_id0w1_run1_step20000/production_audio_greedy_20260930/vision_v1_audio_greedy.jsonl",
+  "predictions_sha256": "f78b27aa7f5ee6ed16f99fc3d7e358dd6881bdf0b627e503b235112870ed90b0",
+  "request_map": {
+    "jv1-006ca2e2564a85ff492470425d913bbb291d6aff": {
+      "body_sha256": "93842561abfb740c7866898057df5114d0c040856ff916c78351a653b3b0cf07",
+      "repeat": 1,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-140"
+    },
+    "jv1-00c82a427a74f785ed08e1c2b679618bc83bffad": {
+      "body_sha256": "5fb75f8b3c31b57c0b8f1a86a123b7525842c1d4f709b789920971a4f3c19f71",
+      "repeat": 1,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-44"
+    },
+    "jv1-014602dfce5d2de47747c7bc13e7fd2be80e1747": {
+      "body_sha256": "2ebc280ed8be4dd0a39670ee705c7712dc465457e42193ba516a52fadf8e4461",
+      "repeat": 1,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-131"
+    },
+    "jv1-0211ca25c832062b3d67ad5dd4d991ae3e59590a": {
+      "body_sha256": "bb8dea04eb2593f872e1ff8ca28611bcd9e64d299a9471ed11e967dbc268542b",
+      "repeat": 3,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-133"
+    },
+    "jv1-02776a06847f70d698c3d23f43575b6fe0b5e765": {
+      "body_sha256": "fd5c1fc5f7bff31f35c69e32d13f87cdfd980c66b51dcc699d827cccf61a9145",
+      "repeat": 3,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-85"
+    },
+    "jv1-02945c3ae6574c88ea594f17c9616b3643a0ff1d": {
+      "body_sha256": "1f7d343c9f1723385ea40354b5181dcda0ae70e27378baa5ac7b8fad0fec5230",
+      "repeat": 1,
+      "sample_id": "jammeval-heron-bench-refined-test-95"
+    },
+    "jv1-02d060ca47c18a9580163c9fcb0f9b725fa76349": {
+      "body_sha256": "40e58e6300ca40bea348ae2cf523812d1f68af8556c94f34ea60abb6063a51bf",
+      "repeat": 2,
+      "sample_id": "jammeval-heron-bench-refined-test-101"
+    },
+    "jv1-03157b09c2b726702f2530b885ef16677856ef0d": {
+      "body_sha256": "1077a353c01df221ebeef06b1e4f3ed1116240b2352a3b6ec027fb7aecc20493",
+      "repeat": 1,
+      "sample_id": "jammeval-ja-vlm-bench-refined-test-45"
+    },
+    "jv1-0315c720d867d1355fa46ff76ebe1f32eceaab71": {
+      "body_sha256": "13e338881e4bfc366fc7a3391deb8c63e10aae203a12627d31c8e30ad81825f1",
+      "repeat": 1,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-20"
+    },
+    "jv1-0341a2f6cbd7d93c8110df5808ecc73724cb29eb": {
+      "body_sha256": "8fdb74a34947780719ff8b12427cf2da21be992ed622e07455043a801dec8e72",
+      "repeat": 1,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-90"
+    },
+    "jv1-03a49efaf83696fb82a85e4d7f87cd21b7add49f": {
+      "body_sha256": "9e750c22d7913e3b0497e29f0003333857699b1df20172e8222ce611004ba4cf",
+      "repeat": 1,
+      "sample_id": "jammeval-heron-bench-refined-test-2"
+    },
+    "jv1-0417df22349648c337f884ef2115465f08655033": {
+      "body_sha256": "f2553fbb209374ed08b48f706738c4edc0f40c4c69ce4f47e29d4a46beb75e23",
+      "repeat": 2,
+      "sample_id": "jammeval-ja-vlm-bench-refined-test-38"
+    },
+    "jv1-04ce1a76795a10ea1e90256e2389b6efec5a5a2c": {
+      "body_sha256": "42691239a727004f2e1341b168ac6b1ffa844a119b6353ae1605f7afc58c0e65",
+      "repeat": 1,
+      "sample_id": "jammeval-ja-vlm-bench-refined-test-35"
+    },
+    "jv1-058a6d71f925dbd309acde6cf1478b4e184fad49": {
+      "body_sha256": "1c66821daaa5867762e5eefd3a2356074c5ff848758c812a3211f65a6db6c5dc",
+      "repeat": 1,
+      "sample_id": "jammeval-heron-bench-refined-test-37"
+    },
+    "jv1-05c3f64fa05fa42fb14715531f593bc454f9aafb": {
+      "body_sha256": "e38bb4d301f66ba822cf6dcfeed6cc98bf8d75badd00cd9569941716222b0cb8",
+      "repeat": 2,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-125"
+    },
+    "jv1-060c331389a62ef4dab937ae2a4198942d4cf344": {
+      "body_sha256": "e3316e27d173cf5aa15363f72874e1eec15a16797cbdea628c18db967f63d445",
+      "repeat": 1,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-27"
+    },
+    "jv1-068f87aa8881064aa3f4d2d7ce37e6e7008a1dbe": {
+      "body_sha256": "e9d33b521e585e5e4a742e4d982605075910dcf17e2aa5fa94a20d3fcab4d532",
+      "repeat": 3,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-148"
+    },
+    "jv1-06d402b6996361743982e01d81ddfc78451f82cf": {
+      "body_sha256": "009d78009dc157dc899d516dea910b014236733375be4f535ede38b1112db180",
+      "repeat": 2,
+      "sample_id": "jammeval-ja-vlm-bench-refined-test-44"
+    },
+    "jv1-06fd02310d8c1511a558e540231ac40f9dd1956a": {
+      "body_sha256": "085c30261c1a76cd495fc665f3dec0c759d8b958ca2bc680e3c5e7bc4279c263",
+      "repeat": 1,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-104"
+    },
+    "jv1-0703bcc3eea0f68acd246a084d5569fe5d966f96": {
+      "body_sha256": "13e338881e4bfc366fc7a3391deb8c63e10aae203a12627d31c8e30ad81825f1",
+      "repeat": 2,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-20"
+    },
+    "jv1-0848f9760e47f56512928038f8dd27808f9aaaae": {
+      "body_sha256": "07c3326e9d03c04fd0be4b549235aec26b73182fa34fde5da984ee684ceb53de",
+      "repeat": 1,
+      "sample_id": "jammeval-ja-vlm-bench-refined-test-12"
+    },
+    "jv1-087ec42179f0553429afe7b646f7cacea7d81a1c": {
+      "body_sha256": "b140c7109cd710f5dd7905245424397af61294c00460b9c1bbd0afa90996a574",
+      "repeat": 2,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-12"
+    },
+    "jv1-0946713bc7cd19003f3f34e7eb98c1cecdc9131e": {
+      "body_sha256": "81206a605db247c8ec6f4e5e6c37cfbdcc1369fa9271fd859a55843b8ebeed30",
+      "repeat": 1,
+      "sample_id": "jammeval-heron-bench-refined-test-35"
+    },
+    "jv1-0957a20f478eff980996666a46170f5ef391cfcf": {
+      "body_sha256": "b29eb7b93b54dc4c4f2ecf1b79dacadc7e830861a4a1bf1139edf51826101d5b",
+      "repeat": 1,
+      "sample_id": "jammeval-heron-bench-refined-test-90"
+    },
+    "jv1-0a02d4fa5c606a08f7aa38a22b4fe65d82b3e40e": {
+      "body_sha256": "ad7fc99d0f437c791b19be7d93d5c88edf72196b1ae31c7f4214cfbda903c962",
+      "repeat": 1,
+      "sample_id": "jammeval-ja-vlm-bench-refined-test-42"
+    },
+    "jv1-0a0881fbe2318cc91dadcb365d2e69b30768590b": {
+      "body_sha256": "9fd97999d3e17b62e1350e08fea3a4a2e102c1c0c815549e64a1c6b0cdc4721e",
+      "repeat": 1,
+      "sample_id": "jammeval-ja-vlm-bench-refined-test-6"
+    },
+    "jv1-0a94a5943bd61c40a016f11f3e5614415e485704": {
+      "body_sha256": "3ca9a23cd338439ce7efca1dc265d24ca24fc51bd5c60b18de75f1debd3fcd59",
+      "repeat": 1,
+      "sample_id": "jammeval-heron-bench-refined-test-1"
+    },
+    "jv1-0ac1b45b9b88c0e08387a8b00eca649bad35f96d": {
+      "body_sha256": "b1371502b3ba4fd174d325774f4515e610fee7debc5c36e145660c3a57fa99cb",
+      "repeat": 3,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-54"
+    },
+    "jv1-0af5e73c69002ed99e06d04c96da4d93a5d6b0e8": {
+      "body_sha256": "24a13ba6c606a6eda0bc1374cd3f89300a8dd15909dd761c324b4f52ac78bb6d",
+      "repeat": 3,
+      "sample_id": "jammeval-ja-vlm-bench-refined-test-36"
+    },
+    "jv1-0af64ef086f1a08ef7c63eb9bf00d7f607b180f4": {
+      "body_sha256": "8bb8d1967de4a198ce7add5ee2a3de75ab02c09b52bc71e487945eaab2126d6b",
+      "repeat": 3,
+      "sample_id": "jammeval-ja-vlm-bench-refined-test-37"
+    },
+    "jv1-0bc08015a416ab7fa3c84e6fb5d0631387c38fec": {
+      "body_sha256": "90d3a41e3a197b4cb0d683275c184f28bc3d8baec9d042eeffff27342e58769e",
+      "repeat": 2,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-59"
+    },
+    "jv1-0c25c9617de949c774b7673b61a6fa2d65f85254": {
+      "body_sha256": "74996de615402e7a3d07bc17d9ea64c33457d34364621f3a42077ce8bdeb021c",
+      "repeat": 1,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-87"
+    },
+    "jv1-0c947edc99d45b28073c57c9c9206dc7a7d6c174": {
+      "body_sha256": "bfa4830bb9ccdbcc035eba320ffaf497641d359b9b35f8676c7dc601e895df43",
+      "repeat": 3,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-63"
+    },
+    "jv1-0cba34ba047792a353809cb5e90ebcdb0c12e868": {
+      "body_sha256": "91225c3ca2722c946632c7a60ab4e741b91e26b2c6cc67bd175896c73f6088c7",
+      "repeat": 2,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-3"
+    },
+    "jv1-0cc4c22332bdbff4d7725d34a1e8c901bfd73c98": {
+      "body_sha256": "cd3d940b136b30301ab0cea5fb62e93828264965ab06526e6d31c349915ff169",
+      "repeat": 3,
+      "sample_id": "jammeval-heron-bench-refined-test-72"
+    },
+    "jv1-0ce3eab3090662c351dba43bd8ee906324474a95": {
+      "body_sha256": "73089df18cdb0ad5c9bca68c7e8212fe0f06440327bcbd50d3b28c2b03eacf59",
+      "repeat": 1,
+      "sample_id": "jammeval-ja-vlm-bench-refined-test-7"
+    },
+    "jv1-0d11089c8a507aef9685e4f901c3eca9ea464876": {
+      "body_sha256": "72302f4c4fe1d1d4edbddc7bca2bf83fb9969a84ff46ce6559e1f2e9a945aae2",
+      "repeat": 1,
+      "sample_id": "jammeval-heron-bench-refined-test-3"
+    },
+    "jv1-0e3f3b61f2b47adc3f76f43fa99afaf33b832d5a": {
+      "body_sha256": "c2669cd86718a7ff20fa7d32be3aa83577ed14b2b090f397a091ba9620f35caa",
+      "repeat": 1,
+      "sample_id": "jammeval-ja-vlm-bench-refined-test-29"
+    },
+    "jv1-0e684db2521f65f71c65d76be942793c51258ca0": {
+      "body_sha256": "a8bfde28031c025a3105b2d4458b501c675dbfcf4c5c8f72f84991308dd6043d",
+      "repeat": 3,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-135"
+    },
+    "jv1-0e6e595cf9d80bbdf8093c5737fd9c47eaa41d9d": {
+      "body_sha256": "6a218144d630ff832efec5555584fd395c54343e8129379fc2c0954ae7d1f263",
+      "repeat": 1,
+      "sample_id": "jammeval-heron-bench-refined-test-40"
+    },
+    "jv1-0e73c6a1be2b016acd6089e3760f6e0ed2d967ba": {
+      "body_sha256": "dc8de377416989529a561afdde848d98d6294f206686831273a5b9016358cfdc",
+      "repeat": 1,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-120"
+    },
+    "jv1-0e75a67b527e4e0bc5e5fbeb51740901cfd28a47": {
+      "body_sha256": "b2b590cace8ed8a39d18e4bfc2eb6cbdfa22076ddb64d6cbd415f23d1941b68a",
+      "repeat": 2,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-2"
+    },
+    "jv1-0fa024e633ff31318aefbfb76e45e342a21b95db": {
+      "body_sha256": "fe4308fd77042695fadda785f9a72d86f6c02249f3b3e1a17197676c129c569c",
+      "repeat": 3,
+      "sample_id": "jammeval-heron-bench-refined-test-74"
+    },
+    "jv1-11161477eb5dcd6b45037d90d12bd98e1e4c23bc": {
+      "body_sha256": "348a8d56b00e97c21896b3aa67c43bf46e32af2940c061c2eb008f33bbaa7d36",
+      "repeat": 1,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-80"
+    },
+    "jv1-1124d1d39c74468457a1c9da763b4460013cb6a1": {
+      "body_sha256": "826bfd225b58cfb6cb98415c746c0cf8233a88470e9615a8a2d98594eb562946",
+      "repeat": 1,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-17"
+    },
+    "jv1-11436e53f7558d870e0ae892f7e97500a7374d2b": {
+      "body_sha256": "2de43f2d9fcb867c318fb5aa55a3d289c3d0307fa900f69c66e83e951d7d4b19",
+      "repeat": 2,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-14"
+    },
+    "jv1-115c0b4d2e7d20f3213542bd370afcc352bbd467": {
+      "body_sha256": "b1371502b3ba4fd174d325774f4515e610fee7debc5c36e145660c3a57fa99cb",
+      "repeat": 2,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-54"
+    },
+    "jv1-115cf9b53b5b1ceae6b07ead184ade7c2fed481d": {
+      "body_sha256": "4dda034c9a080b4a2bc1328cd45c40d44d1e70099007e6ce9625d410578afae1",
+      "repeat": 1,
+      "sample_id": "jammeval-ja-vlm-bench-refined-test-21"
+    },
+    "jv1-119fa5961bd2b3929c949e365d0bc0e1ef5528a2": {
+      "body_sha256": "bb8dea04eb2593f872e1ff8ca28611bcd9e64d299a9471ed11e967dbc268542b",
+      "repeat": 1,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-133"
+    },
+    "jv1-12052b54158ac12996e87fa13cb9f22b1c7db8e5": {
+      "body_sha256": "a41e30262ab18a32349f582b30646f1ed00c23ded595472993f9db2143a50e5e",
+      "repeat": 1,
+      "sample_id": "jammeval-heron-bench-refined-test-30"
+    },
+    "jv1-123a87129ff08709a5bddcdc116dc67ba28fef50": {
+      "body_sha256": "e9d33b521e585e5e4a742e4d982605075910dcf17e2aa5fa94a20d3fcab4d532",
+      "repeat": 1,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-148"
+    },
+    "jv1-123ffb25f2f4d3dedc8259a16d8689a99cc036ec": {
+      "body_sha256": "b18c4ac51f5ee5787247bea6d0018f3f9487928bea87bcab564eccff08fdd419",
+      "repeat": 3,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-32"
+    },
+    "jv1-1247b8a757d8835c504968effb2aab4b9092fb3a": {
+      "body_sha256": "3944bee5927dff25d969afa18f87059fbef6e3e9f26454a931eee3011b552f9e",
+      "repeat": 1,
+      "sample_id": "jammeval-ja-vlm-bench-refined-test-28"
+    },
+    "jv1-1258353beb3f2827a37d8c6dbcbef6847b6a2b3d": {
+      "body_sha256": "e3316e27d173cf5aa15363f72874e1eec15a16797cbdea628c18db967f63d445",
+      "repeat": 2,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-27"
+    },
+    "jv1-129b5644e63f5cb57176a37abb6e6bd4623b457f": {
+      "body_sha256": "6f32e6504fbe66f43bf1a654d00bf274dfa5ad6ea38d2a542ee31bbc9cc6e04b",
+      "repeat": 2,
+      "sample_id": "jammeval-heron-bench-refined-test-77"
+    },
+    "jv1-12afa65ba05f7df3dd506b7c41ccd9602aff2a1f": {
+      "body_sha256": "d0f5c3baf8b5cc068c39cdb54c9c37181723a25b4c2ee440d7c731c01ca1d0b3",
+      "repeat": 3,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-73"
+    },
+    "jv1-12c1f50b78f4447c4456ac08c24367cf6f97cd63": {
+      "body_sha256": "a5e1b76cafa2e6b8355defa75739f9aac2d3454a95c6b49b1c1564dca07ff568",
+      "repeat": 3,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-7"
+    },
+    "jv1-1347c8668fcc5c0c5eee8121afa700cb6539839f": {
+      "body_sha256": "2573e6b9dff24101128a3c5861393813d436149d41eefbd7093338833e5f6383",
+      "repeat": 2,
+      "sample_id": "jammeval-heron-bench-refined-test-22"
+    },
+    "jv1-13e86692cf48375ce1635adeb6b0f55c025b8441": {
+      "body_sha256": "9cf1953e0986010276365992832ad72877ade987b0320b6d5ba32d46adba45cc",
+      "repeat": 2,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-89"
+    },
+    "jv1-13eaabbe9223890c71e6ea16dae6651f29a96460": {
+      "body_sha256": "60b073da1ff82869fc0c88c3bdd71a15a2f2955b8543517fc064a90febe863a1",
+      "repeat": 1,
+      "sample_id": "jammeval-ja-vlm-bench-refined-test-10"
+    },
+    "jv1-143f27a39ee64c7abf7b9df7baed52b4b819359a": {
+      "body_sha256": "4d893e657950e248c5e1b5ceee595ae03f452ffbef43b0bebb0532359ea1048c",
+      "repeat": 2,
+      "sample_id": "jammeval-ja-vlm-bench-refined-test-4"
+    },
+    "jv1-144aae6f489a8832610a6cb122ac5610b19f5a7f": {
+      "body_sha256": "3a3c2a727d1d6673cd8a1dc1626b5ba1a940976d14666082ed5f56158ed207d2",
+      "repeat": 2,
+      "sample_id": "jammeval-heron-bench-refined-test-50"
+    },
+    "jv1-1517c899e71fcffabb238abfddbc6b9606e7f20f": {
+      "body_sha256": "558432e4634ccb67587b07e98e328a6bc356be377c533b85d721c7a980809425",
+      "repeat": 2,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-43"
+    },
+    "jv1-1530a55e3eb0a6f602c73c185b6b8ce53aaae864": {
+      "body_sha256": "8c90d36e39a28bb13f8def7650660cc54d07fd1c0e38237f0f8673141dfb8cd4",
+      "repeat": 2,
+      "sample_id": "jammeval-ja-vlm-bench-refined-test-3"
+    },
+    "jv1-15a38bd7dc8a2e0b06d7b0e3414271d11c98875f": {
+      "body_sha256": "c2ff3576efd82ac47fb7c96c7390a0257fa974f105c4ac9f5c8ef9adb0a9c0b1",
+      "repeat": 3,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-30"
+    },
+    "jv1-15d4f097f91d60001ac456c2507988750aebeed2": {
+      "body_sha256": "95cba5e58361084511d3b6df3a21653acb5009e7b2397cddce9de5690e85ff99",
+      "repeat": 3,
+      "sample_id": "jammeval-heron-bench-refined-test-80"
+    },
+    "jv1-161c231defa843c83c5a3cbb10d5afcd0e9afa73": {
+      "body_sha256": "49b51166da5ad5b5fa4bfea29de47c8f61f5f6ad2c236a45b2bffd6a65bd5ad7",
+      "repeat": 1,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-96"
+    },
+    "jv1-162a9399d3995339e586948c1cb0dcd6a5aa25fc": {
+      "body_sha256": "241b48ce36380249f2f14478c45b8974f04ff39e15ba23c66b85bd88cfadec1b",
+      "repeat": 1,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-101"
+    },
+    "jv1-1685442f34a27f617b33112f93ac8ccff3f63f48": {
+      "body_sha256": "aea1bc75485c843d1a791ba5e02349495811e71e395c0537179ce37658741c73",
+      "repeat": 3,
+      "sample_id": "jammeval-heron-bench-refined-test-25"
+    },
+    "jv1-1725341e0d141765b7d5abaab7b12f03e5c1182f": {
+      "body_sha256": "8c27807efd2b4826457a02a355c18452d8f113d3de829f4603bd5ec6c6b1dba0",
+      "repeat": 3,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-58"
+    },
+    "jv1-173cbeaf60fd8d4f51475af35472212d370f1dba": {
+      "body_sha256": "0023f2380054f953586dc560682919104943f4c350b2024fcee0015b4ea3bc50",
+      "repeat": 3,
+      "sample_id": "jammeval-heron-bench-refined-test-100"
+    },
+    "jv1-1783d1a91d047be4892f2b3808b54b9b14b65e15": {
+      "body_sha256": "c4ec87b853ccbe2fe10062e862b2df163b4c593b63e16d3b22ffe45da92c6a29",
+      "repeat": 2,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-68"
+    },
+    "jv1-17ed575bc605acda86d38a90d590b7de23e9274a": {
+      "body_sha256": "6bee7970592d9800fc1ee1a034e339d2a33d6bf9126ec3b697a0051ea57492e5",
+      "repeat": 1,
+      "sample_id": "jammeval-ja-vlm-bench-refined-test-14"
+    },
+    "jv1-1942ac2ed57ba1b424209ee5d5dd207a652e2281": {
+      "body_sha256": "885a33df52b4a0f271b122bf7e928c34dc63b873c7547ee0d2b21914c4b92f2a",
+      "repeat": 1,
+      "sample_id": "jammeval-heron-bench-refined-test-24"
+    },
+    "jv1-19aee273ea99456af91011f6c3cc8cf9140c5a67": {
+      "body_sha256": "43ead809558c0cd94531aa76d565d9085127556e1f2f2df3bd30864d73743c6f",
+      "repeat": 3,
+      "sample_id": "jammeval-heron-bench-refined-test-18"
+    },
+    "jv1-19b15d64a43f5096dbbb395d087fbd5aa157e536": {
+      "body_sha256": "68af771a57dff2c61acb6130e5db76e7d783c0f9cfb7f2e69ab04143d9d83553",
+      "repeat": 3,
+      "sample_id": "jammeval-heron-bench-refined-test-11"
+    },
+    "jv1-1a2ef5882557d320928b78ea94853e6b93dceaa0": {
+      "body_sha256": "aa776bc72e9e91e64d701dfd32d5458f24f8d9d4d45be2ac1fd3548641d8cc18",
+      "repeat": 1,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-117"
+    },
+    "jv1-1a6185e33b14cc1b0572251294626b830807ad21": {
+      "body_sha256": "adcdc9d2d453ee1ccef61047f8d864d52dd9de9f185c54c7d4edb5a680708af9",
+      "repeat": 1,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-4"
+    },
+    "jv1-1a7b282613119052d210f8c3a161da6e6afc742c": {
+      "body_sha256": "2604bb49190a5eb918fbf8755daa35a64adec0d6f94a20f2916503d74629265a",
+      "repeat": 2,
+      "sample_id": "jammeval-ja-vlm-bench-refined-test-48"
+    },
+    "jv1-1af4c1eed1335c69ba1d45e01a355ccc867a3f6e": {
+      "body_sha256": "be9b206c9513056dc8007358c1aee0ff4a7b7a2d8d4b411c9626f69ff0237008",
+      "repeat": 2,
+      "sample_id": "jammeval-heron-bench-refined-test-63"
+    },
+    "jv1-1b36d48f44c1ac8864470abe532a30f5579edb67": {
+      "body_sha256": "16490a8837ee1759004977813e0b27cfee0e64a50d04fe9a1f6a73c05c44328e",
+      "repeat": 1,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-149"
+    },
+    "jv1-1b39da542b0d505f3fae9dca555171c3786e4059": {
+      "body_sha256": "d4e4ca10cbcd050d8ddd81a60fc0ea8d036a1e1cfeead0fa0f8973cd211b9f94",
+      "repeat": 1,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-13"
+    },
+    "jv1-1b6bb388c3b3681bf0a627b3361ab54ed3a266a0": {
+      "body_sha256": "211c250136010563518c61e126f72e0d47d88b3d7401f9c0a1825b08f616bd39",
+      "repeat": 2,
+      "sample_id": "jammeval-ja-vlm-bench-refined-test-46"
+    },
+    "jv1-1b9256248490a5280a192598d9a7f67c9bb1da13": {
+      "body_sha256": "b03d70cb47d070c806cfcfde7be1796d70319285f37bc677a447c5bdbb371dae",
+      "repeat": 2,
+      "sample_id": "jammeval-heron-bench-refined-test-12"
+    },
+    "jv1-1c285e0fe25f39658405b2560a4174376c88bd4d": {
+      "body_sha256": "42a68ba787c13208ab2322c63d620f54b9254af2948216dd417645225f3c9700",
+      "repeat": 2,
+      "sample_id": "jammeval-heron-bench-refined-test-79"
+    },
+    "jv1-1cb6816ddae9f6328c9d28ff74218109e849c2c3": {
+      "body_sha256": "4371648b402926668c2e1a2d47835f81ace5e9687d0e15cfb9aa3367b1890095",
+      "repeat": 3,
+      "sample_id": "jammeval-heron-bench-refined-test-97"
+    },
+    "jv1-1d228aa20905a348effe2b4bea6539ae1909e15e": {
+      "body_sha256": "d6340feb3f896136148d6be12f813a2ecdad653004457d15005c4c62702a6c70",
+      "repeat": 2,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-77"
+    },
+    "jv1-1d3fd183e08b1d396093b8a8d0b820f8935802a2": {
+      "body_sha256": "e9ecee16b364945326b5502453a6f778c805ec0238febd10d93d83a655506804",
+      "repeat": 2,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-31"
+    },
+    "jv1-1e5203289e36fae3ea33f52e83e5ed50d968a234": {
+      "body_sha256": "1e1630120e56bad8c20ee307b254020101da56d7313a133e659f9ab18b790751",
+      "repeat": 3,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-9"
+    },
+    "jv1-1e62e8a2553573c28063f19ca89449c1b517f920": {
+      "body_sha256": "ca4e4adf76a8366b52a9088f0272a6f969dd7b08653a49583db066dfe433dee7",
+      "repeat": 1,
+      "sample_id": "jammeval-heron-bench-refined-test-27"
+    },
+    "jv1-1e83c9d1ad5809689e2197ea75fa7748b1e5bf30": {
+      "body_sha256": "afe28d4c466dafd0e225ed40d246e1851a8eb6e26c90751b9054031207bde8b6",
+      "repeat": 2,
+      "sample_id": "jammeval-heron-bench-refined-test-49"
+    },
+    "jv1-1f1eaf8cb37f6ea2456a97e69b790fdf09ae98be": {
+      "body_sha256": "1ed64cf3efcfe39da14476ff30216e8cf1b1fa92e5e85e100a379c010e370063",
+      "repeat": 3,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-132"
+    },
+    "jv1-1f5213153dfdbe2463a08745f0ed7b9d78469973": {
+      "body_sha256": "eaa6c0535e82a2507062a033f74ed17b541d8d6d21fb39228898d52c4e9a3a00",
+      "repeat": 3,
+      "sample_id": "jammeval-heron-bench-refined-test-9"
+    },
+    "jv1-1fd87b995a2ead47aeb3758ad515af6a029b8655": {
+      "body_sha256": "dd8088fa62e977682b5351cd1b19da8a152bad371168c3f6d1aee0cb223b5437",
+      "repeat": 1,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-134"
+    },
+    "jv1-1ff862ff61c22c7012f3b7722a05726ee6431517": {
+      "body_sha256": "cced90091f67078bfc91b9d2d284be7eaf6fe5d0ddf36e2ba36055ea9080cfb7",
+      "repeat": 1,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-136"
+    },
+    "jv1-20771fdcc30830b1791a0c27c287fade103db38c": {
+      "body_sha256": "7f4894b6dea206efd0e8c0fb39bf4774dfa871345ef0e0a5df3f3a27c330f516",
+      "repeat": 2,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-79"
+    },
+    "jv1-20f2c42f8a71fcdd418e62f716030e0576efda4c": {
+      "body_sha256": "5273cd2002c19c060a8fcac67dcd0f5c90eb6463d9c77e3bd3ed8a5e025d803a",
+      "repeat": 3,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-56"
+    },
+    "jv1-213928ad5124e6c6e7f2d90b47278ec458027923": {
+      "body_sha256": "2ebc280ed8be4dd0a39670ee705c7712dc465457e42193ba516a52fadf8e4461",
+      "repeat": 2,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-131"
+    },
+    "jv1-2144ade111078bdb634b3576432ae8bdf788b47c": {
+      "body_sha256": "b18c4ac51f5ee5787247bea6d0018f3f9487928bea87bcab564eccff08fdd419",
+      "repeat": 2,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-32"
+    },
+    "jv1-215c50c690fc47ef3e06582a9fece3d469c2a652": {
+      "body_sha256": "93842561abfb740c7866898057df5114d0c040856ff916c78351a653b3b0cf07",
+      "repeat": 2,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-140"
+    },
+    "jv1-21e45f806603c6c5fe88d620af76970ba80c5ae6": {
+      "body_sha256": "a7e8af15fda614ae0b0705f41429953e26cf000a4d0c6e801ad9669083c9ae8f",
+      "repeat": 3,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-108"
+    },
+    "jv1-2204414248d4443264488d11e24648767d0423e0": {
+      "body_sha256": "3944bee5927dff25d969afa18f87059fbef6e3e9f26454a931eee3011b552f9e",
+      "repeat": 2,
+      "sample_id": "jammeval-ja-vlm-bench-refined-test-28"
+    },
+    "jv1-22766283145edf998059dba72f2dec23e9ab1e4e": {
+      "body_sha256": "49148cb9b98b235c11097abeeadac19c1d3813aaccc579b6080012ef7ea32972",
+      "repeat": 1,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-53"
+    },
+    "jv1-22a3b6e8e29efc679a1ae7730118a21f33492054": {
+      "body_sha256": "d18ca611519b8d874441054e790e5ec14d3c541d4c73f732bdede1cc18238aa5",
+      "repeat": 1,
+      "sample_id": "jammeval-heron-bench-refined-test-45"
+    },
+    "jv1-22cbf050f387128c306fda522644362058ed44d1": {
+      "body_sha256": "840e9c5e08b190dc2a356bb7056164b226b2b0241ac94251469a477685558fe9",
+      "repeat": 1,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-112"
+    },
+    "jv1-23adcee970305522c516d502a762f9731f7d8ed1": {
+      "body_sha256": "a0be5c0fd25533674ff30dc7ea202905d265a985aab6b79940f059e789d435a0",
+      "repeat": 3,
+      "sample_id": "jammeval-heron-bench-refined-test-32"
+    },
+    "jv1-23dc8c8ce099675774e7e0f084d83e3489a331f4": {
+      "body_sha256": "fce7e30a679a40023f12acb49b6bca293bb110f5cc9a5d4b084f58890f23242f",
+      "repeat": 2,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-107"
+    },
+    "jv1-23f2ca2b94e61c3d1ab1622e8c7d76fb1ce3bc41": {
+      "body_sha256": "e7cb79c74d87f53add41172373c2c25fac05344cefa333d5acb2c219c9ffe97a",
+      "repeat": 2,
+      "sample_id": "jammeval-ja-vlm-bench-refined-test-31"
+    },
+    "jv1-2405aa42034825404ea868e172ddb286c2f05c47": {
+      "body_sha256": "f0e853296a94010428dae8ec22752ed560898134226ceb26976a58763a5f1db0",
+      "repeat": 1,
+      "sample_id": "jammeval-heron-bench-refined-test-65"
+    },
+    "jv1-2406138f7e31fff6b547d4ec5d37588af6b47fd5": {
+      "body_sha256": "22b8f03aab47a950856a0b6a3d6ec2ad195c8540df2a77ee91d856afd2e92981",
+      "repeat": 2,
+      "sample_id": "jammeval-ja-vlm-bench-refined-test-32"
+    },
+    "jv1-241e2afd36a8d8ae82d3ed6851f9321fbb5e00e3": {
+      "body_sha256": "8126979672d47fe683714a38b97c8fec0eb87717d15a13cbb8933f83da18d793",
+      "repeat": 1,
+      "sample_id": "jammeval-heron-bench-refined-test-69"
+    },
+    "jv1-2496e164d320c06c98770910057f522ed49df3ef": {
+      "body_sha256": "28faec0f47820f94730bac8bb79ff13113b5d46e79145002176ec0f652312c35",
+      "repeat": 3,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-28"
+    },
+    "jv1-2497f305eda48a08f24d98513faeaa859880e1a8": {
+      "body_sha256": "49148cb9b98b235c11097abeeadac19c1d3813aaccc579b6080012ef7ea32972",
+      "repeat": 3,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-53"
+    },
+    "jv1-24da5c6509c6e0fde87aff603825b66b164d38f3": {
+      "body_sha256": "42691239a727004f2e1341b168ac6b1ffa844a119b6353ae1605f7afc58c0e65",
+      "repeat": 2,
+      "sample_id": "jammeval-ja-vlm-bench-refined-test-35"
+    },
+    "jv1-2576a3b4aca514ae28d3b0637f62ed8458a7ce6c": {
+      "body_sha256": "6d31fb004d51d4345f74a4e6fde1b3ec9402bf102f451b54e8cdab4288c24b97",
+      "repeat": 2,
+      "sample_id": "jammeval-heron-bench-refined-test-99"
+    },
+    "jv1-2589200e9935ad18ec9b19ee834c0c60356ff1b2": {
+      "body_sha256": "009d78009dc157dc899d516dea910b014236733375be4f535ede38b1112db180",
+      "repeat": 3,
+      "sample_id": "jammeval-ja-vlm-bench-refined-test-44"
+    },
+    "jv1-25fe4c20a4416b49cafe5242781cddc6dca8b076": {
+      "body_sha256": "be9b206c9513056dc8007358c1aee0ff4a7b7a2d8d4b411c9626f69ff0237008",
+      "repeat": 1,
+      "sample_id": "jammeval-heron-bench-refined-test-63"
+    },
+    "jv1-260c2c91225bfa4f4de39cf048423c02468bb0c7": {
+      "body_sha256": "59766fa280cc42db8f56fd3ab22f1314e4112074f3d0cef43764897e57be266f",
+      "repeat": 1,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-64"
+    },
+    "jv1-2659d33eab0924702f1af98e97b9611c258e67dc": {
+      "body_sha256": "68af771a57dff2c61acb6130e5db76e7d783c0f9cfb7f2e69ab04143d9d83553",
+      "repeat": 1,
+      "sample_id": "jammeval-heron-bench-refined-test-11"
+    },
+    "jv1-2688ca77d9cec9cea6dfe4965e6b2c0aad72e0e5": {
+      "body_sha256": "f7e00a5e190f33968ae0cee7be7e9257b751ab33e921feef5cadd82f298f14be",
+      "repeat": 1,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-100"
+    },
+    "jv1-26c86a5196719a44f952144fc1517e9be54684b7": {
+      "body_sha256": "5fb75f8b3c31b57c0b8f1a86a123b7525842c1d4f709b789920971a4f3c19f71",
+      "repeat": 2,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-44"
+    },
+    "jv1-26ed95254c1bab5064a1f1164467c71fa1599a4c": {
+      "body_sha256": "7b0e42a7e9604e2ddb3ccf585e5ff359cd2702b61639bd3e1f3bb6be1cb1bb92",
+      "repeat": 3,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-19"
+    },
+    "jv1-2733978974c27ed6751d6758451f2a514209dfa8": {
+      "body_sha256": "1a3341949bd7bc886a71c2e6b877bf6a82902c7de1d8e3a59aa771fa4820ff1a",
+      "repeat": 3,
+      "sample_id": "jammeval-heron-bench-refined-test-83"
+    },
+    "jv1-27493cb69a7d6359236e4dd7ac58380742c8612f": {
+      "body_sha256": "0343700aebe6c712814ff10884ac06dced915b5d4ccb2e5f5301cdc62455f40e",
+      "repeat": 1,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-113"
+    },
+    "jv1-27cf2a7efd3e593c3f80d370db7d42b68ccdf7b2": {
+      "body_sha256": "caa46b569b1396bef6727c0dd1a25d6543b7cee5c0fb58de5bfb021fb208cca1",
+      "repeat": 2,
+      "sample_id": "jammeval-heron-bench-refined-test-39"
+    },
+    "jv1-284532eb3a0f880ee2bca6ebea7015764584be74": {
+      "body_sha256": "aea1bc75485c843d1a791ba5e02349495811e71e395c0537179ce37658741c73",
+      "repeat": 1,
+      "sample_id": "jammeval-heron-bench-refined-test-25"
+    },
+    "jv1-286050820ae13bd8c1816d43ded29e2a3ed5cd10": {
+      "body_sha256": "8707b288c9a16067fa992af1d5d34dc1975980db1c5044a5e743ee75bac8a8c8",
+      "repeat": 2,
+      "sample_id": "jammeval-ja-vlm-bench-refined-test-39"
+    },
+    "jv1-28abd92ac556bc98885777f2ffaf0098e5e3b78e": {
+      "body_sha256": "20b7b71de41589703711ecb8b3e325326b65c90de9b2f1f1d444fc7d1b81d21e",
+      "repeat": 1,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-48"
+    },
+    "jv1-29e4f3f043e181a79f67972126a431ef2a49aa1a": {
+      "body_sha256": "709e84a6433de8b521528d524baefecf31a8d28614598c03558014bcf0468816",
+      "repeat": 3,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-38"
+    },
+    "jv1-2a2aa208d0d3722f79ebed361de91aa734ce2b34": {
+      "body_sha256": "caeb639ef6d1b137627d5e74f778839a74351d949cceb92b4e2da736b9194b44",
+      "repeat": 1,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-36"
+    },
+    "jv1-2a2b10e0c797bcdc7ff404ce68cda4968b9db3e1": {
+      "body_sha256": "4bcbbd0a94997458845f09501930e98ca5377df2ae9417dc6dad82be20996076",
+      "repeat": 1,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-33"
+    },
+    "jv1-2a71b41f3d3ee8abea2267854751543e2ca9a0d6": {
+      "body_sha256": "0ca0133d95ec847f1f07452d59847f63011914bde5d90e9de58469f27952faa2",
+      "repeat": 1,
+      "sample_id": "jammeval-heron-bench-refined-test-36"
+    },
+    "jv1-2aae9714e9e2453d75868992ad7e33eeddb62ed9": {
+      "body_sha256": "7c63ef603a9d6990bbca6b25a39ab47159b2223b8bce854d848d395faa70d925",
+      "repeat": 1,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-82"
+    },
+    "jv1-2ac38e647c6134ea89a4046a9d8f1d0e2b719a7b": {
+      "body_sha256": "6cd80c0dd56247efcc8646b99106c570c5103223f9b05f3a86176edd07386b7b",
+      "repeat": 2,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-18"
+    },
+    "jv1-2b0c61d289dbc6f1712ccece875c4d5ff5af00f5": {
+      "body_sha256": "c16063348a0df7dc6dc055c653fa0eb9a918ea31c175885cbbda2e5b69e54737",
+      "repeat": 2,
+      "sample_id": "jammeval-heron-bench-refined-test-10"
+    },
+    "jv1-2b15cae077c6a2e7675727be8ebfcd192f3d78e0": {
+      "body_sha256": "6deefc635657becbcbb574495f9699bdfb53779136b6f484d737dd2fd8fac4c5",
+      "repeat": 2,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-24"
+    },
+    "jv1-2b172174880a82cb1ab52a805beebd1c6bb7aa34": {
+      "body_sha256": "43ead809558c0cd94531aa76d565d9085127556e1f2f2df3bd30864d73743c6f",
+      "repeat": 1,
+      "sample_id": "jammeval-heron-bench-refined-test-18"
+    },
+    "jv1-2b2475882b98838ddb17cb366581a5541e45a386": {
+      "body_sha256": "79b81589a4df63bd6b21c5149c988dc4ca7e579593dfd2955e948c9016cad099",
+      "repeat": 3,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-66"
+    },
+    "jv1-2b71fc185fa10540a880f51cf566e155f643fb85": {
+      "body_sha256": "709e84a6433de8b521528d524baefecf31a8d28614598c03558014bcf0468816",
+      "repeat": 2,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-38"
+    },
+    "jv1-2b9c4fce36576ba039e16ca63df7fc8f2fe58917": {
+      "body_sha256": "1c99a961d10cda507f19ebca241e655044a56cc09bfe7de8bded112428f4b4a5",
+      "repeat": 2,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-11"
+    },
+    "jv1-2bcebefd16f15e4cabaedf28e6ef4adb8b4e3214": {
+      "body_sha256": "74996de615402e7a3d07bc17d9ea64c33457d34364621f3a42077ce8bdeb021c",
+      "repeat": 2,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-87"
+    },
+    "jv1-2be53d313415b733e0c0339fc7b1222cbe8a00e5": {
+      "body_sha256": "a0be5c0fd25533674ff30dc7ea202905d265a985aab6b79940f059e789d435a0",
+      "repeat": 2,
+      "sample_id": "jammeval-heron-bench-refined-test-32"
+    },
+    "jv1-2c040835c83cb73a11840784fcb39d4a6479d178": {
+      "body_sha256": "d419326473e6ecd33aa08e30bb98d164106e476471f1034d69047f4e78246ef1",
+      "repeat": 2,
+      "sample_id": "jammeval-heron-bench-refined-test-31"
+    },
+    "jv1-2c41dea768db57c46be65897795829d8917076df": {
+      "body_sha256": "ca675049f5d9ecebee55acaf40488ea4d6ff10af65f4fe7d52766d9727ed2d93",
+      "repeat": 1,
+      "sample_id": "jammeval-heron-bench-refined-test-34"
+    },
+    "jv1-2c8b337a7883ce244cc644be77a649cd75cf512d": {
+      "body_sha256": "68af771a57dff2c61acb6130e5db76e7d783c0f9cfb7f2e69ab04143d9d83553",
+      "repeat": 2,
+      "sample_id": "jammeval-heron-bench-refined-test-11"
+    },
+    "jv1-2d61977b7fbdb52e8e3484bc96bdd9d4ee786242": {
+      "body_sha256": "429d880ce909b756e0b6c3c69d9f2f2192a2e8e26ccf785f09c40f145290e416",
+      "repeat": 2,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-10"
+    },
+    "jv1-2d904826f5e86aa74a1bfe4e2b8df2b90e8f0d4a": {
+      "body_sha256": "e1a1b55215bf68005f4f0ae0b6eba445e94c8914b3bb3490dd24b069c92c48e2",
+      "repeat": 1,
+      "sample_id": "jammeval-heron-bench-refined-test-52"
+    },
+    "jv1-2df0e1e3e7115ecc99ed91843476afdcd430fcb1": {
+      "body_sha256": "caeb639ef6d1b137627d5e74f778839a74351d949cceb92b4e2da736b9194b44",
+      "repeat": 3,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-36"
+    },
+    "jv1-2e4292fabfa143f8b368f1e14ee5c73041119156": {
+      "body_sha256": "7c63ef603a9d6990bbca6b25a39ab47159b2223b8bce854d848d395faa70d925",
+      "repeat": 3,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-82"
+    },
+    "jv1-2ea1c2b9d642439faba975ef5a1321ca80b2c420": {
+      "body_sha256": "2104627e9d253eb5a9c7977bed1b3eea821f1318ac86ce2a6b8770162b3fc363",
+      "repeat": 2,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-137"
+    },
+    "jv1-2f4d1ee2b03ad1a188eb04ff1728c1ec33aad48c": {
+      "body_sha256": "afe28d4c466dafd0e225ed40d246e1851a8eb6e26c90751b9054031207bde8b6",
+      "repeat": 3,
+      "sample_id": "jammeval-heron-bench-refined-test-49"
+    },
+    "jv1-2f961a34cd203972f37d10d165af2a39bde37eec": {
+      "body_sha256": "77b3200243d536c4af40d2bf4768126fa9bd6f3c2de370f8e4e57f1f4e9b1a68",
+      "repeat": 2,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-37"
+    },
+    "jv1-2f9d8a4639f72ae407cd7cf5042cfdc6704adf35": {
+      "body_sha256": "44cb339b17954c7682a92db82bacf8b54c5198f4cd1acad6209df19e3eb56520",
+      "repeat": 2,
+      "sample_id": "jammeval-heron-bench-refined-test-62"
+    },
+    "jv1-2fdbf03d707b05652b254674468b4532a42d22aa": {
+      "body_sha256": "84457f6c08d024a9cecb96caf0641c7447db706c6eed14028d80ca73262265ed",
+      "repeat": 3,
+      "sample_id": "jammeval-ja-vlm-bench-refined-test-13"
+    },
+    "jv1-3007532f8032b1b4b979cc6f836884453a88364a": {
+      "body_sha256": "2c75fda1a3ee788ef8e75263eda27afbb24062359792256bc4f6a66d81490ce0",
+      "repeat": 3,
+      "sample_id": "jammeval-heron-bench-refined-test-16"
+    },
+    "jv1-301ef9e4a869b8170ecd55a52ad8ace42623fa8e": {
+      "body_sha256": "1ed64cf3efcfe39da14476ff30216e8cf1b1fa92e5e85e100a379c010e370063",
+      "repeat": 1,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-132"
+    },
+    "jv1-30609123ffc5efe1ed9b907b7d4ce1f84e1e86f7": {
+      "body_sha256": "e7cb79c74d87f53add41172373c2c25fac05344cefa333d5acb2c219c9ffe97a",
+      "repeat": 1,
+      "sample_id": "jammeval-ja-vlm-bench-refined-test-31"
+    },
+    "jv1-30e951c1cd245fa018f992b3e848640ceb246514": {
+      "body_sha256": "2548bc0b1f6a26aca1d8112f5a3f061544fa6e26835a8d610863d8b896140959",
+      "repeat": 1,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-92"
+    },
+    "jv1-31a3b174af794ab6b399f826611716b06c01ac64": {
+      "body_sha256": "840e9c5e08b190dc2a356bb7056164b226b2b0241ac94251469a477685558fe9",
+      "repeat": 3,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-112"
+    },
+    "jv1-31caefef6ae1e6111db83ed988d2edcab889a67b": {
+      "body_sha256": "246e55bc4006ed964c7a7b373257d6cd4a68a72e124fa167464393afc224112e",
+      "repeat": 2,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-70"
+    },
+    "jv1-31f9d3f736a8fd2453ad1cba43f6a70356deab6e": {
+      "body_sha256": "28faec0f47820f94730bac8bb79ff13113b5d46e79145002176ec0f652312c35",
+      "repeat": 2,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-28"
+    },
+    "jv1-3293dec1756a462a04a89d3fe3a0899c6df4d507": {
+      "body_sha256": "405cfea2d6d78e606f24140f78e2eff772c0e3cda39ee3f73f065c9585b3e4a3",
+      "repeat": 1,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-0"
+    },
+    "jv1-331125402aee61c5efe8128bf76008a6cc175126": {
+      "body_sha256": "7078a37523cffb783926c92c848b79866dc815d07756fd562d755933ab5d8385",
+      "repeat": 1,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-8"
+    },
+    "jv1-34418cbe18c8e5b05d860c7125c6ff383bc8d328": {
+      "body_sha256": "e1a090f36fd229f521a21bfc43c702c77983e02fb679a21d782f27b2ca7e8884",
+      "repeat": 3,
+      "sample_id": "jammeval-ja-vlm-bench-refined-test-19"
+    },
+    "jv1-34f3408cdc69392b3ce0fdb369eca3f835acd904": {
+      "body_sha256": "9c462f9a5cd33a96611de0f2477c00c50f08c48067e46a11d32f191c1bc4987a",
+      "repeat": 1,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-105"
+    },
+    "jv1-35c292e2127755cacc0882c491c569b84cbef4f9": {
+      "body_sha256": "d36904c1d4d025fcad30573fc045d9f3d9f1fe144c4ae2a4a03ce10cb6211132",
+      "repeat": 1,
+      "sample_id": "jammeval-ja-vlm-bench-refined-test-8"
+    },
+    "jv1-35e8fd6254d5d9441b9b76caf0712279f5031543": {
+      "body_sha256": "09cd8c3ac51ed4ce2f3edbdfb1914c92108785b3a9704a265e9e0641f3bca995",
+      "repeat": 2,
+      "sample_id": "jammeval-heron-bench-refined-test-61"
+    },
+    "jv1-35fbb5907ee40bd67f909484f6c0288c75f5897f": {
+      "body_sha256": "8c8186a0ea7b203243b3aebc0e4723e42708bdb0aaa96e1e323f4e9e8f9faf80",
+      "repeat": 3,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-127"
+    },
+    "jv1-361de840aeb0d81b9ee9fd96abcc4e446684d21a": {
+      "body_sha256": "dd881c2d568b6f93374fb418b890d8706fddff63b8bb598721fed9b716516a0f",
+      "repeat": 2,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-116"
+    },
+    "jv1-366870ba496f1608426be108ef04d46df958e9b8": {
+      "body_sha256": "d6340feb3f896136148d6be12f813a2ecdad653004457d15005c4c62702a6c70",
+      "repeat": 1,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-77"
+    },
+    "jv1-36705f983adbf33b17ef00c0b913c688451a226f": {
+      "body_sha256": "6fcc2e6b43ddb6f4e4166fd9d1b071fc04a3899d0587547362691f3f63654f28",
+      "repeat": 2,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-83"
+    },
+    "jv1-36bf856ed471a074839ff4361af403741d2b1f9e": {
+      "body_sha256": "4dda034c9a080b4a2bc1328cd45c40d44d1e70099007e6ce9625d410578afae1",
+      "repeat": 3,
+      "sample_id": "jammeval-ja-vlm-bench-refined-test-21"
+    },
+    "jv1-373819834bff3937440bd1dbae8398e799ff2210": {
+      "body_sha256": "ca675049f5d9ecebee55acaf40488ea4d6ff10af65f4fe7d52766d9727ed2d93",
+      "repeat": 2,
+      "sample_id": "jammeval-heron-bench-refined-test-34"
+    },
+    "jv1-37a1d92b88e68ed191698ab90b65b612658f4865": {
+      "body_sha256": "009d78009dc157dc899d516dea910b014236733375be4f535ede38b1112db180",
+      "repeat": 1,
+      "sample_id": "jammeval-ja-vlm-bench-refined-test-44"
+    },
+    "jv1-37a88196e1e5b192dbd3e4a9afed52eda7cc3f63": {
+      "body_sha256": "91b8982e4f5df21b108c9585591c8dae0d586cf80a1401cf12a028a7aff63e0e",
+      "repeat": 3,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-69"
+    },
+    "jv1-37ca3c74954b6aa3a9592fbca5a9d9eb55d085cb": {
+      "body_sha256": "1f65c3b9622bfb668e85ebed6b96a6f52bc581952dc3a82fde682abda01b6212",
+      "repeat": 1,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-55"
+    },
+    "jv1-383358765476ef1efce35c40c92fb9ffc2497bcd": {
+      "body_sha256": "be9b206c9513056dc8007358c1aee0ff4a7b7a2d8d4b411c9626f69ff0237008",
+      "repeat": 3,
+      "sample_id": "jammeval-heron-bench-refined-test-63"
+    },
+    "jv1-385f0cfe909c12975cd00672e79c7494b39be445": {
+      "body_sha256": "d18ca611519b8d874441054e790e5ec14d3c541d4c73f732bdede1cc18238aa5",
+      "repeat": 2,
+      "sample_id": "jammeval-heron-bench-refined-test-45"
+    },
+    "jv1-38731df4a5147fad94523cdee692cb4351f68a1d": {
+      "body_sha256": "826bfd225b58cfb6cb98415c746c0cf8233a88470e9615a8a2d98594eb562946",
+      "repeat": 3,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-17"
+    },
+    "jv1-38b8da292c142c9e5d632eb73507a9003fbd8df4": {
+      "body_sha256": "f1e5f71d894a0350b0c3bf5496cce23ef10be063700b439d998f080e107f9de2",
+      "repeat": 3,
+      "sample_id": "jammeval-heron-bench-refined-test-13"
+    },
+    "jv1-38e2086dcb33d33976b5b0e02eb602df33e3e546": {
+      "body_sha256": "1f7d343c9f1723385ea40354b5181dcda0ae70e27378baa5ac7b8fad0fec5230",
+      "repeat": 2,
+      "sample_id": "jammeval-heron-bench-refined-test-95"
+    },
+    "jv1-38e8c2cdd957e0daca934eba691dbf3b2d986b85": {
+      "body_sha256": "b7f8e7c8fc076b9c01071dc3eff5ba18cc71f4b2829008f268139fc054ad2613",
+      "repeat": 3,
+      "sample_id": "jammeval-heron-bench-refined-test-20"
+    },
+    "jv1-3917cb22d7397e4091028f70a0fcae9ba63feec7": {
+      "body_sha256": "34fb45a1123ba0fd19822e0f48553bb8e18198f74467ab2ae8900c83bdefb098",
+      "repeat": 3,
+      "sample_id": "jammeval-heron-bench-refined-test-54"
+    },
+    "jv1-394ae46ac69efd9f7f96d13f6790772c534e95c0": {
+      "body_sha256": "1ed64cf3efcfe39da14476ff30216e8cf1b1fa92e5e85e100a379c010e370063",
+      "repeat": 2,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-132"
+    },
+    "jv1-399317fe7de70d44c8111b6b87035edf31150f7a": {
+      "body_sha256": "2bfd40c2e2a2fc241759f0070d36095b6216e02bd58a09d3cd4b4920cf687c09",
+      "repeat": 2,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-47"
+    },
+    "jv1-39a1cc048f21e235cd51eb7f97dd032e3d3cbd2e": {
+      "body_sha256": "27af2b785ee77184dc9a4b50c79271ceed35260f780237a04fa72258cc96a2bc",
+      "repeat": 1,
+      "sample_id": "jammeval-ja-vlm-bench-refined-test-47"
+    },
+    "jv1-3a7cabe360ed6398d8c138b923468d05bd65cd9b": {
+      "body_sha256": "5c25e69b6114d3661ad474c7d3b3fe15a7058f59e27670fda5521afc48982dc7",
+      "repeat": 3,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-111"
+    },
+    "jv1-3a7f578c2441e3ecbf61461c1a74619a1560726a": {
+      "body_sha256": "dc7566c2ab404b2b199a853c137651e1514787cef1f0f14efca76968561bc671",
+      "repeat": 2,
+      "sample_id": "jammeval-heron-bench-refined-test-57"
+    },
+    "jv1-3ae597df2df771597e7a6591ff2ad8a0cf8d39d2": {
+      "body_sha256": "1affc3ef2eef1e3cdbca2df32016509874c33dc69e018876e7e7ae328548fd2a",
+      "repeat": 1,
+      "sample_id": "jammeval-ja-vlm-bench-refined-test-18"
+    },
+    "jv1-3b27283a43d8d98ff73ba1cf58bdb781ea0842f4": {
+      "body_sha256": "b9450ae50d2e6e95f07f0415d7222440132e6270eb5ac499201cb58fa92e18f8",
+      "repeat": 1,
+      "sample_id": "jammeval-ja-vlm-bench-refined-test-16"
+    },
+    "jv1-3baa484188be817769c2198b0e1fa4ffea0ce635": {
+      "body_sha256": "c03d8d4f192880cf6431db0ec144c6cbdd568f01378de1f7d4890c3f43ffe3bb",
+      "repeat": 3,
+      "sample_id": "jammeval-heron-bench-refined-test-4"
+    },
+    "jv1-3c194e80310663a626b250e0b635759931d8bbd9": {
+      "body_sha256": "71d3c75e50ddf0c9e4f12b4d488dc2b3ebc684fdd187c5be6bccf6e50ab00fac",
+      "repeat": 3,
+      "sample_id": "jammeval-ja-vlm-bench-refined-test-49"
+    },
+    "jv1-3c479c443f211a1c497d77a6b8a5a41777acfefd": {
+      "body_sha256": "09cd8c3ac51ed4ce2f3edbdfb1914c92108785b3a9704a265e9e0641f3bca995",
+      "repeat": 1,
+      "sample_id": "jammeval-heron-bench-refined-test-61"
+    },
+    "jv1-3c58347ffff0985f650db98fac6d26aa76445b6d": {
+      "body_sha256": "3a3c2a727d1d6673cd8a1dc1626b5ba1a940976d14666082ed5f56158ed207d2",
+      "repeat": 3,
+      "sample_id": "jammeval-heron-bench-refined-test-50"
+    },
+    "jv1-3c7801d9666aac1c75f9234cf54243e93c3cc877": {
+      "body_sha256": "f7e00a5e190f33968ae0cee7be7e9257b751ab33e921feef5cadd82f298f14be",
+      "repeat": 3,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-100"
+    },
+    "jv1-3cd82aa2913c360d267337e5e318d6c5be7eefe9": {
+      "body_sha256": "8fdb74a34947780719ff8b12427cf2da21be992ed622e07455043a801dec8e72",
+      "repeat": 2,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-90"
+    },
+    "jv1-3cdb08f8579402e3d46e9696189008c51698b239": {
+      "body_sha256": "d0f5c3baf8b5cc068c39cdb54c9c37181723a25b4c2ee440d7c731c01ca1d0b3",
+      "repeat": 2,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-73"
+    },
+    "jv1-3d5db42c2d90e188936c747819b2e747dba335a8": {
+      "body_sha256": "da2f164b6381c03c5936aa2c78416af0a3d8a14955d0f193e91163bbd7d1fe57",
+      "repeat": 2,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-147"
+    },
+    "jv1-3d8752d74425bd5dbc8368b18bc347e58dde53ee": {
+      "body_sha256": "432ba928d34c9dcb892e1db4f7df82fd9366dc01ab0a521f41308c4c8d3e92c5",
+      "repeat": 2,
+      "sample_id": "jammeval-heron-bench-refined-test-38"
+    },
+    "jv1-3d99b9f2eb07b13c55186b025df412037fb88a18": {
+      "body_sha256": "27b8911f0c2b21ae71097052d489139a50f79402b87856aecd7488a6914c9ec8",
+      "repeat": 1,
+      "sample_id": "jammeval-ja-vlm-bench-refined-test-30"
+    },
+    "jv1-3e9e3acbc6ba6c988d8302cc70d0d9f94ca99eb9": {
+      "body_sha256": "085c30261c1a76cd495fc665f3dec0c759d8b958ca2bc680e3c5e7bc4279c263",
+      "repeat": 3,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-104"
+    },
+    "jv1-3eb5ed6d2e50802a0afd5f7c2c16c3ee2babb9ad": {
+      "body_sha256": "cad4b8607c94019b9f8c698a7f4efef1adb33c852dd7af6868d0a3a7b9ce2c20",
+      "repeat": 1,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-91"
+    },
+    "jv1-3f6b2a162ef4735c11ba1fd9bb90080d5eb04223": {
+      "body_sha256": "3fe5165115cf418b8c0435b95e5b719e1e10a9df98e97555fba1362af223467e",
+      "repeat": 3,
+      "sample_id": "jammeval-heron-bench-refined-test-41"
+    },
+    "jv1-3f815c10790712d8e07857971929df8397e314f2": {
+      "body_sha256": "143b32250c51a264ede2f57ea6609462945aec98149cdb6d271f716612e6b747",
+      "repeat": 2,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-124"
+    },
+    "jv1-3ffa1340708f9e6ff2c407c8f5d8d1eb27fc2c79": {
+      "body_sha256": "241b48ce36380249f2f14478c45b8974f04ff39e15ba23c66b85bd88cfadec1b",
+      "repeat": 2,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-101"
+    },
+    "jv1-400e6371572ed5e8827b894c6c11451b076cfba3": {
+      "body_sha256": "8126979672d47fe683714a38b97c8fec0eb87717d15a13cbb8933f83da18d793",
+      "repeat": 3,
+      "sample_id": "jammeval-heron-bench-refined-test-69"
+    },
+    "jv1-4041b2cbcd4023597351e69c9b2fc4d634608741": {
+      "body_sha256": "95cba5e58361084511d3b6df3a21653acb5009e7b2397cddce9de5690e85ff99",
+      "repeat": 1,
+      "sample_id": "jammeval-heron-bench-refined-test-80"
+    },
+    "jv1-40c2e3f37e9c46b4175ee92936e07f6430213634": {
+      "body_sha256": "8c4d6c2766b14ec7b5fb55f406d47f43c8cfcdecd0db5fe34ae65bf1fa82faf0",
+      "repeat": 1,
+      "sample_id": "jammeval-heron-bench-refined-test-51"
+    },
+    "jv1-4172b6ccee3bcf3d527d91d6e4b68eefd19af8cb": {
+      "body_sha256": "9393990ef19a81144393f293f395731d8141d107301341bf66f0f27d80667ddf",
+      "repeat": 3,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-39"
+    },
+    "jv1-41c69083c0e1a74144e0888aadf6d90e08bc2fb7": {
+      "body_sha256": "a5ae3246e34102d742da05bdf2e3ee300815dafecb4026dd1deada4e5a6518b5",
+      "repeat": 3,
+      "sample_id": "jammeval-ja-vlm-bench-refined-test-0"
+    },
+    "jv1-420415f1215246f8693c2480cc1bce75851a5138": {
+      "body_sha256": "cd5ed469eef927805ed45d0c0e254db646e9b328d77f3d15cc2731ee5cd3394f",
+      "repeat": 3,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-26"
+    },
+    "jv1-422efdbe92e597205d3eb3988d43a01a19260c2c": {
+      "body_sha256": "9c36e6f60ec198836246623335b5ca8a7dba6b68233427bb6a9b093763ce3e33",
+      "repeat": 2,
+      "sample_id": "jammeval-ja-vlm-bench-refined-test-2"
+    },
+    "jv1-424ad4d8a5f42f3119191d0a8bb64fae6154ee4a": {
+      "body_sha256": "6bee7970592d9800fc1ee1a034e339d2a33d6bf9126ec3b697a0051ea57492e5",
+      "repeat": 2,
+      "sample_id": "jammeval-ja-vlm-bench-refined-test-14"
+    },
+    "jv1-42c6ef262d2090cee5c963274bcfaf786c0c210b": {
+      "body_sha256": "e1a090f36fd229f521a21bfc43c702c77983e02fb679a21d782f27b2ca7e8884",
+      "repeat": 2,
+      "sample_id": "jammeval-ja-vlm-bench-refined-test-19"
+    },
+    "jv1-43190ff22faf7c710ead5481feb210fc3dcb3710": {
+      "body_sha256": "7078a37523cffb783926c92c848b79866dc815d07756fd562d755933ab5d8385",
+      "repeat": 2,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-8"
+    },
+    "jv1-43231425e2fdfe1a4c7a1c81a491ef7a4f7261f2": {
+      "body_sha256": "49a37b6795976b6d8643fed102bac687272c690524593ef32789c10ba540bf60",
+      "repeat": 2,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-145"
+    },
+    "jv1-437e6c14661a4a5414ee26e35e19c06338501f22": {
+      "body_sha256": "6238e53c8761c449947b583b8302881a7e273537c2f1ae1482e25cda9babc25f",
+      "repeat": 2,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-143"
+    },
+    "jv1-43ac4d9149074d2a6911bdef430bc658f74f933a": {
+      "body_sha256": "0404810dd1b07033a672894290d0d8fa71e6721f104d4942445b3b607dd59a94",
+      "repeat": 1,
+      "sample_id": "jammeval-ja-vlm-bench-refined-test-22"
+    },
+    "jv1-43dde0c6401cef9fa5ff76b2079afaa8bb8e918f": {
+      "body_sha256": "dc9376e3ef29530edf78c189437baacc99a89280dcf77db2cc3d4173e73f03f3",
+      "repeat": 3,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-41"
+    },
+    "jv1-44b2901302d8620283df602822b2a228765aece4": {
+      "body_sha256": "9c15cdf11390311edb18023738c035d28b868e3f99f2e01a5b0d3887a8161e21",
+      "repeat": 1,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-51"
+    },
+    "jv1-4505bd0ffe0828a2179de06dffe47869a5c606cf": {
+      "body_sha256": "d215fce18f46c65900e6539deb232718e7f91b271fce5e550906577df1df184d",
+      "repeat": 1,
+      "sample_id": "jammeval-ja-vlm-bench-refined-test-5"
+    },
+    "jv1-453ad97c9795e014d4440fcba526cfa224880423": {
+      "body_sha256": "dc9376e3ef29530edf78c189437baacc99a89280dcf77db2cc3d4173e73f03f3",
+      "repeat": 2,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-41"
+    },
+    "jv1-4542755cbf77e83f34488de531e0a04accd338c8": {
+      "body_sha256": "ff3a1b37c6643495bc18e0b7d7a3d2c6e6d21b3b6d486514114a41fbfff51bbd",
+      "repeat": 1,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-5"
+    },
+    "jv1-458ac658f9472207e84d5cd004be6be8be82ace2": {
+      "body_sha256": "9393990ef19a81144393f293f395731d8141d107301341bf66f0f27d80667ddf",
+      "repeat": 2,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-39"
+    },
+    "jv1-45ab667ef85a23d78bc7affe3564048babaea9b0": {
+      "body_sha256": "d36904c1d4d025fcad30573fc045d9f3d9f1fe144c4ae2a4a03ce10cb6211132",
+      "repeat": 3,
+      "sample_id": "jammeval-ja-vlm-bench-refined-test-8"
+    },
+    "jv1-45d26a816ee22af8b61062efebc7c13162498f6b": {
+      "body_sha256": "2cd19a95979d9ee38898db712479858791f8feb531b75942c53b55ab7deae53f",
+      "repeat": 2,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-71"
+    },
+    "jv1-461e2c3e99286a96414deb6a4c0b91e65badc778": {
+      "body_sha256": "84c0ab8258f87072f5a03595d73f3975f2ecd25e338ef0466bf46561985a0b52",
+      "repeat": 2,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-29"
+    },
+    "jv1-46231fbacb39d8bddae8c4db3bfe2b631f58c8bf": {
+      "body_sha256": "a4f777917f5cb7cc94ee1032a78b55a20cca9a609ffedfc54318086668f0ee79",
+      "repeat": 3,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-103"
+    },
+    "jv1-4633511b479550db153ba0ac30358292a25909c4": {
+      "body_sha256": "6a87973b087efdd4f57bd184610be4ec6d04818769498bf2e5993ffb2184a93f",
+      "repeat": 1,
+      "sample_id": "jammeval-heron-bench-refined-test-88"
+    },
+    "jv1-466f9fb599112e5f931d148266bd356261b3e852": {
+      "body_sha256": "cb9fb1062731ff6275f1c1ac7f75a12b01934594fdd2b1e67601f69f57a7dafd",
+      "repeat": 3,
+      "sample_id": "jammeval-ja-vlm-bench-refined-test-15"
+    },
+    "jv1-469d2f93b4503442f9491a307cbe0735c5944f45": {
+      "body_sha256": "72db15b4e913c6cf119db50afcce3a55943755e52b32b12efec85652c37233fd",
+      "repeat": 1,
+      "sample_id": "jammeval-heron-bench-refined-test-28"
+    },
+    "jv1-47484db1bba6f0379b4d9044fd9ea6ba5aab8c0c": {
+      "body_sha256": "f1e5f71d894a0350b0c3bf5496cce23ef10be063700b439d998f080e107f9de2",
+      "repeat": 2,
+      "sample_id": "jammeval-heron-bench-refined-test-13"
+    },
+    "jv1-4764519c53acdfa6dd929a56a839c799c247191e": {
+      "body_sha256": "2bfd40c2e2a2fc241759f0070d36095b6216e02bd58a09d3cd4b4920cf687c09",
+      "repeat": 3,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-47"
+    },
+    "jv1-47fe6804c99f636a240886611c2807b4231eddb6": {
+      "body_sha256": "cbe7102929030deb4030aef8cac847a574a31d18cbc6c9a260f10649fed63dbf",
+      "repeat": 2,
+      "sample_id": "jammeval-heron-bench-refined-test-60"
+    },
+    "jv1-48290be6e0fa13110c884832d0e86c5dc4374c78": {
+      "body_sha256": "6a87973b087efdd4f57bd184610be4ec6d04818769498bf2e5993ffb2184a93f",
+      "repeat": 2,
+      "sample_id": "jammeval-heron-bench-refined-test-88"
+    },
+    "jv1-4864d0becf7514f71e97b55652dd7a54dbfbfb99": {
+      "body_sha256": "8c0f8f61dfe75412ac95827a3f38a8ff51894301366d1a2807d4916e9cf57b96",
+      "repeat": 3,
+      "sample_id": "jammeval-heron-bench-refined-test-26"
+    },
+    "jv1-4876bd97d825eda5a59a9cf561143cc6e6e53224": {
+      "body_sha256": "a5bcee667724f7e63523b184ca709123c2b42a0f4eb640df4c3af0f611715ba8",
+      "repeat": 2,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-98"
+    },
+    "jv1-49414293e7e30cd051d681d62b2df4cedf32489c": {
+      "body_sha256": "211c250136010563518c61e126f72e0d47d88b3d7401f9c0a1825b08f616bd39",
+      "repeat": 3,
+      "sample_id": "jammeval-ja-vlm-bench-refined-test-46"
+    },
+    "jv1-496912c7fcca024b99353f4337de0f2358ecbf4f": {
+      "body_sha256": "0e9c8c95ed8b7f068b1fc0c092b8cbd8cd6e46791aea532188625b2a85722eb9",
+      "repeat": 1,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-141"
+    },
+    "jv1-49c02aa2f301a2cb72d31994878a420ca16000b3": {
+      "body_sha256": "b7f8e7c8fc076b9c01071dc3eff5ba18cc71f4b2829008f268139fc054ad2613",
+      "repeat": 2,
+      "sample_id": "jammeval-heron-bench-refined-test-20"
+    },
+    "jv1-4a0885191cb1a2bceb27716c2089b4b992d756bc": {
+      "body_sha256": "d18ca611519b8d874441054e790e5ec14d3c541d4c73f732bdede1cc18238aa5",
+      "repeat": 3,
+      "sample_id": "jammeval-heron-bench-refined-test-45"
+    },
+    "jv1-4a341f677852846ae23a885a1d997987e62961d9": {
+      "body_sha256": "465968620c49b07b2e420080801c68eb7095dd07b6f867ada67170e635ffde3d",
+      "repeat": 2,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-95"
+    },
+    "jv1-4a91ddc2a3ad61ff7a02b93fe81da8c3ab24f91f": {
+      "body_sha256": "77b3200243d536c4af40d2bf4768126fa9bd6f3c2de370f8e4e57f1f4e9b1a68",
+      "repeat": 3,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-37"
+    },
+    "jv1-4afbfbceb5c1a3719bbd9d60d9989384569567d7": {
+      "body_sha256": "b2b590cace8ed8a39d18e4bfc2eb6cbdfa22076ddb64d6cbd415f23d1941b68a",
+      "repeat": 3,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-2"
+    },
+    "jv1-4aff47dd343f4752a65da62b98129ba9553b485a": {
+      "body_sha256": "a4f777917f5cb7cc94ee1032a78b55a20cca9a609ffedfc54318086668f0ee79",
+      "repeat": 2,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-103"
+    },
+    "jv1-4b1ac028cd79ae0704407635152711785e5d5131": {
+      "body_sha256": "432ba928d34c9dcb892e1db4f7df82fd9366dc01ab0a521f41308c4c8d3e92c5",
+      "repeat": 1,
+      "sample_id": "jammeval-heron-bench-refined-test-38"
+    },
+    "jv1-4b6c16d86456ae715fcf7e0d9c06e7f926b481c8": {
+      "body_sha256": "73089df18cdb0ad5c9bca68c7e8212fe0f06440327bcbd50d3b28c2b03eacf59",
+      "repeat": 2,
+      "sample_id": "jammeval-ja-vlm-bench-refined-test-7"
+    },
+    "jv1-4b7d1e2affaee09fbebe74251bf1c170cf25d7e2": {
+      "body_sha256": "5c25e69b6114d3661ad474c7d3b3fe15a7058f59e27670fda5521afc48982dc7",
+      "repeat": 2,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-111"
+    },
+    "jv1-4b86ca7de4729fe48c721524bd855ad4b3079b7e": {
+      "body_sha256": "6a218144d630ff832efec5555584fd395c54343e8129379fc2c0954ae7d1f263",
+      "repeat": 2,
+      "sample_id": "jammeval-heron-bench-refined-test-40"
+    },
+    "jv1-4bf0e302c185acb371c4f44ad2b1700d0894286d": {
+      "body_sha256": "c4ec87b853ccbe2fe10062e862b2df163b4c593b63e16d3b22ffe45da92c6a29",
+      "repeat": 1,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-68"
+    },
+    "jv1-4bf4dcd0918ebdc00a6702caa2bbe2575a07e5e5": {
+      "body_sha256": "5273cd2002c19c060a8fcac67dcd0f5c90eb6463d9c77e3bd3ed8a5e025d803a",
+      "repeat": 1,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-56"
+    },
+    "jv1-4bf9cb276568314a104e99979f190078549244ef": {
+      "body_sha256": "7a4b78bc0b85b485f8b8b1271601b33f27ff79e27cb71988f553a277a029cece",
+      "repeat": 2,
+      "sample_id": "jammeval-heron-bench-refined-test-6"
+    },
+    "jv1-4c35fe03b97c5dec356a59faa2f9e85e2230a6d0": {
+      "body_sha256": "caa46b569b1396bef6727c0dd1a25d6543b7cee5c0fb58de5bfb021fb208cca1",
+      "repeat": 3,
+      "sample_id": "jammeval-heron-bench-refined-test-39"
+    },
+    "jv1-4cc4ccdd453b67cb86d61e3652125164a1ab1ea8": {
+      "body_sha256": "2cd19a95979d9ee38898db712479858791f8feb531b75942c53b55ab7deae53f",
+      "repeat": 1,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-71"
+    },
+    "jv1-4d2f7d12709d165482c508ff2736cfe6207094d7": {
+      "body_sha256": "74fb3be3c79db70b3bc75765e576c02a7bab86eb61be69711b73c59c96cc2fd2",
+      "repeat": 2,
+      "sample_id": "jammeval-ja-vlm-bench-refined-test-25"
+    },
+    "jv1-4e21b3a7f1b08bc0ad8ab5f10cdf6022e28e9e76": {
+      "body_sha256": "59766fa280cc42db8f56fd3ab22f1314e4112074f3d0cef43764897e57be266f",
+      "repeat": 2,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-64"
+    },
+    "jv1-4ec90294e8207a87c6f43eb7e5335d805e629f0b": {
+      "body_sha256": "19ce13625cb53f2c6214c2a6e6849c42767504ec5c14b0b36223ce2961ef40f6",
+      "repeat": 2,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-130"
+    },
+    "jv1-501b65e4cb8f154764896dbb579b4bff9f0e8f74": {
+      "body_sha256": "3fe5165115cf418b8c0435b95e5b719e1e10a9df98e97555fba1362af223467e",
+      "repeat": 2,
+      "sample_id": "jammeval-heron-bench-refined-test-41"
+    },
+    "jv1-50b3f6cfef8a1fd5d23abdd2d64f9dc06d04e63f": {
+      "body_sha256": "e7cb79c74d87f53add41172373c2c25fac05344cefa333d5acb2c219c9ffe97a",
+      "repeat": 3,
+      "sample_id": "jammeval-ja-vlm-bench-refined-test-31"
+    },
+    "jv1-50cfea024aebf10ab61f1e3d857b9d43f3a9a24b": {
+      "body_sha256": "25217c2faa04dbbf02fd62121f1d6f8f0f9bd2f03dce66696ab2aa36b443aa96",
+      "repeat": 2,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-34"
+    },
+    "jv1-50d8d167c3e624fbb7370416611529f448529d42": {
+      "body_sha256": "90a2b4ded8bda28dd5deffdcbdf1b090ff75b45632c79ea5bc7eddf9c88ddc27",
+      "repeat": 3,
+      "sample_id": "jammeval-heron-bench-refined-test-98"
+    },
+    "jv1-50f59ac09189622ebf4b07df39e9ff5ebede8689": {
+      "body_sha256": "7af259be0eac48443e2d589081d02c621dedd90f3565d826d88e0512f318a4dc",
+      "repeat": 3,
+      "sample_id": "jammeval-ja-vlm-bench-refined-test-26"
+    },
+    "jv1-50f5fbf422abc8b9c3ecac719975e295559bcf59": {
+      "body_sha256": "a7e8af15fda614ae0b0705f41429953e26cf000a4d0c6e801ad9669083c9ae8f",
+      "repeat": 2,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-108"
+    },
+    "jv1-516fbd9447a8d745dc90da34120487611f725d93": {
+      "body_sha256": "7f4894b6dea206efd0e8c0fb39bf4774dfa871345ef0e0a5df3f3a27c330f516",
+      "repeat": 1,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-79"
+    },
+    "jv1-51db4568029de9aab40d43b3b9321a9854d2bc7c": {
+      "body_sha256": "34fb45a1123ba0fd19822e0f48553bb8e18198f74467ab2ae8900c83bdefb098",
+      "repeat": 1,
+      "sample_id": "jammeval-heron-bench-refined-test-54"
+    },
+    "jv1-51ed6ed8518eb07f4214449a40330551523e7e47": {
+      "body_sha256": "fc8a0703289d2178727447bf91e5362f6ccf2049959d5f275a58364e4fcab8a7",
+      "repeat": 2,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-16"
+    },
+    "jv1-52a843537846721a6a552dfa0953fe8724f12009": {
+      "body_sha256": "143b32250c51a264ede2f57ea6609462945aec98149cdb6d271f716612e6b747",
+      "repeat": 3,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-124"
+    },
+    "jv1-52b16d1e3feebf0ee0b73819fc9331bb3267dbee": {
+      "body_sha256": "da2f164b6381c03c5936aa2c78416af0a3d8a14955d0f193e91163bbd7d1fe57",
+      "repeat": 3,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-147"
+    },
+    "jv1-52bfba7fbe8f2bce548cd51008854e3b25aa45e5": {
+      "body_sha256": "4371648b402926668c2e1a2d47835f81ace5e9687d0e15cfb9aa3367b1890095",
+      "repeat": 1,
+      "sample_id": "jammeval-heron-bench-refined-test-97"
+    },
+    "jv1-52da314ae6e3959725d7b7ca3050b7681f0246be": {
+      "body_sha256": "2a5cc35646f8ecd77475edf7ba11c170c9bd37599e2daf8265c315e26f26afdd",
+      "repeat": 1,
+      "sample_id": "jammeval-heron-bench-refined-test-70"
+    },
+    "jv1-53a2785a6dec422e6a618097e82db906f225172a": {
+      "body_sha256": "8044db692f414257724b8340adca942470d5b2095e3ad2a570b1ddef185d6f21",
+      "repeat": 2,
+      "sample_id": "jammeval-ja-vlm-bench-refined-test-41"
+    },
+    "jv1-53be7e7f13006247b3ca19de478459258872e91e": {
+      "body_sha256": "0bf756dad96956d1fa9583ee50d12c97848c4f257e0b5d2587b3e278e7b00ed4",
+      "repeat": 2,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-115"
+    },
+    "jv1-53d3ea66f5da2555b8b440911e47ba92d5a723b2": {
+      "body_sha256": "24a13ba6c606a6eda0bc1374cd3f89300a8dd15909dd761c324b4f52ac78bb6d",
+      "repeat": 1,
+      "sample_id": "jammeval-ja-vlm-bench-refined-test-36"
+    },
+    "jv1-53f38583f8d0b113854715b3e0c4c4cb7f98dac9": {
+      "body_sha256": "a0be5c0fd25533674ff30dc7ea202905d265a985aab6b79940f059e789d435a0",
+      "repeat": 1,
+      "sample_id": "jammeval-heron-bench-refined-test-32"
+    },
+    "jv1-5451f41a3db3abe3e1b1571e8ef1a42d76b5fe1a": {
+      "body_sha256": "026f9e98715525ff4190f8bdb360745b4f831d630de3c07592e724c0a68943c9",
+      "repeat": 2,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-97"
+    },
+    "jv1-5488acba0f664aba9c562becd6fe386915923db0": {
+      "body_sha256": "7c63ef603a9d6990bbca6b25a39ab47159b2223b8bce854d848d395faa70d925",
+      "repeat": 2,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-82"
+    },
+    "jv1-54950057d3b4ae69274a9851edef6ad2b7571fb0": {
+      "body_sha256": "8c8317461a1a92d32da575b0bbcf1df400592c49e0aae519512e6c407f71efb7",
+      "repeat": 2,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-88"
+    },
+    "jv1-54e0b6a8ad00c04e5c4c9fce26eb919e75be87a0": {
+      "body_sha256": "8707b288c9a16067fa992af1d5d34dc1975980db1c5044a5e743ee75bac8a8c8",
+      "repeat": 1,
+      "sample_id": "jammeval-ja-vlm-bench-refined-test-39"
+    },
+    "jv1-55f9886641513ccd67070294ada714c3335e2202": {
+      "body_sha256": "e5c6c19cc23e30c2af25b5b76f8d79e8ce266de818f513b6148eb21a159aa9fd",
+      "repeat": 3,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-1"
+    },
+    "jv1-5648cc69e964eb6681bb34c683d545d0efae28ea": {
+      "body_sha256": "cbe7102929030deb4030aef8cac847a574a31d18cbc6c9a260f10649fed63dbf",
+      "repeat": 3,
+      "sample_id": "jammeval-heron-bench-refined-test-60"
+    },
+    "jv1-5652f0f4f3651d90d4887b0e90f27688f2909870": {
+      "body_sha256": "8d1effe7b7b7a0d0514ed7044e25151c4b694d0da04c36bf6354befd9c007e53",
+      "repeat": 3,
+      "sample_id": "jammeval-heron-bench-refined-test-81"
+    },
+    "jv1-569e948c3f477fabed52f7a486dadf37a1ca3e0e": {
+      "body_sha256": "8c8317461a1a92d32da575b0bbcf1df400592c49e0aae519512e6c407f71efb7",
+      "repeat": 3,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-88"
+    },
+    "jv1-578d9812d1acb7ce191ec6c53c71a79a43606c55": {
+      "body_sha256": "709e84a6433de8b521528d524baefecf31a8d28614598c03558014bcf0468816",
+      "repeat": 1,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-38"
+    },
+    "jv1-57d476f79c474fadf52bee07c5ab14dc7aa59b03": {
+      "body_sha256": "c7520ab43bbf9f43160cd7b561b1af2cb1acd20ee3f89eee506a5afa977f01d1",
+      "repeat": 2,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-52"
+    },
+    "jv1-58b1455d79c1116d77e393ecc0812a01dd4f7e87": {
+      "body_sha256": "60b073da1ff82869fc0c88c3bdd71a15a2f2955b8543517fc064a90febe863a1",
+      "repeat": 3,
+      "sample_id": "jammeval-ja-vlm-bench-refined-test-10"
+    },
+    "jv1-58fb5f2407cb2a1963db30b9557cbc343373cc52": {
+      "body_sha256": "465968620c49b07b2e420080801c68eb7095dd07b6f867ada67170e635ffde3d",
+      "repeat": 1,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-95"
+    },
+    "jv1-597cd311dbb63ff099f0b643749fd39ce0cfa3cd": {
+      "body_sha256": "30fdcc4d57942ec71b738738c064d80ce1fd5820b809ff06e0efae4edab76992",
+      "repeat": 2,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-61"
+    },
+    "jv1-59d8fdb12cdb58e108c0813fd2c8ad21054b66f3": {
+      "body_sha256": "5c25e69b6114d3661ad474c7d3b3fe15a7058f59e27670fda5521afc48982dc7",
+      "repeat": 1,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-111"
+    },
+    "jv1-5a03894a6b82fedefb6e65e950a761db0c5f83c2": {
+      "body_sha256": "d4e4ca10cbcd050d8ddd81a60fc0ea8d036a1e1cfeead0fa0f8973cd211b9f94",
+      "repeat": 2,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-13"
+    },
+    "jv1-5b116197a1b929a13e2883552a552850bf1b588b": {
+      "body_sha256": "bb8dea04eb2593f872e1ff8ca28611bcd9e64d299a9471ed11e967dbc268542b",
+      "repeat": 2,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-133"
+    },
+    "jv1-5b6b267886fa4611483be96c5f14298f06ade80c": {
+      "body_sha256": "77b3200243d536c4af40d2bf4768126fa9bd6f3c2de370f8e4e57f1f4e9b1a68",
+      "repeat": 1,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-37"
+    },
+    "jv1-5b84fee31672c8cad301ab927d174c64507a30b8": {
+      "body_sha256": "0e9c8c95ed8b7f068b1fc0c092b8cbd8cd6e46791aea532188625b2a85722eb9",
+      "repeat": 2,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-141"
+    },
+    "jv1-5bb0d0084e81bced711a96ea857da781659b0a17": {
+      "body_sha256": "a8bfde28031c025a3105b2d4458b501c675dbfcf4c5c8f72f84991308dd6043d",
+      "repeat": 2,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-135"
+    },
+    "jv1-5bf2432ac2df7134a48c9d9d5bc85402c38c24b1": {
+      "body_sha256": "6721cecde966871692222c4b2372dd0bd593768f53e0db9e6c2c2878de273d58",
+      "repeat": 3,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-15"
+    },
+    "jv1-5cabac5d4df45f5b65e6cb8bfcc9e1d77a2fb234": {
+      "body_sha256": "760ba60e157eb8646131e849b4bac1363633e887b266cb9bd75c1f9ec4c125c8",
+      "repeat": 2,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-122"
+    },
+    "jv1-5ccdbe785f5bc1d756256639f9d05098971c6ac5": {
+      "body_sha256": "6d6058845038bc12f1420027e98c87710d02e7f917710f86d1fa2f922adfa122",
+      "repeat": 2,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-139"
+    },
+    "jv1-5d043913e8efa530b3be3a4e00c2ec2f1c1d32aa": {
+      "body_sha256": "7fe31c19ffed3ea30c1f23c01558d512f90b297c0000ea968e3db17fe3eeb972",
+      "repeat": 1,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-118"
+    },
+    "jv1-5d2535d592062bcaf251ed3074105cc155ec01f6": {
+      "body_sha256": "3cb0af44eb4e5a80528ffd317a5c310a5fcef89d6b3521bc11cbe4215ee59c33",
+      "repeat": 3,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-129"
+    },
+    "jv1-5d2d5a95a91a2372613c284c3acda5e309c771e9": {
+      "body_sha256": "6fcc2e6b43ddb6f4e4166fd9d1b071fc04a3899d0587547362691f3f63654f28",
+      "repeat": 3,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-83"
+    },
+    "jv1-5d74471b292fe0eced520987fd9122572a891691": {
+      "body_sha256": "cb9fb1062731ff6275f1c1ac7f75a12b01934594fdd2b1e67601f69f57a7dafd",
+      "repeat": 2,
+      "sample_id": "jammeval-ja-vlm-bench-refined-test-15"
+    },
+    "jv1-5d783fa2ed2b45247bb96788033c6662163d0823": {
+      "body_sha256": "ad7fc99d0f437c791b19be7d93d5c88edf72196b1ae31c7f4214cfbda903c962",
+      "repeat": 2,
+      "sample_id": "jammeval-ja-vlm-bench-refined-test-42"
+    },
+    "jv1-5dfe66fec7d010b165a5545a5d18dc8b09a72f96": {
+      "body_sha256": "aa081c9cea6b1782350b564d35b48dbae4d39573b08e3e547c8e2366aae2bc01",
+      "repeat": 2,
+      "sample_id": "jammeval-heron-bench-refined-test-14"
+    },
+    "jv1-5e0947d85deaa76680fa04ce5723ced4f342854b": {
+      "body_sha256": "c3675640aeb5451e9776061b22986b1108be063356c5cd88feb011ed3429b139",
+      "repeat": 2,
+      "sample_id": "jammeval-heron-bench-refined-test-44"
+    },
+    "jv1-5e48149d1602fa55dca39a83922994c781e93c67": {
+      "body_sha256": "0ca0133d95ec847f1f07452d59847f63011914bde5d90e9de58469f27952faa2",
+      "repeat": 2,
+      "sample_id": "jammeval-heron-bench-refined-test-36"
+    },
+    "jv1-5e49ec5fea440af0fe3e9d97106347d3cc2e7b0d": {
+      "body_sha256": "8dcd818963e28d9f1396f0b73608276b71235111f0def5dbef27d4b28ccb1562",
+      "repeat": 1,
+      "sample_id": "jammeval-heron-bench-refined-test-56"
+    },
+    "jv1-5e90dddfda9f8e49b9cc7e9c2d7e3bbebcdc18ae": {
+      "body_sha256": "fe4308fd77042695fadda785f9a72d86f6c02249f3b3e1a17197676c129c569c",
+      "repeat": 1,
+      "sample_id": "jammeval-heron-bench-refined-test-74"
+    },
+    "jv1-5f0246749e86461afc9eae0b8b0d1ff4ce7efe0d": {
+      "body_sha256": "8e53289345ecc0638debba978b40531c72debe7ace0cdd326818e2cc40baa571",
+      "repeat": 1,
+      "sample_id": "jammeval-heron-bench-refined-test-96"
+    },
+    "jv1-5f104e622e6f94a358eebb2fb7e08342fa73c393": {
+      "body_sha256": "91b8982e4f5df21b108c9585591c8dae0d586cf80a1401cf12a028a7aff63e0e",
+      "repeat": 2,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-69"
+    },
+    "jv1-5f178f7421ecb993a884bb5a9dd6c04c9b60df17": {
+      "body_sha256": "8c8317461a1a92d32da575b0bbcf1df400592c49e0aae519512e6c407f71efb7",
+      "repeat": 1,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-88"
+    },
+    "jv1-5f383c1775f559091d5a01e38599b2ee039bbfcf": {
+      "body_sha256": "8c0f8f61dfe75412ac95827a3f38a8ff51894301366d1a2807d4916e9cf57b96",
+      "repeat": 1,
+      "sample_id": "jammeval-heron-bench-refined-test-26"
+    },
+    "jv1-5fb3a7297ebe1023bf4cc4e4fc6afd47517d340e": {
+      "body_sha256": "27af2b785ee77184dc9a4b50c79271ceed35260f780237a04fa72258cc96a2bc",
+      "repeat": 3,
+      "sample_id": "jammeval-ja-vlm-bench-refined-test-47"
+    },
+    "jv1-5ff67ad0f4574190981fbf383000288f16019556": {
+      "body_sha256": "40e58e6300ca40bea348ae2cf523812d1f68af8556c94f34ea60abb6063a51bf",
+      "repeat": 1,
+      "sample_id": "jammeval-heron-bench-refined-test-101"
+    },
+    "jv1-6076512796f5d7da3465ddd17ff925e8fd1ebc36": {
+      "body_sha256": "e58817b418b7002ecf40649a6783a338cbe7b26d4a021759cf626a4a0e8de145",
+      "repeat": 3,
+      "sample_id": "jammeval-heron-bench-refined-test-17"
+    },
+    "jv1-60a27cd20900b7602d398a61375ba268fa22a57b": {
+      "body_sha256": "41fae7a9e18d0960c51c92c65899ff3bae62b5260fdc1f39cefba395da3cc317",
+      "repeat": 3,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-72"
+    },
+    "jv1-60b92b18f4efc8c8b43b9dc4bc010c04ff1de491": {
+      "body_sha256": "ca4e4adf76a8366b52a9088f0272a6f969dd7b08653a49583db066dfe433dee7",
+      "repeat": 2,
+      "sample_id": "jammeval-heron-bench-refined-test-27"
+    },
+    "jv1-610bdd937fd63850d6514f626ca49dd0b51c6baf": {
+      "body_sha256": "807617433c93119979c6ecbd75a9e1be4ac0e371b749b21ba957e4886a92d1e4",
+      "repeat": 2,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-142"
+    },
+    "jv1-61546d6f66763343c72cb7882b0c4e2279ca7c6f": {
+      "body_sha256": "84c0ab8258f87072f5a03595d73f3975f2ecd25e338ef0466bf46561985a0b52",
+      "repeat": 1,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-29"
+    },
+    "jv1-618b1afe5f0a74ede4e1f4f51081a9002ac55b8f": {
+      "body_sha256": "6a218144d630ff832efec5555584fd395c54343e8129379fc2c0954ae7d1f263",
+      "repeat": 3,
+      "sample_id": "jammeval-heron-bench-refined-test-40"
+    },
+    "jv1-61b0764804ed252023abdede74e5d8cbcee04cdc": {
+      "body_sha256": "d4e4ca10cbcd050d8ddd81a60fc0ea8d036a1e1cfeead0fa0f8973cd211b9f94",
+      "repeat": 3,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-13"
+    },
+    "jv1-61cf5a054d8c7ef5302c00033aef9dd669abe565": {
+      "body_sha256": "e31402e3f0077aba84331b40d0992558385d10a95319b16611d27d3fc9b82d6f",
+      "repeat": 1,
+      "sample_id": "jammeval-ja-vlm-bench-refined-test-20"
+    },
+    "jv1-6253d929626d270a72c81f1b5334cae80655ee5e": {
+      "body_sha256": "01528929f135af3ac558fbb678249492e4c37ccab8ffec3d806243303e809e26",
+      "repeat": 3,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-60"
+    },
+    "jv1-62a682648c7ca2614f0e803208a68ba84fa2cdc1": {
+      "body_sha256": "9c15cdf11390311edb18023738c035d28b868e3f99f2e01a5b0d3887a8161e21",
+      "repeat": 2,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-51"
+    },
+    "jv1-63bf2e11999f7dc73061ecd1763a9ac1f9579a21": {
+      "body_sha256": "dc8de377416989529a561afdde848d98d6294f206686831273a5b9016358cfdc",
+      "repeat": 2,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-120"
+    },
+    "jv1-63c195cd271177c3a5d59b769fb611f735131a3f": {
+      "body_sha256": "42691239a727004f2e1341b168ac6b1ffa844a119b6353ae1605f7afc58c0e65",
+      "repeat": 3,
+      "sample_id": "jammeval-ja-vlm-bench-refined-test-35"
+    },
+    "jv1-63c3d480f783c33e445cec5116b05f49b7062397": {
+      "body_sha256": "e58817b418b7002ecf40649a6783a338cbe7b26d4a021759cf626a4a0e8de145",
+      "repeat": 2,
+      "sample_id": "jammeval-heron-bench-refined-test-17"
+    },
+    "jv1-63d659a2256810568e24920cd9bb3a39b9cba7fd": {
+      "body_sha256": "422598d45b772d2572880ec5c35f7cfaa22997f63c1af5df4f2fe55b00d0b2bb",
+      "repeat": 1,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-78"
+    },
+    "jv1-64265fab88cb0f168ba6a9f192f5afcf339b3019": {
+      "body_sha256": "c2669cd86718a7ff20fa7d32be3aa83577ed14b2b090f397a091ba9620f35caa",
+      "repeat": 2,
+      "sample_id": "jammeval-ja-vlm-bench-refined-test-29"
+    },
+    "jv1-643709abf82f971df9e20674349c7172ffbf4733": {
+      "body_sha256": "2a5cc35646f8ecd77475edf7ba11c170c9bd37599e2daf8265c315e26f26afdd",
+      "repeat": 2,
+      "sample_id": "jammeval-heron-bench-refined-test-70"
+    },
+    "jv1-6480cdf76895e92a164318352985bab8b50f83f6": {
+      "body_sha256": "b776c95c3946b80add6829a9e017c5dc353e025ab1da469fc71e1c1acf64554b",
+      "repeat": 1,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-74"
+    },
+    "jv1-64847a3649aff110e7e5f39b9fc9df5bceed8f2a": {
+      "body_sha256": "4bcbbd0a94997458845f09501930e98ca5377df2ae9417dc6dad82be20996076",
+      "repeat": 3,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-33"
+    },
+    "jv1-64d38bc4d9ceeb1dd268f753bd62570bad1ffb61": {
+      "body_sha256": "0023f2380054f953586dc560682919104943f4c350b2024fcee0015b4ea3bc50",
+      "repeat": 1,
+      "sample_id": "jammeval-heron-bench-refined-test-100"
+    },
+    "jv1-6501beb2ed5461dbbe8def4a21a6988a62b3e833": {
+      "body_sha256": "ca78200a34e795a02d1c800a96af86c18f62c9dfda193532b8b036c9ea0eb311",
+      "repeat": 3,
+      "sample_id": "jammeval-heron-bench-refined-test-7"
+    },
+    "jv1-65b55798277beb88072a0707d35adef3061e509e": {
+      "body_sha256": "8d1effe7b7b7a0d0514ed7044e25151c4b694d0da04c36bf6354befd9c007e53",
+      "repeat": 2,
+      "sample_id": "jammeval-heron-bench-refined-test-81"
+    },
+    "jv1-65c24a7a2c279ed0e6f76d8abc2c73d5a347c195": {
+      "body_sha256": "826bfd225b58cfb6cb98415c746c0cf8233a88470e9615a8a2d98594eb562946",
+      "repeat": 2,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-17"
+    },
+    "jv1-65d14be4dce14ace75cfa0cb4986d94eb6c074a7": {
+      "body_sha256": "79b81589a4df63bd6b21c5149c988dc4ca7e579593dfd2955e948c9016cad099",
+      "repeat": 1,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-66"
+    },
+    "jv1-66876a68bec480007c4174a5b186cb282193dc5d": {
+      "body_sha256": "d8f445a41bb5e47bfecc1852c382f3c2019f4e07f36d9cb7928b93ccc1f4807c",
+      "repeat": 3,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-57"
+    },
+    "jv1-66961ee38c472c5b11f009ccfb8865b0b0b26386": {
+      "body_sha256": "25217c2faa04dbbf02fd62121f1d6f8f0f9bd2f03dce66696ab2aa36b443aa96",
+      "repeat": 1,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-34"
+    },
+    "jv1-66fd30e2b5318490e42cbae1e6299daa269b9af0": {
+      "body_sha256": "807617433c93119979c6ecbd75a9e1be4ac0e371b749b21ba957e4886a92d1e4",
+      "repeat": 1,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-142"
+    },
+    "jv1-6722b35fc8482d37dc179696a426b93c0fd67b81": {
+      "body_sha256": "1a7555d4f54ff7701f7ad0462c0f1392ba5d09bb17ca496725c6847f1dd1b692",
+      "repeat": 1,
+      "sample_id": "jammeval-ja-vlm-bench-refined-test-1"
+    },
+    "jv1-673f00ea7aef5fa161b72e7786e83e14b675ceb3": {
+      "body_sha256": "c2ff3576efd82ac47fb7c96c7390a0257fa974f105c4ac9f5c8ef9adb0a9c0b1",
+      "repeat": 2,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-30"
+    },
+    "jv1-67da75c33734356808f0c9654cef272ae0dcc9ff": {
+      "body_sha256": "34fb45a1123ba0fd19822e0f48553bb8e18198f74467ab2ae8900c83bdefb098",
+      "repeat": 2,
+      "sample_id": "jammeval-heron-bench-refined-test-54"
+    },
+    "jv1-685c93c623f6cd3ad8a7f6361d3769b3f21824ec": {
+      "body_sha256": "cd3d940b136b30301ab0cea5fb62e93828264965ab06526e6d31c349915ff169",
+      "repeat": 1,
+      "sample_id": "jammeval-heron-bench-refined-test-72"
+    },
+    "jv1-6973170508279704f0e4798d8e9681671c0d71f2": {
+      "body_sha256": "1e69a0befa9ac9dcb19c40214e8b5dbd1532f670b8529d2407a2245b54442c3e",
+      "repeat": 1,
+      "sample_id": "jammeval-heron-bench-refined-test-8"
+    },
+    "jv1-699e863c9f7c9999fab483f8fb718f56899239e0": {
+      "body_sha256": "3944bee5927dff25d969afa18f87059fbef6e3e9f26454a931eee3011b552f9e",
+      "repeat": 3,
+      "sample_id": "jammeval-ja-vlm-bench-refined-test-28"
+    },
+    "jv1-69c90aa90d1b3c54146b8bf3ad325c7f9f86ab7c": {
+      "body_sha256": "e9d33b521e585e5e4a742e4d982605075910dcf17e2aa5fa94a20d3fcab4d532",
+      "repeat": 2,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-148"
+    },
+    "jv1-6a78dc0e63578f1591f7c4a9e33fb0544b52cd04": {
+      "body_sha256": "7dfc867998aa4b66fd219c1ccfddbe334d30f78ba2f5cbdfc49d7568b1d7506b",
+      "repeat": 2,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-42"
+    },
+    "jv1-6a89e593c7a31e111c327cdcf34bd25f5ed32f79": {
+      "body_sha256": "1affc3ef2eef1e3cdbca2df32016509874c33dc69e018876e7e7ae328548fd2a",
+      "repeat": 3,
+      "sample_id": "jammeval-ja-vlm-bench-refined-test-18"
+    },
+    "jv1-6b93d70b7a710a8c378dd98fe87f78349c049389": {
+      "body_sha256": "adcdc9d2d453ee1ccef61047f8d864d52dd9de9f185c54c7d4edb5a680708af9",
+      "repeat": 3,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-4"
+    },
+    "jv1-6ba6eac460bc1c88f476f09e3463d375ac4b1bd1": {
+      "body_sha256": "9e750c22d7913e3b0497e29f0003333857699b1df20172e8222ce611004ba4cf",
+      "repeat": 2,
+      "sample_id": "jammeval-heron-bench-refined-test-2"
+    },
+    "jv1-6bb5a516910a9dacb429a61a1e3fe0fbb297ff03": {
+      "body_sha256": "6bee7970592d9800fc1ee1a034e339d2a33d6bf9126ec3b697a0051ea57492e5",
+      "repeat": 3,
+      "sample_id": "jammeval-ja-vlm-bench-refined-test-14"
+    },
+    "jv1-6be1b96db7a2b053d61bce5e8ada256f2abee58e": {
+      "body_sha256": "56d16f04e03bcf8cb4a84bdc143a2ae44e8d0d4dd97b6ce18c444320e6abed3d",
+      "repeat": 1,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-126"
+    },
+    "jv1-6c045feec710736b059b713c1e3f2259845b66b4": {
+      "body_sha256": "ceffa5263f8b86bca7226f518c5538784fb71f81b1b60da50696f9fe35a0cca8",
+      "repeat": 2,
+      "sample_id": "jammeval-heron-bench-refined-test-94"
+    },
+    "jv1-6cd8b5e6b9a258c456ee8373729b788e7285531d": {
+      "body_sha256": "f7e00a5e190f33968ae0cee7be7e9257b751ab33e921feef5cadd82f298f14be",
+      "repeat": 2,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-100"
+    },
+    "jv1-6cebc2f306de39a561b75358b7b2f7f982537c29": {
+      "body_sha256": "516298ab72509d9cb1ba491ef4cf84b3f93aadeb0fd31029323bf3104784e24a",
+      "repeat": 1,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-50"
+    },
+    "jv1-6d0dd63f493c6575c25c02047512689fbaee924b": {
+      "body_sha256": "111e9893a49985c29268abaa825dc11f7bbe9dc553c3e9ea292afe2b4b465421",
+      "repeat": 2,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-109"
+    },
+    "jv1-6d3f83b8a402e1ada6a842c7f355d213b9a5ba12": {
+      "body_sha256": "e9ecee16b364945326b5502453a6f778c805ec0238febd10d93d83a655506804",
+      "repeat": 1,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-31"
+    },
+    "jv1-6d85dc805b5e9dbe97140454dd830a2680f35183": {
+      "body_sha256": "79b81589a4df63bd6b21c5149c988dc4ca7e579593dfd2955e948c9016cad099",
+      "repeat": 2,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-66"
+    },
+    "jv1-6e1902e88c864d41a67b9cbcca0224400d447b4c": {
+      "body_sha256": "0be62e844d23517a7e2286da2d54097a49c093ce62b48a45aeb66c8ea1cdc9a4",
+      "repeat": 2,
+      "sample_id": "jammeval-heron-bench-refined-test-64"
+    },
+    "jv1-6e47cc78a5a1b6e4414f72eb7396ca069bafdd94": {
+      "body_sha256": "d419326473e6ecd33aa08e30bb98d164106e476471f1034d69047f4e78246ef1",
+      "repeat": 1,
+      "sample_id": "jammeval-heron-bench-refined-test-31"
+    },
+    "jv1-6f1389282c3c6311323072362dad45a1aba0bebc": {
+      "body_sha256": "9fd97999d3e17b62e1350e08fea3a4a2e102c1c0c815549e64a1c6b0cdc4721e",
+      "repeat": 2,
+      "sample_id": "jammeval-ja-vlm-bench-refined-test-6"
+    },
+    "jv1-6f35f3a52499a7c99802420b3881df637d58f674": {
+      "body_sha256": "8fbc8cb01785c420c65a15bd3f8e261f308b0439cf21a718498d4e34294ea148",
+      "repeat": 2,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-67"
+    },
+    "jv1-6f8d07c916267d740c6fc97d11cdea84aa467b0c": {
+      "body_sha256": "cced90091f67078bfc91b9d2d284be7eaf6fe5d0ddf36e2ba36055ea9080cfb7",
+      "repeat": 2,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-136"
+    },
+    "jv1-6fd15e62a01a943db64a5fbc13ef42d017dc518b": {
+      "body_sha256": "7a4b78bc0b85b485f8b8b1271601b33f27ff79e27cb71988f553a277a029cece",
+      "repeat": 1,
+      "sample_id": "jammeval-heron-bench-refined-test-6"
+    },
+    "jv1-6ff7f9075a0b94c77bc31025f3806fc584d93267": {
+      "body_sha256": "f2553fbb209374ed08b48f706738c4edc0f40c4c69ce4f47e29d4a46beb75e23",
+      "repeat": 3,
+      "sample_id": "jammeval-ja-vlm-bench-refined-test-38"
+    },
+    "jv1-704326a1f035a10a50666adb4d478dce398b8f96": {
+      "body_sha256": "a7e8af15fda614ae0b0705f41429953e26cf000a4d0c6e801ad9669083c9ae8f",
+      "repeat": 1,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-108"
+    },
+    "jv1-7078da0f05d81fc61303e2fab5e66b608e18071f": {
+      "body_sha256": "cd5ed469eef927805ed45d0c0e254db646e9b328d77f3d15cc2731ee5cd3394f",
+      "repeat": 2,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-26"
+    },
+    "jv1-709f5c2ceec6cbc57cf07f69c6e82d9cfa9632fd": {
+      "body_sha256": "27b8911f0c2b21ae71097052d489139a50f79402b87856aecd7488a6914c9ec8",
+      "repeat": 3,
+      "sample_id": "jammeval-ja-vlm-bench-refined-test-30"
+    },
+    "jv1-70c1bd827d9ab2108959c4887f14ee5ac381c947": {
+      "body_sha256": "2de43f2d9fcb867c318fb5aa55a3d289c3d0307fa900f69c66e83e951d7d4b19",
+      "repeat": 3,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-14"
+    },
+    "jv1-70edc532e7a5bedd884d2bf346f1c5f5623bcae2": {
+      "body_sha256": "22b8f03aab47a950856a0b6a3d6ec2ad195c8540df2a77ee91d856afd2e92981",
+      "repeat": 3,
+      "sample_id": "jammeval-ja-vlm-bench-refined-test-32"
+    },
+    "jv1-70f2d2531ddbffe27417e1af0ef00bdb8640240f": {
+      "body_sha256": "3bbf9cc50b3aaf8daa68f02678ed1cdfbcfc3247490f554a9398a27b2b56f44b",
+      "repeat": 2,
+      "sample_id": "jammeval-heron-bench-refined-test-15"
+    },
+    "jv1-70fb1c30419c6cdd74189ded90889d8da50491d5": {
+      "body_sha256": "5678cb92f3c7dcbc806933f9e4169b9889480e84ade5222588e05616b3273df3",
+      "repeat": 3,
+      "sample_id": "jammeval-heron-bench-refined-test-58"
+    },
+    "jv1-717cbe39ef196a81178e9a0b258cc0f58bfd7a44": {
+      "body_sha256": "1077a353c01df221ebeef06b1e4f3ed1116240b2352a3b6ec027fb7aecc20493",
+      "repeat": 3,
+      "sample_id": "jammeval-ja-vlm-bench-refined-test-45"
+    },
+    "jv1-7188819fc7d2e6b37f6ba9d79694e09b91373606": {
+      "body_sha256": "e430c67673e8d279dbf43a33a1eb8bafc5a760bd16b96c7bafa4acdad4a538e4",
+      "repeat": 3,
+      "sample_id": "jammeval-ja-vlm-bench-refined-test-34"
+    },
+    "jv1-71a7772cc80b2caab476f2fac63721f3ffbb0a69": {
+      "body_sha256": "49b51166da5ad5b5fa4bfea29de47c8f61f5f6ad2c236a45b2bffd6a65bd5ad7",
+      "repeat": 2,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-96"
+    },
+    "jv1-71e30e8bd9ca029f0ec1cdabfa798a71fc1646a9": {
+      "body_sha256": "41fae7a9e18d0960c51c92c65899ff3bae62b5260fdc1f39cefba395da3cc317",
+      "repeat": 2,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-72"
+    },
+    "jv1-725e2084ce82b88162dc68d6a0cf1cab48384949": {
+      "body_sha256": "1a3341949bd7bc886a71c2e6b877bf6a82902c7de1d8e3a59aa771fa4820ff1a",
+      "repeat": 2,
+      "sample_id": "jammeval-heron-bench-refined-test-83"
+    },
+    "jv1-72a586fe36d52d9f4222aaba884472dfe5523e9a": {
+      "body_sha256": "01528929f135af3ac558fbb678249492e4c37ccab8ffec3d806243303e809e26",
+      "repeat": 2,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-60"
+    },
+    "jv1-73006d4d4ce5efa12eb5492e99517014a919955e": {
+      "body_sha256": "348a8d56b00e97c21896b3aa67c43bf46e32af2940c061c2eb008f33bbaa7d36",
+      "repeat": 3,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-80"
+    },
+    "jv1-735689592675f8542921b2980bc6761f48b76293": {
+      "body_sha256": "a5ae3246e34102d742da05bdf2e3ee300815dafecb4026dd1deada4e5a6518b5",
+      "repeat": 2,
+      "sample_id": "jammeval-ja-vlm-bench-refined-test-0"
+    },
+    "jv1-7456165b6fb9fb8a288456ff077b0c1d8932eb24": {
+      "body_sha256": "6d6058845038bc12f1420027e98c87710d02e7f917710f86d1fa2f922adfa122",
+      "repeat": 3,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-139"
+    },
+    "jv1-7490d021a1671cb10999c061f0b8db0e7e549476": {
+      "body_sha256": "d9533b55d2546da11069dbb2cb00ff5d2382eceb7149c34b2ff88eb135dc2bdb",
+      "repeat": 1,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-128"
+    },
+    "jv1-7492a15e9e618ca22e786fa46f8d7bc18df433a5": {
+      "body_sha256": "fc8a0703289d2178727447bf91e5362f6ccf2049959d5f275a58364e4fcab8a7",
+      "repeat": 1,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-16"
+    },
+    "jv1-74cf894e75ee850ae025ffe92f5d910a4daeb946": {
+      "body_sha256": "9fd97999d3e17b62e1350e08fea3a4a2e102c1c0c815549e64a1c6b0cdc4721e",
+      "repeat": 3,
+      "sample_id": "jammeval-ja-vlm-bench-refined-test-6"
+    },
+    "jv1-750150d2f87a561023a7fe31660a78e13bee8571": {
+      "body_sha256": "40e58e6300ca40bea348ae2cf523812d1f68af8556c94f34ea60abb6063a51bf",
+      "repeat": 3,
+      "sample_id": "jammeval-heron-bench-refined-test-101"
+    },
+    "jv1-750b309b0c186445fb1d3dea7c7bd5e94f87600f": {
+      "body_sha256": "2604bb49190a5eb918fbf8755daa35a64adec0d6f94a20f2916503d74629265a",
+      "repeat": 1,
+      "sample_id": "jammeval-ja-vlm-bench-refined-test-48"
+    },
+    "jv1-75152ce6e99ed68e79d37da34934be306404c861": {
+      "body_sha256": "741d9bef3be3c30d596cc7ef0e3c50cba852506745d787b6a0548ebf8637a323",
+      "repeat": 2,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-99"
+    },
+    "jv1-75820f8c158b0aa297798a0fd2e68fb4d5e227c4": {
+      "body_sha256": "2604bb49190a5eb918fbf8755daa35a64adec0d6f94a20f2916503d74629265a",
+      "repeat": 3,
+      "sample_id": "jammeval-ja-vlm-bench-refined-test-48"
+    },
+    "jv1-75c308dde9913db2496a0a45bcb368a6bba58505": {
+      "body_sha256": "4dbc00729df371cdd2715861a317cd3ccae3133153cd98357217ee11128e5783",
+      "repeat": 3,
+      "sample_id": "jammeval-heron-bench-refined-test-46"
+    },
+    "jv1-75e7287989aa97584a66918e2732313f7c674261": {
+      "body_sha256": "67e9a9f180400be8d08bbea7532e62b752dbe07efa2e8b4c3792a071a2715852",
+      "repeat": 1,
+      "sample_id": "jammeval-heron-bench-refined-test-53"
+    },
+    "jv1-7680cfff4f7cf1824554f0da2b29c649781f8f8b": {
+      "body_sha256": "e38bb4d301f66ba822cf6dcfeed6cc98bf8d75badd00cd9569941716222b0cb8",
+      "repeat": 1,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-125"
+    },
+    "jv1-77b92d26d3333b46072ee4ac01f2d0672420e2fc": {
+      "body_sha256": "71a334ae8f5ea2ca492fa3155be4d339ceba375502faba1f7cb98c51636b614f",
+      "repeat": 1,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-23"
+    },
+    "jv1-77c800cfcb50c839e3fa18fb898b53e23993a2ea": {
+      "body_sha256": "53f8a0a93d1ae788ca611895c51534f7bb126a1293761df3662def3ac66d7c2a",
+      "repeat": 3,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-81"
+    },
+    "jv1-78260bd0d40b7bf71d43ae821cc254c67d1e2b53": {
+      "body_sha256": "56d16f04e03bcf8cb4a84bdc143a2ae44e8d0d4dd97b6ce18c444320e6abed3d",
+      "repeat": 2,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-126"
+    },
+    "jv1-78548b8657c6c35bf0fca1c66d0332b6a6703388": {
+      "body_sha256": "dc7566c2ab404b2b199a853c137651e1514787cef1f0f14efca76968561bc671",
+      "repeat": 1,
+      "sample_id": "jammeval-heron-bench-refined-test-57"
+    },
+    "jv1-788b518720acaec3b3cbae8ad4f76cc6f9c92ee6": {
+      "body_sha256": "c7520ab43bbf9f43160cd7b561b1af2cb1acd20ee3f89eee506a5afa977f01d1",
+      "repeat": 3,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-52"
+    },
+    "jv1-788be22f7df9c43b03fb556e4ece772c0dc342a9": {
+      "body_sha256": "ff3a1b37c6643495bc18e0b7d7a3d2c6e6d21b3b6d486514114a41fbfff51bbd",
+      "repeat": 3,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-5"
+    },
+    "jv1-78df766d81a442d475b2b33bef67bd61b8103fd9": {
+      "body_sha256": "e03708b42d5f53468e2f01cf9fac3783d60f85a646fa8513922b76d427707b2a",
+      "repeat": 1,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-93"
+    },
+    "jv1-78ef50e8866fcb220574f81f8f2416efbb2f5f01": {
+      "body_sha256": "1affc3ef2eef1e3cdbca2df32016509874c33dc69e018876e7e7ae328548fd2a",
+      "repeat": 2,
+      "sample_id": "jammeval-ja-vlm-bench-refined-test-18"
+    },
+    "jv1-79f57907824c3e7b094e521f564159368cd12cdd": {
+      "body_sha256": "71a334ae8f5ea2ca492fa3155be4d339ceba375502faba1f7cb98c51636b614f",
+      "repeat": 2,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-23"
+    },
+    "jv1-7a9b1f522a6658ef85dcc1df00bc42e16ec4bbab": {
+      "body_sha256": "60b073da1ff82869fc0c88c3bdd71a15a2f2955b8543517fc064a90febe863a1",
+      "repeat": 2,
+      "sample_id": "jammeval-ja-vlm-bench-refined-test-10"
+    },
+    "jv1-7aabf7f86c695c9f36bd42d544b9999ff19343c8": {
+      "body_sha256": "59766fa280cc42db8f56fd3ab22f1314e4112074f3d0cef43764897e57be266f",
+      "repeat": 3,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-64"
+    },
+    "jv1-7b1ab09c7dd6a7eb539cbeb9fd9ddbb21a6bb078": {
+      "body_sha256": "16490a8837ee1759004977813e0b27cfee0e64a50d04fe9a1f6a73c05c44328e",
+      "repeat": 3,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-149"
+    },
+    "jv1-7b62626c49212aa630c3850104ebc57410b7f77a": {
+      "body_sha256": "4bcbbd0a94997458845f09501930e98ca5377df2ae9417dc6dad82be20996076",
+      "repeat": 2,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-33"
+    },
+    "jv1-7b7ccb2ddbbb86f731aae7a57a03103bfb96ba6d": {
+      "body_sha256": "a14f891296452f21b6eb816f45d351f311eae7af1950ac3fd2caa7115f34a503",
+      "repeat": 3,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-6"
+    },
+    "jv1-7ba99b65497d8c9784d806b9c2a3e02e33314873": {
+      "body_sha256": "78f4e13ed350a96c4fe2d72018447cc93ad38afe11cfaf8e922cdf55dc747776",
+      "repeat": 2,
+      "sample_id": "jammeval-heron-bench-refined-test-0"
+    },
+    "jv1-7baad3ac1ec7bf5ce2fbeb0dd3de5a47792f427f": {
+      "body_sha256": "1efcfd73f8c366d7d3982682e7560ec51fd9ac3b6aa5ef7d47f92e4f1f41c0be",
+      "repeat": 2,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-76"
+    },
+    "jv1-7c205c7a010fd1daed4fdf58fd74d0abde180de0": {
+      "body_sha256": "e1a090f36fd229f521a21bfc43c702c77983e02fb679a21d782f27b2ca7e8884",
+      "repeat": 1,
+      "sample_id": "jammeval-ja-vlm-bench-refined-test-19"
+    },
+    "jv1-7c5966d149195958e06093e804f4584dd089e125": {
+      "body_sha256": "02dd0dc0a1222f731426ab21d0cd90c14bed35ba27c15c867870e254c154ce7e",
+      "repeat": 1,
+      "sample_id": "jammeval-heron-bench-refined-test-43"
+    },
+    "jv1-7d0dc88c4b812a93df2434eac5366c2b4b883b9e": {
+      "body_sha256": "516298ab72509d9cb1ba491ef4cf84b3f93aadeb0fd31029323bf3104784e24a",
+      "repeat": 3,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-50"
+    },
+    "jv1-7d3f24ca97e652fa2dd72ee431fc6e8a0758d0eb": {
+      "body_sha256": "10c3196efea9086a7760bc85fa8149bf7f3f1cb00997dbf5043a4394861e7187",
+      "repeat": 3,
+      "sample_id": "jammeval-heron-bench-refined-test-42"
+    },
+    "jv1-7d51a83dbea2ddd57c93e39a093aabcfe5c824bc": {
+      "body_sha256": "24a13ba6c606a6eda0bc1374cd3f89300a8dd15909dd761c324b4f52ac78bb6d",
+      "repeat": 2,
+      "sample_id": "jammeval-ja-vlm-bench-refined-test-36"
+    },
+    "jv1-7d7f9b27194235fccefcc15bcde613bc645dec59": {
+      "body_sha256": "10297503da93ec2e765ffab47f4a72bfcb1bc7fc75f7bddb68d2270eb0d72d27",
+      "repeat": 2,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-146"
+    },
+    "jv1-7d98aab26a9edbaaf69c824c8d6e59a2e3fa1882": {
+      "body_sha256": "a5ae3246e34102d742da05bdf2e3ee300815dafecb4026dd1deada4e5a6518b5",
+      "repeat": 1,
+      "sample_id": "jammeval-ja-vlm-bench-refined-test-0"
+    },
+    "jv1-7ea38b4486f810ee958edf652b043ff898a852fc": {
+      "body_sha256": "9393990ef19a81144393f293f395731d8141d107301341bf66f0f27d80667ddf",
+      "repeat": 1,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-39"
+    },
+    "jv1-7eba8371d4f631d6756ef732faa93bbda2b713dd": {
+      "body_sha256": "cad4b8607c94019b9f8c698a7f4efef1adb33c852dd7af6868d0a3a7b9ce2c20",
+      "repeat": 2,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-91"
+    },
+    "jv1-7ec7afaf1a992b1e00aefecfbbf3af0a5846e785": {
+      "body_sha256": "fce7e30a679a40023f12acb49b6bca293bb110f5cc9a5d4b084f58890f23242f",
+      "repeat": 1,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-107"
+    },
+    "jv1-7efd59808b01ca5c89bef888dda64c517ace3503": {
+      "body_sha256": "1077a353c01df221ebeef06b1e4f3ed1116240b2352a3b6ec027fb7aecc20493",
+      "repeat": 2,
+      "sample_id": "jammeval-ja-vlm-bench-refined-test-45"
+    },
+    "jv1-7f8721936d16a06941a224c3037195e65704c24e": {
+      "body_sha256": "bb12a388ef0e5a7afc0f992bc1e02ed84cabea4c8712d1fda974fc758e057313",
+      "repeat": 2,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-22"
+    },
+    "jv1-809be43d99484f31156008d03b32a0af01dc0ef4": {
+      "body_sha256": "8c27807efd2b4826457a02a355c18452d8f113d3de829f4603bd5ec6c6b1dba0",
+      "repeat": 2,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-58"
+    },
+    "jv1-80b7ba5888943137cc846be967c437be9ecd878a": {
+      "body_sha256": "809ba99193b8e0e115a27144d2be2e41d5633cf4e0202e18dd055b013e783355",
+      "repeat": 2,
+      "sample_id": "jammeval-heron-bench-refined-test-19"
+    },
+    "jv1-8150b7d9c27c3a1e58cd5b879be693f4fe30466e": {
+      "body_sha256": "f0e853296a94010428dae8ec22752ed560898134226ceb26976a58763a5f1db0",
+      "repeat": 2,
+      "sample_id": "jammeval-heron-bench-refined-test-65"
+    },
+    "jv1-8178ed1c94521eda3ef6c2d1d996470fc6670f96": {
+      "body_sha256": "a8bfde28031c025a3105b2d4458b501c675dbfcf4c5c8f72f84991308dd6043d",
+      "repeat": 1,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-135"
+    },
+    "jv1-8187e5306b2be1fd04d923ab2e5e0ce0c2b365db": {
+      "body_sha256": "50155086d5b2f4e044dc6377fe8e4b3a1427edcbaeb4772fbe25edfe04c2ee36",
+      "repeat": 2,
+      "sample_id": "jammeval-ja-vlm-bench-refined-test-43"
+    },
+    "jv1-819349ffa4308d41c16f66b910d42f5ed36ba2e0": {
+      "body_sha256": "e9ecee16b364945326b5502453a6f778c805ec0238febd10d93d83a655506804",
+      "repeat": 3,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-31"
+    },
+    "jv1-81e18f7333f08846cdf1123a0b30e607393eb641": {
+      "body_sha256": "67e9a9f180400be8d08bbea7532e62b752dbe07efa2e8b4c3792a071a2715852",
+      "repeat": 2,
+      "sample_id": "jammeval-heron-bench-refined-test-53"
+    },
+    "jv1-82bf191e8f8378f57e9f7746795eb5c066d75709": {
+      "body_sha256": "7dfc867998aa4b66fd219c1ccfddbe334d30f78ba2f5cbdfc49d7568b1d7506b",
+      "repeat": 3,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-42"
+    },
+    "jv1-837969d1640313cc1d7b06e8826c9c3dfa5a4905": {
+      "body_sha256": "6721cecde966871692222c4b2372dd0bd593768f53e0db9e6c2c2878de273d58",
+      "repeat": 1,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-15"
+    },
+    "jv1-8405ef88e44b2a56f9f6aeffc2c99414d7860359": {
+      "body_sha256": "4dda034c9a080b4a2bc1328cd45c40d44d1e70099007e6ce9625d410578afae1",
+      "repeat": 2,
+      "sample_id": "jammeval-ja-vlm-bench-refined-test-21"
+    },
+    "jv1-845c1a8d03c7937ce36445ffd99d90c9e7b3b0d4": {
+      "body_sha256": "179955fd2d2a97b14c957a43f39b10a738b254ea02cd70c207b3cca30471cd2a",
+      "repeat": 3,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-102"
+    },
+    "jv1-8507fc4add634d4e43a2c4cca5316ad83cd15b8f": {
+      "body_sha256": "8c8186a0ea7b203243b3aebc0e4723e42708bdb0aaa96e1e323f4e9e8f9faf80",
+      "repeat": 1,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-127"
+    },
+    "jv1-8519484f54df356685bcd06ef6537375de316df4": {
+      "body_sha256": "885a33df52b4a0f271b122bf7e928c34dc63b873c7547ee0d2b21914c4b92f2a",
+      "repeat": 3,
+      "sample_id": "jammeval-heron-bench-refined-test-24"
+    },
+    "jv1-85e9206e3d732c9e8ff84fb798cefb6af5805722": {
+      "body_sha256": "71b1b84eead62f4887622b263615ead51c8bf4a110730981e9750eba2676553e",
+      "repeat": 3,
+      "sample_id": "jammeval-ja-vlm-bench-refined-test-9"
+    },
+    "jv1-862d90e1d46ddd95261e798a05b48bd5d629c8c6": {
+      "body_sha256": "8c8186a0ea7b203243b3aebc0e4723e42708bdb0aaa96e1e323f4e9e8f9faf80",
+      "repeat": 2,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-127"
+    },
+    "jv1-863a9766419b822d8d68c1efe6c1bd9f961d598b": {
+      "body_sha256": "b03d70cb47d070c806cfcfde7be1796d70319285f37bc677a447c5bdbb371dae",
+      "repeat": 1,
+      "sample_id": "jammeval-heron-bench-refined-test-12"
+    },
+    "jv1-8696f0978e85806759b0bbad600a34c55eb70111": {
+      "body_sha256": "fd5c1fc5f7bff31f35c69e32d13f87cdfd980c66b51dcc699d827cccf61a9145",
+      "repeat": 1,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-85"
+    },
+    "jv1-86c2557ad7010b5b776ede8baaea58d9c627ce6e": {
+      "body_sha256": "cced90091f67078bfc91b9d2d284be7eaf6fe5d0ddf36e2ba36055ea9080cfb7",
+      "repeat": 3,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-136"
+    },
+    "jv1-86d9a527a56a27d98c2440a7b7e96e02eef2dddb": {
+      "body_sha256": "c16063348a0df7dc6dc055c653fa0eb9a918ea31c175885cbbda2e5b69e54737",
+      "repeat": 3,
+      "sample_id": "jammeval-heron-bench-refined-test-10"
+    },
+    "jv1-86ebf6ce2f7c17dbe4048dc24f56832de3f7e847": {
+      "body_sha256": "1efcfd73f8c366d7d3982682e7560ec51fd9ac3b6aa5ef7d47f92e4f1f41c0be",
+      "repeat": 3,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-76"
+    },
+    "jv1-8768ae4df20e6a589b487fae162bbb4c25fec7a5": {
+      "body_sha256": "ca4e4adf76a8366b52a9088f0272a6f969dd7b08653a49583db066dfe433dee7",
+      "repeat": 3,
+      "sample_id": "jammeval-heron-bench-refined-test-27"
+    },
+    "jv1-8796f8d5db4eec602063cf5c98fceb83b6eba46f": {
+      "body_sha256": "caeb639ef6d1b137627d5e74f778839a74351d949cceb92b4e2da736b9194b44",
+      "repeat": 2,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-36"
+    },
+    "jv1-87c35edd8b15ebf82d69d1917536058c663fec5d": {
+      "body_sha256": "84457f6c08d024a9cecb96caf0641c7447db706c6eed14028d80ca73262265ed",
+      "repeat": 1,
+      "sample_id": "jammeval-ja-vlm-bench-refined-test-13"
+    },
+    "jv1-883112f09947122adcfab5bd2efcc5b108f30284": {
+      "body_sha256": "1e1630120e56bad8c20ee307b254020101da56d7313a133e659f9ab18b790751",
+      "repeat": 1,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-9"
+    },
+    "jv1-88343d1529f6d71d361dcef65d5cfa8745a15823": {
+      "body_sha256": "77ce91447ef575d8519c2b819f1a24ba9893210a87713e7dbaaa0be8cd63fa6f",
+      "repeat": 3,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-84"
+    },
+    "jv1-8888baac9af8b78e43944f053c583b85ac6dd93b": {
+      "body_sha256": "516298ab72509d9cb1ba491ef4cf84b3f93aadeb0fd31029323bf3104784e24a",
+      "repeat": 2,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-50"
+    },
+    "jv1-88a76c08c49eb898d47022e2db2f7af6c82360ed": {
+      "body_sha256": "0198d45e676f7918ca554c2d3d29118c0566e32c2414ad251d26ce6cfdefaa5f",
+      "repeat": 3,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-46"
+    },
+    "jv1-88da7b3eee1cfa101ac2ad4c30615e991566d470": {
+      "body_sha256": "eaa6c0535e82a2507062a033f74ed17b541d8d6d21fb39228898d52c4e9a3a00",
+      "repeat": 1,
+      "sample_id": "jammeval-heron-bench-refined-test-9"
+    },
+    "jv1-88e4922a26281bfd0bc7fe88261222b1f0c56781": {
+      "body_sha256": "10c3196efea9086a7760bc85fa8149bf7f3f1cb00997dbf5043a4394861e7187",
+      "repeat": 1,
+      "sample_id": "jammeval-heron-bench-refined-test-42"
+    },
+    "jv1-8963c881e99ad157a2d0289a1de8569a46a40472": {
+      "body_sha256": "d6340feb3f896136148d6be12f813a2ecdad653004457d15005c4c62702a6c70",
+      "repeat": 3,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-77"
+    },
+    "jv1-8966f49358eec2913d6dd332cd495366f49666e7": {
+      "body_sha256": "558432e4634ccb67587b07e98e328a6bc356be377c533b85d721c7a980809425",
+      "repeat": 3,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-43"
+    },
+    "jv1-89b058ecb3914d7b4f63be6749ea49017b591ce1": {
+      "body_sha256": "a92fa993167210d0dd0c528d8be46beaf09040efbb390e610f21f9e8fcde1558",
+      "repeat": 1,
+      "sample_id": "jammeval-heron-bench-refined-test-5"
+    },
+    "jv1-89dc715c17af1fb32d894770b0f1b5bfe3bcbac0": {
+      "body_sha256": "dcedeb84f81814e0e728c3fba080280c05ff3291617ad59df2e1d8e4ec19bcc6",
+      "repeat": 1,
+      "sample_id": "jammeval-heron-bench-refined-test-21"
+    },
+    "jv1-8a4f9663208af8d1bb03c92d23b829a4fdc3edd6": {
+      "body_sha256": "cbe7102929030deb4030aef8cac847a574a31d18cbc6c9a260f10649fed63dbf",
+      "repeat": 1,
+      "sample_id": "jammeval-heron-bench-refined-test-60"
+    },
+    "jv1-8ada66c714f7435e13d638efd0dff95e8140e06a": {
+      "body_sha256": "11b0e34ef5c5cd166afea41253859b77f4fd6c8172cb138658aef4bb8152cbd4",
+      "repeat": 3,
+      "sample_id": "jammeval-heron-bench-refined-test-59"
+    },
+    "jv1-8afaa5f5cb48c6a04c26f366571749430c9ed3b8": {
+      "body_sha256": "1dc607d5a895d0a71468986b1933b686c6257d75ad90c65f86321c6dd26a014f",
+      "repeat": 1,
+      "sample_id": "jammeval-ja-vlm-bench-refined-test-17"
+    },
+    "jv1-8b50647c39620e5787c4c84dc6a6307d91816e1c": {
+      "body_sha256": "405cfea2d6d78e606f24140f78e2eff772c0e3cda39ee3f73f065c9585b3e4a3",
+      "repeat": 2,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-0"
+    },
+    "jv1-8b6fb8189e9376655ebae430c40f24cf38241aa1": {
+      "body_sha256": "41b35ddb27a192fee6f524098b0dd8d888083d8b03077de85b2ecc45327a7729",
+      "repeat": 3,
+      "sample_id": "jammeval-ja-vlm-bench-refined-test-23"
+    },
+    "jv1-8ba606c14a3a604f10e404743b6ebdc2992a6fc0": {
+      "body_sha256": "a5bcee667724f7e63523b184ca709123c2b42a0f4eb640df4c3af0f611715ba8",
+      "repeat": 1,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-98"
+    },
+    "jv1-8bdfcaa1854e70d600bddc4f0576ae416b109aaa": {
+      "body_sha256": "760ba60e157eb8646131e849b4bac1363633e887b266cb9bd75c1f9ec4c125c8",
+      "repeat": 3,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-122"
+    },
+    "jv1-8c80040bb1732aa4d1e6283fdca5258beb298b35": {
+      "body_sha256": "246e55bc4006ed964c7a7b373257d6cd4a68a72e124fa167464393afc224112e",
+      "repeat": 1,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-70"
+    },
+    "jv1-8d35be5ed7ffaf2ff41e54a3b4f5ff3176c62fa4": {
+      "body_sha256": "558432e4634ccb67587b07e98e328a6bc356be377c533b85d721c7a980809425",
+      "repeat": 1,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-43"
+    },
+    "jv1-8d4b051539fa835b44dbdda86c887a51fdd57bef": {
+      "body_sha256": "d215fce18f46c65900e6539deb232718e7f91b271fce5e550906577df1df184d",
+      "repeat": 2,
+      "sample_id": "jammeval-ja-vlm-bench-refined-test-5"
+    },
+    "jv1-8db7bf054d3e24e7b4a77b407979566d92e8080c": {
+      "body_sha256": "6cd80c0dd56247efcc8646b99106c570c5103223f9b05f3a86176edd07386b7b",
+      "repeat": 3,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-18"
+    },
+    "jv1-8ddff8c4c4a1cb919f6a692705f988f2cbe86422": {
+      "body_sha256": "d0f5c3baf8b5cc068c39cdb54c9c37181723a25b4c2ee440d7c731c01ca1d0b3",
+      "repeat": 1,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-73"
+    },
+    "jv1-8e197ac51891b5ba6aef3018b9931034dbd3b815": {
+      "body_sha256": "ceffa5263f8b86bca7226f518c5538784fb71f81b1b60da50696f9fe35a0cca8",
+      "repeat": 1,
+      "sample_id": "jammeval-heron-bench-refined-test-94"
+    },
+    "jv1-8e72fc548cb0b620de2540a9272ee36ac00777cf": {
+      "body_sha256": "4d893e657950e248c5e1b5ceee595ae03f452ffbef43b0bebb0532359ea1048c",
+      "repeat": 1,
+      "sample_id": "jammeval-ja-vlm-bench-refined-test-4"
+    },
+    "jv1-8e8e92f7dcbcea874f33ec67b23e6a443399f5d2": {
+      "body_sha256": "33fccc96194fa41416face6d5b667e95a7b4c3009034e092006b8d76d7586cde",
+      "repeat": 1,
+      "sample_id": "jammeval-ja-vlm-bench-refined-test-40"
+    },
+    "jv1-8f129057497ee733ab67798d88367b157b74b332": {
+      "body_sha256": "0343700aebe6c712814ff10884ac06dced915b5d4ccb2e5f5301cdc62455f40e",
+      "repeat": 3,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-113"
+    },
+    "jv1-8f82fcc57f5978a54e106103a09ff6c27678d990": {
+      "body_sha256": "dcedeb84f81814e0e728c3fba080280c05ff3291617ad59df2e1d8e4ec19bcc6",
+      "repeat": 2,
+      "sample_id": "jammeval-heron-bench-refined-test-21"
+    },
+    "jv1-8fd93a116f33843b37535d1eeeddb4713cbb2997": {
+      "body_sha256": "0198d45e676f7918ca554c2d3d29118c0566e32c2414ad251d26ce6cfdefaa5f",
+      "repeat": 2,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-46"
+    },
+    "jv1-8ffe5cfa7f37ae23626cdd80c56c7ccc566e63a7": {
+      "body_sha256": "84457f6c08d024a9cecb96caf0641c7447db706c6eed14028d80ca73262265ed",
+      "repeat": 2,
+      "sample_id": "jammeval-ja-vlm-bench-refined-test-13"
+    },
+    "jv1-90b291ff01ed767c7fc6259ee8480a282a6b50eb": {
+      "body_sha256": "9c462f9a5cd33a96611de0f2477c00c50f08c48067e46a11d32f191c1bc4987a",
+      "repeat": 2,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-105"
+    },
+    "jv1-90bd25949e4f4edf4e3abcc7af996ded54e5e0fc": {
+      "body_sha256": "2de43f2d9fcb867c318fb5aa55a3d289c3d0307fa900f69c66e83e951d7d4b19",
+      "repeat": 1,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-14"
+    },
+    "jv1-90ea401e3c675b07a9edd9cb2b5db54599e9077a": {
+      "body_sha256": "71d3c75e50ddf0c9e4f12b4d488dc2b3ebc684fdd187c5be6bccf6e50ab00fac",
+      "repeat": 2,
+      "sample_id": "jammeval-ja-vlm-bench-refined-test-49"
+    },
+    "jv1-90f6c710ecc8c4f8b837a52da236925220796fa0": {
+      "body_sha256": "1e69a0befa9ac9dcb19c40214e8b5dbd1532f670b8529d2407a2245b54442c3e",
+      "repeat": 2,
+      "sample_id": "jammeval-heron-bench-refined-test-8"
+    },
+    "jv1-9153b0076873e8356c66f4981b5b90fed5527ecb": {
+      "body_sha256": "90a48067b50146884f1a01fc4cd8b21c17e6a725bc3d28afb7b0a57dfec8ab30",
+      "repeat": 1,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-40"
+    },
+    "jv1-916e31f9df5bc659253fe8a5b53d278ecbe4ec64": {
+      "body_sha256": "20b7b71de41589703711ecb8b3e325326b65c90de9b2f1f1d444fc7d1b81d21e",
+      "repeat": 2,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-48"
+    },
+    "jv1-92498ec7fe11906be001fabbb7e927eb9ec4e763": {
+      "body_sha256": "6f32e6504fbe66f43bf1a654d00bf274dfa5ad6ea38d2a542ee31bbc9cc6e04b",
+      "repeat": 1,
+      "sample_id": "jammeval-heron-bench-refined-test-77"
+    },
+    "jv1-925cad02a1b4b76447e6125ebe9d127665278861": {
+      "body_sha256": "6f32e6504fbe66f43bf1a654d00bf274dfa5ad6ea38d2a542ee31bbc9cc6e04b",
+      "repeat": 3,
+      "sample_id": "jammeval-heron-bench-refined-test-77"
+    },
+    "jv1-92952ef7a597223c9610f429a59fe235dff1e07f": {
+      "body_sha256": "351d189f85216c9b86e65621ad2a8b2f7cae822597336b43f36b98d62e1b68af",
+      "repeat": 1,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-49"
+    },
+    "jv1-92d5e558ec7501fafd0ad13c8a4391f5e31385e3": {
+      "body_sha256": "13c65ec0653dbaf0c66120616c1b2bd5c96b0eea24f5c297a0bbecf626949b06",
+      "repeat": 1,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-75"
+    },
+    "jv1-9315766e7fe41346fba95a28d2152f5e70ee9ab5": {
+      "body_sha256": "8e53289345ecc0638debba978b40531c72debe7ace0cdd326818e2cc40baa571",
+      "repeat": 2,
+      "sample_id": "jammeval-heron-bench-refined-test-96"
+    },
+    "jv1-93681ae710669b8c3594be4c2bb09ec8bb85c313": {
+      "body_sha256": "7fe31c19ffed3ea30c1f23c01558d512f90b297c0000ea968e3db17fe3eeb972",
+      "repeat": 3,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-118"
+    },
+    "jv1-938c1d6da27e96ab57c68d07e4734a496562b687": {
+      "body_sha256": "8126979672d47fe683714a38b97c8fec0eb87717d15a13cbb8933f83da18d793",
+      "repeat": 2,
+      "sample_id": "jammeval-heron-bench-refined-test-69"
+    },
+    "jv1-93dbdf7762d49896cb5c59a209ce64fbff97590c": {
+      "body_sha256": "7f4894b6dea206efd0e8c0fb39bf4774dfa871345ef0e0a5df3f3a27c330f516",
+      "repeat": 3,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-79"
+    },
+    "jv1-949753b95e90b85f55628719b64b9c1c39eb7993": {
+      "body_sha256": "7af259be0eac48443e2d589081d02c621dedd90f3565d826d88e0512f318a4dc",
+      "repeat": 2,
+      "sample_id": "jammeval-ja-vlm-bench-refined-test-26"
+    },
+    "jv1-9537e7f67425fb645bc4695c4c7c59129da6cfbf": {
+      "body_sha256": "bc3b3dc7ea545e1e40b98b5cfc7d57c2a5008261ecb5d55d194a5befaf76294a",
+      "repeat": 3,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-86"
+    },
+    "jv1-955e1980174152914041472f3e9aacd5e554043d": {
+      "body_sha256": "44cb339b17954c7682a92db82bacf8b54c5198f4cd1acad6209df19e3eb56520",
+      "repeat": 3,
+      "sample_id": "jammeval-heron-bench-refined-test-62"
+    },
+    "jv1-957e075f1db2865a4c693c9055c15cdb0fce730e": {
+      "body_sha256": "aa081c9cea6b1782350b564d35b48dbae4d39573b08e3e547c8e2366aae2bc01",
+      "repeat": 1,
+      "sample_id": "jammeval-heron-bench-refined-test-14"
+    },
+    "jv1-95f401c648cd0042468b797c99b55f2ca4f6f809": {
+      "body_sha256": "bb3940c3cd91c06e7556dd783f51a44c2c7bc8d1f6832e7f958b23087fa12878",
+      "repeat": 3,
+      "sample_id": "jammeval-heron-bench-refined-test-71"
+    },
+    "jv1-967ff9e5fd686d8691426e5d105dde82c5cab3ae": {
+      "body_sha256": "4575eaeac851ba311e9f7ab27e8cc02466ee129401024f95d713471412c93706",
+      "repeat": 3,
+      "sample_id": "jammeval-heron-bench-refined-test-75"
+    },
+    "jv1-96a5c5be878c3f7c8b8168ebd244eb852b15976e": {
+      "body_sha256": "342bcf54f832712580a5134891426cb2ce6aa1cb775fec22a29e7325166139a7",
+      "repeat": 2,
+      "sample_id": "jammeval-heron-bench-refined-test-29"
+    },
+    "jv1-96d5d4d9ec1a110e56539155c75f0914057a21ae": {
+      "body_sha256": "91b8982e4f5df21b108c9585591c8dae0d586cf80a1401cf12a028a7aff63e0e",
+      "repeat": 1,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-69"
+    },
+    "jv1-96faee87dffbe27898ce8d295cedc6cea33a7c81": {
+      "body_sha256": "72db15b4e913c6cf119db50afcce3a55943755e52b32b12efec85652c37233fd",
+      "repeat": 2,
+      "sample_id": "jammeval-heron-bench-refined-test-28"
+    },
+    "jv1-97045e3442fba91624e28ca94ae6a6dcfda3e2c8": {
+      "body_sha256": "429d880ce909b756e0b6c3c69d9f2f2192a2e8e26ccf785f09c40f145290e416",
+      "repeat": 1,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-10"
+    },
+    "jv1-978b282ffc0a6b09b52fbefd51bcfe78fbf9ddf9": {
+      "body_sha256": "026f9e98715525ff4190f8bdb360745b4f831d630de3c07592e724c0a68943c9",
+      "repeat": 3,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-97"
+    },
+    "jv1-979325aec35bf46ea585b54dfc855bff7c6ca6cf": {
+      "body_sha256": "78f4e13ed350a96c4fe2d72018447cc93ad38afe11cfaf8e922cdf55dc747776",
+      "repeat": 3,
+      "sample_id": "jammeval-heron-bench-refined-test-0"
+    },
+    "jv1-979df5fb7c474863a4b62bad8fe13443e64b64f8": {
+      "body_sha256": "1efcfd73f8c366d7d3982682e7560ec51fd9ac3b6aa5ef7d47f92e4f1f41c0be",
+      "repeat": 1,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-76"
+    },
+    "jv1-981f5d6181143ab3707d72f5be5b33abb790c7eb": {
+      "body_sha256": "84c0ab8258f87072f5a03595d73f3975f2ecd25e338ef0466bf46561985a0b52",
+      "repeat": 3,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-29"
+    },
+    "jv1-9898263ef7de31775359e2b618f5cce95db63b5a": {
+      "body_sha256": "d419326473e6ecd33aa08e30bb98d164106e476471f1034d69047f4e78246ef1",
+      "repeat": 3,
+      "sample_id": "jammeval-heron-bench-refined-test-31"
+    },
+    "jv1-98ac0b49b43a6437ca6ae1c821ef59adfb665950": {
+      "body_sha256": "72db15b4e913c6cf119db50afcce3a55943755e52b32b12efec85652c37233fd",
+      "repeat": 3,
+      "sample_id": "jammeval-heron-bench-refined-test-28"
+    },
+    "jv1-993a9c8be68cc22dd2395ae73c57b29d43daa40b": {
+      "body_sha256": "bfa4830bb9ccdbcc035eba320ffaf497641d359b9b35f8676c7dc601e895df43",
+      "repeat": 1,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-63"
+    },
+    "jv1-9ab5211c778e298362a1e01ba6ec03f0f5322087": {
+      "body_sha256": "0be62e844d23517a7e2286da2d54097a49c093ce62b48a45aeb66c8ea1cdc9a4",
+      "repeat": 3,
+      "sample_id": "jammeval-heron-bench-refined-test-64"
+    },
+    "jv1-9ac4233da7a48f5f5f3ec2f985f2e42509f063b0": {
+      "body_sha256": "bc3b3dc7ea545e1e40b98b5cfc7d57c2a5008261ecb5d55d194a5befaf76294a",
+      "repeat": 2,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-86"
+    },
+    "jv1-9b2bbfe07f49ef33476b52546537f31f03f8c8c2": {
+      "body_sha256": "4d893e657950e248c5e1b5ceee595ae03f452ffbef43b0bebb0532359ea1048c",
+      "repeat": 3,
+      "sample_id": "jammeval-ja-vlm-bench-refined-test-4"
+    },
+    "jv1-9c4f1d6bc632751cae67aeb4de5912e83e29a551": {
+      "body_sha256": "e58817b418b7002ecf40649a6783a338cbe7b26d4a021759cf626a4a0e8de145",
+      "repeat": 1,
+      "sample_id": "jammeval-heron-bench-refined-test-17"
+    },
+    "jv1-9c9035a98c4f4505d6a5d281f0d301a7652c344a": {
+      "body_sha256": "77ce91447ef575d8519c2b819f1a24ba9893210a87713e7dbaaa0be8cd63fa6f",
+      "repeat": 1,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-84"
+    },
+    "jv1-9cbccc1a5e82c2627db93b010b9a988f19a79bf0": {
+      "body_sha256": "6deefc635657becbcbb574495f9699bdfb53779136b6f484d737dd2fd8fac4c5",
+      "repeat": 1,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-24"
+    },
+    "jv1-9cc15364a9dc572db2a0b2fbb3e88484fb3c3b3b": {
+      "body_sha256": "49148cb9b98b235c11097abeeadac19c1d3813aaccc579b6080012ef7ea32972",
+      "repeat": 2,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-53"
+    },
+    "jv1-9d1657e000e301d0e44f3636875b7bda9b048e8a": {
+      "body_sha256": "2573e6b9dff24101128a3c5861393813d436149d41eefbd7093338833e5f6383",
+      "repeat": 3,
+      "sample_id": "jammeval-heron-bench-refined-test-22"
+    },
+    "jv1-9d84d561e358be222a727a857c489ce508b2055b": {
+      "body_sha256": "74996de615402e7a3d07bc17d9ea64c33457d34364621f3a42077ce8bdeb021c",
+      "repeat": 3,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-87"
+    },
+    "jv1-9db0dab2ac053b1f7de996382564b4da970c5123": {
+      "body_sha256": "b776c95c3946b80add6829a9e017c5dc353e025ab1da469fc71e1c1acf64554b",
+      "repeat": 2,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-74"
+    },
+    "jv1-9e54b0946b9362674021bc2b482a0a06e916cda4": {
+      "body_sha256": "259cef520f0ff52385a59047c8197990b8ca3f5bf44b67cfed19496b280f725c",
+      "repeat": 2,
+      "sample_id": "jammeval-heron-bench-refined-test-47"
+    },
+    "jv1-9e8dbea28f3bfa1b2cfc3bfd196c8272d421c6af": {
+      "body_sha256": "72302f4c4fe1d1d4edbddc7bca2bf83fb9969a84ff46ce6559e1f2e9a945aae2",
+      "repeat": 2,
+      "sample_id": "jammeval-heron-bench-refined-test-3"
+    },
+    "jv1-9e948e8af9a26b0537c84a3c128390341d808380": {
+      "body_sha256": "71b1b84eead62f4887622b263615ead51c8bf4a110730981e9750eba2676553e",
+      "repeat": 2,
+      "sample_id": "jammeval-ja-vlm-bench-refined-test-9"
+    },
+    "jv1-9ed52476b777a612813c2b627b3ada8dc6393be2": {
+      "body_sha256": "d9533b55d2546da11069dbb2cb00ff5d2382eceb7149c34b2ff88eb135dc2bdb",
+      "repeat": 3,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-128"
+    },
+    "jv1-9f1eb4f81e23256801c7974fcb92d87fb8bc77b4": {
+      "body_sha256": "fbdafa4f4e8a2c52de2cfe4c9d8d68aa03a3bb4b63f2182ce92459fcd9f21b4e",
+      "repeat": 2,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-25"
+    },
+    "jv1-a004e5fd76f688ca90f21984c8ec3eee6e6163ec": {
+      "body_sha256": "a5bcee667724f7e63523b184ca709123c2b42a0f4eb640df4c3af0f611715ba8",
+      "repeat": 3,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-98"
+    },
+    "jv1-a05aee6340f116a5efa39080170f913ef52a8d9b": {
+      "body_sha256": "53f8a0a93d1ae788ca611895c51534f7bb126a1293761df3662def3ac66d7c2a",
+      "repeat": 2,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-81"
+    },
+    "jv1-a0844a97f2b67d0fed7d2604cc9349c7ef5a703b": {
+      "body_sha256": "6feb2f4c1e4d2397134ef093129e69064968f9b9cee80dbb2911fbb3ad22b819",
+      "repeat": 1,
+      "sample_id": "jammeval-ja-vlm-bench-refined-test-24"
+    },
+    "jv1-a0bdc1cf1649c45ad86bef6f36ce163687effbbd": {
+      "body_sha256": "b18c4ac51f5ee5787247bea6d0018f3f9487928bea87bcab564eccff08fdd419",
+      "repeat": 1,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-32"
+    },
+    "jv1-a19986b7f565c246eae91ef7130c785d8ac8facd": {
+      "body_sha256": "fbdafa4f4e8a2c52de2cfe4c9d8d68aa03a3bb4b63f2182ce92459fcd9f21b4e",
+      "repeat": 3,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-25"
+    },
+    "jv1-a1a357f3114d5370276af3469991c097a69a8082": {
+      "body_sha256": "63dd9c0721871b47723926d47c1fc77828f6cb1651b1486518ef99021545937d",
+      "repeat": 3,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-21"
+    },
+    "jv1-a1c41f31f387abed23d0c054975b19a554e31830": {
+      "body_sha256": "e999a448bdf4f4cfd40050c46d51eb8eab78c8b0dc16c1072afb8ad57ccd4b3d",
+      "repeat": 2,
+      "sample_id": "jammeval-heron-bench-refined-test-23"
+    },
+    "jv1-a23b183584f0acb3412cfb18ff726bdbcab1365f": {
+      "body_sha256": "e430c67673e8d279dbf43a33a1eb8bafc5a760bd16b96c7bafa4acdad4a538e4",
+      "repeat": 1,
+      "sample_id": "jammeval-ja-vlm-bench-refined-test-34"
+    },
+    "jv1-a2533bac89ee7c903669c4bb1303684a2fb5e951": {
+      "body_sha256": "8dcd818963e28d9f1396f0b73608276b71235111f0def5dbef27d4b28ccb1562",
+      "repeat": 3,
+      "sample_id": "jammeval-heron-bench-refined-test-56"
+    },
+    "jv1-a290aba108323f6dea62569bc4dd1e79cb4475cf": {
+      "body_sha256": "2a5cc35646f8ecd77475edf7ba11c170c9bd37599e2daf8265c315e26f26afdd",
+      "repeat": 3,
+      "sample_id": "jammeval-heron-bench-refined-test-70"
+    },
+    "jv1-a2baa3683229e3ebe2f37b617e3c906d36a8ba8d": {
+      "body_sha256": "9e750c22d7913e3b0497e29f0003333857699b1df20172e8222ce611004ba4cf",
+      "repeat": 3,
+      "sample_id": "jammeval-heron-bench-refined-test-2"
+    },
+    "jv1-a2d1366afda11e37375ddd084b8d56b9562f2f09": {
+      "body_sha256": "1c99a961d10cda507f19ebca241e655044a56cc09bfe7de8bded112428f4b4a5",
+      "repeat": 1,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-11"
+    },
+    "jv1-a2dcea954195d56c7c5a23da5ed59c81ac979969": {
+      "body_sha256": "da2f164b6381c03c5936aa2c78416af0a3d8a14955d0f193e91163bbd7d1fe57",
+      "repeat": 1,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-147"
+    },
+    "jv1-a30932356b5df3292653acc43e4d8a0f5344792a": {
+      "body_sha256": "fe4308fd77042695fadda785f9a72d86f6c02249f3b3e1a17197676c129c569c",
+      "repeat": 2,
+      "sample_id": "jammeval-heron-bench-refined-test-74"
+    },
+    "jv1-a35bcdd6b2bdb70bc994ea1983ad5cb2460603e1": {
+      "body_sha256": "02dd0dc0a1222f731426ab21d0cd90c14bed35ba27c15c867870e254c154ce7e",
+      "repeat": 2,
+      "sample_id": "jammeval-heron-bench-refined-test-43"
+    },
+    "jv1-a35e4757d9a1a31fb69d87bba44c9c8f6f1a850d": {
+      "body_sha256": "63dd9c0721871b47723926d47c1fc77828f6cb1651b1486518ef99021545937d",
+      "repeat": 2,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-21"
+    },
+    "jv1-a3fc44e87f91606caa495a654a53b3bd8b34aabf": {
+      "body_sha256": "a4f777917f5cb7cc94ee1032a78b55a20cca9a609ffedfc54318086668f0ee79",
+      "repeat": 1,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-103"
+    },
+    "jv1-a404df489ea76dac8d13083867e5b65e42ac5c67": {
+      "body_sha256": "259cef520f0ff52385a59047c8197990b8ca3f5bf44b67cfed19496b280f725c",
+      "repeat": 1,
+      "sample_id": "jammeval-heron-bench-refined-test-47"
+    },
+    "jv1-a4ce2ab9f96826fef2077d4416f5320462d8c821": {
+      "body_sha256": "b9450ae50d2e6e95f07f0415d7222440132e6270eb5ac499201cb58fa92e18f8",
+      "repeat": 3,
+      "sample_id": "jammeval-ja-vlm-bench-refined-test-16"
+    },
+    "jv1-a4d56be2e354d085016424a41cca5535b85e0518": {
+      "body_sha256": "1f7d343c9f1723385ea40354b5181dcda0ae70e27378baa5ac7b8fad0fec5230",
+      "repeat": 3,
+      "sample_id": "jammeval-heron-bench-refined-test-95"
+    },
+    "jv1-a55582ade5c578d1b6e278231d9a6c00cdfa8322": {
+      "body_sha256": "061c6e6e88a3d34440781197f7ed36ed098b8a74fbf89bbc771eb257cff43312",
+      "repeat": 3,
+      "sample_id": "jammeval-heron-bench-refined-test-55"
+    },
+    "jv1-a561ca17713e438ff1c77ea9ce2b7e55f722d405": {
+      "body_sha256": "73b0c6a155991d515da6bec5fc90764db4071491aa02f536c66782acb8984ca3",
+      "repeat": 3,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-119"
+    },
+    "jv1-a5cdf14dafe732c992144aaecbd126c946541269": {
+      "body_sha256": "6feb2f4c1e4d2397134ef093129e69064968f9b9cee80dbb2911fbb3ad22b819",
+      "repeat": 3,
+      "sample_id": "jammeval-ja-vlm-bench-refined-test-24"
+    },
+    "jv1-a63654e9fb8d4f6c485398245526a34b74ab1a87": {
+      "body_sha256": "8fbc8cb01785c420c65a15bd3f8e261f308b0439cf21a718498d4e34294ea148",
+      "repeat": 1,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-67"
+    },
+    "jv1-a638611d5a32c97c996693ffa3c9d5264727effa": {
+      "body_sha256": "1c66821daaa5867762e5eefd3a2356074c5ff848758c812a3211f65a6db6c5dc",
+      "repeat": 3,
+      "sample_id": "jammeval-heron-bench-refined-test-37"
+    },
+    "jv1-a6a3edf819af6cce850c8decc1d02ce99db3484d": {
+      "body_sha256": "0e9c8c95ed8b7f068b1fc0c092b8cbd8cd6e46791aea532188625b2a85722eb9",
+      "repeat": 3,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-141"
+    },
+    "jv1-a6d5f81c40aaf211ee09df05f86a745a4374b95d": {
+      "body_sha256": "01528929f135af3ac558fbb678249492e4c37ccab8ffec3d806243303e809e26",
+      "repeat": 1,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-60"
+    },
+    "jv1-a7d185ff48050dcb4b20ed8006483316c1b1c650": {
+      "body_sha256": "19ce13625cb53f2c6214c2a6e6849c42767504ec5c14b0b36223ce2961ef40f6",
+      "repeat": 3,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-130"
+    },
+    "jv1-a81ecaacf1cfe78cccc936b4038418a478bfa619": {
+      "body_sha256": "1f65c3b9622bfb668e85ebed6b96a6f52bc581952dc3a82fde682abda01b6212",
+      "repeat": 3,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-55"
+    },
+    "jv1-a86bd6cd88e4f8795d0988506026384729c92049": {
+      "body_sha256": "07c3326e9d03c04fd0be4b549235aec26b73182fa34fde5da984ee684ceb53de",
+      "repeat": 2,
+      "sample_id": "jammeval-ja-vlm-bench-refined-test-12"
+    },
+    "jv1-a87de60e151caa41358dcf0af0f20c50240a5c71": {
+      "body_sha256": "78f4e13ed350a96c4fe2d72018447cc93ad38afe11cfaf8e922cdf55dc747776",
+      "repeat": 1,
+      "sample_id": "jammeval-heron-bench-refined-test-0"
+    },
+    "jv1-a8a7e7958ea1363ea40de48a6619544d52999324": {
+      "body_sha256": "f1e5f71d894a0350b0c3bf5496cce23ef10be063700b439d998f080e107f9de2",
+      "repeat": 1,
+      "sample_id": "jammeval-heron-bench-refined-test-13"
+    },
+    "jv1-a8fbff2c24b21c9cdd6faae88862a1dd67953af3": {
+      "body_sha256": "47f001086176c2a9191054adf88682c18621deffc5340eb2f01326597cbaeec2",
+      "repeat": 1,
+      "sample_id": "jammeval-heron-bench-refined-test-93"
+    },
+    "jv1-a9198e5043c29f95b850e49cecfb405a63088c1d": {
+      "body_sha256": "8c90d36e39a28bb13f8def7650660cc54d07fd1c0e38237f0f8673141dfb8cd4",
+      "repeat": 3,
+      "sample_id": "jammeval-ja-vlm-bench-refined-test-3"
+    },
+    "jv1-a91ba16dae23cb5a769217cd47bf9e2ddaa976eb": {
+      "body_sha256": "b9450ae50d2e6e95f07f0415d7222440132e6270eb5ac499201cb58fa92e18f8",
+      "repeat": 2,
+      "sample_id": "jammeval-ja-vlm-bench-refined-test-16"
+    },
+    "jv1-a92f95a6a3018bcffe124cd6595b2f67b199d5ac": {
+      "body_sha256": "9c462f9a5cd33a96611de0f2477c00c50f08c48067e46a11d32f191c1bc4987a",
+      "repeat": 3,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-105"
+    },
+    "jv1-a99b77835602ff760f44dda48a72819361250e20": {
+      "body_sha256": "41cb94d41686309125de772477f82b7708ea12f6afe1c8d8679c3783a941002e",
+      "repeat": 3,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-65"
+    },
+    "jv1-a9b7169a8acd169d2f3a5f4c60c064a690743988": {
+      "body_sha256": "dd8088fa62e977682b5351cd1b19da8a152bad371168c3f6d1aee0cb223b5437",
+      "repeat": 2,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-134"
+    },
+    "jv1-aa0c3e873eeb6e7b9d55e48c09d2802dd21417a3": {
+      "body_sha256": "4575eaeac851ba311e9f7ab27e8cc02466ee129401024f95d713471412c93706",
+      "repeat": 1,
+      "sample_id": "jammeval-heron-bench-refined-test-75"
+    },
+    "jv1-aa256991e33519b10960f3f70674f818c6e3eca2": {
+      "body_sha256": "b140c7109cd710f5dd7905245424397af61294c00460b9c1bbd0afa90996a574",
+      "repeat": 1,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-12"
+    },
+    "jv1-aa655f55ab88077b7258cbd3fb72bda449ad9c2c": {
+      "body_sha256": "10297503da93ec2e765ffab47f4a72bfcb1bc7fc75f7bddb68d2270eb0d72d27",
+      "repeat": 1,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-146"
+    },
+    "jv1-aa992d778c5c41ee6d4ef39735d910fe1d107062": {
+      "body_sha256": "d36904c1d4d025fcad30573fc045d9f3d9f1fe144c4ae2a4a03ce10cb6211132",
+      "repeat": 2,
+      "sample_id": "jammeval-ja-vlm-bench-refined-test-8"
+    },
+    "jv1-aae6e7a2cacad317c8b65e3025318531c9b62f4a": {
+      "body_sha256": "49b51166da5ad5b5fa4bfea29de47c8f61f5f6ad2c236a45b2bffd6a65bd5ad7",
+      "repeat": 3,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-96"
+    },
+    "jv1-ab0194b473d284d88fa01c725460b16f6be70711": {
+      "body_sha256": "7333bb3e2e5344ff687c08e79a43182b5f36208cbe36eb6431a582d33b530771",
+      "repeat": 1,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-110"
+    },
+    "jv1-ab259516c070b3723951803779292a445a11ac07": {
+      "body_sha256": "8044db692f414257724b8340adca942470d5b2095e3ad2a570b1ddef185d6f21",
+      "repeat": 1,
+      "sample_id": "jammeval-ja-vlm-bench-refined-test-41"
+    },
+    "jv1-ab2b256ed8a2a62b42f6bf9c3b701aa4e53f493b": {
+      "body_sha256": "db4f330b654006e88e1941fa0492d8a71beae684dc58c9a16e06274028e50185",
+      "repeat": 2,
+      "sample_id": "jammeval-heron-bench-refined-test-66"
+    },
+    "jv1-abb09a978ddfe6e56a2b9b085352b7a1ac1081d7": {
+      "body_sha256": "e1a1b55215bf68005f4f0ae0b6eba445e94c8914b3bb3490dd24b069c92c48e2",
+      "repeat": 3,
+      "sample_id": "jammeval-heron-bench-refined-test-52"
+    },
+    "jv1-abc1b142d61a776c9fcba163de3aeaa9a68e5b97": {
+      "body_sha256": "11b0e34ef5c5cd166afea41253859b77f4fd6c8172cb138658aef4bb8152cbd4",
+      "repeat": 2,
+      "sample_id": "jammeval-heron-bench-refined-test-59"
+    },
+    "jv1-ac007c9a4973cfa42f0295c3757468b08e4cba12": {
+      "body_sha256": "10297503da93ec2e765ffab47f4a72bfcb1bc7fc75f7bddb68d2270eb0d72d27",
+      "repeat": 3,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-146"
+    },
+    "jv1-ac2f21db97c078bd391751ac038f2a51e3ff7ce0": {
+      "body_sha256": "67e9a9f180400be8d08bbea7532e62b752dbe07efa2e8b4c3792a071a2715852",
+      "repeat": 3,
+      "sample_id": "jammeval-heron-bench-refined-test-53"
+    },
+    "jv1-ac6a5bd793e2e98e6fd64e816cfdaa08102aad2a": {
+      "body_sha256": "8bb8d1967de4a198ce7add5ee2a3de75ab02c09b52bc71e487945eaab2126d6b",
+      "repeat": 1,
+      "sample_id": "jammeval-ja-vlm-bench-refined-test-37"
+    },
+    "jv1-ac7d078907e2db4fbae1be6d0ae16d42f5e802a1": {
+      "body_sha256": "c2669cd86718a7ff20fa7d32be3aa83577ed14b2b090f397a091ba9620f35caa",
+      "repeat": 3,
+      "sample_id": "jammeval-ja-vlm-bench-refined-test-29"
+    },
+    "jv1-acec307f4da28ca3dd9436c7ba8e9df0c5994485": {
+      "body_sha256": "caa46b569b1396bef6727c0dd1a25d6543b7cee5c0fb58de5bfb021fb208cca1",
+      "repeat": 1,
+      "sample_id": "jammeval-heron-bench-refined-test-39"
+    },
+    "jv1-ad13c2608f2df51006458ae7909e6415c8f63f85": {
+      "body_sha256": "7078a37523cffb783926c92c848b79866dc815d07756fd562d755933ab5d8385",
+      "repeat": 3,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-8"
+    },
+    "jv1-ad6d392445fd11cc638fc47f6779edb1ff926957": {
+      "body_sha256": "adcdc9d2d453ee1ccef61047f8d864d52dd9de9f185c54c7d4edb5a680708af9",
+      "repeat": 2,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-4"
+    },
+    "jv1-ad7f5e2ed828ce7b159736c9b9c93faf501ba6a5": {
+      "body_sha256": "dd881c2d568b6f93374fb418b890d8706fddff63b8bb598721fed9b716516a0f",
+      "repeat": 1,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-116"
+    },
+    "jv1-ae468c2f792076c7362b35ed6601a2b243305b35": {
+      "body_sha256": "8c4d6c2766b14ec7b5fb55f406d47f43c8cfcdecd0db5fe34ae65bf1fa82faf0",
+      "repeat": 2,
+      "sample_id": "jammeval-heron-bench-refined-test-51"
+    },
+    "jv1-ae70b0e708ec35eec9d32d0b0e11ba689e0dfe4e": {
+      "body_sha256": "71a334ae8f5ea2ca492fa3155be4d339ceba375502faba1f7cb98c51636b614f",
+      "repeat": 3,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-23"
+    },
+    "jv1-ae789670de983edafc820f5627028596c0f9033d": {
+      "body_sha256": "e5c6c19cc23e30c2af25b5b76f8d79e8ce266de818f513b6148eb21a159aa9fd",
+      "repeat": 1,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-1"
+    },
+    "jv1-aeb8fd7d8366b1f017bef81b34a2fded05a9d5c8": {
+      "body_sha256": "2ebc280ed8be4dd0a39670ee705c7712dc465457e42193ba516a52fadf8e4461",
+      "repeat": 3,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-131"
+    },
+    "jv1-af2077d0909c5525dc18d84f821e8c8db07db0cf": {
+      "body_sha256": "f0b375cdd06af641ce0cce71cce01b2777da43d1bb2536995d37eb6e4a47830e",
+      "repeat": 3,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-94"
+    },
+    "jv1-afa880999177f8016b7716c0f4252a3e50702544": {
+      "body_sha256": "a14f891296452f21b6eb816f45d351f311eae7af1950ac3fd2caa7115f34a503",
+      "repeat": 1,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-6"
+    },
+    "jv1-afcb224a877c2c7a33b1b24eb5535acc23b90131": {
+      "body_sha256": "4575eaeac851ba311e9f7ab27e8cc02466ee129401024f95d713471412c93706",
+      "repeat": 2,
+      "sample_id": "jammeval-heron-bench-refined-test-75"
+    },
+    "jv1-afeac4ab82c9c7d012a60e0540ce77197182951c": {
+      "body_sha256": "026f9e98715525ff4190f8bdb360745b4f831d630de3c07592e724c0a68943c9",
+      "repeat": 1,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-97"
+    },
+    "jv1-b02f06fa8a13550e3a65cfd09d8aa69bf4d3aa9b": {
+      "body_sha256": "3a3c2a727d1d6673cd8a1dc1626b5ba1a940976d14666082ed5f56158ed207d2",
+      "repeat": 1,
+      "sample_id": "jammeval-heron-bench-refined-test-50"
+    },
+    "jv1-b09b4b23d701a4c70cf800b430360515a414206d": {
+      "body_sha256": "5d68f2033cc440ac7de505281d63bb8bb35543ed4f6971edc219b81146196bfa",
+      "repeat": 2,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-138"
+    },
+    "jv1-b0d39d5c062264353ee6b5f3fa60ca9281c40852": {
+      "body_sha256": "5d68f2033cc440ac7de505281d63bb8bb35543ed4f6971edc219b81146196bfa",
+      "repeat": 1,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-138"
+    },
+    "jv1-b1098cba4a94a9b92b148797133162280141d01b": {
+      "body_sha256": "02dd0dc0a1222f731426ab21d0cd90c14bed35ba27c15c867870e254c154ce7e",
+      "repeat": 3,
+      "sample_id": "jammeval-heron-bench-refined-test-43"
+    },
+    "jv1-b1a4f8c0572ec883662d16f9c165af48695d0c7d": {
+      "body_sha256": "7b0e42a7e9604e2ddb3ccf585e5ff359cd2702b61639bd3e1f3bb6be1cb1bb92",
+      "repeat": 2,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-19"
+    },
+    "jv1-b1b26a37b79dcb386971c7cdc121c4cde497532e": {
+      "body_sha256": "cb9fb1062731ff6275f1c1ac7f75a12b01934594fdd2b1e67601f69f57a7dafd",
+      "repeat": 1,
+      "sample_id": "jammeval-ja-vlm-bench-refined-test-15"
+    },
+    "jv1-b1b279e9b6cb7502e97450fd8fbc336c45c1cb4c": {
+      "body_sha256": "143b32250c51a264ede2f57ea6609462945aec98149cdb6d271f716612e6b747",
+      "repeat": 1,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-124"
+    },
+    "jv1-b20ed5537bb57f1743e6bccf21457e0737967f3e": {
+      "body_sha256": "9683538030a6601dfbf3afa6aa045d40a522355b280c417950947da6f9f0798b",
+      "repeat": 2,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-45"
+    },
+    "jv1-b280fd4afb433e1cac466c08c1742f20d89df9b5": {
+      "body_sha256": "95cba5e58361084511d3b6df3a21653acb5009e7b2397cddce9de5690e85ff99",
+      "repeat": 2,
+      "sample_id": "jammeval-heron-bench-refined-test-80"
+    },
+    "jv1-b31690b1f15740017e64e3ecaf7629fcce7d6187": {
+      "body_sha256": "7b0e42a7e9604e2ddb3ccf585e5ff359cd2702b61639bd3e1f3bb6be1cb1bb92",
+      "repeat": 1,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-19"
+    },
+    "jv1-b32508efc0f1b049c2a21a557daea3eb47983325": {
+      "body_sha256": "2104627e9d253eb5a9c7977bed1b3eea821f1318ac86ce2a6b8770162b3fc363",
+      "repeat": 1,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-137"
+    },
+    "jv1-b33211932924f2eca40420f82efde6f71cf1ac68": {
+      "body_sha256": "e3316e27d173cf5aa15363f72874e1eec15a16797cbdea628c18db967f63d445",
+      "repeat": 3,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-27"
+    },
+    "jv1-b33afcf23ff85c29f0008ceb6236c7c5afd67c7f": {
+      "body_sha256": "085c30261c1a76cd495fc665f3dec0c759d8b958ca2bc680e3c5e7bc4279c263",
+      "repeat": 2,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-104"
+    },
+    "jv1-b42040d82f6f98abf488f8c45dddcd9bebd98942": {
+      "body_sha256": "840e9c5e08b190dc2a356bb7056164b226b2b0241ac94251469a477685558fe9",
+      "repeat": 2,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-112"
+    },
+    "jv1-b451d6f0ef98f64a5cb8b0e95d09c9b2a4a57e27": {
+      "body_sha256": "465968620c49b07b2e420080801c68eb7095dd07b6f867ada67170e635ffde3d",
+      "repeat": 3,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-95"
+    },
+    "jv1-b4887b0c0d57ac92618efa24c06fc133139111a4": {
+      "body_sha256": "7e8d8e1218ccba5316623c26fb232e6d1c54a609a0699a0981ea584f30855689",
+      "repeat": 3,
+      "sample_id": "jammeval-ja-vlm-bench-refined-test-33"
+    },
+    "jv1-b57cc43f271704fb527d35ed7bbe32f30fcd698a": {
+      "body_sha256": "9c15cdf11390311edb18023738c035d28b868e3f99f2e01a5b0d3887a8161e21",
+      "repeat": 3,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-51"
+    },
+    "jv1-b5b154cd1e6fd7ea536ed1079eefd2d2cf5cd4aa": {
+      "body_sha256": "a92fa993167210d0dd0c528d8be46beaf09040efbb390e610f21f9e8fcde1558",
+      "repeat": 3,
+      "sample_id": "jammeval-heron-bench-refined-test-5"
+    },
+    "jv1-b61da8431441afa2433b66d1d2f96ac34e400db5": {
+      "body_sha256": "3fe5165115cf418b8c0435b95e5b719e1e10a9df98e97555fba1362af223467e",
+      "repeat": 1,
+      "sample_id": "jammeval-heron-bench-refined-test-41"
+    },
+    "jv1-b6e399830e43b0a8b9cb91c0db2f5af493d9bf7f": {
+      "body_sha256": "429d880ce909b756e0b6c3c69d9f2f2192a2e8e26ccf785f09c40f145290e416",
+      "repeat": 3,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-10"
+    },
+    "jv1-b75edac7d1c8363a38159871c2e49801b3a26507": {
+      "body_sha256": "6ccd7d72cdabb59301fe42d7022734b94152dd4f987318051c8fe1da7db20749",
+      "repeat": 1,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-35"
+    },
+    "jv1-b786e0a88d0b7cec91a4e09e4c29ba1befa52415": {
+      "body_sha256": "1dc607d5a895d0a71468986b1933b686c6257d75ad90c65f86321c6dd26a014f",
+      "repeat": 3,
+      "sample_id": "jammeval-ja-vlm-bench-refined-test-17"
+    },
+    "jv1-b7bd8de61a994af074de4735309f2472c5b03843": {
+      "body_sha256": "49a37b6795976b6d8643fed102bac687272c690524593ef32789c10ba540bf60",
+      "repeat": 3,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-145"
+    },
+    "jv1-b7d08c64689b0679f811274f8c472da7670cd2cd": {
+      "body_sha256": "2bfd40c2e2a2fc241759f0070d36095b6216e02bd58a09d3cd4b4920cf687c09",
+      "repeat": 1,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-47"
+    },
+    "jv1-b812d2841997682eb51c78766779a7eccd01f906": {
+      "body_sha256": "50155086d5b2f4e044dc6377fe8e4b3a1427edcbaeb4772fbe25edfe04c2ee36",
+      "repeat": 1,
+      "sample_id": "jammeval-ja-vlm-bench-refined-test-43"
+    },
+    "jv1-b88fa1383fe775a773bdf736afd35bdc823455b7": {
+      "body_sha256": "5fb75f8b3c31b57c0b8f1a86a123b7525842c1d4f709b789920971a4f3c19f71",
+      "repeat": 3,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-44"
+    },
+    "jv1-b9582ca7dc2a43b0ea774f0c18211925c14a97f4": {
+      "body_sha256": "cd5ed469eef927805ed45d0c0e254db646e9b328d77f3d15cc2731ee5cd3394f",
+      "repeat": 1,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-26"
+    },
+    "jv1-b97789736a00bab94a241b3071c9bf7bd99adec1": {
+      "body_sha256": "9c36e6f60ec198836246623335b5ca8a7dba6b68233427bb6a9b093763ce3e33",
+      "repeat": 1,
+      "sample_id": "jammeval-ja-vlm-bench-refined-test-2"
+    },
+    "jv1-ba548fa798af329c2764dae6bb7e252e0860f457": {
+      "body_sha256": "342bcf54f832712580a5134891426cb2ce6aa1cb775fec22a29e7325166139a7",
+      "repeat": 3,
+      "sample_id": "jammeval-heron-bench-refined-test-29"
+    },
+    "jv1-ba64f10ff509ec407ad92bd9c5bcc15d6483f1e7": {
+      "body_sha256": "6ccd7d72cdabb59301fe42d7022734b94152dd4f987318051c8fe1da7db20749",
+      "repeat": 2,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-35"
+    },
+    "jv1-bb7d7ffe931fc9761582f46877710a22f89b59e8": {
+      "body_sha256": "432ba928d34c9dcb892e1db4f7df82fd9366dc01ab0a521f41308c4c8d3e92c5",
+      "repeat": 3,
+      "sample_id": "jammeval-heron-bench-refined-test-38"
+    },
+    "jv1-bba02bfa0d5fb3ad816f80a8d7d0c94ca382586d": {
+      "body_sha256": "53f8a0a93d1ae788ca611895c51534f7bb126a1293761df3662def3ac66d7c2a",
+      "repeat": 1,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-81"
+    },
+    "jv1-bbc709bffc9ed30bf97ce54f3553239236b7a827": {
+      "body_sha256": "bb12a388ef0e5a7afc0f992bc1e02ed84cabea4c8712d1fda974fc758e057313",
+      "repeat": 3,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-22"
+    },
+    "jv1-bbf56b05cdea5fc8a305fa5075c17e673ef7cd4a": {
+      "body_sha256": "061c6e6e88a3d34440781197f7ed36ed098b8a74fbf89bbc771eb257cff43312",
+      "repeat": 1,
+      "sample_id": "jammeval-heron-bench-refined-test-55"
+    },
+    "jv1-bc4d14e0269d97baa53e40f4f009967cc99016e0": {
+      "body_sha256": "809ba99193b8e0e115a27144d2be2e41d5633cf4e0202e18dd055b013e783355",
+      "repeat": 3,
+      "sample_id": "jammeval-heron-bench-refined-test-19"
+    },
+    "jv1-bc836787781bb99985d1a6a5ae09e97733b89ee0": {
+      "body_sha256": "db4f330b654006e88e1941fa0492d8a71beae684dc58c9a16e06274028e50185",
+      "repeat": 1,
+      "sample_id": "jammeval-heron-bench-refined-test-66"
+    },
+    "jv1-bc89de2acf2a67291d43a4958ca4e3c277798e5a": {
+      "body_sha256": "9cf1953e0986010276365992832ad72877ade987b0320b6d5ba32d46adba45cc",
+      "repeat": 1,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-89"
+    },
+    "jv1-bd0603d77e889bdc6008d765a692eb2d2acb7efb": {
+      "body_sha256": "aa081c9cea6b1782350b564d35b48dbae4d39573b08e3e547c8e2366aae2bc01",
+      "repeat": 3,
+      "sample_id": "jammeval-heron-bench-refined-test-14"
+    },
+    "jv1-bd4513790de143bd759ed2f8773058a3172d3b92": {
+      "body_sha256": "16490a8837ee1759004977813e0b27cfee0e64a50d04fe9a1f6a73c05c44328e",
+      "repeat": 2,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-149"
+    },
+    "jv1-be36d0e3b972843b965e53d2ba886ab697cc1f78": {
+      "body_sha256": "c7520ab43bbf9f43160cd7b561b1af2cb1acd20ee3f89eee506a5afa977f01d1",
+      "repeat": 1,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-52"
+    },
+    "jv1-beacd0b602b387704a120d2d48f341e5f71fe4ef": {
+      "body_sha256": "5273cd2002c19c060a8fcac67dcd0f5c90eb6463d9c77e3bd3ed8a5e025d803a",
+      "repeat": 2,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-56"
+    },
+    "jv1-bf32ee6be279356353e8dcd6a9f8965a5789b20e": {
+      "body_sha256": "1c66821daaa5867762e5eefd3a2356074c5ff848758c812a3211f65a6db6c5dc",
+      "repeat": 2,
+      "sample_id": "jammeval-heron-bench-refined-test-37"
+    },
+    "jv1-bfb1f64f51ebf9ecc2498c909d1631bd5830713f": {
+      "body_sha256": "3bbf9cc50b3aaf8daa68f02678ed1cdfbcfc3247490f554a9398a27b2b56f44b",
+      "repeat": 3,
+      "sample_id": "jammeval-heron-bench-refined-test-15"
+    },
+    "jv1-bff9406e6891e6821ff27637aed2aed6eaf09ec6": {
+      "body_sha256": "aa776bc72e9e91e64d701dfd32d5458f24f8d9d4d45be2ac1fd3548641d8cc18",
+      "repeat": 3,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-117"
+    },
+    "jv1-c00bb661b68f43a63145cd2e2cebd5638a25cefa": {
+      "body_sha256": "20b7b71de41589703711ecb8b3e325326b65c90de9b2f1f1d444fc7d1b81d21e",
+      "repeat": 3,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-48"
+    },
+    "jv1-c07ee20fa24d5875f29ae12e4589b7a3f645b4f9": {
+      "body_sha256": "63dd9c0721871b47723926d47c1fc77828f6cb1651b1486518ef99021545937d",
+      "repeat": 1,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-21"
+    },
+    "jv1-c0907fb1dc3337ffa020ffed7175b53b09e05910": {
+      "body_sha256": "91225c3ca2722c946632c7a60ab4e741b91e26b2c6cc67bd175896c73f6088c7",
+      "repeat": 3,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-3"
+    },
+    "jv1-c0f2630073e84bf56394d667040ddf1809cea652": {
+      "body_sha256": "9683538030a6601dfbf3afa6aa045d40a522355b280c417950947da6f9f0798b",
+      "repeat": 1,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-45"
+    },
+    "jv1-c0f357a2d10d83c479dd4ac5bb402f569a13320f": {
+      "body_sha256": "71b1b84eead62f4887622b263615ead51c8bf4a110730981e9750eba2676553e",
+      "repeat": 1,
+      "sample_id": "jammeval-ja-vlm-bench-refined-test-9"
+    },
+    "jv1-c0fa0532c61cd8932fa78111cff9702cad3daf3b": {
+      "body_sha256": "72302f4c4fe1d1d4edbddc7bca2bf83fb9969a84ff46ce6559e1f2e9a945aae2",
+      "repeat": 3,
+      "sample_id": "jammeval-heron-bench-refined-test-3"
+    },
+    "jv1-c103bd8d4e1f87710696ebd26db9691d1d680c1f": {
+      "body_sha256": "8dcd818963e28d9f1396f0b73608276b71235111f0def5dbef27d4b28ccb1562",
+      "repeat": 2,
+      "sample_id": "jammeval-heron-bench-refined-test-56"
+    },
+    "jv1-c190f737080872fed729ca5469ea3916d8f5f49f": {
+      "body_sha256": "b03d70cb47d070c806cfcfde7be1796d70319285f37bc677a447c5bdbb371dae",
+      "repeat": 3,
+      "sample_id": "jammeval-heron-bench-refined-test-12"
+    },
+    "jv1-c1b3a995f750fd8c6acc347295ae12199c9452bf": {
+      "body_sha256": "8fdb74a34947780719ff8b12427cf2da21be992ed622e07455043a801dec8e72",
+      "repeat": 3,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-90"
+    },
+    "jv1-c2290d01ceb1305a0efcfcb565811b36644c8471": {
+      "body_sha256": "73b0c6a155991d515da6bec5fc90764db4071491aa02f536c66782acb8984ca3",
+      "repeat": 2,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-119"
+    },
+    "jv1-c278b2b16a7556e8461689b9060fce661ad3ceb0": {
+      "body_sha256": "27af2b785ee77184dc9a4b50c79271ceed35260f780237a04fa72258cc96a2bc",
+      "repeat": 2,
+      "sample_id": "jammeval-ja-vlm-bench-refined-test-47"
+    },
+    "jv1-c309101968eaaf0c3b0b78bd20cca72d020ef2ea": {
+      "body_sha256": "a5e1b76cafa2e6b8355defa75739f9aac2d3454a95c6b49b1c1564dca07ff568",
+      "repeat": 1,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-7"
+    },
+    "jv1-c3b37739794c798e4ee4856d75b530507bce8574": {
+      "body_sha256": "8fbc8cb01785c420c65a15bd3f8e261f308b0439cf21a718498d4e34294ea148",
+      "repeat": 3,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-67"
+    },
+    "jv1-c3b458f3c7fadd606d83ce21d0c9e00bb36d1b5c": {
+      "body_sha256": "fd5c1fc5f7bff31f35c69e32d13f87cdfd980c66b51dcc699d827cccf61a9145",
+      "repeat": 2,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-85"
+    },
+    "jv1-c3c17093018cb22696911ae1fd06b647cdbea553": {
+      "body_sha256": "9683538030a6601dfbf3afa6aa045d40a522355b280c417950947da6f9f0798b",
+      "repeat": 3,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-45"
+    },
+    "jv1-c3ee60fd4344d9d8a67dc70639c22777082958f9": {
+      "body_sha256": "bb3940c3cd91c06e7556dd783f51a44c2c7bc8d1f6832e7f958b23087fa12878",
+      "repeat": 1,
+      "sample_id": "jammeval-heron-bench-refined-test-71"
+    },
+    "jv1-c49426043d59627df6540973057a3ebdbef887db": {
+      "body_sha256": "760ba60e157eb8646131e849b4bac1363633e887b266cb9bd75c1f9ec4c125c8",
+      "repeat": 1,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-122"
+    },
+    "jv1-c52dca517b15ac905ec641e8700a28c9baff4f3e": {
+      "body_sha256": "1c99a961d10cda507f19ebca241e655044a56cc09bfe7de8bded112428f4b4a5",
+      "repeat": 3,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-11"
+    },
+    "jv1-c566e658991b6a1398cf373f24cc00dd344adc3f": {
+      "body_sha256": "1e69a0befa9ac9dcb19c40214e8b5dbd1532f670b8529d2407a2245b54442c3e",
+      "repeat": 3,
+      "sample_id": "jammeval-heron-bench-refined-test-8"
+    },
+    "jv1-c57e7ef45a91092453fd9d26e8d59dcce972924f": {
+      "body_sha256": "6a87973b087efdd4f57bd184610be4ec6d04818769498bf2e5993ffb2184a93f",
+      "repeat": 3,
+      "sample_id": "jammeval-heron-bench-refined-test-88"
+    },
+    "jv1-c58af518e00ea83dca9c2d98be689283a2a38934": {
+      "body_sha256": "30fdcc4d57942ec71b738738c064d80ce1fd5820b809ff06e0efae4edab76992",
+      "repeat": 3,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-61"
+    },
+    "jv1-c5b5e29860885ebc08b2edeae1a05bca2d18f01d": {
+      "body_sha256": "348a8d56b00e97c21896b3aa67c43bf46e32af2940c061c2eb008f33bbaa7d36",
+      "repeat": 2,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-80"
+    },
+    "jv1-c618bd3d8f71b28947421e88655434ae57fe0458": {
+      "body_sha256": "4dbc00729df371cdd2715861a317cd3ccae3133153cd98357217ee11128e5783",
+      "repeat": 2,
+      "sample_id": "jammeval-heron-bench-refined-test-46"
+    },
+    "jv1-c6432195c12305c8c009a261fd40db015b6946b3": {
+      "body_sha256": "c4ec87b853ccbe2fe10062e862b2df163b4c593b63e16d3b22ffe45da92c6a29",
+      "repeat": 3,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-68"
+    },
+    "jv1-c66d5079bcef840f9fc0f64b5c7623fd97cfc62f": {
+      "body_sha256": "7af259be0eac48443e2d589081d02c621dedd90f3565d826d88e0512f318a4dc",
+      "repeat": 1,
+      "sample_id": "jammeval-ja-vlm-bench-refined-test-26"
+    },
+    "jv1-c698b3f73ae84da78b4b5241277163d2a10f61ae": {
+      "body_sha256": "ff3a1b37c6643495bc18e0b7d7a3d2c6e6d21b3b6d486514114a41fbfff51bbd",
+      "repeat": 2,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-5"
+    },
+    "jv1-c7f864bd9bef9117c4b5c7beaf2cdd1988a37fb7": {
+      "body_sha256": "c03d8d4f192880cf6431db0ec144c6cbdd568f01378de1f7d4890c3f43ffe3bb",
+      "repeat": 1,
+      "sample_id": "jammeval-heron-bench-refined-test-4"
+    },
+    "jv1-c83424d11cbe135c0eb509111d86e960572dfd02": {
+      "body_sha256": "0023f2380054f953586dc560682919104943f4c350b2024fcee0015b4ea3bc50",
+      "repeat": 2,
+      "sample_id": "jammeval-heron-bench-refined-test-100"
+    },
+    "jv1-c8d2576af556c6271fe762d81c62a7dafc42ccd2": {
+      "body_sha256": "e1a1b55215bf68005f4f0ae0b6eba445e94c8914b3bb3490dd24b069c92c48e2",
+      "repeat": 2,
+      "sample_id": "jammeval-heron-bench-refined-test-52"
+    },
+    "jv1-c8dba9da1b1dd9586c43838e560dffef14fdf108": {
+      "body_sha256": "bb3940c3cd91c06e7556dd783f51a44c2c7bc8d1f6832e7f958b23087fa12878",
+      "repeat": 2,
+      "sample_id": "jammeval-heron-bench-refined-test-71"
+    },
+    "jv1-ca147896b639d4a412a89368286ccf01ca056104": {
+      "body_sha256": "8c0f8f61dfe75412ac95827a3f38a8ff51894301366d1a2807d4916e9cf57b96",
+      "repeat": 2,
+      "sample_id": "jammeval-heron-bench-refined-test-26"
+    },
+    "jv1-ca471518fde24fba2972aa88a8887d79461822d6": {
+      "body_sha256": "5678cb92f3c7dcbc806933f9e4169b9889480e84ade5222588e05616b3273df3",
+      "repeat": 2,
+      "sample_id": "jammeval-heron-bench-refined-test-58"
+    },
+    "jv1-ca56e8748f4a2e9070ef1895a0519d605db2e1ac": {
+      "body_sha256": "2cd19a95979d9ee38898db712479858791f8feb531b75942c53b55ab7deae53f",
+      "repeat": 3,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-71"
+    },
+    "jv1-ca8edad29e8e8687db3a5b2968295bb013b8d61f": {
+      "body_sha256": "dd8088fa62e977682b5351cd1b19da8a152bad371168c3f6d1aee0cb223b5437",
+      "repeat": 3,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-134"
+    },
+    "jv1-cad0b238f4151a5a530e8c4efb2c9c719f0549d9": {
+      "body_sha256": "e999a448bdf4f4cfd40050c46d51eb8eab78c8b0dc16c1072afb8ad57ccd4b3d",
+      "repeat": 3,
+      "sample_id": "jammeval-heron-bench-refined-test-23"
+    },
+    "jv1-cb1a8715b8a4541ba4f0a71811d767dffd2fa391": {
+      "body_sha256": "11b0e34ef5c5cd166afea41253859b77f4fd6c8172cb138658aef4bb8152cbd4",
+      "repeat": 1,
+      "sample_id": "jammeval-heron-bench-refined-test-59"
+    },
+    "jv1-cbd3199b596e8a57ef6383ed38cecb909640be49": {
+      "body_sha256": "e430c67673e8d279dbf43a33a1eb8bafc5a760bd16b96c7bafa4acdad4a538e4",
+      "repeat": 2,
+      "sample_id": "jammeval-ja-vlm-bench-refined-test-34"
+    },
+    "jv1-cbd5b842a5db7d93700f35bfea69c4a0f7f20f14": {
+      "body_sha256": "09cd8c3ac51ed4ce2f3edbdfb1914c92108785b3a9704a265e9e0641f3bca995",
+      "repeat": 3,
+      "sample_id": "jammeval-heron-bench-refined-test-61"
+    },
+    "jv1-ccb54e4d1d58fccc3ba3642a585ffbf6c8619141": {
+      "body_sha256": "42a68ba787c13208ab2322c63d620f54b9254af2948216dd417645225f3c9700",
+      "repeat": 1,
+      "sample_id": "jammeval-heron-bench-refined-test-79"
+    },
+    "jv1-ccd14ec4d91440ce40cc5b70007848c69f98f77d": {
+      "body_sha256": "bb12a388ef0e5a7afc0f992bc1e02ed84cabea4c8712d1fda974fc758e057313",
+      "repeat": 1,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-22"
+    },
+    "jv1-ccd345bf9537b03558c31b69d4bf2ae1150ffd30": {
+      "body_sha256": "7333bb3e2e5344ff687c08e79a43182b5f36208cbe36eb6431a582d33b530771",
+      "repeat": 3,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-110"
+    },
+    "jv1-cd0da79409e4ac9c596ff12524201b0df39c4030": {
+      "body_sha256": "7f2f9ddcf52056a7ffa6d4686f01421e3f37edae78a7e5a319ea9cef3f07adb9",
+      "repeat": 1,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-106"
+    },
+    "jv1-ce6f98b0cff0666eeac4ae65252f178df61dac60": {
+      "body_sha256": "111e9893a49985c29268abaa825dc11f7bbe9dc553c3e9ea292afe2b4b465421",
+      "repeat": 3,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-109"
+    },
+    "jv1-ce9b38a37da9c5f41a24ae35a05acf734bcdfc7a": {
+      "body_sha256": "ceffa5263f8b86bca7226f518c5538784fb71f81b1b60da50696f9fe35a0cca8",
+      "repeat": 3,
+      "sample_id": "jammeval-heron-bench-refined-test-94"
+    },
+    "jv1-ceac296756470a79422b5b422846b4723d8f9705": {
+      "body_sha256": "90d3a41e3a197b4cb0d683275c184f28bc3d8baec9d042eeffff27342e58769e",
+      "repeat": 1,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-59"
+    },
+    "jv1-cee5185b202d8d6428b446436b5ba1485ebbb631": {
+      "body_sha256": "6ccd7d72cdabb59301fe42d7022734b94152dd4f987318051c8fe1da7db20749",
+      "repeat": 3,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-35"
+    },
+    "jv1-cf0324f1ebbd7aa278ef61df0e4c2cbb22d5da39": {
+      "body_sha256": "b29eb7b93b54dc4c4f2ecf1b79dacadc7e830861a4a1bf1139edf51826101d5b",
+      "repeat": 3,
+      "sample_id": "jammeval-heron-bench-refined-test-90"
+    },
+    "jv1-cf11e4f078b9f43ba846f00405d7899062ff8068": {
+      "body_sha256": "d8f445a41bb5e47bfecc1852c382f3c2019f4e07f36d9cb7928b93ccc1f4807c",
+      "repeat": 1,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-57"
+    },
+    "jv1-cf174f4755704a8fe0c085a70d7291d3728fee77": {
+      "body_sha256": "33fccc96194fa41416face6d5b667e95a7b4c3009034e092006b8d76d7586cde",
+      "repeat": 3,
+      "sample_id": "jammeval-ja-vlm-bench-refined-test-40"
+    },
+    "jv1-cf348edbd54609a0261aa06807c5e4ba69b2309e": {
+      "body_sha256": "0bf756dad96956d1fa9583ee50d12c97848c4f257e0b5d2587b3e278e7b00ed4",
+      "repeat": 1,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-115"
+    },
+    "jv1-cf56ed2e55fd4ee8297fa878471735d24fef6c3d": {
+      "body_sha256": "90a48067b50146884f1a01fc4cd8b21c17e6a725bc3d28afb7b0a57dfec8ab30",
+      "repeat": 3,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-40"
+    },
+    "jv1-cf9fda3adc64bcd0536c647f4c0961b9a08d4905": {
+      "body_sha256": "1a7555d4f54ff7701f7ad0462c0f1392ba5d09bb17ca496725c6847f1dd1b692",
+      "repeat": 3,
+      "sample_id": "jammeval-ja-vlm-bench-refined-test-1"
+    },
+    "jv1-cfb238c2155ebe848ee4dee9157c4df432439856": {
+      "body_sha256": "809ba99193b8e0e115a27144d2be2e41d5633cf4e0202e18dd055b013e783355",
+      "repeat": 1,
+      "sample_id": "jammeval-heron-bench-refined-test-19"
+    },
+    "jv1-cfc4a0b65167eb435e9a86e6105cc122fa7b99fe": {
+      "body_sha256": "81206a605db247c8ec6f4e5e6c37cfbdcc1369fa9271fd859a55843b8ebeed30",
+      "repeat": 3,
+      "sample_id": "jammeval-heron-bench-refined-test-35"
+    },
+    "jv1-d0534c34f9ae536f31506303bfba2334cd61223b": {
+      "body_sha256": "d215fce18f46c65900e6539deb232718e7f91b271fce5e550906577df1df184d",
+      "repeat": 3,
+      "sample_id": "jammeval-ja-vlm-bench-refined-test-5"
+    },
+    "jv1-d05c69690331240a94bd4cd7e77f5c52012da0b6": {
+      "body_sha256": "241b48ce36380249f2f14478c45b8974f04ff39e15ba23c66b85bd88cfadec1b",
+      "repeat": 3,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-101"
+    },
+    "jv1-d0aeaf322cb242a536e3858c6557a72a3f4fe7c7": {
+      "body_sha256": "c3675640aeb5451e9776061b22986b1108be063356c5cd88feb011ed3429b139",
+      "repeat": 1,
+      "sample_id": "jammeval-heron-bench-refined-test-44"
+    },
+    "jv1-d0c5237c19d22214c02ca52ef0964352182648fa": {
+      "body_sha256": "e03708b42d5f53468e2f01cf9fac3783d60f85a646fa8513922b76d427707b2a",
+      "repeat": 3,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-93"
+    },
+    "jv1-d12765e4387976fbff842ac4b1fc162ec8858da9": {
+      "body_sha256": "991b899be3fbab5258f7d2acac82b4e3963c253a2ce4b68bd52db0f7a47b57ed",
+      "repeat": 1,
+      "sample_id": "jammeval-heron-bench-refined-test-76"
+    },
+    "jv1-d217955d572804745fceb06078b123fa78eff081": {
+      "body_sha256": "47f001086176c2a9191054adf88682c18621deffc5340eb2f01326597cbaeec2",
+      "repeat": 2,
+      "sample_id": "jammeval-heron-bench-refined-test-93"
+    },
+    "jv1-d246757e6cd278fa0444e4d635ac7bfa8d4812a9": {
+      "body_sha256": "5d68f2033cc440ac7de505281d63bb8bb35543ed4f6971edc219b81146196bfa",
+      "repeat": 3,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-138"
+    },
+    "jv1-d24f451bdf4c8935c3c45d1c620f3598ab64eec4": {
+      "body_sha256": "d9533b55d2546da11069dbb2cb00ff5d2382eceb7149c34b2ff88eb135dc2bdb",
+      "repeat": 2,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-128"
+    },
+    "jv1-d25108df53d0ffb562946de4719e008ce288e62f": {
+      "body_sha256": "9cf1953e0986010276365992832ad72877ade987b0320b6d5ba32d46adba45cc",
+      "repeat": 3,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-89"
+    },
+    "jv1-d32bd904e3997bc8fca3f879761cefc3fd6828fa": {
+      "body_sha256": "ca78200a34e795a02d1c800a96af86c18f62c9dfda193532b8b036c9ea0eb311",
+      "repeat": 1,
+      "sample_id": "jammeval-heron-bench-refined-test-7"
+    },
+    "jv1-d350c3d4eca9a96ca97612042e654db93710e4e5": {
+      "body_sha256": "a41e30262ab18a32349f582b30646f1ed00c23ded595472993f9db2143a50e5e",
+      "repeat": 2,
+      "sample_id": "jammeval-heron-bench-refined-test-30"
+    },
+    "jv1-d37650baca751132c443f2c773091d7a14700480": {
+      "body_sha256": "13e338881e4bfc366fc7a3391deb8c63e10aae203a12627d31c8e30ad81825f1",
+      "repeat": 3,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-20"
+    },
+    "jv1-d3870f1e3dd4064b2d6b56a87fd080ecfae506b7": {
+      "body_sha256": "bc3b3dc7ea545e1e40b98b5cfc7d57c2a5008261ecb5d55d194a5befaf76294a",
+      "repeat": 1,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-86"
+    },
+    "jv1-d388bea22b9c6f02ceedeb12b76b0e700724df36": {
+      "body_sha256": "3bbf9cc50b3aaf8daa68f02678ed1cdfbcfc3247490f554a9398a27b2b56f44b",
+      "repeat": 1,
+      "sample_id": "jammeval-heron-bench-refined-test-15"
+    },
+    "jv1-d3cf5aa76b16bbc16ef620b553f0302192134457": {
+      "body_sha256": "7dfc867998aa4b66fd219c1ccfddbe334d30f78ba2f5cbdfc49d7568b1d7506b",
+      "repeat": 1,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-42"
+    },
+    "jv1-d3e7e995dc86e2c080624995674a56a5f9ae3880": {
+      "body_sha256": "c2ff3576efd82ac47fb7c96c7390a0257fa974f105c4ac9f5c8ef9adb0a9c0b1",
+      "repeat": 1,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-30"
+    },
+    "jv1-d467ad86296499c5c39a6f1c9efe2c36ee570b4f": {
+      "body_sha256": "d8f445a41bb5e47bfecc1852c382f3c2019f4e07f36d9cb7928b93ccc1f4807c",
+      "repeat": 2,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-57"
+    },
+    "jv1-d48c8b8d8c0c2e8bc33e4e5cb5354ffc1ae7f96b": {
+      "body_sha256": "061c6e6e88a3d34440781197f7ed36ed098b8a74fbf89bbc771eb257cff43312",
+      "repeat": 2,
+      "sample_id": "jammeval-heron-bench-refined-test-55"
+    },
+    "jv1-d4cc6723a688a86a79c69d1d1914cefcdb41bb3e": {
+      "body_sha256": "351d189f85216c9b86e65621ad2a8b2f7cae822597336b43f36b98d62e1b68af",
+      "repeat": 2,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-49"
+    },
+    "jv1-d55f41f102c84d566a1b31e0bed422da1f372b9f": {
+      "body_sha256": "7e8d8e1218ccba5316623c26fb232e6d1c54a609a0699a0981ea584f30855689",
+      "repeat": 1,
+      "sample_id": "jammeval-ja-vlm-bench-refined-test-33"
+    },
+    "jv1-d5799538fb04cd6c75635bb4db6aa1ed0f5808f0": {
+      "body_sha256": "41b35ddb27a192fee6f524098b0dd8d888083d8b03077de85b2ecc45327a7729",
+      "repeat": 1,
+      "sample_id": "jammeval-ja-vlm-bench-refined-test-23"
+    },
+    "jv1-d59a3081c5ff1d74a58357391fe7789812015082": {
+      "body_sha256": "0198d45e676f7918ca554c2d3d29118c0566e32c2414ad251d26ce6cfdefaa5f",
+      "repeat": 1,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-46"
+    },
+    "jv1-d5de6c743791ebd8225a39e7d58723133f2f5b38": {
+      "body_sha256": "91225c3ca2722c946632c7a60ab4e741b91e26b2c6cc67bd175896c73f6088c7",
+      "repeat": 1,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-3"
+    },
+    "jv1-d5dfdaa36d3f8001644b5a6437229ceef58bdb41": {
+      "body_sha256": "259cef520f0ff52385a59047c8197990b8ca3f5bf44b67cfed19496b280f725c",
+      "repeat": 3,
+      "sample_id": "jammeval-heron-bench-refined-test-47"
+    },
+    "jv1-d5ff3363afd0112fea445ae33ee91ff2f6cefbce": {
+      "body_sha256": "ca675049f5d9ecebee55acaf40488ea4d6ff10af65f4fe7d52766d9727ed2d93",
+      "repeat": 3,
+      "sample_id": "jammeval-heron-bench-refined-test-34"
+    },
+    "jv1-d66628d27b89b9334030ca5fb6daf6dfb4062595": {
+      "body_sha256": "6cd80c0dd56247efcc8646b99106c570c5103223f9b05f3a86176edd07386b7b",
+      "repeat": 1,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-18"
+    },
+    "jv1-d6757d19b495b02fb5caef9fa8ae9937a99368a2": {
+      "body_sha256": "afe28d4c466dafd0e225ed40d246e1851a8eb6e26c90751b9054031207bde8b6",
+      "repeat": 1,
+      "sample_id": "jammeval-heron-bench-refined-test-49"
+    },
+    "jv1-d788f7c1a200cb5d71126953ad92049f335ce634": {
+      "body_sha256": "5dddf10434f2f0b1a13d8cda9351d6815b6f6eff8ad698070b8f9ca36cd362b6",
+      "repeat": 2,
+      "sample_id": "jammeval-ja-vlm-bench-refined-test-11"
+    },
+    "jv1-d7c54f042da1025839a8a9a2d0eb8bfa64b062d4": {
+      "body_sha256": "0404810dd1b07033a672894290d0d8fa71e6721f104d4942445b3b607dd59a94",
+      "repeat": 2,
+      "sample_id": "jammeval-ja-vlm-bench-refined-test-22"
+    },
+    "jv1-d82fa85fee810556730bb3b31380fa46c847d11d": {
+      "body_sha256": "8e53289345ecc0638debba978b40531c72debe7ace0cdd326818e2cc40baa571",
+      "repeat": 3,
+      "sample_id": "jammeval-heron-bench-refined-test-96"
+    },
+    "jv1-d99002cc3320cb2c9447397c620e8d5395e33cec": {
+      "body_sha256": "10c3196efea9086a7760bc85fa8149bf7f3f1cb00997dbf5043a4394861e7187",
+      "repeat": 2,
+      "sample_id": "jammeval-heron-bench-refined-test-42"
+    },
+    "jv1-d9bc6263bb3534225b9b81035d92ba476b841e7a": {
+      "body_sha256": "73089df18cdb0ad5c9bca68c7e8212fe0f06440327bcbd50d3b28c2b03eacf59",
+      "repeat": 3,
+      "sample_id": "jammeval-ja-vlm-bench-refined-test-7"
+    },
+    "jv1-da85d47b6f5edbb6310218f1419ab0768f01a5b9": {
+      "body_sha256": "dd881c2d568b6f93374fb418b890d8706fddff63b8bb598721fed9b716516a0f",
+      "repeat": 3,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-116"
+    },
+    "jv1-dbd3134d14ded604aaf403bec649042b9d501130": {
+      "body_sha256": "f0e853296a94010428dae8ec22752ed560898134226ceb26976a58763a5f1db0",
+      "repeat": 3,
+      "sample_id": "jammeval-heron-bench-refined-test-65"
+    },
+    "jv1-dc7a3ff2d4cf3e45233879c1af1a34396d805ef8": {
+      "body_sha256": "b7f8e7c8fc076b9c01071dc3eff5ba18cc71f4b2829008f268139fc054ad2613",
+      "repeat": 1,
+      "sample_id": "jammeval-heron-bench-refined-test-20"
+    },
+    "jv1-dcc0536ab2ffdcb374b52a3686f57a255646a766": {
+      "body_sha256": "5dddf10434f2f0b1a13d8cda9351d6815b6f6eff8ad698070b8f9ca36cd362b6",
+      "repeat": 1,
+      "sample_id": "jammeval-ja-vlm-bench-refined-test-11"
+    },
+    "jv1-dcccec7388ab8217bc85cbaffe45adcff5c27eab": {
+      "body_sha256": "1a7555d4f54ff7701f7ad0462c0f1392ba5d09bb17ca496725c6847f1dd1b692",
+      "repeat": 2,
+      "sample_id": "jammeval-ja-vlm-bench-refined-test-1"
+    },
+    "jv1-dd2b3b00cdf7d4bc40dfd30c4cb96ffbb9293e5c": {
+      "body_sha256": "6d6058845038bc12f1420027e98c87710d02e7f917710f86d1fa2f922adfa122",
+      "repeat": 1,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-139"
+    },
+    "jv1-dd6d08141a2230c16f8aa04c2758ccfe86ad25b7": {
+      "body_sha256": "e03708b42d5f53468e2f01cf9fac3783d60f85a646fa8513922b76d427707b2a",
+      "repeat": 2,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-93"
+    },
+    "jv1-dd8cbc9f32bc24185995e397b2ff06ba515c2af6": {
+      "body_sha256": "0be62e844d23517a7e2286da2d54097a49c093ce62b48a45aeb66c8ea1cdc9a4",
+      "repeat": 1,
+      "sample_id": "jammeval-heron-bench-refined-test-64"
+    },
+    "jv1-dd8f1e0c737e8004707a4cf1e15c8fd78a0bd2a7": {
+      "body_sha256": "eaa6c0535e82a2507062a033f74ed17b541d8d6d21fb39228898d52c4e9a3a00",
+      "repeat": 2,
+      "sample_id": "jammeval-heron-bench-refined-test-9"
+    },
+    "jv1-dda004a006e9f11ec4134741febbecac9d52305c": {
+      "body_sha256": "1dc607d5a895d0a71468986b1933b686c6257d75ad90c65f86321c6dd26a014f",
+      "repeat": 2,
+      "sample_id": "jammeval-ja-vlm-bench-refined-test-17"
+    },
+    "jv1-ddb61b40a9150f8bfee079e39965d764beba501b": {
+      "body_sha256": "991b899be3fbab5258f7d2acac82b4e3963c253a2ce4b68bd52db0f7a47b57ed",
+      "repeat": 2,
+      "sample_id": "jammeval-heron-bench-refined-test-76"
+    },
+    "jv1-ddbca4143db6e844113226ba4bae09404b401b54": {
+      "body_sha256": "9c36e6f60ec198836246623335b5ca8a7dba6b68233427bb6a9b093763ce3e33",
+      "repeat": 3,
+      "sample_id": "jammeval-ja-vlm-bench-refined-test-2"
+    },
+    "jv1-de2a1b1a3e0fceee494fc7598801a5a92723ddc5": {
+      "body_sha256": "422598d45b772d2572880ec5c35f7cfaa22997f63c1af5df4f2fe55b00d0b2bb",
+      "repeat": 3,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-78"
+    },
+    "jv1-dedcda4806b67f5a0ffe4338683ce0138b76c202": {
+      "body_sha256": "6d31fb004d51d4345f74a4e6fde1b3ec9402bf102f451b54e8cdab4288c24b97",
+      "repeat": 1,
+      "sample_id": "jammeval-heron-bench-refined-test-99"
+    },
+    "jv1-df4a5fc3cc9ecdf03fb9679b4cd6e934f4eba4a5": {
+      "body_sha256": "179955fd2d2a97b14c957a43f39b10a738b254ea02cd70c207b3cca30471cd2a",
+      "repeat": 2,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-102"
+    },
+    "jv1-df65509a9408bb02f1196e4789929a30b48b5253": {
+      "body_sha256": "422598d45b772d2572880ec5c35f7cfaa22997f63c1af5df4f2fe55b00d0b2bb",
+      "repeat": 2,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-78"
+    },
+    "jv1-df909d14413ebed7372e46d4913bce604e7c5b8c": {
+      "body_sha256": "6deefc635657becbcbb574495f9699bdfb53779136b6f484d737dd2fd8fac4c5",
+      "repeat": 3,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-24"
+    },
+    "jv1-dfdddc22cc7d1878b32270be321666a78bb3f7ef": {
+      "body_sha256": "179955fd2d2a97b14c957a43f39b10a738b254ea02cd70c207b3cca30471cd2a",
+      "repeat": 1,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-102"
+    },
+    "jv1-dffb1b9857b421559fe56682b7437395f67b9aa4": {
+      "body_sha256": "7e8d8e1218ccba5316623c26fb232e6d1c54a609a0699a0981ea584f30855689",
+      "repeat": 2,
+      "sample_id": "jammeval-ja-vlm-bench-refined-test-33"
+    },
+    "jv1-dffdd809832138fc16943f83850d3b20b914b93b": {
+      "body_sha256": "405cfea2d6d78e606f24140f78e2eff772c0e3cda39ee3f73f065c9585b3e4a3",
+      "repeat": 3,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-0"
+    },
+    "jv1-e01a9f5bde34e43c8e9e5ed236513f0640b94ec2": {
+      "body_sha256": "a41e30262ab18a32349f582b30646f1ed00c23ded595472993f9db2143a50e5e",
+      "repeat": 3,
+      "sample_id": "jammeval-heron-bench-refined-test-30"
+    },
+    "jv1-e034df201bbcb667aab139cf7e55194ef2cb50bc": {
+      "body_sha256": "4371648b402926668c2e1a2d47835f81ace5e9687d0e15cfb9aa3367b1890095",
+      "repeat": 2,
+      "sample_id": "jammeval-heron-bench-refined-test-97"
+    },
+    "jv1-e0367e543eeb76f4edb7d96e645ead434804cc23": {
+      "body_sha256": "6feb2f4c1e4d2397134ef093129e69064968f9b9cee80dbb2911fbb3ad22b819",
+      "repeat": 2,
+      "sample_id": "jammeval-ja-vlm-bench-refined-test-24"
+    },
+    "jv1-e03eb0c5823b564189bfef577f4c827f705edb99": {
+      "body_sha256": "0343700aebe6c712814ff10884ac06dced915b5d4ccb2e5f5301cdc62455f40e",
+      "repeat": 2,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-113"
+    },
+    "jv1-e0a95184f9c70ac2c7379b6936539281b64a4cb1": {
+      "body_sha256": "cd3d940b136b30301ab0cea5fb62e93828264965ab06526e6d31c349915ff169",
+      "repeat": 2,
+      "sample_id": "jammeval-heron-bench-refined-test-72"
+    },
+    "jv1-e0b5bf2775b8a343b6c102a05741fe7cd55f5810": {
+      "body_sha256": "6fcc2e6b43ddb6f4e4166fd9d1b071fc04a3899d0587547362691f3f63654f28",
+      "repeat": 1,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-83"
+    },
+    "jv1-e1241bb369a1a9a64dcbe36fbba31c1f3f545565": {
+      "body_sha256": "fc8a0703289d2178727447bf91e5362f6ccf2049959d5f275a58364e4fcab8a7",
+      "repeat": 3,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-16"
+    },
+    "jv1-e15c730c7dec59755491dc3683db6225103bb25d": {
+      "body_sha256": "b776c95c3946b80add6829a9e017c5dc353e025ab1da469fc71e1c1acf64554b",
+      "repeat": 3,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-74"
+    },
+    "jv1-e187d52b91e1fa509ad55cc84422bef5345ae873": {
+      "body_sha256": "33fccc96194fa41416face6d5b667e95a7b4c3009034e092006b8d76d7586cde",
+      "repeat": 2,
+      "sample_id": "jammeval-ja-vlm-bench-refined-test-40"
+    },
+    "jv1-e2430b8ec8fa14767e19ce8a5bec8d1f9c7cbf94": {
+      "body_sha256": "b2b590cace8ed8a39d18e4bfc2eb6cbdfa22076ddb64d6cbd415f23d1941b68a",
+      "repeat": 1,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-2"
+    },
+    "jv1-e2bb3af4ab404cb3e7eec4a8e14a4018bc75b176": {
+      "body_sha256": "74fb3be3c79db70b3bc75765e576c02a7bab86eb61be69711b73c59c96cc2fd2",
+      "repeat": 1,
+      "sample_id": "jammeval-ja-vlm-bench-refined-test-25"
+    },
+    "jv1-e30b6c5acb4b14bf80d30b145fcfa4a12e99e15f": {
+      "body_sha256": "41fae7a9e18d0960c51c92c65899ff3bae62b5260fdc1f39cefba395da3cc317",
+      "repeat": 1,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-72"
+    },
+    "jv1-e31326c20f817695dd66eea2655da0b8a36bb0ee": {
+      "body_sha256": "49a37b6795976b6d8643fed102bac687272c690524593ef32789c10ba540bf60",
+      "repeat": 1,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-145"
+    },
+    "jv1-e336b55b550c61cf89ea58cfeb0759d84f79f417": {
+      "body_sha256": "741d9bef3be3c30d596cc7ef0e3c50cba852506745d787b6a0548ebf8637a323",
+      "repeat": 1,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-99"
+    },
+    "jv1-e36538d8be9b43530e8cf478e980cf1b61c08e83": {
+      "body_sha256": "2c75fda1a3ee788ef8e75263eda27afbb24062359792256bc4f6a66d81490ce0",
+      "repeat": 2,
+      "sample_id": "jammeval-heron-bench-refined-test-16"
+    },
+    "jv1-e3a14dd52ae99c8fa7f16888c2a38d44c5c84f9e": {
+      "body_sha256": "3cb0af44eb4e5a80528ffd317a5c310a5fcef89d6b3521bc11cbe4215ee59c33",
+      "repeat": 1,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-129"
+    },
+    "jv1-e408f7d41eef73908e221d61107cfcdbbe3d0553": {
+      "body_sha256": "30fdcc4d57942ec71b738738c064d80ce1fd5820b809ff06e0efae4edab76992",
+      "repeat": 1,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-61"
+    },
+    "jv1-e458bc3d730e4b03dea4b5d3e4feb8a2a2e54ad2": {
+      "body_sha256": "2548bc0b1f6a26aca1d8112f5a3f061544fa6e26835a8d610863d8b896140959",
+      "repeat": 3,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-92"
+    },
+    "jv1-e496829bcd3542e2d59c6d03e332c83e6a52b2e5": {
+      "body_sha256": "6d31fb004d51d4345f74a4e6fde1b3ec9402bf102f451b54e8cdab4288c24b97",
+      "repeat": 3,
+      "sample_id": "jammeval-heron-bench-refined-test-99"
+    },
+    "jv1-e512313b42408cd8cc7568d6302b37620a947f4b": {
+      "body_sha256": "c3675640aeb5451e9776061b22986b1108be063356c5cd88feb011ed3429b139",
+      "repeat": 3,
+      "sample_id": "jammeval-heron-bench-refined-test-44"
+    },
+    "jv1-e56cfc54781e4f5830d525d1dbe18f700b6bb437": {
+      "body_sha256": "1e1630120e56bad8c20ee307b254020101da56d7313a133e659f9ab18b790751",
+      "repeat": 2,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-9"
+    },
+    "jv1-e6214dc541204d9af86872c82d4c6341fc27d954": {
+      "body_sha256": "19ce13625cb53f2c6214c2a6e6849c42767504ec5c14b0b36223ce2961ef40f6",
+      "repeat": 1,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-130"
+    },
+    "jv1-e65bcef06afc7e333a9b05cdea0d4e53bdea08b3": {
+      "body_sha256": "71d3c75e50ddf0c9e4f12b4d488dc2b3ebc684fdd187c5be6bccf6e50ab00fac",
+      "repeat": 1,
+      "sample_id": "jammeval-ja-vlm-bench-refined-test-49"
+    },
+    "jv1-e6727c3869dc7da6d45ac23e462e5c18c943d99f": {
+      "body_sha256": "44cb339b17954c7682a92db82bacf8b54c5198f4cd1acad6209df19e3eb56520",
+      "repeat": 1,
+      "sample_id": "jammeval-heron-bench-refined-test-62"
+    },
+    "jv1-e69ebc9fc3e09751816e9f25842a928ef49874c1": {
+      "body_sha256": "a14f891296452f21b6eb816f45d351f311eae7af1950ac3fd2caa7115f34a503",
+      "repeat": 2,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-6"
+    },
+    "jv1-e6de5bafed37cef3e4147d0ae33e3bd580a35038": {
+      "body_sha256": "6238e53c8761c449947b583b8302881a7e273537c2f1ae1482e25cda9babc25f",
+      "repeat": 3,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-143"
+    },
+    "jv1-e707c1f1579e1b5912b1554e880375de143da04a": {
+      "body_sha256": "07c3326e9d03c04fd0be4b549235aec26b73182fa34fde5da984ee684ceb53de",
+      "repeat": 3,
+      "sample_id": "jammeval-ja-vlm-bench-refined-test-12"
+    },
+    "jv1-e743042199f5e059d1eb76bf33a649693abba226": {
+      "body_sha256": "90a2b4ded8bda28dd5deffdcbdf1b090ff75b45632c79ea5bc7eddf9c88ddc27",
+      "repeat": 1,
+      "sample_id": "jammeval-heron-bench-refined-test-98"
+    },
+    "jv1-e756a23d78fd44593b9474de55d0cceaa4c50b46": {
+      "body_sha256": "22b8f03aab47a950856a0b6a3d6ec2ad195c8540df2a77ee91d856afd2e92981",
+      "repeat": 1,
+      "sample_id": "jammeval-ja-vlm-bench-refined-test-32"
+    },
+    "jv1-e8259ca27182930deac18151cbcd598ccd8e80f6": {
+      "body_sha256": "dc8de377416989529a561afdde848d98d6294f206686831273a5b9016358cfdc",
+      "repeat": 3,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-120"
+    },
+    "jv1-e85789c435f8157232373012070c077e99f05dda": {
+      "body_sha256": "fbdafa4f4e8a2c52de2cfe4c9d8d68aa03a3bb4b63f2182ce92459fcd9f21b4e",
+      "repeat": 1,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-25"
+    },
+    "jv1-e8bcf7046b52ea7e565c6a8a596806663999cb68": {
+      "body_sha256": "6238e53c8761c449947b583b8302881a7e273537c2f1ae1482e25cda9babc25f",
+      "repeat": 1,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-143"
+    },
+    "jv1-e9225a4016ad425b1ce1ea748c5cefd0ea69f6ad": {
+      "body_sha256": "5dddf10434f2f0b1a13d8cda9351d6815b6f6eff8ad698070b8f9ca36cd362b6",
+      "repeat": 3,
+      "sample_id": "jammeval-ja-vlm-bench-refined-test-11"
+    },
+    "jv1-e922d1e5ca473000ec632a7968848b934bfb44b5": {
+      "body_sha256": "ca78200a34e795a02d1c800a96af86c18f62c9dfda193532b8b036c9ea0eb311",
+      "repeat": 2,
+      "sample_id": "jammeval-heron-bench-refined-test-7"
+    },
+    "jv1-e92bef3f35bbb398d7bf05e6052836e355048ec6": {
+      "body_sha256": "e31402e3f0077aba84331b40d0992558385d10a95319b16611d27d3fc9b82d6f",
+      "repeat": 3,
+      "sample_id": "jammeval-ja-vlm-bench-refined-test-20"
+    },
+    "jv1-e9559047e3a4394862cf7eb944da560d85518f31": {
+      "body_sha256": "b140c7109cd710f5dd7905245424397af61294c00460b9c1bbd0afa90996a574",
+      "repeat": 3,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-12"
+    },
+    "jv1-e993e851393d47b0a09e78a2a0e977c40413662e": {
+      "body_sha256": "3ca9a23cd338439ce7efca1dc265d24ca24fc51bd5c60b18de75f1debd3fcd59",
+      "repeat": 2,
+      "sample_id": "jammeval-heron-bench-refined-test-1"
+    },
+    "jv1-ea32601bbe859ba534000dbf96748ee88ad6cfa9": {
+      "body_sha256": "93842561abfb740c7866898057df5114d0c040856ff916c78351a653b3b0cf07",
+      "repeat": 3,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-140"
+    },
+    "jv1-eae0c4797bcb484eb3c359067206d46fb4e8c014": {
+      "body_sha256": "e31402e3f0077aba84331b40d0992558385d10a95319b16611d27d3fc9b82d6f",
+      "repeat": 2,
+      "sample_id": "jammeval-ja-vlm-bench-refined-test-20"
+    },
+    "jv1-eb63db9a1046a8795a9c7aab9b8884c9ee0fa75a": {
+      "body_sha256": "8044db692f414257724b8340adca942470d5b2095e3ad2a570b1ddef185d6f21",
+      "repeat": 3,
+      "sample_id": "jammeval-ja-vlm-bench-refined-test-41"
+    },
+    "jv1-ec0198c3d33c10c1fe0151d97cf585b58431e377": {
+      "body_sha256": "8d1effe7b7b7a0d0514ed7044e25151c4b694d0da04c36bf6354befd9c007e53",
+      "repeat": 1,
+      "sample_id": "jammeval-heron-bench-refined-test-81"
+    },
+    "jv1-ec06c03bd3633543c88e28036100d93b91acc980": {
+      "body_sha256": "4dbc00729df371cdd2715861a317cd3ccae3133153cd98357217ee11128e5783",
+      "repeat": 1,
+      "sample_id": "jammeval-heron-bench-refined-test-46"
+    },
+    "jv1-ec09acd7ac12746adda112e408ac514370899244": {
+      "body_sha256": "a92fa993167210d0dd0c528d8be46beaf09040efbb390e610f21f9e8fcde1558",
+      "repeat": 2,
+      "sample_id": "jammeval-heron-bench-refined-test-5"
+    },
+    "jv1-ec2dc8f6945a4e7bb83d372816126a5622a6612d": {
+      "body_sha256": "43ead809558c0cd94531aa76d565d9085127556e1f2f2df3bd30864d73743c6f",
+      "repeat": 2,
+      "sample_id": "jammeval-heron-bench-refined-test-18"
+    },
+    "jv1-ec3290213ca2185108eb4a5e3217db3b8ef69b26": {
+      "body_sha256": "8c4d6c2766b14ec7b5fb55f406d47f43c8cfcdecd0db5fe34ae65bf1fa82faf0",
+      "repeat": 3,
+      "sample_id": "jammeval-heron-bench-refined-test-51"
+    },
+    "jv1-ec38d4eda7fe1f3dc5eed481136a13c4814727e4": {
+      "body_sha256": "ad7fc99d0f437c791b19be7d93d5c88edf72196b1ae31c7f4214cfbda903c962",
+      "repeat": 3,
+      "sample_id": "jammeval-ja-vlm-bench-refined-test-42"
+    },
+    "jv1-ec874ac60a4adde4f4dfa576739281a07ead59ec": {
+      "body_sha256": "90a48067b50146884f1a01fc4cd8b21c17e6a725bc3d28afb7b0a57dfec8ab30",
+      "repeat": 2,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-40"
+    },
+    "jv1-ecdf55f9ff0fad9e9f5765e304102595d42201df": {
+      "body_sha256": "c03d8d4f192880cf6431db0ec144c6cbdd568f01378de1f7d4890c3f43ffe3bb",
+      "repeat": 2,
+      "sample_id": "jammeval-heron-bench-refined-test-4"
+    },
+    "jv1-ece12e465c4cea534ad01631df7e4755aa7dc33a": {
+      "body_sha256": "f0b375cdd06af641ce0cce71cce01b2777da43d1bb2536995d37eb6e4a47830e",
+      "repeat": 2,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-94"
+    },
+    "jv1-ed75d8aa3fda9df6af7ef73b303b7621ca2dc1da": {
+      "body_sha256": "47f001086176c2a9191054adf88682c18621deffc5340eb2f01326597cbaeec2",
+      "repeat": 3,
+      "sample_id": "jammeval-heron-bench-refined-test-93"
+    },
+    "jv1-ede46311453a6a5b763f735a386731aa03c0f714": {
+      "body_sha256": "bfa4830bb9ccdbcc035eba320ffaf497641d359b9b35f8676c7dc601e895df43",
+      "repeat": 2,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-63"
+    },
+    "jv1-ee4f8c4214b81a7091e2924e851f31c66ea4ff87": {
+      "body_sha256": "f2553fbb209374ed08b48f706738c4edc0f40c4c69ce4f47e29d4a46beb75e23",
+      "repeat": 1,
+      "sample_id": "jammeval-ja-vlm-bench-refined-test-38"
+    },
+    "jv1-ee5a40d0aa9f848aba3083b77be0d70ef2f7210a": {
+      "body_sha256": "2104627e9d253eb5a9c7977bed1b3eea821f1318ac86ce2a6b8770162b3fc363",
+      "repeat": 3,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-137"
+    },
+    "jv1-ee8113c49be2d2d075e5ac0d55e06b748550f389": {
+      "body_sha256": "3ca9a23cd338439ce7efca1dc265d24ca24fc51bd5c60b18de75f1debd3fcd59",
+      "repeat": 3,
+      "sample_id": "jammeval-heron-bench-refined-test-1"
+    },
+    "jv1-eefe9fbd047af8fc39309c2dc06c04013f1b26be": {
+      "body_sha256": "7a4b78bc0b85b485f8b8b1271601b33f27ff79e27cb71988f553a277a029cece",
+      "repeat": 3,
+      "sample_id": "jammeval-heron-bench-refined-test-6"
+    },
+    "jv1-ef647118f4f97cda46718931d1d9c74f7ab981de": {
+      "body_sha256": "25217c2faa04dbbf02fd62121f1d6f8f0f9bd2f03dce66696ab2aa36b443aa96",
+      "repeat": 3,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-34"
+    },
+    "jv1-ef8c1ecc80e3e138908dba2739eab5dde0bd2cb3": {
+      "body_sha256": "e38bb4d301f66ba822cf6dcfeed6cc98bf8d75badd00cd9569941716222b0cb8",
+      "repeat": 3,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-125"
+    },
+    "jv1-ef9214d271212498eb3bd7c50d94a99719659914": {
+      "body_sha256": "5678cb92f3c7dcbc806933f9e4169b9889480e84ade5222588e05616b3273df3",
+      "repeat": 1,
+      "sample_id": "jammeval-heron-bench-refined-test-58"
+    },
+    "jv1-f0564856c8bece3dfb2614593fdfd180ef5e829e": {
+      "body_sha256": "7f2f9ddcf52056a7ffa6d4686f01421e3f37edae78a7e5a319ea9cef3f07adb9",
+      "repeat": 2,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-106"
+    },
+    "jv1-f0a5fbd329ac4990e679e8c75f31d6876dd9b2f4": {
+      "body_sha256": "8bb8d1967de4a198ce7add5ee2a3de75ab02c09b52bc71e487945eaab2126d6b",
+      "repeat": 2,
+      "sample_id": "jammeval-ja-vlm-bench-refined-test-37"
+    },
+    "jv1-f0ed655a3bdecdc5306827d13d422dcf7f71a9df": {
+      "body_sha256": "13c65ec0653dbaf0c66120616c1b2bd5c96b0eea24f5c297a0bbecf626949b06",
+      "repeat": 2,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-75"
+    },
+    "jv1-f10605aa118ddd0d2e28b857a494953d8e1ddf6d": {
+      "body_sha256": "90d3a41e3a197b4cb0d683275c184f28bc3d8baec9d042eeffff27342e58769e",
+      "repeat": 3,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-59"
+    },
+    "jv1-f124882420bb7c8a12d9e9c5243bf12abd917bef": {
+      "body_sha256": "dc9376e3ef29530edf78c189437baacc99a89280dcf77db2cc3d4173e73f03f3",
+      "repeat": 1,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-41"
+    },
+    "jv1-f2170c17affe0a8d59ce919ee4adc82a3adfae7f": {
+      "body_sha256": "0bf756dad96956d1fa9583ee50d12c97848c4f257e0b5d2587b3e278e7b00ed4",
+      "repeat": 3,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-115"
+    },
+    "jv1-f26300988424fbd8e231d38897a3cf38013116dd": {
+      "body_sha256": "41cb94d41686309125de772477f82b7708ea12f6afe1c8d8679c3783a941002e",
+      "repeat": 2,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-65"
+    },
+    "jv1-f2645f25041ce08f37d36d721b43ab406f8d4950": {
+      "body_sha256": "7333bb3e2e5344ff687c08e79a43182b5f36208cbe36eb6431a582d33b530771",
+      "repeat": 2,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-110"
+    },
+    "jv1-f2bd1eb87ddef722d96c78cd4a4c5b0a55ab5d4c": {
+      "body_sha256": "f0b375cdd06af641ce0cce71cce01b2777da43d1bb2536995d37eb6e4a47830e",
+      "repeat": 1,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-94"
+    },
+    "jv1-f2ca1d5d206d3d68838cd2addf6542256c7b36ca": {
+      "body_sha256": "81206a605db247c8ec6f4e5e6c37cfbdcc1369fa9271fd859a55843b8ebeed30",
+      "repeat": 2,
+      "sample_id": "jammeval-heron-bench-refined-test-35"
+    },
+    "jv1-f32ae01c586d6259e8a269498404c1a9faaa9577": {
+      "body_sha256": "a5e1b76cafa2e6b8355defa75739f9aac2d3454a95c6b49b1c1564dca07ff568",
+      "repeat": 2,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-7"
+    },
+    "jv1-f3cb2c7e53a6ece9e240bfc0c6b6e074ec8daf4c": {
+      "body_sha256": "41b35ddb27a192fee6f524098b0dd8d888083d8b03077de85b2ecc45327a7729",
+      "repeat": 2,
+      "sample_id": "jammeval-ja-vlm-bench-refined-test-23"
+    },
+    "jv1-f3e33393ff9d7bedb6b6700545bf6e48889b01b0": {
+      "body_sha256": "fce7e30a679a40023f12acb49b6bca293bb110f5cc9a5d4b084f58890f23242f",
+      "repeat": 3,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-107"
+    },
+    "jv1-f4421f77dc05c6a6a03ba5c65324342d2fdd9e0a": {
+      "body_sha256": "991b899be3fbab5258f7d2acac82b4e3963c253a2ce4b68bd52db0f7a47b57ed",
+      "repeat": 3,
+      "sample_id": "jammeval-heron-bench-refined-test-76"
+    },
+    "jv1-f484273f728e472a89f4829247866f48340953e5": {
+      "body_sha256": "2573e6b9dff24101128a3c5861393813d436149d41eefbd7093338833e5f6383",
+      "repeat": 1,
+      "sample_id": "jammeval-heron-bench-refined-test-22"
+    },
+    "jv1-f4a9d81cf261780c1303e81e6c918a1c95a1a532": {
+      "body_sha256": "73b0c6a155991d515da6bec5fc90764db4071491aa02f536c66782acb8984ca3",
+      "repeat": 1,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-119"
+    },
+    "jv1-f4ef1d7b04fa0093fabfaf8b719e5d02d82e15de": {
+      "body_sha256": "dc7566c2ab404b2b199a853c137651e1514787cef1f0f14efca76968561bc671",
+      "repeat": 3,
+      "sample_id": "jammeval-heron-bench-refined-test-57"
+    },
+    "jv1-f557037d444b2af698fd749219a33bfc7df5c2dc": {
+      "body_sha256": "885a33df52b4a0f271b122bf7e928c34dc63b873c7547ee0d2b21914c4b92f2a",
+      "repeat": 2,
+      "sample_id": "jammeval-heron-bench-refined-test-24"
+    },
+    "jv1-f558c15ccac9e3d9ccf9b3283480314eb3ceca00": {
+      "body_sha256": "0ca0133d95ec847f1f07452d59847f63011914bde5d90e9de58469f27952faa2",
+      "repeat": 3,
+      "sample_id": "jammeval-heron-bench-refined-test-36"
+    },
+    "jv1-f569afe9aa9556f4905ac327946d661611b07f1f": {
+      "body_sha256": "cad4b8607c94019b9f8c698a7f4efef1adb33c852dd7af6868d0a3a7b9ce2c20",
+      "repeat": 3,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-91"
+    },
+    "jv1-f5d508f88ca8135259197f58f9a89101ea8f3e96": {
+      "body_sha256": "41cb94d41686309125de772477f82b7708ea12f6afe1c8d8679c3783a941002e",
+      "repeat": 1,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-65"
+    },
+    "jv1-f60a6897527e656be0f6fe4fe1ebbdc429c021c3": {
+      "body_sha256": "90a2b4ded8bda28dd5deffdcbdf1b090ff75b45632c79ea5bc7eddf9c88ddc27",
+      "repeat": 2,
+      "sample_id": "jammeval-heron-bench-refined-test-98"
+    },
+    "jv1-f6479e8cc1e800b999541137f28215880f4e643e": {
+      "body_sha256": "351d189f85216c9b86e65621ad2a8b2f7cae822597336b43f36b98d62e1b68af",
+      "repeat": 3,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-49"
+    },
+    "jv1-f66da192efb080c49230beea223cca4b4c343e1d": {
+      "body_sha256": "b29eb7b93b54dc4c4f2ecf1b79dacadc7e830861a4a1bf1139edf51826101d5b",
+      "repeat": 2,
+      "sample_id": "jammeval-heron-bench-refined-test-90"
+    },
+    "jv1-f677694a303a0c5176bc7eb54329ecde26588689": {
+      "body_sha256": "6721cecde966871692222c4b2372dd0bd593768f53e0db9e6c2c2878de273d58",
+      "repeat": 2,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-15"
+    },
+    "jv1-f6a5384ef1ea95f94816818118353b8036757569": {
+      "body_sha256": "c16063348a0df7dc6dc055c653fa0eb9a918ea31c175885cbbda2e5b69e54737",
+      "repeat": 1,
+      "sample_id": "jammeval-heron-bench-refined-test-10"
+    },
+    "jv1-f6ceb04e4dff52d6c6df0b4616872bbe73727957": {
+      "body_sha256": "3cb0af44eb4e5a80528ffd317a5c310a5fcef89d6b3521bc11cbe4215ee59c33",
+      "repeat": 2,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-129"
+    },
+    "jv1-f6fb4e40fef1559ed1d02ba1fd73d6318660000e": {
+      "body_sha256": "dcedeb84f81814e0e728c3fba080280c05ff3291617ad59df2e1d8e4ec19bcc6",
+      "repeat": 3,
+      "sample_id": "jammeval-heron-bench-refined-test-21"
+    },
+    "jv1-f785b1401e26b2038956fd5ebda27bb7615f558d": {
+      "body_sha256": "7f2f9ddcf52056a7ffa6d4686f01421e3f37edae78a7e5a319ea9cef3f07adb9",
+      "repeat": 3,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-106"
+    },
+    "jv1-f7c86f436ff8d481686b4b4bce2e1e95152368c5": {
+      "body_sha256": "8707b288c9a16067fa992af1d5d34dc1975980db1c5044a5e743ee75bac8a8c8",
+      "repeat": 3,
+      "sample_id": "jammeval-ja-vlm-bench-refined-test-39"
+    },
+    "jv1-f7fce4d20ab88124567bee644f02c9e9ff43ca03": {
+      "body_sha256": "211c250136010563518c61e126f72e0d47d88b3d7401f9c0a1825b08f616bd39",
+      "repeat": 1,
+      "sample_id": "jammeval-ja-vlm-bench-refined-test-46"
+    },
+    "jv1-f814c4e52e5ba218ab660706d74e6aa21e8077aa": {
+      "body_sha256": "8c27807efd2b4826457a02a355c18452d8f113d3de829f4603bd5ec6c6b1dba0",
+      "repeat": 1,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-58"
+    },
+    "jv1-fa082f5cb371085246c579c092a1fc8556438322": {
+      "body_sha256": "741d9bef3be3c30d596cc7ef0e3c50cba852506745d787b6a0548ebf8637a323",
+      "repeat": 3,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-99"
+    },
+    "jv1-fa559c471dbdf378aa0c741b472c24a09e619c00": {
+      "body_sha256": "2548bc0b1f6a26aca1d8112f5a3f061544fa6e26835a8d610863d8b896140959",
+      "repeat": 2,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-92"
+    },
+    "jv1-fa9768695962d35359bd649ebe721e0e2e6efe66": {
+      "body_sha256": "246e55bc4006ed964c7a7b373257d6cd4a68a72e124fa167464393afc224112e",
+      "repeat": 3,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-70"
+    },
+    "jv1-faa94f475cd204fb6151ca6fdebfd5d9aedf9500": {
+      "body_sha256": "50155086d5b2f4e044dc6377fe8e4b3a1427edcbaeb4772fbe25edfe04c2ee36",
+      "repeat": 3,
+      "sample_id": "jammeval-ja-vlm-bench-refined-test-43"
+    },
+    "jv1-faaae0980257ed840101e90827a836b9dcce6022": {
+      "body_sha256": "342bcf54f832712580a5134891426cb2ce6aa1cb775fec22a29e7325166139a7",
+      "repeat": 1,
+      "sample_id": "jammeval-heron-bench-refined-test-29"
+    },
+    "jv1-fae1f2747964de02df7c00ca36d266b33b754e19": {
+      "body_sha256": "8c90d36e39a28bb13f8def7650660cc54d07fd1c0e38237f0f8673141dfb8cd4",
+      "repeat": 1,
+      "sample_id": "jammeval-ja-vlm-bench-refined-test-3"
+    },
+    "jv1-fae2542878ac57a76924b69cf0e182949dfdce6f": {
+      "body_sha256": "27b8911f0c2b21ae71097052d489139a50f79402b87856aecd7488a6914c9ec8",
+      "repeat": 2,
+      "sample_id": "jammeval-ja-vlm-bench-refined-test-30"
+    },
+    "jv1-faea7bdaca59cb6a95911078d8a00a9597754ac0": {
+      "body_sha256": "56d16f04e03bcf8cb4a84bdc143a2ae44e8d0d4dd97b6ce18c444320e6abed3d",
+      "repeat": 3,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-126"
+    },
+    "jv1-fb79003394c754ce03edf40759edf53af2e764e4": {
+      "body_sha256": "42a68ba787c13208ab2322c63d620f54b9254af2948216dd417645225f3c9700",
+      "repeat": 3,
+      "sample_id": "jammeval-heron-bench-refined-test-79"
+    },
+    "jv1-fb9408d8bbf5a7b6958bdcf13654f62ec6db1316": {
+      "body_sha256": "807617433c93119979c6ecbd75a9e1be4ac0e371b749b21ba957e4886a92d1e4",
+      "repeat": 3,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-142"
+    },
+    "jv1-fbc5ece4aa1d9e544bbd8d6c516ff2a661d627b2": {
+      "body_sha256": "111e9893a49985c29268abaa825dc11f7bbe9dc553c3e9ea292afe2b4b465421",
+      "repeat": 1,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-109"
+    },
+    "jv1-fc62f48f3e574b7c8b5e2b76cac9ac966e8c9cbd": {
+      "body_sha256": "e999a448bdf4f4cfd40050c46d51eb8eab78c8b0dc16c1072afb8ad57ccd4b3d",
+      "repeat": 1,
+      "sample_id": "jammeval-heron-bench-refined-test-23"
+    },
+    "jv1-fcc270cfefadf9391df1075935e35c62f3dfb9ce": {
+      "body_sha256": "74fb3be3c79db70b3bc75765e576c02a7bab86eb61be69711b73c59c96cc2fd2",
+      "repeat": 3,
+      "sample_id": "jammeval-ja-vlm-bench-refined-test-25"
+    },
+    "jv1-fd016b583522da6848893edf97c4e024513e3686": {
+      "body_sha256": "e5c6c19cc23e30c2af25b5b76f8d79e8ce266de818f513b6148eb21a159aa9fd",
+      "repeat": 2,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-1"
+    },
+    "jv1-fd66ff70ff535122f4f9c3f659202f3b15ff907c": {
+      "body_sha256": "7fe31c19ffed3ea30c1f23c01558d512f90b297c0000ea968e3db17fe3eeb972",
+      "repeat": 2,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-118"
+    },
+    "jv1-fd8d1e77625870931593a20cc3a1b938a88e9b97": {
+      "body_sha256": "13c65ec0653dbaf0c66120616c1b2bd5c96b0eea24f5c297a0bbecf626949b06",
+      "repeat": 3,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-75"
+    },
+    "jv1-fd924bdc0877c142494b76a7038196a0fa135170": {
+      "body_sha256": "77ce91447ef575d8519c2b819f1a24ba9893210a87713e7dbaaa0be8cd63fa6f",
+      "repeat": 2,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-84"
+    },
+    "jv1-fdc9c8195b873c97db0182571a06150bd5a3d14a": {
+      "body_sha256": "db4f330b654006e88e1941fa0492d8a71beae684dc58c9a16e06274028e50185",
+      "repeat": 3,
+      "sample_id": "jammeval-heron-bench-refined-test-66"
+    },
+    "jv1-fe636ee85c21ce81a73fd6942d88583ac39d6339": {
+      "body_sha256": "aea1bc75485c843d1a791ba5e02349495811e71e395c0537179ce37658741c73",
+      "repeat": 2,
+      "sample_id": "jammeval-heron-bench-refined-test-25"
+    },
+    "jv1-fe698db6c910035b1b0fc519b84b36b4c68890f6": {
+      "body_sha256": "b1371502b3ba4fd174d325774f4515e610fee7debc5c36e145660c3a57fa99cb",
+      "repeat": 1,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-54"
+    },
+    "jv1-fedb2016b896caf27cad18e1d9c3f82312a58d90": {
+      "body_sha256": "2c75fda1a3ee788ef8e75263eda27afbb24062359792256bc4f6a66d81490ce0",
+      "repeat": 1,
+      "sample_id": "jammeval-heron-bench-refined-test-16"
+    },
+    "jv1-fef3a2c2459be7375710b627e656991ccd4580f9": {
+      "body_sha256": "0404810dd1b07033a672894290d0d8fa71e6721f104d4942445b3b607dd59a94",
+      "repeat": 3,
+      "sample_id": "jammeval-ja-vlm-bench-refined-test-22"
+    },
+    "jv1-ff3221347996b58bdd9b0fd75b516624d18358f1": {
+      "body_sha256": "aa776bc72e9e91e64d701dfd32d5458f24f8d9d4d45be2ac1fd3548641d8cc18",
+      "repeat": 2,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-117"
+    },
+    "jv1-ff3c5b74a0b34adc047238074a69a3e9240264ad": {
+      "body_sha256": "1f65c3b9622bfb668e85ebed6b96a6f52bc581952dc3a82fde682abda01b6212",
+      "repeat": 2,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-55"
+    },
+    "jv1-ff5d45ddf0bdb12e41c20f0d8cf25b90e01f329f": {
+      "body_sha256": "28faec0f47820f94730bac8bb79ff13113b5d46e79145002176ec0f652312c35",
+      "repeat": 1,
+      "sample_id": "jammeval-cc-ocr-ja-refined-test-28"
+    },
+    "jv1-ffeb1f49c2903bcefdd112f796ea46e3e6d5c37e": {
+      "body_sha256": "1a3341949bd7bc886a71c2e6b877bf6a82902c7de1d8e3a59aa771fa4820ff1a",
+      "repeat": 1,
+      "sample_id": "jammeval-heron-bench-refined-test-83"
+    }
+  },
+  "schema_version": "jmoshivis.jammeval-judge-batch.v2",
+  "suite_contract": {
+    "frozen_manifest_sha256": "f11cc0952e00f5bd299635ab97b0254406269aedfea17a189d033367b2f18a72",
+    "frozen_num_questions": 734,
+    "judge_implementation_file_sha256": {
+      "j-moshivis/jmoshivis/evaluation/judge.py": "59c2a2c56160abc21c775e2831f88ba8dfcb2827002939a8ccdb1766e5b62751",
+      "j-moshivis/jmoshivis/evaluation/schema.py": "ccc2eb6fda4adb5f82be2007f30953a680e967113ad7180a4678535f31048d7f",
+      "j-moshivis/jmoshivis/evaluation/score.py": "584ecbb50ebb343e9fba991384df2edb0aa3d1f5b40dd57a95767b8c8a2e919d",
+      "j-moshivis/jmoshivis/evaluation/suite.py": "a542572e550e0e5e7c945ee7a400fb0882124eca8d5299be07e4b69cbe0bc15c"
+    },
+    "judge_model": "gpt-5.1-2025-11-13",
+    "judge_n_repeats": 3,
+    "judge_template_sha256": "e49100c04e850eb156e49c81730958863c895b04498a7b152f4ec2ea341f35b5",
+    "language_id_model_sha256": "8f3472cfe8738a7b6099e8e999c3cbfae0dcd15696aac7d7738a8039db603e83",
+    "paper_generation": "greedy",
+    "response_overlap_seconds": 0.32,
+    "response_tail_seconds": 10.0,
+    "scoring_protocol": {
+      "bootstrap_seed": 42,
+      "dependency_versions": {
+        "emoji": "2.10.1",
+        "fasttext-wheel": "0.9.2",
+        "fugashi": "1.3.1",
+        "neologdn": "0.5.2",
+        "numpy": "1.26.4",
+        "rouge-score": "0.1.2",
+        "unidic-lite": "1.0.8"
+      },
+      "implementation_file_sha256": {
+        "j-moshivis/jmoshivis/evaluation/metrics.py": "efda35203356614e8797dd1cc0d7e7abacd0be84cf8f89b2a0189728f01d75ac",
+        "j-moshivis/jmoshivis/evaluation/official_rouge_ja.py": "46d5d92ae412329e776ec14153667e7ed10900e8bbec0da74f2e0b3edcaa57b3",
+        "j-moshivis/jmoshivis/evaluation/schema.py": "ccc2eb6fda4adb5f82be2007f30953a680e967113ad7180a4678535f31048d7f",
+        "j-moshivis/jmoshivis/evaluation/score.py": "584ecbb50ebb343e9fba991384df2edb0aa3d1f5b40dd57a95767b8c8a2e919d",
+        "j-moshivis/jmoshivis/evaluation/suite.py": "a542572e550e0e5e7c945ee7a400fb0882124eca8d5299be07e4b69cbe0bc15c"
+      }
+    },
+    "suite_id": "vision_v1",
+    "suite_lock": "/gpu-server/yamamoto/j-moshivis/j-moshivis/evaluation/suite_v1.lock.json",
+    "suite_lock_sha256": "bda3dd04d50585b623024304d7d52663e26f1cf7297775b182c065f2fb7c2bb4"
+  }
+}

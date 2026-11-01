@@ -126,7 +126,7 @@ async function connect() {
     if (kind === 0) {
       const info = JSON.parse(decoder.decode(buffer.slice(1)));
       frameSize = info.frame_size || frameSize;
-      playbackTime = audioContext.currentTime + 0.08;
+      playbackTime = audioContext.currentTime + 0.15;  // ジッタバッファ (サーバー52ms/frame化により縮小)
       setConnected(true);
       setStatus("準備完了。話すボタンを押して画像について質問できます。");
     } else if (kind === 1) {
@@ -288,23 +288,65 @@ function playPcm(samples) {
   source.connect(audioContext.destination);
 
   const now = audioContext.currentTime;
-  const startAt = Math.max(now + 0.02, playbackTime);
+  const startAt = Math.max(now + 0.08, playbackTime);  // 遅延到着時も間を確保して途切れを防ぐ
   source.start(startAt);
   playbackTime = startAt + buffer.duration;
 }
 
-imageInput.addEventListener("change", async () => {
-  imageFile = imageInput.files[0] || null;
-  if (!imageFile) {
-    return;
-  }
-  preview.src = URL.createObjectURL(imageFile);
+let previewUrl = null;
+async function selectImage(file) {
+  if (!file) return;
+  imageFile = file;
+  if (previewUrl) URL.revokeObjectURL(previewUrl);
+  previewUrl = URL.createObjectURL(imageFile);
+  preview.src = previewUrl;
   imageDrop.classList.add("has-image");
   setStatus("画像を選択しました。接続できます。");
   if (ready) {
+    // New image = new conversation, to avoid leaking the previous context.
+    clearTranscript();
+    sendBinary(9);
     sendBinary(8, await imageFile.arrayBuffer());
   }
+}
+imageInput.addEventListener("change", async () => {
+  try { await selectImage(imageInput.files[0]); }
+  catch (error) { setError(`画像の選択に失敗しました: ${error.message}`); }
 });
+
+async function loadSampleImages() {
+  const container = document.getElementById("sample-images");
+  try {
+    const response = await fetch("/samples/catalog.json", { cache: "no-store" });
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    const items = await response.json();
+    container.replaceChildren();
+    for (const item of items) {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "sample-image";
+      const thumbnail = document.createElement("img");
+      thumbnail.src = item.url;
+      thumbnail.alt = item.label;
+      const label = document.createElement("span");
+      label.textContent = item.label;
+      button.append(thumbnail, label);
+      button.addEventListener("click", async () => {
+        button.disabled = true;
+        try {
+          const imageResponse = await fetch(item.url);
+          if (!imageResponse.ok) throw new Error(`HTTP ${imageResponse.status}`);
+          const blob = await imageResponse.blob();
+          await selectImage(new File([blob], item.url.split("/").pop(), { type: blob.type }));
+          container.querySelectorAll("button").forEach(b => b.classList.toggle("selected", b === button));
+        } catch (error) { setError(`サンプル画像の読み込みに失敗しました: ${error.message}`); }
+        finally { button.disabled = false; }
+      });
+      container.append(button);
+    }
+  } catch (error) { container.textContent = `サンプルを読み込めませんでした。画像のアップロードは利用できます。(${error.message})`; }
+}
+loadSampleImages();
 
 connectButton.addEventListener("click", connect);
 
@@ -318,7 +360,7 @@ talkButton.addEventListener("click", async () => {
 
 resetButton.addEventListener("click", () => {
   clearTranscript();
-  playbackTime = audioContext ? audioContext.currentTime + 0.05 : 0;
+  playbackTime = audioContext ? audioContext.currentTime + 0.15 : 0;
   sendBinary(9);
 });
 

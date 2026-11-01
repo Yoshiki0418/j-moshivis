@@ -1,0 +1,62 @@
+<!doctype html><meta charset="utf-8"><title>発話タイミング比較</title><style>body{font-family:sans-serif;max-width:1000px;margin:32px auto}section{border:1px solid #ccc;padding:20px;margin:16px 0}audio{width:100%}pre{white-space:pre-wrap}</style><h1>発音・発話タイミングの比較</h1><p>左：同じユーザー音声／右：モデル生成音声。全条件でテキストは greedy、音声のみ sampling。同じ質問・画像です。追加学習前だけ既存の seed 42 の録音です。数値は音量による診断であり、短い相づちを失敗とは判定しません。</p><section><h2>追加学習前（seed 42）</h2><audio controls src="../image_probe_test3_audio_sampling_20261012/conversation_stereo.wav"></audio><h3>質問前を含む全生成テキスト</h3><pre>古い木造の古い建物が並んでいて、右側には大きな塔が立っていて、右側には瓦の屋根がついてますよ。 右側の瓦の先に、瓦が立っていて、その先には大きな塔が立っていますね。お寺か神社のような建物かもしれません。</pre><details><summary>タイミング診断</summary><pre>{
+  &quot;window_sec&quot;: 0.08,
+  &quot;rms_threshold&quot;: 0.01,
+  &quot;first_user_energy_sec&quot;: 0.4,
+  &quot;assistant_active_before_first_user_sec&quot;: 0.0,
+  &quot;total_energy_overlap_sec&quot;: 0.0,
+  &quot;longest_continuous_energy_overlap_sec&quot;: 0.0,
+  &quot;early_text_events&quot;: [],
+  &quot;note&quot;: &quot;Energy proxy only; not speech VAD. Brief full-duplex backchannels are not errors.&quot;
+}</pre></details></section><section><h2>100 step（seed 43）</h2><audio controls src="step100/conversation_stereo.wav"></audio><h3>質問前を含む全生成テキスト</h3><pre>屋根がすごく長くて、瓦がたくさん並んでる感じですね。お寺みたいな雰囲気の建物です 屋根がすごく長くて、奥に瓦の塔が立ってるので、お寺か神社の入り口かもしれませんね</pre><details><summary>タイミング診断</summary><pre>{
+  &quot;window_sec&quot;: 0.08,
+  &quot;rms_threshold&quot;: 0.01,
+  &quot;first_user_energy_sec&quot;: 0.4,
+  &quot;assistant_active_before_first_user_sec&quot;: 0.0,
+  &quot;total_energy_overlap_sec&quot;: 0.0,
+  &quot;longest_continuous_energy_overlap_sec&quot;: 0.0,
+  &quot;early_text_events&quot;: [],
+  &quot;note&quot;: &quot;Energy proxy only; not speech VAD. Brief full-duplex backchannels are not errors.&quot;
+}</pre></details></section><section><h2>200 step（seed 43）</h2><audio controls src="step200/conversation_stereo.wav"></audio><h3>質問前を含む全生成テキスト</h3><pre>すごく古いお寺が並んでいて、屋根が瓦でびっしり見えますよ。 すごく静かな町並みですね。奥にお寺が連なっていて、街灯も灯っています。</pre><details><summary>タイミング診断</summary><pre>{
+  &quot;window_sec&quot;: 0.08,
+  &quot;rms_threshold&quot;: 0.01,
+  &quot;first_user_energy_sec&quot;: 0.4,
+  &quot;assistant_active_before_first_user_sec&quot;: 0.0,
+  &quot;total_energy_overlap_sec&quot;: 0.0,
+  &quot;longest_continuous_energy_overlap_sec&quot;: 0.0,
+  &quot;early_text_events&quot;: [],
+  &quot;note&quot;: &quot;Energy proxy only; not speech VAD. Brief full-duplex backchannels are not errors.&quot;
+}</pre></details></section><section><h2>500 step（seed 43）</h2><audio controls src="../image_probe_test3_depth500_audio_sampling_seed43_20261012/conversation_stereo.wav"></audio><h3>質問前を含む全生成テキスト</h3><pre>ね、なんか、おしゃれな感じがするね。 の屋根の飾り、すごく目立ちますね。 屋根が重なってて、古い建物が並んでる。和風の雰囲気みたいですね。 はい、お城や神社が並んでる、日本家屋の風景ですね。奥に大きな塔が立ってますよ。</pre><details><summary>タイミング診断</summary><pre>{
+  &quot;window_sec&quot;: 0.08,
+  &quot;rms_threshold&quot;: 0.01,
+  &quot;first_user_energy_sec&quot;: 0.4,
+  &quot;assistant_active_before_first_user_sec&quot;: 0.24,
+  &quot;total_energy_overlap_sec&quot;: 3.04,
+  &quot;longest_continuous_energy_overlap_sec&quot;: 1.04,
+  &quot;early_text_events&quot;: [
+    {
+      &quot;frame&quot;: 2,
+      &quot;time_sec&quot;: 0.16,
+      &quot;token_id&quot;: 969,
+      &quot;piece&quot;: &quot;ね&quot;,
+      &quot;gate&quot;: 0.02364080213010311,
+      &quot;phase&quot;: &quot;question_and_response&quot;
+    },
+    {
+      &quot;frame&quot;: 3,
+      &quot;time_sec&quot;: 0.24,
+      &quot;token_id&quot;: 7,
+      &quot;piece&quot;: &quot;、&quot;,
+      &quot;gate&quot;: 0.030380655080080032,
+      &quot;phase&quot;: &quot;question_and_response&quot;
+    },
+    {
+      &quot;frame&quot;: 4,
+      &quot;time_sec&quot;: 0.32,
+      &quot;token_id&quot;: 4547,
+      &quot;piece&quot;: &quot;なん&quot;,
+      &quot;gate&quot;: 0.013768321834504604,
+      &quot;phase&quot;: &quot;question_and_response&quot;
+    }
+  ],
+  &quot;note&quot;: &quot;Energy proxy only; not speech VAD. Brief full-duplex backchannels are not errors.&quot;
+}</pre></details></section>

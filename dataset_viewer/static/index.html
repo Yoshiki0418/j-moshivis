@@ -1,0 +1,466 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light" />
+    <title>J-MoshiVis Dataset Viewer</title>
+    <link rel="stylesheet" href="/static/styles.css" />
+    <script src="/static/app.js" defer></script>
+  </head>
+  <body>
+    <a class="skip-link" href="#dataset-list">データ一覧へ移動</a>
+
+    <div class="app-shell">
+      <header class="app-header">
+        <div>
+          <p class="eyebrow">J-MoshiVis</p>
+          <h1>Dataset Viewer</h1>
+          <p class="header-description">
+            画像からアライメントまで、データセット化の進捗と内容を確認します。
+          </p>
+        </div>
+        <div class="header-actions">
+          <div class="view-mode-switch" role="group" aria-label="画面モード">
+            <button type="button" id="browse-mode" class="mode-button is-active" aria-pressed="true">データ閲覧</button>
+            <button type="button" id="annotation-mode" class="mode-button" aria-pressed="false">アノテーション</button>
+          </div>
+          <div class="index-state" id="index-state" role="status" aria-live="polite">
+            <span class="state-dot" aria-hidden="true"></span>
+            <span id="index-state-label">接続中…</span>
+          </div>
+          <button class="button button-secondary" id="refresh-button" type="button">
+            <svg aria-hidden="true" viewBox="0 0 24 24">
+              <path d="M20 11a8.1 8.1 0 0 0-14.9-4L3 10m0 0V4m0 6h6M4 13a8.1 8.1 0 0 0 14.9 4l2.1-3m0 0v6m0-6h-6" />
+            </svg>
+            再索引
+          </button>
+        </div>
+      </header>
+
+      <main>
+        <section class="dashboard" aria-labelledby="dashboard-title">
+          <div class="section-heading dashboard-heading">
+            <div>
+              <h2 id="dashboard-title">データセット進捗</h2>
+              <p id="last-updated">最終更新を確認しています</p>
+            </div>
+            <div class="dashboard-heading-meta">
+              <span class="auto-refresh-note" id="auto-refresh-note"><span aria-hidden="true"></span><span id="auto-refresh-label">10秒ごとに自動更新</span></span>
+              <p class="dashboard-note">画像付き／非画像を別集計・重複を除いた UID 単位</p>
+            </div>
+          </div>
+
+          <article class="total-audio-card" aria-labelledby="total-audio-title">
+            <div class="total-audio-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><path d="M4 14v-4M8 17V7M12 20V4M16 17V7M20 14v-4" /></svg>
+            </div>
+            <div class="total-audio-copy">
+              <p id="total-audio-title">総音声</p>
+              <p class="total-audio-value"><span id="metric-total-audio">—</span><span>件</span></p>
+              <p class="total-audio-duration"><span>総再生時間</span><strong id="metric-total-audio-duration">—</strong></p>
+              <p id="metric-total-audio-sub">画像付き＋非画像の音声 UID 合計</p>
+            </div>
+          </article>
+
+          <div class="dashboard-groups">
+            <section class="dashboard-group visual-dashboard-group" aria-labelledby="visual-progress-title">
+              <div class="dashboard-group-heading">
+                <div>
+                  <h3 id="visual-progress-title">画像付きデータ</h3>
+                  <p>visual-v3 / 日本の日常画像-v1 / counting-v4 / OCR-v4</p>
+                </div>
+                <span class="dashboard-group-badge visual-group-badge">画像あり</span>
+              </div>
+              <div class="metric-grid">
+                <article class="metric-card metric-image">
+                  <div class="metric-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2" /><circle cx="9" cy="9" r="2" /><path d="m3 17 5-5 4 4 3-3 6 6" /></svg>
+                  </div>
+                  <div>
+                    <p class="metric-label">画像</p>
+                    <p class="metric-value" id="metric-visual-images">—</p>
+                    <p class="metric-sub" id="metric-visual-images-sub">読み込み中</p>
+                  </div>
+                </article>
+                <article class="metric-card metric-dialogue">
+                  <div class="metric-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24"><path d="M21 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4Z" /><path d="M8 9h8M8 13h5" /></svg>
+                  </div>
+                  <div>
+                    <p class="metric-label">対話テキスト</p>
+                    <p class="metric-value" id="metric-visual-dialogues">—</p>
+                    <p class="metric-sub" id="metric-visual-dialogues-sub">読み込み中</p>
+                  </div>
+                </article>
+                <article class="metric-card metric-audio">
+                  <div class="metric-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24"><path d="M4 14v-4M8 17V7M12 20V4M16 17V7M20 14v-4" /></svg>
+                  </div>
+                  <div>
+                    <p class="metric-label">対話音声</p>
+                    <p class="metric-value" id="metric-visual-audio">—</p>
+                    <p class="metric-sub" id="metric-visual-audio-sub">読み込み中</p>
+                  </div>
+                </article>
+                <article class="metric-card metric-alignment">
+                  <div class="metric-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16" /><path d="M8 3v6M15 9v6M11 15v6" /></svg>
+                  </div>
+                  <div>
+                    <p class="metric-label">アライメント</p>
+                    <p class="metric-value" id="metric-visual-alignments">—</p>
+                    <p class="metric-sub" id="metric-visual-alignments-sub">読み込み中</p>
+                  </div>
+                </article>
+              </div>
+            </section>
+
+            <section class="dashboard-group nonvisual-dashboard-group" aria-labelledby="nonvisual-progress-title">
+              <div class="dashboard-group-heading">
+                <div>
+                  <h3 id="nonvisual-progress-title">非画像対話データ</h3>
+                  <p>nonvisual-v1（画像は対象外）</p>
+                </div>
+                <span class="dashboard-group-badge nonvisual-group-badge">画像なし</span>
+              </div>
+              <div class="metric-grid metric-grid-three">
+                <article class="metric-card metric-dialogue">
+                  <div class="metric-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24"><path d="M21 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4Z" /><path d="M8 9h8M8 13h5" /></svg>
+                  </div>
+                  <div>
+                    <p class="metric-label">対話テキスト</p>
+                    <p class="metric-value" id="metric-nonvisual-dialogues">—</p>
+                    <p class="metric-sub" id="metric-nonvisual-dialogues-sub">読み込み中</p>
+                  </div>
+                </article>
+                <article class="metric-card metric-audio">
+                  <div class="metric-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24"><path d="M4 14v-4M8 17V7M12 20V4M16 17V7M20 14v-4" /></svg>
+                  </div>
+                  <div>
+                    <p class="metric-label">対話音声</p>
+                    <p class="metric-value" id="metric-nonvisual-audio">—</p>
+                    <p class="metric-sub" id="metric-nonvisual-audio-sub">読み込み中</p>
+                  </div>
+                </article>
+                <article class="metric-card metric-alignment">
+                  <div class="metric-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16" /><path d="M8 3v6M15 9v6M11 15v6" /></svg>
+                  </div>
+                  <div>
+                    <p class="metric-label">アライメント</p>
+                    <p class="metric-value" id="metric-nonvisual-alignments">—</p>
+                    <p class="metric-sub" id="metric-nonvisual-alignments-sub">読み込み中</p>
+                  </div>
+                </article>
+              </div>
+            </section>
+          </div>
+        </section>
+
+        <section class="dashboard review-dashboard" aria-labelledby="review-dashboard-title">
+          <div class="section-heading">
+            <div><h2 id="review-dashboard-title">人手確認・認証・再作成</h2>
+              <p>「承認必須」と「人間が確認済み」は別管理。カードから対象を絞り込めます。</p></div>
+          </div>
+          <div class="metric-grid review-metric-grid">
+            <article class="metric-card"><div><p class="metric-label">人間の承認が必須</p><p class="metric-value" id="metric-review-required">—</p><p class="metric-sub">承認済み・要確認・却下の合計</p></div></article>
+            <button type="button" class="metric-card review-metric-button" data-review-filter="pending"><div><p class="metric-label">承認必須・要確認</p><p class="metric-value" id="metric-review-pending">—</p><p class="metric-sub">承認されるまで音声生成を保留</p></div></button>
+            <button type="button" class="metric-card review-metric-button" data-review-filter="approved"><div><p class="metric-label">認証ラベル付き</p><p class="metric-value" id="metric-review-certified">—</p><p class="metric-sub" id="metric-review-certified-sub">人間が確認・承認したデータ</p></div></button>
+            <button type="button" class="metric-card review-metric-button" data-review-filter="regeneration"><div><p class="metric-label">編集後の音声・アライメント再作成待ち</p><p class="metric-value" id="metric-review-regeneration">—</p><p class="metric-sub" id="metric-review-regeneration-sub">旧音声などがある認証データのみ</p></div></button>
+            <button type="button" class="metric-card review-metric-button" data-review-filter="not_required"><div><p class="metric-label">未確認・承認任意</p><p class="metric-value" id="metric-review-optional">—</p><p class="metric-sub">人間の承認なしでも利用可能</p></div></button>
+            <button type="button" class="metric-card review-metric-button" data-review-filter="rejected"><div><p class="metric-label">却下・一括再生成候補</p><p class="metric-value" id="metric-review-rejected">—</p><p class="metric-sub">元データ・編集履歴を保持</p></div></button>
+          </div>
+        </section>
+
+        <section class="filters" aria-labelledby="filter-title">
+          <div class="filter-title-row">
+            <h2 id="filter-title">絞り込み</h2>
+            <div class="filter-title-actions">
+            <button class="text-button annotation-only" id="annotation-advanced-toggle" type="button" aria-expanded="false">詳細条件</button>
+            <button class="text-button" id="clear-filters" type="button">条件をクリア</button>
+            </div>
+          </div>
+          <form class="filter-form" id="filter-form" role="search">
+            <label class="annotation-only">
+              <span>コレクション</span>
+              <select id="annotation-collection" name="collection">
+                <option value="">すべてのコレクション</option>
+              </select>
+            </label>
+            <label class="filter-advanced">
+              <span>カテゴリ</span>
+              <select id="category-filter" name="category">
+                <option value="">すべてのカテゴリ</option>
+              </select>
+            </label>
+            <label class="filter-advanced">
+              <span>到達段階</span>
+              <select id="stage-filter" name="stage">
+                <option value="">すべての段階</option>
+                <option value="image">画像のみ</option>
+                <option value="dialogue">対話まで</option>
+                <option value="audio">音声まで</option>
+                <option value="complete">アライメント完了</option>
+                <option value="missing_dialogue">対話未生成</option>
+                <option value="planned_missing_dialogue">生成対象だが対話未生成</option>
+                <option value="missing_audio">音声未生成</option>
+                <option value="missing_alignment">アライメント未生成</option>
+                <option value="regeneration_pending">編集後の再作成待ち</option>
+              </select>
+            </label>
+            <label>
+              <span>レビュー状態</span>
+              <select id="review-status-filter" name="review_status">
+                <option value="">すべての状態</option>
+                <option value="pending">要確認</option>
+                <option value="approved">認証済み（人間の承認済み）</option>
+                <option value="rejected">却下</option>
+                <option value="not_required">未確認（承認任意）</option>
+                <option value="unreviewed">未確認すべて（必須＋任意）</option>
+              </select>
+            </label>
+            <label>
+              <span>補助タスク</span>
+              <select id="auxiliary-kind-filter" name="auxiliary_kind">
+                <option value="">すべてのタスク</option>
+                <option value="counting">カウント</option>
+                <option value="ocr">日本語OCR</option>
+              </select>
+            </label>
+            <label class="checkbox-filter filter-advanced">
+              <span>確認対象</span>
+              <span class="checkbox-control">
+                <input id="review-required-filter" name="review_required" type="checkbox" value="true" />
+                <span>承認必須・未確認（要確認）のみ</span>
+              </span>
+            </label>
+            <label class="search-field">
+              <span>UID 検索</span>
+              <div class="search-input-wrap">
+                <svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7" /><path d="m20 20-4-4" /></svg>
+                <input id="uid-search" name="q" type="search" placeholder="例: counting:flickr:…" autocomplete="off" />
+              </div>
+            </label>
+            <button class="button button-primary filter-submit" type="submit">検索</button>
+          </form>
+        </section>
+
+        <section class="annotation-toolbar annotation-only" aria-label="アノテーション操作">
+          <div><strong>確認・編集ワークスペース</strong><span>前後移動: Alt + ← / →。編集内容は自動更新で上書きされません。</span></div>
+          <div class="annotation-toolbar-actions">
+            <label><input type="checkbox" id="annotation-auto-next" />判定・保存後に次へ</label>
+            <button type="button" class="button button-secondary" id="annotation-list-toggle" aria-expanded="true">一覧を隠す</button>
+          </div>
+        </section>
+
+        <section class="workspace" aria-label="データセット閲覧">
+          <aside class="tree-panel panel" aria-labelledby="tree-title">
+            <div class="panel-header compact-header">
+              <div>
+                <p class="panel-kicker">BROWSE</p>
+                <h2 id="tree-title">コレクション</h2>
+              </div>
+              <button class="icon-button mobile-panel-close" id="tree-close" type="button" aria-label="コレクションを閉じる">×</button>
+            </div>
+            <button class="tree-root is-selected" id="all-collections" type="button">
+              <span class="folder-icon" aria-hidden="true"></span>
+              <span>すべてのデータ</span>
+              <span class="tree-count" id="all-count">—</span>
+            </button>
+            <nav class="tree" id="collection-tree" aria-label="コレクションとディレクトリ">
+              <div class="skeleton tree-skeleton"></div>
+              <div class="skeleton tree-skeleton short"></div>
+              <div class="skeleton tree-skeleton"></div>
+            </nav>
+          </aside>
+
+          <section class="list-panel panel" aria-labelledby="list-title">
+            <div class="panel-header list-header">
+              <div class="list-title-row">
+                <button class="icon-button tree-toggle" id="tree-toggle" type="button" aria-label="コレクションを開く" aria-controls="collection-tree">
+                  <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16" /></svg>
+                </button>
+                <div>
+                  <p class="panel-kicker" id="active-collection">ALL DATA</p>
+                  <h2 id="list-title">データ一覧</h2>
+                </div>
+              </div>
+              <p class="result-count" id="result-count" aria-live="polite">読み込み中…</p>
+            </div>
+
+            <div class="list-loading" id="list-loading" hidden>
+              <span class="spinner" aria-hidden="true"></span>
+              データを読み込んでいます
+            </div>
+            <div class="empty-state" id="list-empty" hidden>
+              <div class="empty-icon" aria-hidden="true">⌕</div>
+              <h3>該当するデータがありません</h3>
+              <p>カテゴリや検索条件を変更してください。</p>
+            </div>
+            <div class="error-state" id="list-error" role="alert" hidden>
+              <h3>一覧を取得できませんでした</h3>
+              <p id="list-error-message"></p>
+              <button class="button button-secondary" id="list-retry" type="button">再試行</button>
+            </div>
+            <div class="dataset-list" id="dataset-list" tabindex="-1" aria-busy="true"></div>
+
+            <footer class="pagination" aria-label="ページ切り替え">
+              <button class="button button-secondary pagination-button" id="page-prev" type="button">前へ</button>
+              <p><span id="page-current">1</span> / <span id="page-total">1</span> ページ</p>
+              <button class="button button-secondary pagination-button" id="page-next" type="button">次へ</button>
+            </footer>
+          </section>
+
+          <aside class="detail-panel panel" id="detail-panel" aria-labelledby="detail-title">
+            <div class="detail-empty" id="detail-empty">
+              <div class="detail-empty-illustration" aria-hidden="true">
+                <svg viewBox="0 0 80 80"><rect x="11" y="15" width="58" height="50" rx="6" /><circle cx="29" cy="32" r="6" /><path d="m15 59 17-17 11 11 8-8 14 14" /></svg>
+              </div>
+              <h2 id="detail-title">データを選択</h2>
+              <p>一覧から UID を選ぶと、画像・対話・音声・アライメントを表示します。</p>
+            </div>
+
+            <div class="detail-content" id="detail-content" hidden>
+              <header class="detail-header">
+                <div class="detail-header-main">
+                  <button class="icon-button detail-close" id="detail-close" type="button" aria-label="詳細を閉じる">×</button>
+                  <div>
+                    <p class="panel-kicker" id="detail-category">CATEGORY</p>
+                    <h2 id="detail-uid"></h2>
+                    <p class="detail-path" id="detail-path"></p>
+                  </div>
+                </div>
+                <div class="detail-navigation">
+                  <button class="button button-secondary" id="item-prev" type="button" aria-label="前のデータ">
+                    <span aria-hidden="true">←</span> 前
+                  </button>
+                  <button class="button button-secondary" id="item-next" type="button" aria-label="次のデータ">
+                    次 <span aria-hidden="true">→</span>
+                  </button>
+                </div>
+              </header>
+
+              <div class="detail-scroll">
+                <div class="detail-stepper" id="detail-stepper" aria-label="データセット化の到達段階"></div>
+
+                <section class="detail-section image-section" aria-labelledby="image-section-title">
+                  <div class="detail-section-heading">
+                    <h3 id="image-section-title">画像</h3>
+                    <a id="annotation-image-open" class="annotation-only annotation-image-link" target="_blank" rel="noopener">原寸画像を別タブで開く ↗</a>
+                    <span class="availability" id="image-availability"></span>
+                  </div>
+                  <div class="image-viewer" id="image-viewer">
+                    <img id="detail-image" alt="" />
+                    <p class="missing-message" id="image-missing" hidden>画像ファイルがありません</p>
+                  </div>
+                </section>
+
+                <div class="detail-text-pane">
+                <section class="detail-section review-card" id="review-section" aria-labelledby="review-section-title" hidden>
+                  <div class="review-card-header">
+                    <div>
+                      <p class="review-eyebrow">HUMAN REVIEW</p>
+                      <h3 id="review-section-title">人手確認・対話編集</h3>
+                    </div>
+                    <span class="review-status-badge" id="review-status-badge"></span>
+                  </div>
+                  <div class="review-actions" id="review-actions">
+                    <button class="button button-secondary" id="review-edit" type="button">対話を編集</button>
+                    <button class="button review-approve" id="review-approve" type="button">承認して利用する</button>
+                    <button class="button review-reject" id="review-reject" type="button">却下する</button>
+                    <button class="button button-secondary review-reset" id="review-reset" type="button">未確認へ戻す</button>
+                  </div>
+                  <div class="review-actions dialogue-heading-actions" id="dialogue-heading-actions" hidden>
+                    <button class="button review-approve" id="dialogue-save" type="button">保存して承認</button>
+                    <button class="button button-secondary" id="dialogue-cancel" type="button">編集を取り消す</button>
+                  </div>
+                  <details class="review-context-details" id="review-context-details" open>
+                  <summary>補助情報・正解・確認メモ</summary>
+                  <p class="review-description" id="review-description">
+                    正解注釈なしでVLMが画像から判断した内容です。画像と該当する質問・回答を確認してください。
+                  </p>
+                  <dl class="review-facts" id="review-facts"></dl>
+                  <div class="review-qa" id="review-qa" aria-label="確認対象の質問と回答"></div>
+                  <p class="review-usage" id="review-usage" role="status"></p>
+                  <label class="review-note-label" for="review-note">
+                    <span>確認メモ（任意）</span>
+                    <textarea id="review-note" rows="3" maxlength="1000" placeholder="判断理由や修正時のメモを残せます"></textarea>
+                  </label>
+                  <p class="review-error" id="review-error" role="alert" hidden></p>
+                  </details>
+                </section>
+
+                <section class="detail-section dialogue-section" aria-labelledby="dialogue-section-title">
+                  <div class="detail-section-heading">
+                    <h3 id="dialogue-section-title">対話テキスト</h3>
+                    <span class="availability" id="dialogue-availability"></span>
+                  </div>
+                  <div class="conversation" id="detail-dialogue" tabindex="0" role="region" aria-label="対話テキスト・上下にスクロールできます"></div>
+                  <div id="dialogue-editor-actions" class="dialogue-editor" hidden>
+                    <p>本文と正解情報を修正し、画像との対応を確認して保存してください。元の生成結果は保持され、修正版が承認されます。音声・アライメントは修正版から再作成が必要です。</p>
+                    <div id="dialogue-editor-facts"></div>
+                    <p id="dialogue-editor-error" class="review-error" role="alert" hidden></p>
+                  </div>
+                </section>
+
+                </div>
+                <details class="detail-section audio-section media-section" id="audio-section" aria-labelledby="audio-section-title">
+                  <summary class="media-section-heading">
+                    <span class="media-section-title" id="audio-section-title">対話音声</span>
+                    <span class="availability" id="audio-availability"></span>
+                  </summary>
+                  <div class="media-section-content">
+                  <div class="audio-card" id="audio-card">
+                    <audio id="detail-audio" controls preload="metadata"></audio>
+                    <p class="audio-hint">アライメント行を選択すると、その位置から再生します。</p>
+                  </div>
+                  <p class="missing-block" id="audio-missing" hidden>まだ対話音声は作成されていません。</p>
+                  </div>
+                </details>
+
+                <details class="detail-section alignment-section media-section" id="alignment-section" aria-labelledby="alignment-section-title">
+                  <summary class="media-section-heading">
+                    <span class="media-section-title" id="alignment-section-title">アライメント</span>
+                    <span class="availability" id="alignment-availability"></span>
+                  </summary>
+                  <div class="media-section-content">
+                  <div class="table-wrap" id="alignment-wrap">
+                    <table>
+                      <thead>
+                        <tr>
+                          <th scope="col">開始</th>
+                          <th scope="col">終了</th>
+                          <th scope="col">話者</th>
+                          <th scope="col">テキスト</th>
+                        </tr>
+                      </thead>
+                      <tbody id="alignment-body"></tbody>
+                    </table>
+                  </div>
+                  <p class="missing-block" id="alignment-missing" hidden>まだアライメントは作成されていません。</p>
+                  </div>
+                </details>
+
+                <details class="metadata-section">
+                  <summary>メタデータ</summary>
+                  <dl class="metadata-grid" id="metadata-grid"></dl>
+                </details>
+              </div>
+            </div>
+
+            <div class="detail-loading" id="detail-loading" hidden>
+              <span class="spinner" aria-hidden="true"></span>
+              詳細を読み込んでいます
+            </div>
+          </aside>
+        </section>
+      </main>
+    </div>
+
+    <div class="mobile-backdrop" id="mobile-backdrop" hidden></div>
+    <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+  </body>
+</html>
