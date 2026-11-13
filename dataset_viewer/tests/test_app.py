@@ -158,6 +158,45 @@ class FakeCatalog:
 
 
 class DatasetViewerApiTests(unittest.IsolatedAsyncioTestCase):
+    async def test_interactive_requests_notify_scanner_before_dispatch(self):
+        calls = []
+        self.catalog.request_interactive_pause = lambda: calls.append("pause")
+        for method, path, body in (
+            ("get", "/api/items/known", None),
+            ("put", "/api/items/known/review", {"content_sha256": "a" * 64, "decision": "approved"}),
+            ("put", "/api/items/known/dialogue", {"content_sha256": "a" * 64, "dialogue": [{"text": "修正"}]}),
+        ):
+            before = len(calls)
+            response = await getattr(self.client, method)(path, **({"json": body} if body else {}))
+            self.assertEqual(response.status, 200)
+            self.assertEqual(len(calls), before + 1)
+        # Status polling alone should not hold indexing indefinitely.
+        before = len(calls)
+        await self.client.get("/api/status")
+        self.assertEqual(len(calls), before)
+
+    async def test_slow_image_resolution_does_not_block_approval_or_health(self):
+        original = self.catalog.resolve_media
+        started, release = threading.Event(), threading.Event()
+        def blocked(*args, **kwargs):
+            started.set()
+            release.wait(3)
+            return original(*args, **kwargs)
+        self.catalog.resolve_media = blocked
+        request = asyncio.create_task(self.client.get("/api/items/known/media/image"))
+        try:
+            self.assertTrue(await asyncio.to_thread(started.wait, 1))
+            response = await asyncio.wait_for(self.client.get("/api/health"), .5)
+            self.assertEqual(response.status, 200)
+            self.assertIn("app;dur=", response.headers["Server-Timing"])
+            approval = await asyncio.wait_for(self.client.put("/api/items/known/review", json={
+                "content_sha256": "a" * 64, "decision": "approved"}), .5)
+            self.assertEqual(approval.status, 200)
+        finally:
+            release.set()
+            image = await request
+            await image.read()
+
     async def test_slow_catalog_queries_do_not_block_health(self):
         original = self.catalog.get_item
         started, release = threading.Event(), threading.Event()

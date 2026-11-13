@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import json
 import tempfile
+import threading
+import time
 import unittest
 from unittest.mock import patch
 from concurrent.futures import ThreadPoolExecutor
@@ -21,6 +23,107 @@ def _write_jsonl(path: Path, records: list[dict], partial: dict | None = None) -
 
 
 class DatasetCatalogTest(unittest.TestCase):
+    def _save_during_refresh(self, *, edit=False, sql_scan=False):
+        token = self.catalog.list_items(collection="visual_v3")["items"][0]["token"]
+        detail = self.catalog.get_item(token)
+        before = self.catalog.status()
+        entered, release = threading.Event(), threading.Event()
+
+        def slow_scan(db):
+            # Simulate a refresh that has already modified its SQLite snapshot.
+            # The next annotation must see the previous complete catalogue,
+            # never these partially scanned rows or metadata.
+            db.execute("INSERT INTO meta(key,value) VALUES('interrupted_test','uncommitted')")
+            db.execute("UPDATE items SET review_status='rejected',dataset_usable=0 WHERE collection='visual_v3'")
+            entered.set()
+            if sql_scan:
+                db.execute("""WITH RECURSIVE sequence(x) AS
+                    (VALUES(0) UNION ALL SELECT x+1 FROM sequence WHERE x<20000000)
+                    SELECT SUM(x) FROM sequence""").fetchone()
+            else:
+                while not release.wait(0.005):
+                    self.catalog._check_refresh_interruption()
+            return {}
+
+        save = (lambda: self.catalog.edit_dialogue(token, fingerprint=detail["content_sha256"],
+                    dialogue=[{"text": "写真には何がありますか？"}, {"text": "猫が写っています。"}])) if edit else (
+                lambda: self.catalog.review_item(token, fingerprint=detail["content_sha256"], decision="approved"))
+        with patch.object(self.catalog, "_refresh_targeted_speech_roots", side_effect=slow_scan):
+            with ThreadPoolExecutor(max_workers=2) as executor:
+                refresh = executor.submit(self.catalog.refresh)
+                try:
+                    self.assertTrue(entered.wait(1))
+                    started = time.monotonic()
+                    saved = executor.submit(save).result(timeout=2)
+                    elapsed = time.monotonic() - started
+                    interrupted = refresh.result(timeout=2)
+                finally:
+                    release.set()
+                    # This also releases a SQL test promptly if an assertion
+                    # fails before the review worker has announced itself.
+                    if not refresh.done():
+                        self.catalog.request_interactive_pause(1)
+        self.assertTrue(saved["ok"])
+        self.assertLess(elapsed, 2)
+        self.assertTrue(interrupted["refresh_interrupted"])
+        with self.catalog._connect() as db:
+            self.assertIsNone(db.execute("SELECT value FROM meta WHERE key='interrupted_test'").fetchone())
+        self.assertEqual(self.catalog.status()["last_refresh"], before["last_refresh"])
+        after = self.catalog.get_item(token)
+        self.assertTrue(after["human_certified"])
+        self.assertTrue(after["dataset_usable"])
+        self.assertFalse(self.catalog._interactive_pending.is_set())
+        if edit:
+            self.assertEqual(after["dialogue"][-1]["text"], "猫が写っています。")
+        # The rolled-back scan can run again and must retain the durable save.
+        self.assertNotIn("refresh_interrupted", self.catalog.refresh())
+        self.assertTrue(self.catalog.get_item(token)["human_certified"])
+        return elapsed
+
+    def test_approval_interrupts_background_scan_and_rolls_back_partial_catalog(self):
+        self._save_during_refresh()
+
+    def test_edit_approval_interrupts_background_scan_and_keeps_revised_text(self):
+        self._save_during_refresh(edit=True)
+
+    def test_approval_interrupts_long_sql_phase_of_background_refresh(self):
+        self._save_during_refresh(sql_scan=True)
+
+    def test_interactive_pause_postpones_refresh_without_changing_catalogue(self):
+        before = self.catalog.status()
+        self.catalog.request_interactive_pause(30)
+        with patch.object(self.catalog, "_refresh_targeted_speech_roots") as scan:
+            result = self.catalog.refresh()
+        self.assertTrue(result["refresh_interrupted"])
+        self.assertEqual(result["catalog_revision"], before["catalog_revision"])
+        self.assertEqual(result["last_refresh"], before["last_refresh"])
+        scan.assert_not_called()
+
+    def test_manual_refresh_resumes_pause_but_preserves_pending_writer_priority(self):
+        self.catalog.request_interactive_pause(30)
+        self.assertTrue(self.catalog.refresh()["refresh_interrupted"])
+        self.catalog.resume_background_refresh()
+        self.assertNotIn("refresh_interrupted", self.catalog.refresh())
+
+        entered, release = threading.Event(), threading.Event()
+        def queued_annotation():
+            with self.catalog._interactive_write():
+                entered.set()
+                release.wait(2)
+
+        with ThreadPoolExecutor(max_workers=1) as executor:
+            writer = executor.submit(queued_annotation)
+            try:
+                self.assertTrue(entered.wait(1))
+                self.catalog.request_interactive_pause(30)
+                self.catalog.resume_background_refresh()
+                self.assertTrue(self.catalog._interactive_pending.is_set())
+                self.assertTrue(self.catalog._refresh_should_yield())
+            finally:
+                release.set()
+            writer.result(timeout=1)
+        self.assertFalse(self.catalog._refresh_should_yield())
+
     def test_unchanged_detail_does_not_wait_for_background_refresh_lock(self):
         token = self.catalog.list_items(collection="visual_v3")["items"][0]["token"]
         before = self.catalog.get_item(token)

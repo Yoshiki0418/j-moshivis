@@ -36,7 +36,7 @@ const context=vm.createContext({document,console,URLSearchParams,Intl,AbortContr
 vm.runInContext(fs.readFileSync(process.argv[1],'utf8'),context);
 context.assert=assert;
 vm.runInContext(`(async()=>{
-  const realLoadItems=loadItems, realLoadTree=loadTree, realLoadDetail=loadDetail;
+  const realLoadItems=loadItems, realLoadTree=loadTree, realLoadDetail=loadDetail, realSelectItem=selectItem;
   collectDom(); loadItems=async()=>{}; loadDashboard=async()=>{}; loadTree=async()=>{}; showToast=()=>{};
   bindEvents();
   state.filters.review_status='approved'; dom.reviewStatusFilter.value='approved';
@@ -121,9 +121,9 @@ vm.runInContext(`(async()=>{
   loadDetail=()=>{throw new Error('Do not refetch the approved record before advancing');};
   api=async()=>{steps.push('saved');return {item:{...raw,review_status:'approved'}};};
   await submitReview('approved');
-  assert.strictEqual(JSON.stringify(steps),JSON.stringify(['saved','next:next-test','list']));
+  assert.strictEqual(JSON.stringify(steps),JSON.stringify(['saved','next:next-test']));
   steps.length=0;startDialogueEdit();await saveDialogueEdit();
-  assert.strictEqual(JSON.stringify(steps),JSON.stringify(['saved','next:next-test','list']));
+  assert.strictEqual(JSON.stringify(steps),JSON.stringify(['saved','next:next-test']));
   loadItems=async()=>{};loadDashboard=async()=>{};loadTree=async()=>{};
   // Aggregate updates are debounced and cannot overlap each other.
   let scheduled,clears=0;
@@ -169,6 +169,62 @@ vm.runInContext(`(async()=>{
   dom.alignmentSection.open=true;
   renderAlignment({alignment:[{start:0,end:1,speaker:'assistant',text:'猫です。'}]});
   assert.strictEqual(dom.alignmentSection.open,true);
+  // Prefetch the next question/image while the current item is being reviewed.
+  // A successful durable PUT may then advance without another detail request.
+  clearDetailPrefetch();state.excludedReviewTokens.clear();state.reviewQueueScope='';
+  state.filters={collection:'',category:'',directory:'',stage:'',review_status:'pending',
+    auxiliary_kind:'',review_required:'true',q:''};state.page=1;
+  state.annotationMode=true;state.editingDialogue=false;state.reviewBusy=false;
+  dom.annotationAutoNext.checked=true;
+  loadDetail=realLoadDetail;selectItem=realSelectItem;loadItems=async()=>{};
+  const raws=['a','b','c'].map(token=>({...raw,token,uid:token,review_required:true,
+    review_status:'pending',content_sha256:token.repeat(64),availability:{...raw.availability,image:true}}));
+  state.items=raws.map(normalizeItem);state.total=3;state.pages=1;
+  state.selectedItem=normalizeItem(raws[0]);state.selectedToken='a';state.navigation={previous:'',next:'b'};
+  const prefetchedRequests=[],imageRequests=[],renders=[];
+  globalThis.Image=class {set src(value){imageRequests.push(value);} decode(){return Promise.resolve();}};
+  renderDetail=item=>{state.selectedItem=item;state.selectedToken=item.token;renders.push(item.token);};
+  let commitReview;
+  api=(path,options={})=>{
+    if(options.method==='PUT')return new Promise(resolve=>{commitReview=resolve;});
+    prefetchedRequests.push(path);
+    const token=decodeURIComponent(path.match(/items\\/([^?]+)/)[1]);
+    const index=raws.findIndex(row=>row.token===token);
+    return Promise.resolve({...raws[index],navigation:{previous:raws[index-1]?.token,next:raws[index+1]?.token}});
+  };
+  prefetchNextDetails();await Promise.all([...state.detailPrefetch.values()].map(entry=>entry.promise));
+  assert.strictEqual(prefetchedRequests.length,2);
+  assert.ok(imageRequests.some(url=>url.includes('/b/media/image?v='+('b'.repeat(64)))));
+  const saving=submitReview('approved');
+  assert.strictEqual(state.selectedToken,'a');assert.strictEqual(state.reviewBusy,true);
+  assert.strictEqual(renders.length,0); // No success or navigation before durable acknowledgement.
+  commitReview({item:{...raws[0],review_status:'approved'}});await saving;
+  assert.strictEqual(state.selectedToken,'b');
+  assert.deepStrictEqual([...renders],['b']); // Do not redraw/reload the old image/audio first.
+  assert.strictEqual(prefetchedRequests.filter(path=>path.includes('/b?')).length,1);
+  assert.strictEqual(state.navigation.previous,''); // Prefetched B originally pointed back to approved A.
+  assert.strictEqual(state.items.some(item=>item.token==='a'),false);
+  assert.strictEqual(state.total,2);
+  assert.notStrictEqual(mediaUrl({...raws[1],content_sha256:'new-image-version'},'image'),mediaUrl(raws[1],'image'));
+  // Selecting a prefetched record still in flight reuses the exact same request.
+  clearDetailPrefetch();state.navigation.next='c';state.items=[normalizeItem(raws[1]),normalizeItem(raws[2])];
+  const inFlight=[];let deliverC;
+  api=path=>{inFlight.push(path);return new Promise(resolve=>{deliverC=resolve;});};
+  prefetchNextDetails();const openingC=selectItem('c');
+  assert.strictEqual(inFlight.length,1);
+  deliverC({...raws[2],navigation:{previous:'b',next:null}});await openingC;
+  assert.strictEqual(state.selectedItem.token,'c');
+  // A late request which ignored AbortSignal must not replace a newer selection.
+  state.annotationMode=false;clearDetailPrefetch();
+  const deliveries={};api=path=>new Promise(resolve=>{deliveries[decodeURIComponent(path.match(/items\\/([^?]+)/)[1])]=resolve;});
+  const oldSelection=realLoadDetail('a'),newSelection=realLoadDetail('b');
+  deliveries.b(raws[1]);await newSelection;deliveries.a(raws[0]);await oldSelection;
+  assert.strictEqual(state.selectedItem.token,'b');
+  // Cache entries are scoped by filters; a new queue cannot consume old navigation.
+  state.annotationMode=true;clearDetailPrefetch();state.navigation.next='c';state.items=[normalizeItem(raws[1]),normalizeItem(raws[2])];
+  let scopedCalls=0;api=async path=>{scopedCalls++;return raws[2];};
+  prefetchNextDetails();await Promise.all([...state.detailPrefetch.values()].map(entry=>entry.promise));
+  state.filters.q='different-filter';await selectItem('c');assert.strictEqual(scopedCalls,2);
 })()`,context).catch(error=>{console.error(error);process.exitCode=1;});
 """
         result = subprocess.run([shutil.which("node"), "-e", script, str(source)],

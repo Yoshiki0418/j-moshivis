@@ -63,6 +63,10 @@ class _SourceSpec:
     priority: int
 
 
+class _RefreshInterrupted(Exception):
+    """Internal control flow: yield the catalogue writer to an annotation."""
+
+
 _SOURCE_SPECS: tuple[_SourceSpec, ...] = (
     _SourceSpec(
         "japanese_daily_v1.images",
@@ -187,7 +191,69 @@ class DatasetCatalog:
         self.db_path.parent.mkdir(parents=True, exist_ok=True)
         self.review_store = default_review_store(self.repo_root)
         self._refresh_lock = threading.Lock()
+        self._interactive_lock = threading.Lock()
+        self._interactive_waiters = 0
+        self._interactive_pending = threading.Event()
+        self._interactive_pause_until = 0.0
         self._initialise()
+
+    def request_interactive_pause(self, seconds: float = 30.0) -> None:
+        """Nonblocking hint from the HTTP loop: postpone rebuildable scanning."""
+        if not math.isfinite(seconds) or seconds < 0:
+            raise ValueError("interactive pause must be finite and nonnegative")
+        with self._interactive_lock:
+            self._interactive_pause_until = max(self._interactive_pause_until, time.monotonic() + seconds)
+
+    def resume_background_refresh(self) -> None:
+        """Honor an explicit refresh, while queued annotation writes still win."""
+        with self._interactive_lock:
+            self._interactive_pause_until = 0.0
+
+    def _refresh_should_yield(self) -> bool:
+        return self._interactive_pending.is_set() or time.monotonic() < self._interactive_pause_until
+
+    @contextmanager
+    def _interactive_write(self) -> Iterator[None]:
+        """Let a human save interrupt an ongoing, rebuildable background scan.
+
+        The event is set *before* waiting for the catalogue writer. All queued
+        saves keep it set until the last one finishes, so a new refresh cannot
+        steal the lock between edits. The approval ledger is still fsynced and
+        the exact image/text fingerprint is verified under the same writer lock.
+        """
+        with self._interactive_lock:
+            self._interactive_waiters += 1
+            self._interactive_pending.set()
+        try:
+            with self._refresh_lock:
+                yield
+        finally:
+            with self._interactive_lock:
+                self._interactive_waiters -= 1
+                if self._interactive_waiters == 0:
+                    self._interactive_pending.clear()
+
+    def _check_refresh_interruption(self) -> None:
+        if self._refresh_should_yield():
+            raise _RefreshInterrupted()
+
+    @contextmanager
+    def _background_write(self) -> Iterator[sqlite3.Connection]:
+        with self._refresh_lock, self._connect() as db:
+            self._check_refresh_interruption()
+            # SQL aggregations/deletes can themselves take seconds. Cooperate
+            # during SQL too; _connect rolls the transaction back on exception.
+            db.set_progress_handler(lambda: int(self._refresh_should_yield()), 10000)
+            try:
+                yield db
+            except sqlite3.OperationalError as error:
+                if (getattr(error, "sqlite_errorcode", None) == sqlite3.SQLITE_INTERRUPT
+                        and self._refresh_should_yield()):
+                    raise _RefreshInterrupted() from None
+                raise
+            finally:
+                # Rollback must run without a handler that would interrupt it.
+                db.set_progress_handler(None, 0)
 
     # ------------------------------------------------------------------
     # Database lifecycle
@@ -395,9 +461,16 @@ class DatasetCatalog:
         incomplete line is not visible until a later refresh completes it.
         """
 
+        try:
+            return self._refresh_transactional(force=force)
+        except _RefreshInterrupted:
+            logging.getLogger(__name__).info("Catalog refresh yielded to an annotation save; uncommitted scan rolled back")
+            return {**self.status(), "refresh_interrupted": True}
+
+    def _refresh_transactional(self, force: bool = False) -> dict[str, Any]:
         changed_collections: set[str] = set()
         appended_uids: dict[str, set[str]] = {}
-        with self._refresh_lock, self._connect() as db:
+        with self._background_write() as db:
             phase_start = time.monotonic()
             timings = {}
             progress_before = self._progress_signature(db)
@@ -415,6 +488,7 @@ class DatasetCatalog:
                     changed_collections.add(row["collection"])
 
             for spec in source_specs:
+                self._check_refresh_interruption()
                 path = self.repo_root / spec.relative_path
                 previous = db.execute(
                     "SELECT * FROM sources WHERE source_id=?",
@@ -511,6 +585,7 @@ class DatasetCatalog:
                 for offset, length, record, parse_error in self._iter_jsonl(
                     path, start_offset=indexed_bytes
                 ):
+                    self._check_refresh_interruption()
                     if parse_error == "partial":
                         partial += 1
                         continue
@@ -571,8 +646,10 @@ class DatasetCatalog:
             phase_start = time.monotonic()
 
             for collection in changed_collections:
+                self._check_refresh_interruption()
                 self._rebuild_collection(db, collection)
             for collection, uids in appended_uids.items():
+                self._check_refresh_interruption()
                 if collection not in changed_collections:
                     self._rebuild_items_for_uids(db, collection, uids)
             self._refresh_pending_media(db)
@@ -584,6 +661,7 @@ class DatasetCatalog:
             logging.getLogger(__name__).info("Catalog refresh phases (seconds): %s", timings)
 
             refreshed_at = _utc_now()
+            self._check_refresh_interruption()
             progress_after = self._progress_signature(db)
             if progress_after != progress_before or duration_updates or review_updates:
                 revision_row = db.execute(
@@ -610,8 +688,13 @@ class DatasetCatalog:
         # mode keeps readers responsive, but its log otherwise remains roughly
         # as large as the catalogue after the commit.  Checkpoint only after the
         # writer transaction has closed so the temporary space is released.
-        with self._connect() as checkpoint_db:
-            checkpoint_db.execute("PRAGMA wal_checkpoint(TRUNCATE)")
+        if not self._refresh_should_yield():
+            with self._connect() as checkpoint_db:
+                # A reader/annotation may start just after the scan commits.
+                # Keep checkpoint lock acquisition opportunistic, not a second
+                # minute-long wait in front of an interactive writer.
+                checkpoint_db.execute("PRAGMA busy_timeout=0")
+                checkpoint_db.execute("PRAGMA wal_checkpoint(TRUNCATE)")
 
         return self.status()
 
@@ -784,6 +867,7 @@ class DatasetCatalog:
         for row in db.execute(
             "SELECT * FROM items WHERE has_dialogue=1 AND (review_required=1 OR uid IN (SELECT uid FROM review_affected))"
         ).fetchall():
+            self._check_refresh_interruption()
             _, changed = self._refresh_review_identity(
                 db, row, force_hash=not bool(self._summary_value(row["summary_json"], "source_review_id"))
             )
@@ -796,6 +880,7 @@ class DatasetCatalog:
         ).fetchall()
         updates: list[tuple[str, int, str, str]] = []
         for row in rows:
+            self._check_refresh_interruption()
             integrity = self._summary_value(
                 row["summary_json"], "image_integrity_status"
             )
@@ -835,6 +920,7 @@ class DatasetCatalog:
         ).fetchall()
         updates: list[tuple[int, int, str, str, str]] = []
         for row in rows:
+            self._check_refresh_interruption()
             has_audio = int(
                 bool(row["has_audio"])
                 or bool(row["audio_path"] and self._stored_path_exists(row["audio_path"]))
@@ -892,6 +978,7 @@ class DatasetCatalog:
         updates: list[tuple[str, str, str]] = []
         unresolved = 0
         for row in rows:
+            self._check_refresh_interruption()
             metadata = self._read_json_media(row["speech_dialogue_path"])
             duration = (
                 _as_duration(metadata.get("duration_seconds", metadata.get("duration")))
@@ -1029,6 +1116,7 @@ class DatasetCatalog:
         discovered: dict[str, tuple[Path, Path]] = {}
         if self.data_root.is_dir():
             for root in self.data_root.iterdir():
+                self._check_refresh_interruption()
                 if not root.is_dir() or not root.name.startswith("speech"):
                     continue
                 lowered = root.name.lower()
@@ -1050,11 +1138,13 @@ class DatasetCatalog:
             )
         }
         for source_id in set(existing) - set(discovered):
+            self._check_refresh_interruption()
             for row in db.execute("SELECT collection,uid FROM components WHERE source_id=?", (source_id,)):
                 changed.setdefault(row["collection"], set()).add(row["uid"])
             db.execute("DELETE FROM sources WHERE source_id=?", (source_id,))
 
         for source_id, (root, stereo_root) in discovered.items():
+            self._check_refresh_interruption()
             # ``lowered`` from the discovery loop may refer to a different
             # speech root by the time indexing starts.  Recompute it for this
             # root so normal dialogues inherit the correct counting/OCR
@@ -1094,6 +1184,7 @@ class DatasetCatalog:
             if entries is not None:
                 with entries:
                     for entry in entries:
+                        self._check_refresh_interruption()
                         if not entry.is_dir(follow_symlinks=False):
                             continue
                         scanned += 1
@@ -1490,6 +1581,7 @@ class DatasetCatalog:
         group: list[sqlite3.Row] = []
         output: list[tuple[Any, ...]] = []
         for row in cursor:
+            self._check_refresh_interruption()
             if current_uid is not None and row["uid"] != current_uid:
                 output.append(self._merge_components(collection, current_uid, group))
                 if len(output) >= 2_000:
@@ -1510,6 +1602,7 @@ class DatasetCatalog:
 
         ordered = sorted(set(uids))
         for index in range(0, len(ordered), 500):
+            self._check_refresh_interruption()
             chunk = ordered[index : index + 500]
             if not chunk:
                 continue
@@ -1528,6 +1621,7 @@ class DatasetCatalog:
             group: list[sqlite3.Row] = []
             output: list[tuple[Any, ...]] = []
             for row in cursor:
+                self._check_refresh_interruption()
                 if current_uid is not None and row["uid"] != current_uid:
                     output.append(
                         self._merge_components(collection, current_uid, group)
@@ -2050,7 +2144,7 @@ class DatasetCatalog:
                     self.review_store.decision_for(summary.get("review_id")), summary.get("image_integrity_status"))
                 needs_update = changed or status != selected["review_status"] or usable != selected["dataset_usable"]
         if needs_update:
-            with self._refresh_lock, self._connect() as db:
+            with self._interactive_write(), self._connect() as db:
                 selected = db.execute("SELECT * FROM items WHERE collection=? AND uid=?", (collection, uid)).fetchone()
                 if selected is not None and selected["has_dialogue"]:
                     summary, _ = self._refresh_review_identity(db, selected, force_hash=True)
@@ -2126,7 +2220,7 @@ class DatasetCatalog:
         if not isinstance(note, str) or len(note.strip()) > MAX_REVIEW_NOTE_CHARS:
             raise ValueError("確認メモは1000文字以内で入力してください。")
         collection, uid = self._decode_token(token)
-        with self._refresh_lock:
+        with self._interactive_write():
             with self._connect() as db:
                 row = db.execute("SELECT * FROM items WHERE collection=? AND uid=?", (collection, uid)).fetchone()
                 if row is None:
@@ -2218,7 +2312,7 @@ class DatasetCatalog:
                 f"note must be at most {MAX_REVIEW_NOTE_CHARS} characters"
             )
         collection, uid = self._decode_token(token)
-        with self._refresh_lock:
+        with self._interactive_write():
             with self._connect() as db:
                 row = db.execute(
                     "SELECT * FROM items WHERE collection=? AND uid=?",

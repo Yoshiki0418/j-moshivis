@@ -15,6 +15,7 @@ import logging
 import mimetypes
 import re
 import sys
+import time
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Callable, Mapping, Sequence
@@ -106,6 +107,7 @@ def _error_payload(code: str, message: str) -> dict[str, Any]:
 async def _error_middleware(
     request: web.Request, handler: Callable[[web.Request], Any]
 ) -> web.StreamResponse:
+    started = time.perf_counter()
     try:
         response = await handler(request)
     except web.HTTPException as exc:
@@ -133,6 +135,7 @@ async def _error_middleware(
     response.headers.setdefault("X-Content-Type-Options", "nosniff")
     if request.path.startswith("/api/"):
         response.headers.setdefault("Cache-Control", "no-store")
+        response.headers.setdefault("Server-Timing", f"app;dur={(time.perf_counter() - started) * 1000:.1f}")
     return response
 
 
@@ -249,6 +252,9 @@ async def _periodic_refresh(app: web.Application, interval: float) -> None:
 
 async def _on_cleanup(app: web.Application) -> None:
     state = app[APP_REFRESH_STATE]
+    pause = getattr(app[APP_CATALOG], "request_interactive_pause", None)
+    if callable(pause):
+        pause()
     periodic_task = state.periodic_task
     if periodic_task is not None and not periodic_task.done():
         periodic_task.cancel()
@@ -368,8 +374,15 @@ async def items(request: web.Request) -> web.Response:
     return _json_response(payload)
 
 
+def _note_interaction(app: web.Application) -> None:
+    app[APP_REFRESH_STATE].last_interaction = asyncio.get_running_loop().time()
+    pause = getattr(app[APP_CATALOG], "request_interactive_pause", None)
+    if callable(pause):
+        pause()
+
+
 async def item_detail(request: web.Request) -> web.Response:
-    request.app[APP_REFRESH_STATE].last_interaction = asyncio.get_running_loop().time()
+    _note_interaction(request.app)
     token = request.match_info["token"]
     if not token:
         raise ValueError("token is required")
@@ -386,7 +399,7 @@ async def item_detail(request: web.Request) -> web.Response:
 
 
 async def review_item(request: web.Request) -> web.Response:
-    request.app[APP_REFRESH_STATE].last_interaction = asyncio.get_running_loop().time()
+    _note_interaction(request.app)
     token = request.match_info["token"]
     if not token:
         raise ValueError("token is required")
@@ -435,7 +448,7 @@ async def review_item(request: web.Request) -> web.Response:
 
 
 async def edit_dialogue(request: web.Request) -> web.Response:
-    request.app[APP_REFRESH_STATE].last_interaction = asyncio.get_running_loop().time()
+    _note_interaction(request.app)
     if request.content_type != "application/json":
         raise ValueError("Content-Type must be application/json")
     body = await request.json()
@@ -478,14 +491,10 @@ def _resolved_media_path(result: Any) -> tuple[Path, str | None]:
     return Path(raw_path), supplied_mime
 
 
-async def media(request: web.Request) -> web.StreamResponse:
-    token = request.match_info["token"]
-    kind = request.match_info["kind"]
-    if not _SAFE_MEDIA_KIND.fullmatch(kind):
-        raise ValueError("Unsupported media kind")
-
+def _prepare_media(catalog: Any, repo_root: Path, token: str, kind: str) -> tuple[Path, str]:
+    """Resolve registered files off the event loop, including filesystem stat."""
     result = _call_with_supported_kwargs(
-        _method(request.app[APP_CATALOG], "resolve_media", "get_media"),
+        _method(catalog, "resolve_media", "get_media"),
         token=token,
         kind=kind,
     )
@@ -493,7 +502,7 @@ async def media(request: web.Request) -> web.StreamResponse:
         raise KeyError((token, kind))
     path, supplied_mime = _resolved_media_path(result)
     if not path.is_absolute():
-        path = request.app[APP_REPO_ROOT] / path
+        path = repo_root / path
     path = path.resolve()
     if not path.is_file():
         raise FileNotFoundError(path)
@@ -506,6 +515,17 @@ async def media(request: web.Request) -> web.StreamResponse:
     allowed = _IMAGE_MIMES | _AUDIO_MIMES
     if mime not in allowed:
         raise ValueError("The registered file is not a supported image or audio type")
+    return path, mime
+
+
+async def media(request: web.Request) -> web.StreamResponse:
+    token = request.match_info["token"]
+    kind = request.match_info["kind"]
+    if not _SAFE_MEDIA_KIND.fullmatch(kind):
+        raise ValueError("Unsupported media kind")
+    path, mime = await asyncio.to_thread(
+        _prepare_media, request.app[APP_CATALOG], request.app[APP_REPO_ROOT], token, kind
+    )
 
     response = web.FileResponse(
         path,
@@ -530,6 +550,9 @@ async def refresh(request: web.Request) -> web.Response:
             if not isinstance(body_force, bool):
                 raise ValueError("force must be a boolean")
             force = body_force
+    resume = getattr(request.app[APP_CATALOG], "resume_background_refresh", None)
+    if callable(resume):
+        resume()
     started = _start_refresh(request.app, force=force)
     return _json_response(
         {

@@ -1,0 +1,10 @@
+{
+  "pid": 575228,
+  "gpu": 0,
+  "log": "/gpu-server/yamamoto/j-moshivis/logs/realtime_web_20261110_134827.log",
+  "url": "http://127.0.0.1:8998",
+  "started_at": "20261110_134827",
+  "checkpoint": "/gpu-server/yamamoto/j-moshivis/checkpoints/depth_audio_timing_pilot_20261012/final_step_200.safetensors",
+  "status": "stopped",
+  "stopped_at": "2026-11-10T14:46:51+09:00"
+}

@@ -1,0 +1,12 @@
+{
+  "health": {
+    "ok": true,
+    "sample_rate": 24000,
+    "frame_size": 1920
+  },
+  "sample_images": 5,
+  "generated_audio_packets": 160,
+  "text": "  すごく静かな感じですね。空が青く光ってて、すごく落ち着いた雰囲気です",
+  "errors": [],
+  "elapsed_sec": 9.947690387954935
+}

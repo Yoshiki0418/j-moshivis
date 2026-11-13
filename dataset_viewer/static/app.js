@@ -2,6 +2,8 @@
 
 const PAGE_SIZE = 50;
 const STATUS_POLL_INTERVAL_MS = 10000;
+const DETAIL_PREFETCH_TTL_MS = 30000;
+const DETAIL_PREFETCH_LIMIT = 3;
 const STAGES = [
   { key: "image", label: "画像" },
   { key: "dialogue", label: "対話" },
@@ -43,6 +45,11 @@ const state = {
   navigation: { previous: "", next: "" },
   listController: null,
   detailController: null,
+  detailRequestId: 0,
+  listRequestId: 0,
+  detailPrefetch: new Map(),
+  excludedReviewTokens: new Set(),
+  reviewQueueScope: "",
   statusWasBusy: false,
   manualRefreshPending: false,
   catalogRevision: null,
@@ -333,7 +340,9 @@ async function loadStatus({ quiet = false } = {}) {
     if (updated) dom.lastUpdated.textContent = `最終確認: ${formatDateTime(updated)}`;
 
     if ((revisionChanged || manualRefreshCompleted) && !failed) {
-      await Promise.allSettled([loadDashboard(), loadTree(), loadItems()]);
+      clearDetailPrefetch();
+      if (state.annotationMode && !manualRefreshCompleted) refreshAfterAnnotation();
+      else await Promise.allSettled([loadDashboard(), loadTree(), loadItems()]);
       if (manualRefreshCompleted) showToast("再索引が完了しました。");
     }
     if (manualRefreshCompleted || (state.manualRefreshPending && failed)) {
@@ -341,6 +350,7 @@ async function loadStatus({ quiet = false } = {}) {
       state.manualRefreshPending = false;
     }
     state.statusWasBusy = busy;
+    prefetchNextDetails();
     return raw;
   } catch (error) {
     dom.indexState.classList.remove("is-ready", "is-busy");
@@ -663,7 +673,9 @@ async function loadItems({ scrollTop = false, selectFirst = false } = {}) {
     updateAnnotationLayout();
   }
   if (state.listController) state.listController.abort();
-  state.listController = new AbortController();
+  const controller = new AbortController();
+  state.listController = controller;
+  const requestId = ++state.listRequestId;
   setListState("loading");
 
   const params = filterParams();
@@ -672,7 +684,8 @@ async function loadItems({ scrollTop = false, selectFirst = false } = {}) {
   // offset is sent as well for APIs that expose offset/limit pagination.
   params.set("offset", String((state.page - 1) * state.limit));
   try {
-    const raw = await api(`/api/items?${params.toString()}`, { signal: state.listController.signal });
+    const raw = await api(`/api/items?${params.toString()}`, { signal: controller.signal });
+    if (requestId !== state.listRequestId) return;
     const payload = !Array.isArray(raw) && raw.data && !Array.isArray(raw.data) ? raw.data : raw;
     const items = Array.isArray(payload) ? payload : (payload.items || payload.results || payload.data || []);
     state.items = Array.isArray(items) ? items.map(normalizeItem) : [];
@@ -689,8 +702,9 @@ async function loadItems({ scrollTop = false, selectFirst = false } = {}) {
         && !state.editingDialogue && !state.savingDialogue && !state.reviewBusy) {
       await selectItem(state.items[0].token);
     }
+    prefetchNextDetails();
   } catch (error) {
-    if (error.name === "AbortError") return;
+    if (error.name === "AbortError" || requestId !== state.listRequestId) return;
     dom.listErrorMessage.textContent = error.message;
     setListState("error");
   }
@@ -968,35 +982,128 @@ async function selectItem(token) {
   state.selectedToken = token;
   updateSelectedRow();
   openDetail();
-  await loadDetail(token, { scrollToStart: state.annotationMode && hadSelection });
+  await loadDetail(token, { scrollToStart: state.annotationMode && hadSelection, usePrefetch: true });
 }
 
-async function loadDetail(token, { scrollToStart = false } = {}) {
+function detailParams() {
+  const params = filterParams();
+  params.set("page", String(state.page));
+  params.set("limit", String(state.limit));
+  return params;
+}
+
+function detailScope() {
+  return detailParams().toString();
+}
+
+function clearDetailPrefetch(token = null) {
+  for (const [key, entry] of state.detailPrefetch) {
+    if (token !== null && entry.token !== token) continue;
+    if (!entry.inUse) entry.controller.abort();
+    state.detailPrefetch.delete(key);
+  }
+}
+
+function warmDetailImage(raw, entry) {
+  const detail = normalizeItem(raw.item || raw.data || raw);
+  if (typeof Image === "undefined" || detail.stageStatus.image.state !== "complete") return;
+  const image = new Image();
+  image.decoding = "async";
+  image.src = mediaUrl(detail, "image");
+  entry.image = image;
+  if (image.decode) void image.decode().catch(() => {});
+}
+
+function prefetchDetail(token) {
+  const scope = detailScope();
+  const key = `${scope}\n${token}`;
+  const existing = state.detailPrefetch.get(key);
+  if (existing && Date.now() - existing.createdAt < DETAIL_PREFETCH_TTL_MS) return existing;
+  if (existing) clearDetailPrefetch(token);
+  const controller = new AbortController();
+  const entry = { token, scope, controller, createdAt: Date.now(), inUse: false };
+  entry.promise = api(`/api/items/${encodeURIComponent(token)}?${scope}`, {
+    signal: controller.signal, priority: "low",
+  }).then(raw => {
+    entry.raw = raw;
+    warmDetailImage(raw, entry);
+    return raw;
+  }).catch(error => {
+    if (state.detailPrefetch.get(key) === entry) state.detailPrefetch.delete(key);
+    throw error;
+  });
+  // Prefetch failures are retried by normal navigation, never surfaced as save failures.
+  void entry.promise.catch(() => {});
+  state.detailPrefetch.set(key, entry);
+  for (const [oldKey, oldEntry] of state.detailPrefetch) {
+    if (state.detailPrefetch.size <= DETAIL_PREFETCH_LIMIT) break;
+    if (oldKey !== key && !oldEntry.inUse) {
+      oldEntry.controller.abort();
+      state.detailPrefetch.delete(oldKey);
+    }
+  }
+  return entry;
+}
+
+function prefetchNextDetails() {
+  if (!state.annotationMode || document.hidden || !state.selectedItem) return;
+  const scope = detailScope();
+  if (state.reviewQueueScope !== scope) {
+    state.reviewQueueScope = scope;
+    state.excludedReviewTokens.clear();
+    clearDetailPrefetch();
+  }
+  const next = state.navigation.next || listNeighbor(state.selectedToken, 1);
+  const afterNext = next && listNeighbor(next, 1);
+  for (const token of new Set([next, afterNext])) {
+    if (token && token !== state.selectedToken && !state.excludedReviewTokens.has(token)) prefetchDetail(token);
+  }
+}
+
+async function loadDetail(token, { scrollToStart = false, usePrefetch = false } = {}) {
   if (state.editingDialogue) return; // Automatic refresh must not replace a draft.
   if (state.detailController) state.detailController.abort();
-  state.detailController = new AbortController();
+  const controller = new AbortController();
+  state.detailController = controller;
+  const requestId = ++state.detailRequestId;
   // A background refresh must not collapse a long, page-height transcript.
   const keepVisible = state.annotationMode && !dom.detailContent.hidden && state.selectedItem?.token === token;
   dom.detailLoading.hidden = keepVisible;
   dom.detailEmpty.hidden = true;
   if (!keepVisible) dom.detailContent.hidden = true;
-  const params = filterParams();
-  params.set("page", String(state.page));
-  params.set("limit", String(state.limit));
+  const scope = detailScope();
+  const key = `${scope}\n${token}`;
+  const prefetched = usePrefetch ? state.detailPrefetch.get(key) : null;
+  const reusable = prefetched && Date.now() - prefetched.createdAt < DETAIL_PREFETCH_TTL_MS;
   try {
-    const raw = await api(`/api/items/${encodeURIComponent(token)}?${params.toString()}`, { signal: state.detailController.signal });
+    let raw;
+    if (reusable) {
+      prefetched.inUse = true;
+      try { raw = await prefetched.promise; }
+      catch (error) {
+        if (controller.signal.aborted) return;
+        raw = await api(`/api/items/${encodeURIComponent(token)}?${scope}`, { signal: controller.signal });
+      }
+    } else raw = await api(`/api/items/${encodeURIComponent(token)}?${scope}`, { signal: controller.signal });
+    if (requestId !== state.detailRequestId || controller.signal.aborted || state.editingDialogue) return;
     const source = raw.item || raw.data || raw;
     const detail = normalizeItem(source);
     detail.token = detail.token || token;
     const navigation = raw.navigation || source.navigation || {};
     state.navigation.previous = navigationToken(navigation.previous ?? navigation.prev ?? raw.previous_token ?? source.previous_token) || listNeighbor(token, -1);
     state.navigation.next = navigationToken(navigation.next ?? raw.next_token ?? source.next_token) || listNeighbor(token, 1);
+    for (const direction of ["previous", "next"]) {
+      if (state.reviewQueueScope === scope && state.excludedReviewTokens.has(state.navigation[direction])) {
+        state.navigation[direction] = listNeighbor(token, direction === "previous" ? -1 : 1);
+      }
+    }
     renderDetail(detail);
     dom.detailContent.hidden = false;
     scheduleDialogueEditorSizing();
     if (scrollToStart && state.annotationMode) dom.detailPanel.scrollIntoView({ block: "start", behavior: "auto" });
+    prefetchNextDetails();
   } catch (error) {
-    if (error.name === "AbortError") return;
+    if (error.name === "AbortError" || requestId !== state.detailRequestId) return;
     if (!keepVisible) {
       dom.detailEmpty.hidden = false;
       dom.detailEmpty.querySelector("h2").textContent = "詳細を取得できませんでした";
@@ -1004,7 +1111,11 @@ async function loadDetail(token, { scrollToStart = false } = {}) {
     }
     showToast(`詳細を取得できませんでした: ${error.message}`, true);
   } finally {
-    dom.detailLoading.hidden = true;
+    if (prefetched) {
+      prefetched.inUse = false;
+      if (state.detailPrefetch.get(key) === prefetched) state.detailPrefetch.delete(key);
+    }
+    if (requestId === state.detailRequestId) dom.detailLoading.hidden = true;
   }
 }
 
@@ -1164,6 +1275,7 @@ async function submitReview(decision) {
   const item = state.selectedItem;
   if (!item?.token || !item.review_available || state.reviewBusy || state.editingDialogue) return;
   const nextToken = state.annotationMode && dom.annotationAutoNext.checked && decision !== "pending" ? state.navigation.next : "";
+  const queueScope = detailScope();
   let succeeded = false;
   state.reviewBusy = true;
   const review = item.reviewState;
@@ -1208,7 +1320,8 @@ async function submitReview(decision) {
         note: dom.reviewNote.value.trim(),
       },
     });
-    renderDetail(next);
+    applyReviewedItemToQueue(next, queueScope);
+    if (!nextToken || queueScope !== detailScope()) renderDetail(next);
     showToast(decision === "approved"
       ? "承認しました。この対話は学習データセットで利用されます。"
       : decision === "rejected"
@@ -1227,10 +1340,46 @@ async function submitReview(decision) {
   if (succeeded) {
     // Durable save first, then the next record. Aggregate queries must never
     // sit on the annotation navigation's critical path.
-    if (nextToken) await selectItem(nextToken);
-    else await loadDetail(item.token);
+    if (nextToken && queueScope === detailScope()) await selectItem(nextToken);
     refreshAfterAnnotation();
   }
+}
+
+function applyReviewedItemToQueue(item, scope) {
+  clearDetailPrefetch(item.token);
+  if (state.detailController) state.detailController.abort();
+  state.detailRequestId += 1;
+  // A pre-save list response must not resurrect a just-approved pending row.
+  if (state.listController) state.listController.abort();
+  state.listRequestId += 1;
+  if (scope !== detailScope()) return;
+  const wanted = state.filters.review_status;
+  const actual = item.reviewState.status;
+  const statusMatches = !wanted || (wanted === "unreviewed"
+    ? ["pending", "not_required"].includes(actual) : wanted === actual);
+  const remains = statusMatches
+    && (!state.filters.review_required || item.reviewState.required)
+    && (state.filters.stage !== "regeneration_pending" || item.regeneration_pending);
+  if (state.reviewQueueScope !== scope) {
+    state.reviewQueueScope = scope;
+    state.excludedReviewTokens.clear();
+  }
+  if (!remains) {
+    state.excludedReviewTokens.add(item.token);
+    if (state.excludedReviewTokens.size > 100) state.excludedReviewTokens.delete(state.excludedReviewTokens.values().next().value);
+  } else state.excludedReviewTokens.delete(item.token);
+  const index = state.items.findIndex(row => row.token === item.token);
+  if (index < 0) return;
+  if (remains) state.items[index] = item;
+  else {
+    state.items.splice(index, 1);
+    state.total = Math.max(0, state.total - 1);
+    state.pages = Math.max(1, Math.ceil(state.total / state.limit));
+    state.page = Math.min(state.page, state.pages);
+  }
+  renderItems();
+  updatePagination();
+  setListState(state.items.length ? "ready" : "empty");
 }
 
 let annotationRefreshTimer = null;
@@ -1238,8 +1387,8 @@ let annotationRefreshRunning = false;
 let annotationRefreshPending = false;
 
 function refreshAfterAnnotation() {
-  // Keep the pending queue current without waiting for expensive aggregates.
-  void loadItems();
+  // The saved row is patched immediately. Reconcile the queue and aggregates
+  // together only when the annotator pauses, instead of issuing them per click.
   annotationRefreshPending = true;
   if (annotationRefreshTimer !== null) window.clearTimeout(annotationRefreshTimer);
   annotationRefreshTimer = window.setTimeout(flushAnnotationRefresh, 1000);
@@ -1248,10 +1397,14 @@ function refreshAfterAnnotation() {
 async function flushAnnotationRefresh() {
   annotationRefreshTimer = null;
   if (annotationRefreshRunning) return;
+  if (state.reviewBusy || state.savingDialogue || state.editingDialogue) {
+    annotationRefreshTimer = window.setTimeout(flushAnnotationRefresh, 1000);
+    return;
+  }
   annotationRefreshRunning = true;
   annotationRefreshPending = false;
   try {
-    await Promise.allSettled([loadDashboard(), loadTree()]);
+    await Promise.allSettled([loadItems(), loadDashboard(), loadTree()]);
   } finally {
     annotationRefreshRunning = false;
     if (annotationRefreshPending) {
@@ -1307,6 +1460,7 @@ async function saveDialogueEdit() {
   const item = state.selectedItem;
   if (!state.editingDialogue || state.savingDialogue || !item) return;
   const nextToken = state.annotationMode && dom.annotationAutoNext.checked ? state.navigation.next : "";
+  const queueScope = detailScope();
   let succeeded = false;
   const inputs = [...dom.detailDialogue.querySelectorAll("textarea")];
   const facts = [...dom.dialogueEditorFacts.querySelectorAll("input")];
@@ -1329,7 +1483,9 @@ async function saveDialogueEdit() {
     state.editingDialogue = false;
     dom.dialogueEditorActions.hidden = true;
     dom.dialogueHeadingActions.hidden = true;
-    renderDetail(normalizeItem(result.item));
+    const updated = normalizeItem(result.item);
+    applyReviewedItemToQueue(updated, queueScope);
+    if (!nextToken || queueScope !== detailScope()) renderDetail(updated);
     showToast(result.content_changed === false
       ? "本文に変更はありません。人手承認の認証ラベルを付けました。"
       : "修正版を保存して承認しました。音声・アライメントは修正版から作成してください。");
@@ -1345,7 +1501,7 @@ async function saveDialogueEdit() {
     setReviewButtonsBusy(false);
   }
   if (succeeded) {
-    if (nextToken) await selectItem(nextToken);
+    if (nextToken && queueScope === detailScope()) await selectItem(nextToken);
     refreshAfterAnnotation();
   }
 }
@@ -1533,8 +1689,15 @@ function mediaUrl(item, kind) {
   const direct = kind === "image"
     ? (item.image_url || item.media?.image)
     : (item.audio_url || item.media?.audio);
-  if (direct && isSafeLocalUrl(direct)) return String(direct);
-  return `/api/items/${encodeURIComponent(item.token)}/media/${kind}`;
+  const url = direct && isSafeLocalUrl(direct) ? String(direct)
+    : `/api/items/${encodeURIComponent(item.token)}/media/${kind}`;
+  if (kind !== "image") return url;
+  // Browser caching must bind image bytes to the exact displayed review version.
+  const revision = item.current_image_sha256 || item.summary?.current_image_sha256
+    || item.content_sha256 || item.reviewState?.content_sha256;
+  if (!revision) return url;
+  const [path, fragment] = url.split("#", 2);
+  return `${path}${path.includes("?") ? "&" : "?"}v=${encodeURIComponent(revision)}${fragment === undefined ? "" : `#${fragment}`}`;
 }
 
 function isSafeLocalUrl(raw) {
