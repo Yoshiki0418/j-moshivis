@@ -334,6 +334,7 @@ def _item_filters(request: web.Request) -> dict[str, Any]:
             query.get("review_required"), name="review_required"
         ),
         "auxiliary_kind": query.get("auxiliary_kind"),
+        "ai_status": query.get("ai_status"),
     }
     return {key: value for key, value in filters.items() if value is not None}
 
@@ -461,12 +462,17 @@ async def edit_dialogue(request: web.Request) -> web.Response:
         raise ValueError("dialogue must be an array")
     if body.get("reviewer") is not None and not isinstance(body["reviewer"], str):
         raise ValueError("reviewer must be a string")
+    suggestion_id = body.get("ai_suggestion_id")
+    if suggestion_id is not None and (not isinstance(suggestion_id, str) or not 1 <= len(suggestion_id) <= 128):
+        raise ValueError("ai_suggestion_id must be a nonempty string of at most 128 characters")
+    suggestion_kwargs = {"ai_suggestion_id": suggestion_id} if suggestion_id is not None else {}
     try:
         payload = await asyncio.to_thread(
             request.app[APP_CATALOG].edit_dialogue,
             request.match_info["token"], fingerprint=fingerprint,
             dialogue=body["dialogue"], auxiliary_task=body.get("auxiliary_task"),
             note=body.get("note", ""), reviewer=body.get("reviewer") or request.remote,
+            **suggestion_kwargs,
         )
     except ReviewConflictError as exc:
         raise web.HTTPConflict(reason=str(exc)) from exc

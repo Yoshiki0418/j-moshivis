@@ -230,6 +230,14 @@
                 <option value="ocr">日本語OCR</option>
               </select>
             </label>
+            <label>
+              <span>AI事前確認</span>
+              <select id="ai-status-filter" name="ai_status">
+                <option value="">すべて</option>
+                <option value="ready">AI事前確認済み・人手未確認</option>
+                <option value="needs_attention">AIの注意点あり・人手未確認</option>
+              </select>
+            </label>
             <label class="checkbox-filter filter-advanced">
               <span>確認対象</span>
               <span class="checkbox-control">
@@ -377,6 +385,12 @@
                     <button class="button review-approve" id="dialogue-save" type="button">保存して承認</button>
                     <button class="button button-secondary" id="dialogue-cancel" type="button">編集を取り消す</button>
                   </div>
+                  <div id="ai-suggestion-concerns" class="ai-suggestion-concerns" hidden role="status"></div>
+                  <details class="ai-suggestion" id="ai-suggestion" hidden>
+                    <summary id="ai-suggestion-label">AI事前修正（未承認）・元の対話と差分</summary>
+                    <p>表示中の修正案は、まだ承認されていません。画像と対話全文を確認し、承認すると表示中の本文・正解情報が保存されます。</p>
+                    <div id="ai-suggestion-diff"></div>
+                  </details>
                   <details class="review-context-details" id="review-context-details" open>
                   <summary>補助情報・正解・確認メモ</summary>
                   <p class="review-description" id="review-description">

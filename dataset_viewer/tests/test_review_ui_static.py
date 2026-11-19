@@ -46,6 +46,10 @@ class ReviewUiStaticTests(unittest.TestCase):
             "metric-review-certified",
             "metric-review-regeneration",
             "metric-review-pending",
+            "ai-suggestion",
+            "ai-suggestion-label",
+            "ai-suggestion-diff",
+            "ai-status-filter",
         ):
             self.assertIn(element_id, parser.ids)
 

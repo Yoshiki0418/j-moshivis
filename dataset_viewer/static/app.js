@@ -40,7 +40,7 @@ const state = {
   annotationAdvanced: false,
   filters: {
     collection: "", category: "", directory: "", stage: "", review_status: "",
-    auxiliary_kind: "", review_required: "", q: "",
+    auxiliary_kind: "", review_required: "", ai_status: "", q: "",
   },
   navigation: { previous: "", next: "" },
   listController: null,
@@ -53,6 +53,8 @@ const state = {
   statusWasBusy: false,
   manualRefreshPending: false,
   catalogRevision: null,
+  aiSuggestionCount: null,
+  aiListRefreshPending: false,
   statusPollTimer: null,
   statusPollRunning: false,
   collectionStats: new Map(),
@@ -83,7 +85,7 @@ function collectDom() {
     "metric-review-required", "metric-review-pending", "metric-review-certified", "metric-review-certified-sub",
     "metric-review-regeneration", "metric-review-regeneration-sub", "metric-review-optional", "metric-review-rejected",
     "filter-form", "category-filter", "stage-filter", "uid-search", "clear-filters",
-    "review-status-filter", "auxiliary-kind-filter", "review-required-filter",
+    "review-status-filter", "auxiliary-kind-filter", "review-required-filter", "ai-status-filter",
     "collection-tree", "all-collections", "all-count", "active-collection", "result-count",
     "list-loading", "list-empty", "list-error", "list-error-message", "list-retry",
     "dataset-list", "page-prev", "page-next", "page-current", "page-total",
@@ -103,12 +105,25 @@ function collectDom() {
     "annotation-advanced-toggle",
     "dialogue-heading-actions", "review-context-details",
     "audio-section", "alignment-section",
+    "ai-suggestion", "ai-suggestion-label", "ai-suggestion-concerns", "ai-suggestion-diff",
   ];
   for (const id of ids) dom[toCamel(id)] = document.getElementById(id);
   dom.treePanel = document.querySelector(".tree-panel");
 }
 
 function bindEvents() {
+  dom.aiStatusFilter.addEventListener("change", () => {
+    state.filters.ai_status = dom.aiStatusFilter.value;
+    if (state.filters.ai_status) {
+      state.filters.review_status = "pending";
+      state.filters.review_required = "true";
+      dom.reviewStatusFilter.value = "pending";
+      dom.reviewRequiredFilter.checked = true;
+    }
+    state.page = 1;
+    clearDetailPrefetch();
+    void loadItems({ selectFirst: true });
+  });
   dom.browseMode.addEventListener("click", () => setViewMode(false));
   dom.annotationMode.addEventListener("click", () => setViewMode(true));
   window.addEventListener("hashchange", () => setViewMode(window.location.hash === "#annotate", { updateUrl: false }));
@@ -155,6 +170,8 @@ function bindEvents() {
     if (dom.reviewStatusFilter.value !== "pending") {
       dom.reviewRequiredFilter.checked = false;
       state.filters.review_required = "";
+      state.filters.ai_status = "";
+      dom.aiStatusFilter.value = "";
     }
     state.filters.review_status = dom.reviewStatusFilter.value;
     state.page = 1;
@@ -167,6 +184,10 @@ function bindEvents() {
   });
   dom.reviewRequiredFilter.addEventListener("change", () => {
     state.filters.review_required = dom.reviewRequiredFilter.checked ? "true" : "";
+    if (!dom.reviewRequiredFilter.checked) {
+      state.filters.ai_status = "";
+      dom.aiStatusFilter.value = "";
+    }
     if (dom.reviewRequiredFilter.checked) {
       state.filters.review_status = "pending";
       dom.reviewStatusFilter.value = "pending";
@@ -316,6 +337,11 @@ async function loadStatus({ quiet = false } = {}) {
     const nextRevision = asNumber(raw.catalog_revision ?? raw.revision);
     const revisionChanged = state.catalogRevision !== null && nextRevision !== null && nextRevision !== state.catalogRevision;
     if (nextRevision !== null) state.catalogRevision = nextRevision;
+    const aiCount = asNumber(raw.ai_suggestion_count);
+    if (state.aiSuggestionCount !== null && aiCount !== null && aiCount !== state.aiSuggestionCount) {
+      state.aiListRefreshPending = true;
+    }
+    if (aiCount !== null) state.aiSuggestionCount = aiCount;
     const manualRefreshCompleted = state.manualRefreshPending && state.statusWasBusy && !busy;
 
     dom.indexState.classList.toggle("is-ready", !busy && !failed);
@@ -348,6 +374,14 @@ async function loadStatus({ quiet = false } = {}) {
     if (manualRefreshCompleted || (state.manualRefreshPending && failed)) {
       if (failed) showToast(`再索引に失敗しました: ${refreshError || "不明なエラー"}`, true);
       state.manualRefreshPending = false;
+    }
+    if (state.aiListRefreshPending && state.filters.ai_status && !state.editingDialogue
+        && !state.savingDialogue && !state.reviewBusy && !failed) {
+      state.aiListRefreshPending = false;
+      clearDetailPrefetch();
+      // Only refresh the queue. A newly completed AI draft must never replace
+      // the current text/draft that a person is already inspecting.
+      await loadItems();
     }
     state.statusWasBusy = busy;
     prefetchNextDetails();
@@ -1138,6 +1172,7 @@ function renderDetail(item) {
   renderAvailability("alignment", item.stageStatus.alignment);
   renderDetailImage(item);
   renderReview(item);
+  renderAiSuggestion(item);
   renderDialogue(item, { resetScroll: changedItem });
   renderAudio(item);
   renderAlignment(item);
@@ -1186,6 +1221,7 @@ function renderReview(item) {
   dom.reviewStatusBadge.className = `review-status-badge is-${status.key}`;
   dom.reviewStatusBadge.textContent = status.label;
   dom.reviewNote.value = review.note;
+  dom.reviewApprove.textContent = activeAiSuggestion(item) ? "AI修正案を承認して保存" : "承認して利用する";
   dom.reviewDescription.textContent = review.required
     ? "人間の承認が必須です。画像と対話全文を確認してください。未確認・却下の間は音声生成に進めません。"
     : "承認は任意です。未確認でも利用できますが、対話全体を確認して承認すると認証ラベルが付きます。本文も編集できます。";
@@ -1197,10 +1233,10 @@ function renderReview(item) {
   if (auxiliary.kind === "counting") {
     if (auxiliary.counted_target) facts.push(["数えた対象", auxiliary.counted_target]);
     if (auxiliary.answer_count !== undefined && auxiliary.answer_count !== null) {
-      facts.push(["VLMの回答", `${auxiliary.answer_count}個`]);
+      facts.push([activeAiSuggestion(item) ? "AI修正案の回答" : "VLMの回答", `${auxiliary.answer_count}個`]);
     }
   } else if (auxiliary.recognized_text) {
-    facts.push(["VLMが読んだ文字", auxiliary.recognized_text]);
+    facts.push([activeAiSuggestion(item) ? "AI修正案の文字" : "VLMが読んだ文字", auxiliary.recognized_text]);
   }
   if (review.verification_status) {
     facts.push(["検証状態", verificationStatusLabel(review.verification_status)]);
@@ -1235,7 +1271,7 @@ function renderReviewQa(item) {
   const answerIndex = integerValue(auxiliary?.answer_turn_index);
   const entries = [
     ["確認対象の質問", questionIndex === null ? null : turns[questionIndex]],
-    ["VLMの回答", answerIndex === null ? null : turns[answerIndex]],
+    [activeAiSuggestion(item) ? "AI修正案の回答" : "VLMの回答", answerIndex === null ? null : turns[answerIndex]],
   ].filter(([, turn]) => turn);
   if (!entries.length) {
     dom.reviewQa.append(createElement("p", "review-qa-missing", "該当する質問・回答の位置情報がありません。対話全体を確認してください。"));
@@ -1271,6 +1307,47 @@ function verificationStatusLabel(status) {
   return labels[status] || String(status).replaceAll("_", " ");
 }
 
+function activeAiSuggestion(item) {
+  return item?.reviewState?.required && item.reviewState.status === "pending"
+    ? item.ai_suggestion : null;
+}
+
+function renderAiSuggestion(item) {
+  const suggestion = activeAiSuggestion(item);
+  dom.aiSuggestion.hidden = !suggestion;
+  dom.aiSuggestion.open = false;
+  dom.aiSuggestionConcerns.replaceChildren();
+  dom.aiSuggestionConcerns.hidden = !suggestion?.concerns?.length;
+  dom.aiSuggestionDiff.replaceChildren();
+  if (!suggestion) return;
+  const label = suggestion.verdict === "unchanged" ? "AI事前確認（未承認・変更なし）"
+    : suggestion.verdict === "needs_attention" ? "AI事前修正（未承認・要確認）" : "AI事前修正（未承認）";
+  dom.aiSuggestionLabel.textContent = `${label}・元の対話と差分`;
+  for (const concern of suggestion.concerns || []) {
+    dom.aiSuggestionConcerns.append(createElement("p", "review-error", `要確認: ${concern}`));
+  }
+  const proposed = normalizeDialogue(item.dialogue);
+  const original = normalizeDialogue(item.original_dialogue);
+  for (const [index, before] of original.entries()) {
+    const after = proposed[index];
+    const changed = after && before.text !== after.text;
+    const block = createElement("div", "ai-suggestion-turn");
+    block.append(createElement("p", "message-speaker", `${index + 1}. ${before.speaker}（${changed ? "変更あり" : "変更なし"}）`));
+    block.append(createElement("p", changed ? "ai-suggestion-before" : "", `元の本文: ${before.text}`));
+    if (changed) block.append(createElement("p", "ai-suggestion-after", `修正案: ${after.text}`));
+    for (const change of suggestion.changes || []) {
+      if (change.turn_index === index && change.reason) {
+        block.append(createElement("p", "ai-suggestion-reason", `修正理由: ${change.reason}`));
+      }
+    }
+    dom.aiSuggestionDiff.append(block);
+  }
+  for (const [key, label] of [["answer_count", "正解の数"], ["counted_target", "数えた対象"], ["recognized_text", "読み取り文字"]]) {
+    const before = item.original_auxiliary_task?.[key], after = item.auxiliaryTask?.[key];
+    if (before !== after) dom.aiSuggestionDiff.append(createElement("p", "ai-suggestion-turn", `${label}: ${before ?? "—"} → ${after ?? "—"}`));
+  }
+}
+
 async function submitReview(decision) {
   const item = state.selectedItem;
   if (!item?.token || !item.review_available || state.reviewBusy || state.editingDialogue) return;
@@ -1279,12 +1356,16 @@ async function submitReview(decision) {
   let succeeded = false;
   state.reviewBusy = true;
   const review = item.reviewState;
+  const suggestion = activeAiSuggestion(item);
+  const approveSuggestion = decision === "approved" && suggestion;
   dom.reviewError.hidden = true;
   dom.reviewError.textContent = "";
   setReviewButtonsBusy(true);
   dom.reviewSection.setAttribute("aria-busy", "true");
   try {
-    const result = await api(`/api/items/${encodeURIComponent(item.token)}/review`, {
+    const endpoint = approveSuggestion ? `/api/items/${encodeURIComponent(item.token)}/dialogue`
+      : `/api/items/${encodeURIComponent(item.token)}/review`;
+    const result = await api(endpoint, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -1294,6 +1375,11 @@ async function submitReview(decision) {
         // keep the descriptive alias for clients and future API versions.
         fingerprint: review.content_sha256,
         note: dom.reviewNote.value.trim(),
+        ...(approveSuggestion ? {
+          ai_suggestion_id: suggestion.suggestion_id,
+          dialogue: normalizeDialogue(item.dialogue).map(turn => ({ text: turn.text })),
+          auxiliary_task: item.auxiliaryTask,
+        } : {}),
       }),
     });
     const returnedItem = result.item || result.data?.item || {};
@@ -1305,6 +1391,11 @@ async function submitReview(decision) {
     const status = decision === "pending" && !review.required ? "not_required" : decision;
     const next = normalizeItem({
       ...item,
+      ...(suggestion ? {
+        ai_suggestion: null,
+        dialogue: item.original_dialogue,
+        auxiliary_task: item.original_auxiliary_task,
+      } : {}),
       ...returnedItem,
       review_status: status,
       dataset_usable: datasetUsable,
@@ -1323,7 +1414,7 @@ async function submitReview(decision) {
     applyReviewedItemToQueue(next, queueScope);
     if (!nextToken || queueScope !== detailScope()) renderDetail(next);
     showToast(decision === "approved"
-      ? "承認しました。この対話は学習データセットで利用されます。"
+      ? approveSuggestion ? "表示中のAI修正案を保存し、人手承認しました。" : "承認しました。この対話は学習データセットで利用されます。"
       : decision === "rejected"
         ? "却下しました。この対話は学習データセットから除外されます。"
         : review.required ? "未確認に戻しました。音声生成・学習を保留します。" : "認証ラベルを外しました。通常データとして利用可能です。");
@@ -1478,6 +1569,7 @@ async function saveDialogueEdit() {
       body: JSON.stringify({ content_sha256: item.reviewState.content_sha256,
         dialogue: inputs.map((input) => ({ text: input.value.trim() })),
         auxiliary_task: ["counting", "ocr"].includes(auxiliary.kind) ? auxiliary : null,
+        ...(activeAiSuggestion(item) ? { ai_suggestion_id: item.ai_suggestion.suggestion_id } : {}),
         note: dom.reviewNote.value.trim() }),
     });
     state.editingDialogue = false;
@@ -1522,6 +1614,9 @@ function renderDialogue(item, { resetScroll = false } = {}) {
     if (targetLabel) card.classList.add("is-review-target");
     const speaker = createElement("p", "message-speaker", displaySpeaker(turn.speaker, role));
     if (targetLabel) speaker.append(createElement("span", "message-review-label", targetLabel));
+    if (activeAiSuggestion(item) && item.original_dialogue?.[index]?.text !== turn.text) {
+      speaker.append(createElement("span", "message-ai-label", "AI修正案・未承認"));
+    }
     card.append(speaker);
     if (state.editingDialogue) {
       const input = document.createElement("textarea");
@@ -1772,13 +1867,14 @@ function updateSelectedRow() {
 function clearFilters(reload = true) {
   state.filters = {
     collection: "", category: "", directory: "", stage: "", review_status: "",
-    auxiliary_kind: "", review_required: "", q: "",
+    auxiliary_kind: "", review_required: "", ai_status: "", q: "",
   };
   state.page = 1;
   dom.categoryFilter.value = "";
   dom.stageFilter.value = "";
   dom.reviewStatusFilter.value = "";
   dom.auxiliaryKindFilter.value = "";
+  dom.aiStatusFilter.value = "";
   dom.reviewRequiredFilter.checked = false;
   dom.uidSearch.value = "";
   dom.annotationCollection.value = "";

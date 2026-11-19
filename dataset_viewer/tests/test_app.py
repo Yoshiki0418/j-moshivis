@@ -146,11 +146,13 @@ class FakeCatalog:
         self.refresh_calls.append(force)
         return self.status()
 
-    def edit_dialogue(self, token, *, fingerprint, dialogue, auxiliary_task=None, note="", reviewer=None):
+    def edit_dialogue(self, token, *, fingerprint, dialogue, auxiliary_task=None, note="", reviewer=None,
+                      ai_suggestion_id=None):
         if token != "known":
             raise KeyError(token)
         if fingerprint != "a" * 64:
             raise ReviewConflictError("stale dialogue")
+        self.last_ai_suggestion_id = ai_suggestion_id
         return {"ok": True, "item": {"dialogue": dialogue, "review_status": "approved"}}
 
     def close(self) -> None:
@@ -285,12 +287,13 @@ class DatasetViewerApiTests(unittest.IsolatedAsyncioTestCase):
     async def test_items_caps_limit_and_preserves_filters(self) -> None:
         response = await self.client.get(
             "/api/items?page=3&limit=999&category=general&has_audio=true"
-            "&review_status=pending&review_required=true&auxiliary_kind=counting"
+            "&review_status=pending&review_required=true&auxiliary_kind=counting&ai_status=ready"
         )
         self.assertEqual(response.status, 200)
         payload = await response.json()
         self.assertEqual(payload["limit"], MAX_LIMIT)
         self.assertEqual(self.catalog.last_list_kwargs["limit"], MAX_LIMIT)
+        self.assertEqual(self.catalog.last_list_kwargs["filters"]["ai_status"], "ready")
         self.assertEqual(self.catalog.last_list_kwargs["page"], 3)
         self.assertEqual(self.catalog.last_list_kwargs["filters"]["category"], "general")
         self.assertTrue(self.catalog.last_list_kwargs["filters"]["has_audio"])
@@ -360,6 +363,18 @@ class DatasetViewerApiTests(unittest.IsolatedAsyncioTestCase):
         response = await self.client.put("/api/items/known/dialogue", json={
             "content_sha256": "a" * 64, "dialogue": "invalid"})
         self.assertEqual(response.status, 400)
+
+    async def test_ai_suggestion_approval_forwards_draft_id_and_validates_it(self):
+        response = await self.client.put("/api/items/known/dialogue", json={
+            "content_sha256": "a" * 64, "dialogue": [{"text": "確認したAI修正案"}],
+            "ai_suggestion_id": "draft-1"})
+        self.assertEqual(response.status, 200)
+        self.assertEqual(self.catalog.last_ai_suggestion_id, "draft-1")
+        for invalid in (42, "", "x" * 129):
+            response = await self.client.put("/api/items/known/dialogue", json={
+                "content_sha256": "a" * 64, "dialogue": [{"text": "修正案"}],
+                "ai_suggestion_id": invalid})
+            self.assertEqual(response.status, 400)
 
     async def test_registered_media_supports_range(self) -> None:
         response = await self.client.get("/api/items/known/media/image")
