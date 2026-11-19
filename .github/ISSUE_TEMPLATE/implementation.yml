@@ -1,6 +1,7 @@
 name: "実装・変更（コード／設定／文書）"
 description: "リポジトリの変更を、専用ブランチとPRで進めます。"
 title: "feat: "
+type: Feature
 labels:
   - "type:implementation"
   - "status:todo"
@@ -8,6 +9,9 @@ body:
   - type: markdown
     attributes:
       value: |
+        コードや動作設定を変更する場合、Issueの **Type** は `Feature`、不具合修正は `Bug` です。文書だけの変更は `Task` です。
+        初期値は `Feature` です。該当するTypeを設定し、必要に応じてIssue作成後に変更してください。どの場合も `type:implementation` ラベルを付け、PRで変更します。
+
         タイトルは `prefix: 日本語タイトル`、ブランチは `prefix/Issue番号/english-kebab-case` とします。
         例: `feat: 対話の再生成を実装する` → `feat/10/gpt-dialogue-regeneration`。
         文書変更なら `docs`、不具合修正なら `fix` など、作業に合う接頭辞へ変更してください。

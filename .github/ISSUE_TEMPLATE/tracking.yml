@@ -1,6 +1,7 @@
 name: "管理（複数Issueの取りまとめ）"
 description: "子Issueの目的・依存関係・完了状況をまとめます。"
 title: "chore: "
+type: Task
 labels:
   - "type:tracking"
   - "status:todo"
@@ -8,6 +9,7 @@ body:
   - type: markdown
     attributes:
       value: |
+        子Issueを管理する親Issueは **Type** が `Task`、運用ラベルは `type:tracking` です。
         タイトルは `chore: 日本語タイトル` を基本とします。
         この管理Issue自体にはブランチ・PRを作らず、実装や実行は子Issueへ分けて追跡します。
         子Issueの完了と見送りの理由を確認した後に、このIssueを閉じます。

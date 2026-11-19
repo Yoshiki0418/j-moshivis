@@ -1,6 +1,7 @@
 name: "作業・実験（リポジトリ変更なし）"
 description: "人手承認、データ生成、評価実験などの実行と結果を管理します。"
 title: "chore: "
+type: Task
 labels:
   - "type:operation"
   - "status:todo"
@@ -8,6 +9,7 @@ body:
   - type: markdown
     attributes:
       value: |
+        人手承認や既存スクリプトの実行は **Type** が `Task`、運用ラベルは `type:operation` です。
         タイトルは `chore: 日本語タイトル` を基本とします。研究実験は `chore`、テストコードの変更は `test` です。
         **リポジトリ変更がなければブランチ・PRは不要です。** 空コミットや空PRは作らず、実施結果と完了条件を確認してIssueを閉じます。
         途中でコード・設定・文書の変更が必要になったら、関連する実装Issueを分けてください。実装PRのマージだけで、この作業Issueを閉じないでください。
