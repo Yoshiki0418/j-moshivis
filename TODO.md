@@ -1,5 +1,7 @@
 # J-MoshiVis：自分が進めるTODO
 
+> 2026-11-19以降の作業・優先度・進捗は [GitHub Issues](https://github.com/Yoshiki0418/j-moshivis/issues) で管理します。この文書は当時の計画として保持します。ここにしかない作業へ着手するときは、内容を確認して対応Issueを作成してください。[運用ルール](CONTRIBUTING.md)
+
 更新日：2026-11-13（JST）。
 
 研究を進めるために、**自分で確認・判断することと、AIへ依頼すること**をまとめたリスト。
