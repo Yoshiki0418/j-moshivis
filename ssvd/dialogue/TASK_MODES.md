@@ -167,7 +167,34 @@ Current JSSODa pages are 115 characters or longer and intentionally produce no
 eligible OCR rows; the mode is ready for the upcoming shop-sign/telephone/
 price dataset.
 
-## Tests
+## 日本の日常画像の要確認対話を新規生成する場合
+
+対象は同じ画像の元の要確認種別が OCR または counting で、人がまだ判断していない Qwen 対話。
+2026-11-19 の対象候補 24,228 件のうち、旧対話の `auxiliary_task.question_turn_index` が 4（3 問目）のものは 24,183 件。
+同じ UID に新方式を適用したときの質問位置の割当は、2 問目 6,353 件、3 問目 6,340 件、4 問目 6,404 件、5 問目 3,587 件、6 問目 1,544 件。生成前の計算であり、保留や評価画像の除外によって完成した対話の分布は変わる。
+
+本家は会話履歴を共有する二つの話者が同じ画像説明を参照し、1 発話ずつ生成する。
+論文本文は 8–16 往復、公開コードの既定は 8–16 発話（4–8 往復）。
+今回は日本語の既存データの長さに合わせて 4–6 往復とし、初問の切り口と課題を尋ねる位置を画像ごとに変える。
+「うん」「へえ」などの挿入回数を自然さの指標にしない。
+[論文 §3.3・付録 E](https://arxiv.org/html/2503.15633v1#S3.SS3)・[公開コードの長さ指定](https://github.com/kyutai-labs/moshivis/blob/main/ssvd/generate.py#L305-L310)・[話者交替](https://github.com/kyutai-labs/moshivis/blob/main/ssvd/multiturn_prompting.py#L181-L214)
+
+1. 画像を一度送り、会話に使える場面の説明と、元の課題に対応する根拠を作る。元対話の本文、数、読み、画像タイトルはプロンプトに含めない。対象を数え切れない場合や文字を判別できない場合は、その画像を同じ種別で保留する。
+2. ユーザー役は会話で初めて聞いた事柄から次の問いを作る。アシスタント役は画像から得た根拠を参照して答える。OCR では画像上の原表記と音声対話用の読みを別々に記録する。
+3. 所定の位置に元種別の問いと答えがあるかを機械的に確認し、根拠との不一致は保留する。この検査は画像に対する正答を保証しない。最終候補は新しい review ID を持ち、本人の承認対象になる。
+
+ローカルで次の Responses API リクエストを組み立てる例。下のコマンドは外部送信や台帳の更新を行わない。
+リポジトリ直下で、対象 UID を指定する。出力には画像が含まれるので Git 管理外に保存する。
+
+```bash
+python3 -m ssvd.dialogue.preview_regeneration --uid "$PENDING_UID" > /tmp/jmv-next-request.json
+```
+
+再生時は初回の出力の `identity` と、同じ設定でそれまでに得た JSON オブジェクトの配列 `replies` を一つの JSON にして `--transcript` に渡す。応答順は画像の観察、ユーザー、アシスタントの繰り返し。結果は `request`、`hold`、`pending_review` のいずれか。完了時の `candidate` は確認用の別版。`--model` と `--pairs` で比較条件を揃えられる。
+
+本実行時の評価画像の除外、費用計上、再開、送信と保存時の人手判定の再照合は [#10](https://github.com/Yoshiki0418/j-moshivis/issues/10) の範囲。モデル選定では同じ 20 画像（OCR 14、カウント 6）について、指定した対象を実際に数えた・読んだか、前の返答に沿う自然な追質問か、別の発話にも根拠のない説明がないか、全文の修正時間を人が確認する。保留を含む全画像を分母として種別別の件数と費用を記録する。[少数試行 #12](https://github.com/Yoshiki0418/j-moshivis/issues/12)
+
+## テストの実行
 
 ```bash
 PYTHONPATH=ssvd/dialogue .venv-data/bin/python -m unittest discover \
