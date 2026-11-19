@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import json
+import subprocess
+import sys
 import tempfile
 import threading
 import time
@@ -23,7 +25,7 @@ def _write_jsonl(path: Path, records: list[dict], partial: dict | None = None) -
 
 
 class DatasetCatalogTest(unittest.TestCase):
-    def _required_ai_suggestion(self):
+    def _required_ai_suggestion(self, *, unchanged=False):
         source = self.data / "dialogues_counting/full/qwen3vl_30b_normal_s0.jsonl"
         record = {"uid": "count:one", "task_mode": "normal", "generator": "test-vlm",
                   "image": str(self.counting_one_image), "image_sha256": image_file_sha256(self.counting_one_image),
@@ -40,11 +42,71 @@ class DatasetCatalogTest(unittest.TestCase):
         suggestion = self.catalog.ai_suggestion_store.put_suggestion(
             collection=detail["collection"], uid=detail["uid"],
             base_fingerprint=detail["content_sha256"], image_sha256=record["image_sha256"],
-            dialogue=[record["dialogue"][0], {"speaker": "アシスタント", "text": "2個あります。"}],
-            auxiliary_task={**record["auxiliary_task"], "answer_count": 2}, model="gpt-6-luna",
-            changes=[{"turn_index": 1, "reason": "画像の個数に合わせて訂正"}],
-            concerns=[], verdict="corrected")
+            dialogue=record["dialogue"] if unchanged else [
+                record["dialogue"][0], {"speaker": "アシスタント", "text": "2個あります。"}],
+            auxiliary_task={**record["auxiliary_task"], "answer_count": 1 if unchanged else 2}, model="gpt-6-luna",
+            changes=[] if unchanged else [{"turn_index": 1, "reason": "画像の個数に合わせて訂正"}],
+            concerns=[], verdict="unchanged" if unchanged else "corrected")
         return source, record, detail, suggestion
+
+    def _assert_ai_approval_loses_to_intervening_human(self, decision, *, unchanged=False):
+        source, record, original, suggestion = self._required_ai_suggestion(unchanged=unchanged)
+        source_bytes = source.read_bytes()
+        append = self.catalog.review_store.append
+        history_after_human = []
+
+        def append_after_human(**kwargs):
+            # The viewer has already accepted its AI preview, but has not yet
+            # acquired the ledger's append lock. A separate process commits a
+            # decision with the SAME content fingerprint in that exact gap.
+            event = {"fingerprint": original["content_sha256"], "decision": decision,
+                     "uid": original["uid"], "collection": original["collection"]}
+            child = subprocess.run(
+                [sys.executable, "-c",
+                 "import json,sys; from ssvd.review_store import ReviewStore; "
+                 "ReviewStore(sys.argv[1]).append(**json.loads(sys.argv[2]))",
+                 str(self.catalog.review_store.path), json.dumps(event)],
+                cwd=Path(__file__).resolve().parents[2],
+                capture_output=True, text=True, timeout=10,
+            )
+            self.assertEqual(child.returncode, 0, child.stderr)
+            history_after_human.append(self.catalog.review_store.path.read_bytes())
+            return append(**kwargs)
+
+        with patch.object(self.catalog.review_store, "append", side_effect=append_after_human):
+            with self.assertRaises(ReviewConflictError):
+                self.catalog.edit_dialogue(
+                    original["token"], fingerprint=original["content_sha256"],
+                    dialogue=suggestion["dialogue"], auxiliary_task=suggestion["auxiliary_task"],
+                    ai_suggestion_id=suggestion["suggestion_id"],
+                )
+        self.assertEqual(len(history_after_human), 1)
+        self.assertEqual(self.catalog.review_store.path.read_bytes(), history_after_human[0])
+        self.assertEqual(self.catalog.review_store.latest_revisions(), {})
+        self.assertEqual(self.catalog.review_store.decision_for(original["content_sha256"])["decision"], decision)
+        self.assertEqual(source.read_bytes(), source_bytes)
+        current = self.catalog.get_item(original["token"])
+        self.assertIsNone(current["ai_suggestion"])
+        self.assertEqual(current["dialogue"][1]["text"], record["dialogue"][1]["text"])
+        self.assertEqual(current["review_status"], decision)
+
+    def test_ai_revision_cannot_race_human_approval(self):
+        self._assert_ai_approval_loses_to_intervening_human("approved")
+
+    def test_ai_revision_cannot_race_human_rejection(self):
+        self._assert_ai_approval_loses_to_intervening_human("rejected")
+
+    def test_ai_revision_cannot_race_human_reset(self):
+        self._assert_ai_approval_loses_to_intervening_human("pending")
+
+    def test_unchanged_ai_approval_cannot_race_human_approval(self):
+        self._assert_ai_approval_loses_to_intervening_human("approved", unchanged=True)
+
+    def test_unchanged_ai_approval_cannot_race_human_rejection(self):
+        self._assert_ai_approval_loses_to_intervening_human("rejected", unchanged=True)
+
+    def test_unchanged_ai_approval_cannot_race_human_reset(self):
+        self._assert_ai_approval_loses_to_intervening_human("pending", unchanged=True)
 
     def test_ai_suggestion_is_pending_overlay_until_human_approval(self):
         source, record, original, suggestion = self._required_ai_suggestion()

@@ -2332,7 +2332,10 @@ class DatasetCatalog:
                     collection=collection, note=note, reviewer=reviewer,
                     task_mode=str(revised.get("task_mode") or "normal"),
                     revised_record=revised if new_id != fingerprint else None,
-                    base_fingerprint=base, parent_fingerprint=fingerprint)
+                    base_fingerprint=base, parent_fingerprint=fingerprint,
+                    # The preview check above is advisory. Recheck under the
+                    # ledger's writer lock even when the text is unchanged.
+                    require_unreviewed=ai_suggestion_id is not None)
                 fresh = db.execute("SELECT * FROM items WHERE collection=? AND uid=?", (collection, uid)).fetchone()
                 self._refresh_review_identity(db, fresh, force_hash=True)
                 updated = db.execute("""UPDATE items SET review_status='approved',dataset_usable=1

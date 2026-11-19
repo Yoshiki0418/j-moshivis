@@ -219,6 +219,7 @@ class ReviewStore:
         base_fingerprint: str | None = None,
         parent_fingerprint: str | None = None,
         task_mode: str | None = None,
+        require_unreviewed: bool = False,
     ) -> dict[str, Any]:
         if not isinstance(fingerprint, str) or len(fingerprint) != 64:
             raise ValueError("fingerprint must be a 64-character SHA-256 hex string")
@@ -271,9 +272,11 @@ class ReviewStore:
         fd = os.open(self.path, os.O_RDWR | os.O_CREAT | os.O_APPEND, 0o664)
         try:
             fcntl.flock(fd, fcntl.LOCK_EX)
-            if revised_record is not None:
+            if revised_record is not None or require_unreviewed:
                 # Compare while holding the same lock used by all writers. A
-                # second tab/server cannot silently overwrite a newer edit.
+                # second tab/server cannot slip in a decision between this
+                # check and the append/fsync below. Read the locked descriptor,
+                # not cached history or a separately opened shared-lock reader.
                 current = base_fingerprint
                 with os.fdopen(os.dup(fd), "r", encoding="utf-8") as stream:
                     stream.seek(0)
@@ -282,11 +285,23 @@ class ReviewStore:
                             previous = json.loads(line)
                         except (UnicodeError, json.JSONDecodeError):
                             continue
-                        if (isinstance(previous, dict)
-                                and previous.get("base_fingerprint") == base_fingerprint
+                        if not isinstance(previous, dict):
+                            continue
+                        if (require_unreviewed and previous.get("collection") == collection
+                                and previous.get("uid") == uid):
+                            previous_id = previous.get("fingerprint") or previous.get("review_id")
+                            previous_decision = previous.get("decision") or previous.get("status")
+                            if (isinstance(previous_id, str) and len(previous_id) == 64
+                                    and all(c in "0123456789abcdefABCDEF" for c in previous_id)
+                                    and isinstance(previous_decision, str)
+                                    and previous_decision in REVIEW_DECISIONS):
+                                raise ReviewConflictError(
+                                    "A human decision already exists for this dialogue. "
+                                    "Reload before approving the AI suggestion.")
+                        if (previous.get("base_fingerprint") == base_fingerprint
                                 and isinstance(previous.get("revised_record"), dict)):
                             current = previous.get("fingerprint")
-                if current != parent_fingerprint:
+                if revised_record is not None and current != parent_fingerprint:
                     raise ReviewConflictError("Another editor saved a newer revision. Reload before saving.")
             size = os.fstat(fd).st_size
             if size and os.pread(fd, 1, size - 1) != b"\n":
