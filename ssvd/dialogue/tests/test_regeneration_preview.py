@@ -7,10 +7,9 @@ from pathlib import Path
 import sqlite3
 import tempfile
 import unittest
-from unittest.mock import patch
 
 from ssvd.dialogue.preview_regeneration import COLLECTION, preview
-from ssvd.review_store import DEFAULT_REVIEW_EVENTS, ReviewStore, review_metadata
+from ssvd.review_store import DEFAULT_REVIEW_EVENTS, ReviewStore, content_fingerprint, review_metadata
 
 
 class PreviewTests(unittest.TestCase):
@@ -43,8 +42,8 @@ class PreviewTests(unittest.TestCase):
             db.commit()
 
     def test_only_image_and_task_sent_to_model(self):
-        with self.assertRaisesRegex(ValueError, "4 to 6"):
-            preview(self.root, "test", pairs=7)
+        with self.assertRaisesRegex(ValueError, "4 to 8"):
+            preview(self.root, "test", pairs=9)
         step = preview(self.root, "test")
         wire = json.dumps(step["request"])
         for private in ("OLD_DIALOGUE", "OLD_TRANSCRIPTION", "image.jpg", self.source["review_id"]):
@@ -52,6 +51,9 @@ class PreviewTests(unittest.TestCase):
         identity = dict(step["identity"], uid="other")
         with self.assertRaisesRegex(ValueError, "different source"):
             preview(self.root, "test", transcript={"identity": identity, "replies": []})
+        v1 = dict(step["identity"], prompt_version="grounded_roles_v1")
+        with self.assertRaisesRegex(ValueError, "different source"):
+            preview(self.root, "test", transcript={"identity": v1, "replies": []})
 
     def test_prior_human_event_and_image_replacement(self):
         self.image.write_bytes(b"changed")
@@ -62,20 +64,64 @@ class PreviewTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "human"):
             preview(self.root, "test")
 
-    def test_new_ocr_version_uses_existing_review_gate(self):
-        finished = dict(status="pending_review", task_pair=2,
-                        grounding=dict(written="SAMPLE", reading="サンプル", target="看板"),
-                        dialogue=[{"role": r, "text": t} for r, t in [
-                            ("user", "どんな場所？"), ("assistant", "看板が見えるよ。"),
-                            ("user", "なんて書いてある？"), ("assistant", "サンプルだよ。")]])
-        with patch("ssvd.dialogue.preview_regeneration.next_step", return_value=finished):
-            result = preview(self.root, "test")
+    def replay(self, tasks, exchanges, pairs):
+        identity = preview(self.root, "test", pairs=pairs)["identity"]
+        replies = [{"status": "ok", "tasks": tasks, "scene": "駅前に看板と自転車が見える。"}]
+        transcript = {"identity": identity, "replies": replies}
+        step = preview(self.root, "test", pairs=pairs, transcript=transcript)
+        for pair in range(1, pairs + 1):
+            selected = next((k for k, pos in step["task_pairs"].items() if pos == pair), None)
+            q, a = exchanges[selected] if selected else ("どんな様子？", "看板と自転車が見えるよ。")
+            replies.extend([{"text": q}, {"text": a}])
+            step = preview(self.root, "test", pairs=pairs, transcript=transcript)
+            self.assertNotEqual(step["status"], "hold", step.get("reason"))
+        self.assertEqual(step["status"], "pending_review")
+        return step
+
+    def test_dual_task_fingerprint_and_no_exact_answer_for_lower_bound(self):
+        ocr = dict(kind="ocr", mode="exact", written="SAMPLE", reading="サンプル", target="看板")
+        count = dict(kind="counting", mode="lower_bound", count=3, target="自転車", reason="奥が隠れている")
+        result = self.replay([ocr, count], {
+            "ocr": ("看板にはなんて書いてある？", "サンプルって書いてあるよ。"),
+            "counting": ("自転車は何台ある？", "少なくとも三台は見えるよ。")}, pairs=8)
         candidate = result["candidate"]
-        self.assertEqual(candidate["auxiliary_task"]["recognized_text"], "SAMPLE")
-        self.assertEqual(candidate["auxiliary_task"]["spoken_reading"], "サンプル")
-        self.assertEqual(candidate["auxiliary_task"]["question_turn_index"], 2)
+        auxiliary = candidate["auxiliary_task"]
+        self.assertEqual(auxiliary["recognized_text"], "SAMPLE")
+        self.assertEqual(auxiliary["spoken_reading"], "サンプル")
+        self.assertEqual(auxiliary["question_turn_index"], 2 * (result["task_pairs"]["ocr"] - 1))
+        second = auxiliary["additional_tasks"][0]
+        self.assertEqual(second["minimum_count"], 3)
+        self.assertNotIn("answer_count", second)
+        self.assertEqual(len(candidate["dialogue"]), 16)
         self.assertEqual(candidate["dialogue"][1]["speaker"], "アシスタント")
         self.assertEqual(candidate["split_group_key"], "test-group")
         self.assertTrue(candidate["review_required"])
         self.assertNotEqual(candidate["review_id"], self.source["review_id"])
-        self.assertEqual(result["status"], "pending_review")
+        second["minimum_count"] = 4
+        self.assertNotEqual(content_fingerprint(candidate), candidate["review_id"])
+
+    def test_ordinary_candidate_from_ocr_source_still_requires_review(self):
+        candidate = self.replay([], {}, pairs=7)["candidate"]
+        self.assertEqual(candidate["auxiliary_kind"], "none")
+        self.assertEqual(len(candidate["dialogue"]), 14)
+        self.assertTrue(candidate["review_required"])
+
+    def test_uncertain_observations_keep_only_supported_values(self):
+        for kind, mode, values, answer, expected in [
+            ("counting", "approximate", {"count": 8}, "八台くらいに見えるよ。", {"estimated_count": 8}),
+            ("counting", "unknown", {}, "重なってて台数は分からないな。", {}),
+            ("ocr", "partial", {"written": "A7", "reading": "エーなな"},
+             "エーなな、って部分だけ読めるよ。", {"visible_fragment": "A7", "spoken_reading": "エーなな"}),
+            ("ocr", "unknown", {}, "ぼやけていて文字までは読めないな。", {}),
+        ]:
+            with self.subTest(kind=kind, mode=mode):
+                target, question = ("看板", "看板には何て書いてある？") if kind == "ocr" else ("自転車", "自転車は何台ある？")
+                task = dict(kind=kind, mode=mode, target=target, reason="一部が隠れている", **values)
+                result = self.replay([task], {kind: (question, answer)}, pairs=4)
+                auxiliary = result["candidate"]["auxiliary_task"]
+                self.assertTrue(result["candidate"]["review_required"])
+                self.assertEqual(auxiliary["answer_mode"], mode)
+                self.assertEqual(auxiliary["reason"], task["reason"])
+                value_fields = {"answer_count", "minimum_count", "estimated_count",
+                                "recognized_text", "visible_fragment", "spoken_reading"}
+                self.assertEqual({k: auxiliary[k] for k in value_fields if k in auxiliary}, expected)

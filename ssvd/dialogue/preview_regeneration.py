@@ -9,7 +9,7 @@ from pathlib import Path
 import sqlite3
 
 from ssvd.ai_suggestion_store import human_touched_uids
-from ssvd.dialogue.regeneration_roles import next_step
+from ssvd.dialogue.regeneration_roles import PAIR_COUNTS, next_step
 from ssvd.review_store import (
     DEFAULT_REVIEW_EVENTS, REVIEW_REQUIRED_STATUS, ReviewStore,
     content_fingerprint, review_metadata,
@@ -17,7 +17,7 @@ from ssvd.review_store import (
 
 ROOT = Path(__file__).resolve().parents[2]
 COLLECTION = "japanese_daily_v1"
-PROMPT_VERSION = "grounded_roles_v1"
+PROMPT_VERSION = "grounded_roles_v2"
 
 
 def _load_source(root, uid):
@@ -61,10 +61,33 @@ def _load_source(root, uid):
     return source, kind, data_url, row["review_id"]
 
 
+def _review_task(task, pair):
+    """Keep estimates and legible fragments distinct from exact annotations."""
+    kind, mode = task["kind"], task["mode"]
+    question_index = 2 * (pair - 1)
+    result = dict(kind=kind, answer_mode=mode, grounding_source="vlm_visual",
+                  question_turn_index=question_index, answer_turn_index=question_index + 1)
+    if mode != "exact":
+        result["reason"] = task["reason"]
+    if kind == "counting":
+        result["counted_target"] = task["target"]
+        if mode != "unknown":
+            field = {"exact": "answer_count", "approximate": "estimated_count",
+                     "lower_bound": "minimum_count"}[mode]
+            result[field] = task["count"]
+    else:
+        result["ocr_target"] = task["target"]
+        if mode != "unknown":
+            field = "recognized_text" if mode == "exact" else "visible_fragment"
+            result[field] = task["written"]
+            result["spoken_reading"] = task["reading"]
+    return result
+
+
 def preview(root, uid, *, model="gpt-6-luna", pairs=None, transcript=None):
     """Replay decoded replies bound to the same image, review revision and settings."""
-    if pairs is not None and (type(pairs) is not int or pairs not in (4, 5, 6)):
-        raise ValueError("Japanese Daily candidates use 4 to 6 question-answer pairs")
+    if pairs is not None and (type(pairs) is not int or pairs not in PAIR_COUNTS):
+        raise ValueError("Japanese Daily candidates use 4 to 8 question-answer pairs")
     source, kind, image, base = _load_source(root, uid)
     identity = dict(collection=COLLECTION, uid=uid, base_fingerprint=base,
                     image_sha256=source["image_sha256"], kind=kind, model=model,
@@ -80,14 +103,12 @@ def preview(root, uid, *, model="gpt-6-luna", pairs=None, transcript=None):
     if step["status"] != "pending_review":
         return {"identity": identity, **step}
 
-    question_index = 2 * (step["task_pair"] - 1)
     evidence = step["grounding"]
-    auxiliary = dict(kind=kind, grounding_source="vlm_visual",
-                     question_turn_index=question_index, answer_turn_index=question_index + 1)
-    if kind == "ocr":
-        auxiliary.update(recognized_text=evidence["written"], spoken_reading=evidence["reading"])
-    else:
-        auxiliary.update(counted_target=evidence["target"], answer_count=evidence["count"])
+    tasks = [_review_task(task, step["task_pairs"][task["kind"]]) for task in evidence["tasks"]]
+    auxiliary = tasks[0] if tasks else {"kind": "none", "grounding_source": "none"}
+    # The review fingerprint covers this entire dictionary, including a second exchange.
+    if len(tasks) > 1:
+        auxiliary["additional_tasks"] = tasks[1:]
     speakers = {"user": "ユーザー", "assistant": "アシスタント"}
     candidate = dict(uid=uid, image=source["image"], image_sha256=identity["image_sha256"],
                      task_mode="normal", generator=model, prompt_version=PROMPT_VERSION,
@@ -97,14 +118,14 @@ def preview(root, uid, *, model="gpt-6-luna", pairs=None, transcript=None):
         candidate["split_group_key"] = source["split_group_key"]
     candidate.update(review_metadata(candidate))
     return {"identity": identity, "status": "pending_review", "candidate": candidate,
-            "grounding": evidence, "task_pair": step["task_pair"]}
+            "grounding": evidence, "pair_count": step["pair_count"], "task_pairs": step["task_pairs"]}
 
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--uid", required=True)
     parser.add_argument("--model", default="gpt-6-luna")
-    parser.add_argument("--pairs", type=int, choices=(4, 5, 6))
+    parser.add_argument("--pairs", type=int, choices=PAIR_COUNTS)
     parser.add_argument("--transcript", type=Path, help="JSON with identity and ordered decoded replies")
     args = parser.parse_args()
     try:
