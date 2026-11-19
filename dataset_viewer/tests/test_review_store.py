@@ -1,6 +1,9 @@
 from __future__ import annotations
 
 import json
+import select
+import subprocess
+import sys
 import tempfile
 import unittest
 from pathlib import Path
@@ -130,6 +133,106 @@ class ReviewStoreTests(unittest.TestCase):
                 collection="counting_v4",
                 note="x" * (MAX_REVIEW_NOTE_CHARS + 1),
             )
+
+    def test_unreviewed_guard_is_scoped_to_collection_and_uid(self):
+        store = ReviewStore(self.path)
+        fingerprint = content_fingerprint(self.record)
+        store.append(fingerprint=fingerprint, decision="rejected", uid="sample-1", collection="other")
+        store.append(fingerprint=fingerprint, decision="approved", uid="another-uid", collection="counting_v4")
+        event = store.append(fingerprint=fingerprint, decision="approved", uid="sample-1",
+                             collection="counting_v4", require_unreviewed=True)
+        self.assertEqual(event["decision"], "approved")
+        before = self.path.read_bytes()
+        with self.assertRaises(ReviewConflictError):
+            store.append(fingerprint=fingerprint, decision="approved", uid="sample-1",
+                         collection="counting_v4", require_unreviewed=True)
+        self.assertEqual(self.path.read_bytes(), before)
+
+    def test_unreviewed_guard_includes_superseded_human_decisions(self):
+        store = ReviewStore(self.path)
+        store.append(fingerprint="b" * 64, decision="pending", uid="sample-1", collection="counting_v4")
+        # Latest-by-fingerprint caches must not hide this UID's older event.
+        store.append(fingerprint="b" * 64, decision="approved", uid="sample-1", collection="other")
+        before = self.path.read_bytes()
+        with self.assertRaises(ReviewConflictError):
+            store.append(fingerprint=content_fingerprint(self.record), decision="approved", uid="sample-1",
+                         collection="counting_v4", require_unreviewed=True)
+        self.assertEqual(self.path.read_bytes(), before)
+
+    def test_unreviewed_guard_is_optional_for_normal_human_updates(self):
+        store = ReviewStore(self.path)
+        fingerprint = content_fingerprint(self.record)
+        store.append(fingerprint=fingerprint, decision="rejected", uid="sample-1", collection="counting_v4")
+        event = store.append(fingerprint=fingerprint, decision="approved", uid="sample-1", collection="counting_v4")
+        self.assertEqual(event["decision"], "approved")
+
+    def test_unreviewed_guard_rechecks_under_competing_process_write_lock(self):
+        human_code = """
+import json,sys
+from ssvd import review_store
+real_flock = review_store.fcntl.flock
+def hold_writer_lock(fd, operation):
+    real_flock(fd, operation)
+    if operation == review_store.fcntl.LOCK_EX:
+        print('locked', flush=True)
+        assert sys.stdin.readline().strip() == 'release'
+review_store.fcntl.flock = hold_writer_lock
+review_store.ReviewStore(sys.argv[1]).append(**json.loads(sys.argv[2]))
+"""
+        ai_code = """
+import json,sys
+from ssvd import review_store
+real_flock = review_store.fcntl.flock
+def signal_writer_lock(fd, operation):
+    if operation == review_store.fcntl.LOCK_EX:
+        print('waiting', flush=True)
+    real_flock(fd, operation)
+review_store.fcntl.flock = signal_writer_lock
+try:
+    review_store.ReviewStore(sys.argv[1]).append(require_unreviewed=True, **json.loads(sys.argv[2]))
+except review_store.ReviewConflictError:
+    print('conflict', flush=True)
+else:
+    print('approved', flush=True)
+"""
+        event = {"fingerprint": content_fingerprint(self.record), "decision": "rejected",
+                 "uid": "sample-1", "collection": "counting_v4"}
+        processes = []
+
+        def start(code, decision):
+            process = subprocess.Popen(
+                [sys.executable, "-c", code, str(self.path), json.dumps({**event, "decision": decision})],
+                cwd=Path(__file__).resolve().parents[2],
+                stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True,
+            )
+            processes.append(process)
+            return process
+
+        def signal_from(process, expected):
+            self.assertTrue(select.select([process.stdout], [], [], 10)[0], f"missing {expected} signal")
+            self.assertEqual(process.stdout.readline().strip(), expected)
+
+        try:
+            human = start(human_code, "rejected")
+            signal_from(human, "locked")
+            self.assertEqual(self.path.read_bytes(), b"")
+            ai = start(ai_code, "approved")
+            signal_from(ai, "waiting")
+            # Human holds the same writer lock; only now is its rejection
+            # appended. The waiting AI must reread it after acquiring the lock.
+            _, human_error = human.communicate("release\n", timeout=10)
+            self.assertEqual(human.returncode, 0, human_error)
+            ai_output, ai_error = ai.communicate(timeout=10)
+            self.assertEqual(ai.returncode, 0, ai_error)
+            self.assertEqual(ai_output.strip(), "conflict")
+        finally:
+            for process in processes:
+                if process.poll() is None:
+                    process.kill()
+                process.communicate(timeout=10)
+        events = [json.loads(line) for line in self.path.read_text().splitlines()]
+        self.assertEqual(len(events), 1)
+        self.assertEqual(events[0]["decision"], "rejected")
 
 
 if __name__ == "__main__":

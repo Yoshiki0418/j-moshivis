@@ -22,7 +22,7 @@ class Element {
   replaceChildren(...children) { this.children=[]; this.append(...children); }
   setAttribute(name,value) {this.attributes[name]=value;} removeAttribute() {}
   scrollIntoView() {this.scrollCalls=(this.scrollCalls||0)+1;}
-  reportValidity() { return Boolean(this.value.trim()); }
+  reportValidity() { return Boolean(String(this.value).trim()); }
   querySelectorAll(tag) { const found=[]; const visit=e=>{for(const c of e.children||[]){
     if(c.tag===tag)found.push(c); visit(c);}}; visit(this); return found; }
 }
@@ -39,6 +39,11 @@ vm.runInContext(`(async()=>{
   const realLoadItems=loadItems, realLoadTree=loadTree, realLoadDetail=loadDetail, realSelectItem=selectItem;
   collectDom(); loadItems=async()=>{}; loadDashboard=async()=>{}; loadTree=async()=>{}; showToast=()=>{};
   bindEvents();
+  dom.aiStatusFilter.value='ready';dom.aiStatusFilter.events.change();
+  assert.strictEqual(state.filters.ai_status,'ready');
+  assert.strictEqual(state.filters.review_status,'pending');
+  assert.strictEqual(state.filters.review_required,'true');
+  assert.strictEqual(filterParams().get('ai_status'),'ready');
   state.filters.review_status='approved'; dom.reviewStatusFilter.value='approved';
   dom.reviewRequiredFilter.checked=true; dom.reviewRequiredFilter.events.change();
   assert.strictEqual(state.filters.review_status,'pending');
@@ -47,6 +52,8 @@ vm.runInContext(`(async()=>{
   dom.reviewStatusFilter.value='approved'; dom.reviewStatusFilter.events.change();
   assert.strictEqual(dom.reviewRequiredFilter.checked,false);
   assert.strictEqual(state.filters.review_required,'');
+  assert.strictEqual(state.filters.ai_status,'');
+  assert.strictEqual(dom.aiStatusFilter.value,'');
   const optional=normalizeReview({review_required:false,review_status:'approved'});
   assert.strictEqual(optional.status,'approved'); assert.strictEqual(optional.dataset_usable,true);
   assert.strictEqual(normalizeReview({review_required:false}).dataset_usable,true);
@@ -225,6 +232,66 @@ vm.runInContext(`(async()=>{
   let scopedCalls=0;api=async path=>{scopedCalls++;return raws[2];};
   prefetchNextDetails();await Promise.all([...state.detailPrefetch.values()].map(entry=>entry.promise));
   state.filters.q='different-filter';await selectItem('c');assert.strictEqual(scopedCalls,2);
+  // AI drafts stay pending in the UI and approval saves the text actually shown.
+  state.annotationMode=false;state.navigation.next='';state.editingDialogue=false;
+  const draft={...raw,review_required:true,review_status:'pending',
+    dialogue:[raw.dialogue[0],{speaker:'アシスタント',text:'犬が写っています。'}],
+    original_dialogue:raw.dialogue,
+    auxiliary_task:{kind:'counting',answer_count:2,counted_target:'犬'},
+    original_auxiliary_task:{kind:'counting',answer_count:1,counted_target:'犬'},
+    ai_suggestion:{suggestion_id:'draft-1',verdict:'corrected',
+      changes:[{turn_index:1,reason:'画像を再確認'}],concerns:['小さい物体に注意']}};
+  state.selectedItem=normalizeItem(draft);renderReview(state.selectedItem);renderAiSuggestion(state.selectedItem);
+  assert.strictEqual(state.selectedItem.reviewState.status,'pending');
+  assert.strictEqual(dom.aiSuggestion.hidden,false);
+  assert.strictEqual(dom.aiSuggestionConcerns.hidden,false);
+  assert.ok(dom.aiSuggestionLabel.textContent.includes('未承認'));
+  assert.ok(dom.reviewApprove.textContent.includes('AI修正案'));
+  const diff=dom.aiSuggestionDiff.querySelectorAll('p').map(node=>node.textContent).join(' ');
+  assert.ok(diff.includes('猫です。'));assert.ok(diff.includes('犬が写っています。'));
+  assert.ok(diff.includes('正解の数: 1 → 2'));
+  const requests=[];
+  renderDetail=item=>{state.selectedItem=item;};
+  api=async(path,options)=>{const body=JSON.parse(options.body);requests.push({path,body});
+    return {item:{...draft,dialogue:body.dialogue,auxiliary_task:body.auxiliary_task,
+      ai_suggestion:null,review_status:'approved',content_sha256:'d'.repeat(64)}};};
+  await submitReview('approved');
+  assert.ok(requests[0].path.endsWith('/dialogue'));
+  assert.strictEqual(requests[0].body.ai_suggestion_id,'draft-1');
+  assert.strictEqual(requests[0].body.content_sha256,raw.content_sha256);
+  assert.strictEqual(requests[0].body.dialogue[1].text,'犬が写っています。');
+  assert.strictEqual(requests[0].body.auxiliary_task.answer_count,2);
+  assert.strictEqual(state.selectedItem.content_sha256,'d'.repeat(64));
+  assert.strictEqual(activeAiSuggestion(state.selectedItem),null);
+  // Human edits begin from the suggestion and carry the same race protection.
+  state.selectedItem=normalizeItem(draft);startDialogueEdit();
+  dom.detailDialogue.querySelectorAll('textarea')[1].value='犬が2匹います。';
+  await saveDialogueEdit();
+  assert.strictEqual(requests[1].body.ai_suggestion_id,'draft-1');
+  assert.strictEqual(requests[1].body.dialogue[1].text,'犬が2匹います。');
+  // An intervention after opening a draft must neither approve nor navigate.
+  state.selectedItem=normalizeItem(draft);api=async()=>{throw new Error('human decision changed');};
+  await submitReview('approved');
+  assert.strictEqual(state.selectedItem.reviewState.status,'pending');
+  assert.strictEqual(state.selectedItem.ai_suggestion.suggestion_id,'draft-1');
+  assert.strictEqual(dom.reviewError.hidden,false);
+  // Rejecting a draft still records a human rejection without saving AI text.
+  api=async(path,options)=>{requests.push({path,body:JSON.parse(options.body)});return {decision:'rejected'};};
+  await submitReview('rejected');
+  assert.ok(requests[2].path.endsWith('/review'));
+  assert.strictEqual(requests[2].body.ai_suggestion_id,undefined);
+  assert.strictEqual(state.selectedItem.dialogue[1].text,raw.dialogue[1].text);
+  assert.strictEqual(activeAiSuggestion(state.selectedItem),null);
+  // Newly completed suggestions refresh a filtered queue, preserving any draft.
+  state.filters.ai_status='ready';state.aiSuggestionCount=1;
+  state.editingDialogue=true;let aiQueueLoads=0;
+  loadItems=async()=>{aiQueueLoads++;};
+  api=async()=>({ready:true,ai_suggestion_count:2});
+  await loadStatus();assert.strictEqual(aiQueueLoads,0);
+  assert.strictEqual(state.aiListRefreshPending,true);
+  state.editingDialogue=false;await loadStatus();assert.strictEqual(aiQueueLoads,1);
+  assert.strictEqual(state.aiListRefreshPending,false);
+  clearFilters(false);assert.strictEqual(state.filters.ai_status,'');
 })()`,context).catch(error=>{console.error(error);process.exitCode=1;});
 """
         result = subprocess.run([shutil.which("node"), "-e", script, str(source)],

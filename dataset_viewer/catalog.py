@@ -26,6 +26,9 @@ from contextlib import contextmanager
 from pathlib import Path
 from typing import Any, Iterable, Iterator, Mapping, Sequence
 
+from ssvd.ai_suggestion_store import (
+    AISuggestionIntegrityError, default_ai_suggestion_store, human_touched_uids,
+)
 from ssvd.review_store import (
     MAX_REVIEW_NOTE_CHARS,
     REVIEW_DECISIONS,
@@ -190,6 +193,7 @@ class DatasetCatalog:
         self.db_path = Path(db_path).expanduser().resolve()
         self.db_path.parent.mkdir(parents=True, exist_ok=True)
         self.review_store = default_review_store(self.repo_root)
+        self.ai_suggestion_store = default_ai_suggestion_store(self.repo_root)
         self._refresh_lock = threading.Lock()
         self._interactive_lock = threading.Lock()
         self._interactive_waiters = 0
@@ -1829,12 +1833,17 @@ class DatasetCatalog:
             for row in sources
             if row["status"] not in {"ok", "missing"} or row["error"]
         ]
+        try:
+            ai_suggestion_count = self.ai_suggestion_store.count()
+        except AISuggestionIntegrityError:
+            ai_suggestion_count = 0
         return {
             "ready": any(row["items"] for row in collections),
             "db_path": str(self.db_path),
             "last_refresh": last[0] if last else None,
             "last_changed": last_changed[0] if last_changed else None,
             "catalog_revision": int(revision[0]) if revision else 0,
+            "ai_suggestion_count": ai_suggestion_count,
             "sources": sources,
             "errors": errors,
             "collections": collections,
@@ -2078,6 +2087,7 @@ class DatasetCatalog:
         review_status: str | None = None,
         review_required: bool | None = None,
         auxiliary_kind: str | None = None,
+        ai_status: str | None = None,
         page: int = 1,
         limit: int = 50,
         offset: int | None = None,
@@ -2104,9 +2114,11 @@ class DatasetCatalog:
             offset = max(0, int(offset))
             page = offset // limit + 1
         with self._connect() as db:
-            total = db.execute(f"SELECT COUNT(*) FROM items {where}", params).fetchone()[0]
+            where = self._with_ai_filter(db, where, ai_status)
+            items_source = self._query_items(ai_status)
+            total = db.execute(f"SELECT COUNT(*) FROM {items_source} {where}", params).fetchone()[0]
             rows = db.execute(
-                f"""SELECT * FROM items {where}
+                f"""SELECT items.* FROM {items_source} {where}
                     ORDER BY collection,category,uid LIMIT ? OFFSET ?""",
                 [*params, limit, offset],
             ).fetchall()
@@ -2125,6 +2137,7 @@ class DatasetCatalog:
                 "review_status": review_status,
                 "review_required": review_required,
                 "auxiliary_kind": auxiliary_kind,
+                "ai_status": ai_status,
             },
         }
 
@@ -2208,14 +2221,49 @@ class DatasetCatalog:
                 "alignment": alignment,
                 "review": review,
                 "human_revision": summary.get("human_revision"),
+                "ai_suggestion": None,
                 "navigation": self._navigation(row, filters or {}),
             }
         )
+        suggestion = self._active_ai_suggestion(row, summary)
+        if suggestion is not None:
+            # Suggestions are a display-only overlay. The content/review ID
+            # continues to identify the original until a human saves approval.
+            detail["original_dialogue"] = dialogue
+            detail["original_auxiliary_task"] = detail.get("auxiliary_task")
+            detail["dialogue"] = self._normalise_dialogue(suggestion["dialogue"])
+            if suggestion.get("auxiliary_task") is not None:
+                detail["auxiliary_task"] = suggestion["auxiliary_task"]
+            detail["ai_suggestion"] = {
+                key: suggestion.get(key) for key in (
+                    "suggestion_id", "model", "created_at", "changes", "concerns", "verdict",
+                )
+            }
         return detail
+
+    def _active_ai_suggestion(self, row: sqlite3.Row, summary: Mapping[str, Any]) -> dict[str, Any] | None:
+        """Offer AI drafts only on untouched, required, exact pending content."""
+        if (not row["review_required"] or row["review_status"] != "pending"
+                or not row["has_dialogue"] or summary.get("human_revision")
+                or not summary.get("current_image_sha256")
+                or summary.get("image_integrity_status") == "unavailable"):
+            return None
+        if (row["collection"], row["uid"]) in human_touched_uids(self.review_store):
+            return None
+        try:
+            return self.ai_suggestion_store.get_suggestion(
+                collection=row["collection"], uid=row["uid"],
+                base_fingerprint=summary.get("review_id") or row["review_id"],
+                image_sha256=summary["current_image_sha256"],
+            )
+        except AISuggestionIntegrityError:
+            logging.getLogger(__name__).warning("Ignoring invalid AI suggestion for %s/%s", row["collection"], row["uid"])
+            return None
 
     def edit_dialogue(self, token: str, *, fingerprint: str, dialogue: list,
                       auxiliary_task: Mapping[str, Any] | None = None,
-                      note: str = "", reviewer: str | None = None) -> dict[str, Any]:
+                      note: str = "", reviewer: str | None = None,
+                      ai_suggestion_id: str | None = None) -> dict[str, Any]:
         """Save a human correction and its approval in a single durable event."""
         if not isinstance(note, str) or len(note.strip()) > MAX_REVIEW_NOTE_CHARS:
             raise ValueError("確認メモは1000文字以内で入力してください。")
@@ -2232,6 +2280,10 @@ class DatasetCatalog:
                     db.commit()
                 if summary.get("image_integrity_status") == "unavailable" or fingerprint != summary.get("review_id"):
                     raise ReviewConflictError("画像または対話が変更されました。再読み込みしてから保存してください。")
+                if ai_suggestion_id is not None:
+                    suggestion = self._active_ai_suggestion(row, summary)
+                    if suggestion is None or suggestion.get("suggestion_id") != ai_suggestion_id:
+                        raise ReviewConflictError("AI修正案または人手確認の状態が変更されました。再読み込みして確認してください。")
                 original = self._read_locator(row["dialogue_source"], row["dialogue_offset"], row["dialogue_length"])
                 base = summary.get("source_review_id", fingerprint)
                 previous = self.review_store.latest_revisions().get(base)
@@ -2280,7 +2332,10 @@ class DatasetCatalog:
                     collection=collection, note=note, reviewer=reviewer,
                     task_mode=str(revised.get("task_mode") or "normal"),
                     revised_record=revised if new_id != fingerprint else None,
-                    base_fingerprint=base, parent_fingerprint=fingerprint)
+                    base_fingerprint=base, parent_fingerprint=fingerprint,
+                    # The preview check above is advisory. Recheck under the
+                    # ledger's writer lock even when the text is unchanged.
+                    require_unreviewed=ai_suggestion_id is not None)
                 fresh = db.execute("SELECT * FROM items WHERE collection=? AND uid=?", (collection, uid)).fetchone()
                 self._refresh_review_identity(db, fresh, force_hash=True)
                 updated = db.execute("""UPDATE items SET review_status='approved',dataset_usable=1
@@ -2423,6 +2478,44 @@ class DatasetCatalog:
     # ------------------------------------------------------------------
     # Query helpers / normalization
     # ------------------------------------------------------------------
+    @staticmethod
+    def _query_items(ai_status: str | None) -> str:
+        # CROSS JOIN intentionally starts with compact AI keys. Otherwise SQLite
+        # prefers items_review and visits every pending item for every page.
+        return ("ai_ready_keys CROSS JOIN items ON collection=ai_collection AND uid=ai_uid"
+                if ai_status else "items")
+
+    def _with_ai_filter(self, db: sqlite3.Connection, where: str, ai_status: str | None) -> str:
+        """Join compact draft keys, without opening every source/image/payload.
+
+        Catalogued image hashes select candidates; get_item and human saves
+        independently rehash current image bytes before displaying/accepting one.
+        The attached store and temporary human-history index are read snapshots.
+        """
+        if not ai_status:
+            return where
+        if ai_status not in {"ready", "needs_attention"}:
+            raise ValueError(f"unsupported AI status: {ai_status}")
+        prefix = where + " AND " if where else "WHERE "
+        db.execute("CREATE TEMP TABLE ai_ready_keys(ai_collection TEXT,ai_uid TEXT,PRIMARY KEY(ai_collection,ai_uid)) WITHOUT ROWID")
+        if not self.ai_suggestion_store.path.is_file():
+            return prefix + "0"
+        db.execute("ATTACH DATABASE ? AS ai_drafts",
+                   (self.ai_suggestion_store.path.resolve().as_uri() + "?mode=ro",))
+        db.execute("CREATE TEMP TABLE ai_human_touched(collection TEXT,uid TEXT,PRIMARY KEY(collection,uid)) WITHOUT ROWID")
+        db.executemany("INSERT INTO ai_human_touched VALUES(?,?)", human_touched_uids(self.review_store))
+        db.execute("INSERT OR IGNORE INTO ai_ready_keys SELECT collection,uid FROM ai_drafts.suggestions")
+        verdict = " AND json_valid(draft.payload_json) AND json_extract(draft.payload_json,'$.verdict')='needs_attention'" if ai_status == "needs_attention" else ""
+        return prefix + """review_required=1 AND review_status='pending' AND has_dialogue=1
+            AND json_type(summary_json,'$.human_revision') IS NOT 'object'
+            AND COALESCE(json_extract(summary_json,'$.image_integrity_status'),'')!='unavailable'
+            AND NOT EXISTS (SELECT 1 FROM ai_human_touched AS touched
+                WHERE touched.collection=items.collection AND touched.uid=items.uid)
+            AND EXISTS (SELECT 1 FROM ai_drafts.suggestions AS draft
+                WHERE draft.collection=items.collection AND draft.uid=items.uid
+                AND draft.base_fingerprint=items.review_id
+                AND draft.image_sha256=json_extract(items.summary_json,'$.current_image_sha256')""" + verdict + ")"
+
     @staticmethod
     def _where(
         collection: str | None = None,
@@ -2570,8 +2663,6 @@ class DatasetCatalog:
             review_required=filters.get("review_required"),
             auxiliary_kind=filters.get("auxiliary_kind"),
         )
-        base = where[6:] if where.startswith("WHERE ") else ""
-        prefix = f"({base}) AND " if base else ""
         earlier = "(collection<? OR (collection=? AND (category<? OR (category=? AND uid<?))))"
         later = "(collection>? OR (collection=? AND (category>? OR (category=? AND uid>?))))"
         order_values = [
@@ -2582,21 +2673,25 @@ class DatasetCatalog:
             row["uid"],
         ]
         with self._connect() as db:
+            where = self._with_ai_filter(db, where, filters.get("ai_status"))
+            items_source = self._query_items(filters.get("ai_status"))
+            base = where[6:] if where.startswith("WHERE ") else ""
+            prefix = f"({base}) AND " if base else ""
             previous = db.execute(
-                f"""SELECT collection,uid FROM items WHERE {prefix}{earlier}
+                f"""SELECT collection,uid FROM {items_source} WHERE {prefix}{earlier}
                     ORDER BY collection DESC,category DESC,uid DESC LIMIT 1""",
                 [*params, *order_values],
             ).fetchone()
             next_row = db.execute(
-                f"""SELECT collection,uid FROM items WHERE {prefix}{later}
+                f"""SELECT collection,uid FROM {items_source} WHERE {prefix}{later}
                     ORDER BY collection,category,uid LIMIT 1""",
                 [*params, *order_values],
             ).fetchone()
             total = db.execute(
-                f"SELECT COUNT(*) FROM items {where}", params
+                f"SELECT COUNT(*) FROM {items_source} {where}", params
             ).fetchone()[0]
             before = db.execute(
-                f"SELECT COUNT(*) FROM items WHERE {prefix}{earlier}",
+                f"SELECT COUNT(*) FROM {items_source} WHERE {prefix}{earlier}",
                 [*params, *order_values],
             ).fetchone()[0]
         return {

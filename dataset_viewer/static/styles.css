@@ -2046,6 +2046,16 @@ td:nth-child(3) {
 .detail-text-pane { display: contents; }
 .review-context-details > summary { display: none; }
 .dialogue-section > .detail-section-heading { flex-wrap: wrap; }
+.ai-suggestion { grid-column: 1 / -1; border: 1px solid #c99026; border-radius: var(--radius); padding: 10px 12px; background: #fff8e8; color: #49340e; }
+.ai-suggestion > summary { cursor: pointer; font-weight: 700; }
+.ai-suggestion-concerns { grid-column: 1 / -1; border-left: 3px solid var(--warning); padding-left: 10px; }
+.ai-suggestion-concerns p { margin: 4px 0; overflow-wrap: anywhere; }
+.ai-suggestion p { white-space: pre-wrap; overflow-wrap: anywhere; }
+.ai-suggestion-turn { border-top: 1px solid #dfc795; margin-top: 10px; padding-top: 8px; }
+.ai-suggestion-before { color: #765a40; }
+.ai-suggestion-after { color: #204c39; }
+.ai-suggestion-reason { font-size: 12px; }
+.message-ai-label { color: #8b5d11; margin-left: 8px; font-size: 11px; }
 .dialogue-heading-actions { margin: 0; flex: 1 0 100%; }
 .media-section { border: 1px solid var(--line); border-radius: var(--radius); background: var(--panel); }
 .media-section-heading { display: flex; align-items: center; gap: 10px; padding: 12px; cursor: pointer; list-style: none; }
