@@ -203,6 +203,26 @@ python3 -m ssvd.dialogue.preview_regeneration --uid "$PENDING_UID" > /tmp/jmv-ne
 
 人手比較は同じ 20 画像（元ラベルで OCR 14、カウント 6）で行う。確定できる画像で過度に「分からない」と答えていないか、曖昧な画像で断定していないか、追質問や言い回しが自然か、全文を承認するまでの修正時間を記録する。生成後の通常・片方・両方の内訳と各回答種別、保留件数も報告する。[少数試行 #12](https://github.com/Yoshiki0418/j-moshivis/issues/12)
 
+### 20画像で試行する
+
+リポジトリ直下で実行する。`prepare` は人手未確認の旧 Qwen 対話から抽出し、v3 の評価画像、固定の外部視覚評価・キャプション評価画像、試行内の画像と重複・類似する候補を除く。元の OCR／カウント分類や選定時の難しさは旧記録からの目印。元画像で実際に判別できる内容は各モデルが改めて観察し、人が確認する。
+
+```bash
+.venv-data/bin/python -m ssvd.dialogue.pilot prepare
+.venv-data/bin/python -m ssvd.dialogue.pilot status
+.venv-data/bin/python -m ssvd.dialogue.pilot review
+```
+
+`data/curation/gpt_pilot_issue12/` に固定した画像リスト、SQLite台帳、匿名比較用の `review.html` を保存する。抽出を再実行しても同じ台帳を使う。候補生成後は、両モデルの全文と既存Qwen対話を原画像・448px画像で比較できる。判定の書き出しは実験用で、正式な承認とTTSへの投入は既存の確認手順で行う。
+
+有料の `run` は同期 Responses API で20画像を両モデルに投入する。`OPENAI_API_KEY` または権限600のキーファイルを使う。既定のファイルは `~/.config/j-moshivis/openai_api_key`、別パスは `--api-key-file` で指定できる。
+
+```bash
+.venv-data/bin/python -m ssvd.dialogue.pilot run
+```
+
+この試行の生成予算は累計2米ドル。送信前に画像・履歴を含む入力トークン数を公式APIで調べ、推論を含む最大出力分まで予約する。実績額は返された使用量とStandardの公表単価で算出する。課金状態が不明のまま終了した場合は、台帳を保持したまま同じコマンドで再開する。その呼び出しの予約は保持し、当該画像・モデルは保留として残りの組を処理する。照会に必要な送信時刻と `X-Client-Request-Id` は台帳の `calls` にある。[トークン数の確認](https://developers.openai.com/api/docs/guides/token-counting)・[Lunaの単価](https://developers.openai.com/api/docs/models/gpt-6-luna)・[Terraの単価](https://developers.openai.com/api/docs/models/gpt-6.1-terra)
+
 ## テストの実行
 
 ```bash
