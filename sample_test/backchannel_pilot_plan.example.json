@@ -1,0 +1,35 @@
+{
+  "_template_note": "Synthetic schema example only. Replace paths, segment, timestamps, and SHA256 values with locally reviewed inputs before building.",
+  "text": "うん。",
+  "voice_path": "data/backchannel_assets/ack.flac",
+  "audible_delay": 0.4,
+  "gain": 1.0,
+  "samples": [
+    {
+      "title": "架空の対話を使った設定例",
+      "anchor_prefix": "この景色は落ち着きますね。",
+      "reason": "感想の区切りを聞いた後、ユーザーが話し続ける間に短く応じる。",
+      "source": {
+        "collection": "example_collection",
+        "uid": "example-001",
+        "speech_dialogue_path": "data/example-001/dialogue.json",
+        "audio_path": "data/example-001/stereo_dialogue.wav",
+        "alignment_path": "data/example-001/assistant_dialogue.refined.json",
+        "image_path": "data/example-001/image.jpg",
+        "segment_index": 0,
+        "segment": {
+          "speaker": "USER",
+          "text": "この景色は落ち着きますね。ここでゆっくりと過ごしたいです。",
+          "start": 1.0,
+          "end": 9.0
+        }
+      },
+      "source_sha256": {
+        "audio_path": "REPLACE_WITH_SHA256",
+        "alignment_path": "REPLACE_WITH_SHA256",
+        "speech_dialogue_path": "REPLACE_WITH_SHA256",
+        "image_path": "REPLACE_WITH_SHA256"
+      }
+    }
+  ]
+}
