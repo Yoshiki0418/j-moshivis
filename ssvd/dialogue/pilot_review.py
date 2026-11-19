@@ -10,7 +10,7 @@ from tempfile import NamedTemporaryFile
 from PIL import Image
 
 from ssvd.dialogue.preview_regeneration import _load_source
-from ssvd.review_store import content_fingerprint
+from ssvd.review_store import DEFAULT_REVIEW_EVENTS, content_fingerprint
 
 _MODELS = ("gpt-6-luna", "gpt-6.1-terra")
 _HEADER = """<!doctype html><html lang="ja"><meta charset="utf-8">
@@ -95,6 +95,8 @@ def _dialogue(record, sample_id, side):
 
 def write_review(root: Path, run_dir: Path, manifest: dict, outcomes: dict) -> Path:
     """Refresh the offline sheet from current untouched sources; never update formal reviews."""
+    if not (root / DEFAULT_REVIEW_EVENTS).is_file():
+        raise RuntimeError("Human decision history is unavailable")
     samples = manifest["samples"]
     uids = [sample["uid"] for sample in samples]
     if len(set(uids)) != len(uids):

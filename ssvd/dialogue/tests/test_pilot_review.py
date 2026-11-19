@@ -12,7 +12,7 @@ from unittest.mock import patch
 from PIL import Image
 
 from ssvd.dialogue.pilot_review import write_review
-from ssvd.review_store import review_metadata
+from ssvd.review_store import DEFAULT_REVIEW_EVENTS, review_metadata
 
 
 class PilotReviewTests(unittest.TestCase):
@@ -20,6 +20,9 @@ class PilotReviewTests(unittest.TestCase):
         directory = tempfile.TemporaryDirectory()
         self.addCleanup(directory.cleanup)
         self.root = Path(directory.name)
+        events = self.root / DEFAULT_REVIEW_EVENTS
+        events.parent.mkdir(parents=True)
+        events.touch()
         self.run = self.root / "pilot"
         with BytesIO() as picture:
             Image.new("RGB", (34, 20), "green").save(picture, "PNG")
@@ -74,6 +77,12 @@ class PilotReviewTests(unittest.TestCase):
         encoded = re.search(r'<img [^>]*src="data:image/png;base64,([^"]+)', html).group(1)
         with Image.open(BytesIO(base64.b64decode(encoded))) as resized:
             self.assertEqual(resized.size, (448, 448))
+
+    def test_missing_decision_history_stops_export(self):
+        (self.root / DEFAULT_REVIEW_EVENTS).unlink()
+        with self.assertRaisesRegex(RuntimeError, "decision history"):
+            self.render()
+        self.assertFalse((self.run / "review.html").exists())
 
     def test_stale_or_protected_sources_removed_on_refresh(self):
         self.render()
