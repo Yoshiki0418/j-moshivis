@@ -84,7 +84,7 @@ def _review_task(task, pair):
     return result
 
 
-def preview(root, uid, *, model="gpt-6-luna", pairs=None, transcript=None):
+def preview(root, uid, *, model="gpt-6-luna", pairs=None, transcript=None, recovery=False):
     """Replay decoded replies bound to the same image, review revision and settings."""
     if pairs is not None and (type(pairs) is not int or pairs not in PAIR_COUNTS):
         raise ValueError("Japanese Daily candidates use 4 to 8 question-answer pairs")
@@ -99,7 +99,7 @@ def preview(root, uid, *, model="gpt-6-luna", pairs=None, transcript=None):
         replies = transcript.get("replies")
         if not isinstance(replies, list):
             raise ValueError("Expected a list of decoded JSON replies")
-    step = next_step(uid, kind, image, replies, model=model, pairs=pairs)
+    step = next_step(uid, kind, image, replies, model=model, pairs=pairs, recovery=recovery)
     if step["status"] != "pending_review":
         return {"identity": identity, **step}
 
@@ -127,10 +127,12 @@ def main():
     parser.add_argument("--model", default="gpt-6-luna")
     parser.add_argument("--pairs", type=int, choices=PAIR_COUNTS)
     parser.add_argument("--transcript", type=Path, help="JSON with identity and ordered decoded replies")
+    parser.add_argument("--recovery", action="store_true", help="Apply the follow-up pilot replay checks")
     args = parser.parse_args()
     try:
         transcript = json.loads(args.transcript.read_text(encoding="utf-8")) if args.transcript else None
-        result = preview(ROOT, args.uid, model=args.model, pairs=args.pairs, transcript=transcript)
+        result = preview(ROOT, args.uid, model=args.model, pairs=args.pairs,
+                         transcript=transcript, recovery=args.recovery)
     except (ValueError, OSError, sqlite3.Error) as error:
         parser.exit(1, f"{error}\n")
     print(json.dumps(result, ensure_ascii=False))

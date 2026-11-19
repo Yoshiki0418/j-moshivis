@@ -111,9 +111,12 @@ def status(run_dir):
         db.execute("BEGIN")
         manifest = load_manifest(db)
         outcomes = read_outcomes(db)
-        settled, actual, uncertain, reserved = db.execute("""
+        has_phase = any(col[1] == "phase" for col in db.execute("PRAGMA table_info(calls)"))
+        initial = "phase='initial'" if has_phase else "1"
+        settled, actual, uncertain, reserved = db.execute(f"""
             SELECT count(charged), COALESCE(sum(charged),0), count(*)-count(charged),
                    COALESCE(sum(CASE WHEN charged IS NULL THEN reserved END),0) FROM calls
+            WHERE {initial}
         """).fetchone()
         comparison = {}
         for model in MODELS:
@@ -124,7 +127,8 @@ def status(run_dir):
                     tasks = outcome["grounding"]["tasks"]
                     task_mix["+".join(sorted(t["kind"] for t in tasks)) or "none"] += 1
                     modes.update(f"{t['kind']}/{t['mode']}" for t in tasks)
-            receipts = db.execute("SELECT charged,receipt FROM calls WHERE model=? AND charged IS NOT NULL", (model,))
+            receipts = db.execute(f"SELECT charged,receipt FROM calls WHERE model=? AND charged IS NOT NULL AND {initial}",
+                                  (model,))
             tokens = Counter()
             cost = 0
             for charge, payload in receipts:
@@ -140,29 +144,44 @@ def status(run_dir):
                 unresolved_reserve_usd=reserved/NANOS, budget_usd=float(BUDGET_USD))
 
 
-def generate_one(root, db, sample, model, api):
+def generate_one(root, db, sample, model, api, *, recovery=False):
     uid = sample["uid"]
     store = ReviewStore(root / DEFAULT_REVIEW_EVENTS)
     identity = {key: sample[key] for key in ("uid", "kind", "pairs", "base_fingerprint", "image_sha256")}
     identity.update(collection=COLLECTION, model=model, prompt_version=PROMPT_VERSION)
     replies = []
+    existing = 0
+    if recovery:
+        existing, last = db.execute("SELECT count(*),max(step) FROM calls WHERE uid=? AND model=?",
+                                    (uid, model)).fetchone()
+        if not existing:
+            raise RuntimeError("Recovery requires the retained initial image observation")
+        if last != existing - 1:
+            raise RuntimeError("Stored pilot transcript has missing steps")
     while True:
         if not Path(store.path).is_file():
             raise RuntimeError("Human decision history is unavailable")
         try:
             stage = preview(root, uid, model=model, pairs=sample["pairs"],
-                            transcript={"identity": identity, "replies": replies})
+                            transcript={"identity": identity, "replies": replies},
+                            **({"recovery": True} if recovery else {}))
         except (ValueError, FileNotFoundError) as exc:
             # preview also validates the source and the immutable transcript identity.
             return {"status": "protected", "reason": str(exc)}
         if stage["status"] != "request":
+            if recovery and len(replies) < existing:
+                raise RuntimeError("Recovery stopped before consuming the stored pilot transcript")
             return stage
         body = api.prepare(stage["request"])
         request_hash = hashlib.sha256(encode(body).encode()).hexdigest()
         key = (uid, model, len(replies))
         saved = db.execute("SELECT request_hash,reply FROM calls WHERE uid=? AND model=? AND step=?", key).fetchone()
         if saved:
-            if saved[0] != request_hash or saved[1] is None:
+            matched = saved[0] == request_hash
+            if recovery and not matched:
+                from ssvd.dialogue.pilot_replay_hash import matches_saved_request
+                matched = matches_saved_request(body, saved[0])
+            if not matched or saved[1] is None:
                 raise RuntimeError("Unresolved or changed request. Reconcile the original call before continuing.")
             replies.append(json.loads(saved[1]))
             continue
@@ -180,6 +199,8 @@ def generate_one(root, db, sample, model, api):
         with db:
             db.execute("INSERT INTO calls(uid,model,step,request_hash,client_id,reserved) VALUES(?,?,?,?,?,?)",
                        (*key, request_hash, client_id, reserve))
+            if recovery:
+                db.execute("UPDATE calls SET phase='recovery' WHERE uid=? AND model=? AND step=?", key)
         try:
             reply, receipt = api.generate(body, request_id=client_id)
         except PilotRequestRejected:
@@ -193,7 +214,8 @@ def generate_one(root, db, sample, model, api):
                        (encode(reply), encode(receipt), charge, *key))
         if charge > reserve:
             raise RuntimeError("Reported cost exceeded the reservation. Check pricing before continuing.")
-        replies.append(reply)
+        # Recovery appends the same JSON representation it will read on resumption.
+        replies.append(json.loads(encode(reply)) if recovery else reply)
 
 
 def run_pilot(root, run_dir, api):
@@ -225,27 +247,40 @@ def run_pilot(root, run_dir, api):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     commands = parser.add_subparsers(dest="command", required=True)
-    for name in ("prepare", "status", "review"):
+    for name in ("prepare", "status", "review", "recovery-status", "recovery-review"):
         commands.add_parser(name)
-    run = commands.add_parser("run")
-    run.add_argument("--api-key-file", type=Path, help="Private file containing only the project API key")
+    for name in ("run", "recover"):
+        commands.add_parser(name).add_argument("--api-key-file", type=Path,
+                                               help="Private file containing only the project API key")
     args = parser.parse_args()
     os.umask(0o077)
     try:
         if args.command == "prepare":
             prepare(ROOT, RUN_DIR)
-        elif args.command == "run":
+        elif args.command in ("run", "recover"):
             key_file = args.api_key_file or (Path.home() / ".config/j-moshivis/openai_api_key")
             key = key_file.read_text(encoding="utf-8").strip() if args.api_key_file else os.environ.get("OPENAI_API_KEY", "").strip()
             if not key and key_file.is_file():
                 key = key_file.read_text(encoding="utf-8").strip()
             if not key:
                 raise RuntimeError("Set OPENAI_API_KEY or supply --api-key-file for the credited project")
-            run_pilot(ROOT, RUN_DIR, OpenAIPilotAPI(key))
+            if args.command == "run":
+                run_pilot(ROOT, RUN_DIR, OpenAIPilotAPI(key))
+            else:
+                from ssvd.dialogue.pilot_recovery import recover
+                recover(ROOT, RUN_DIR, OpenAIPilotAPI(key))
         elif args.command == "review":
             with operation(RUN_DIR), closing(open_db(RUN_DIR)) as db:
                 print(write_review(ROOT, RUN_DIR, load_manifest(db), read_outcomes(db)))
-        print(json.dumps(status(RUN_DIR), ensure_ascii=False, indent=2))
+        elif args.command == "recovery-review":
+            from ssvd.dialogue.pilot_recovery import recovery_review
+            print(recovery_review(ROOT, RUN_DIR))
+        if args.command in ("recover", "recovery-status", "recovery-review"):
+            from ssvd.dialogue.pilot_recovery import recovery_status
+            report = recovery_status(RUN_DIR)
+        else:
+            report = status(RUN_DIR)
+        print(json.dumps(report, ensure_ascii=False, indent=2))
     except (OSError, ValueError, RuntimeError, sqlite3.Error) as exc:
         print(str(exc), file=sys.stderr)
         return 1

@@ -36,7 +36,54 @@ def _normalized(text: str) -> str:
 _KATAKANA_TO_HIRAGANA = str.maketrans({ch: ch - 96 for ch in range(ord("ァ"), ord("ヶ") + 1)})
 
 
-def mentions_target(target: str, text: str) -> bool:
+_COLOR = r"ピンク|オレンジ|黄色|緑|赤|青|黒|白|茶|紫"
+_MODIFIER = rf"{_COLOR}|縦長|横長|大き|小さ|丸|中央|正面|上部|手前"
+_PARTICLE = r"に書かれた|にある|にいる|に見える|をした|の"
+_OCR_ATTRIBUTE = r"の(?:大きな)?(?:店名|駅名|題名|タイトル|税込価格|漢字|刻字)$"
+_NEGATIVE_MENTION = re.compile(r"^(?:とは|では|じゃ)(?:違|なく|ない|ありません)|^(?:は|が)(?:見えない|見えません|ない|ありません)")
+
+
+def _noun_form(text):
+    text = re.sub(rf"({_COLOR})(?:色|い|く)", r"\1", text)
+    text = re.sub(r"(大き|小さ|丸)[ないく]", r"\1", text)
+    text = re.sub(r"縦(?=看板)", "縦長", text)
+    return re.sub(r"上の(?:方|ほう)", "上部", text)
+
+
+def _target_parts(name):
+    # Preserve every noun and modifier. Split a few productive compounds so
+    # 「料金所上」 can match 「料金所の上」 and 「縦長看板」 can match 「縦長の看板」.
+    name = re.sub(r"([一-龯])上(?=の|$)", r"\1の上", name)
+    name = re.sub(r"([一-龯])(?=ポスター)", r"\1の", name)
+    target = re.split(rf"({_MODIFIER})|(?:{_PARTICLE})", _noun_form(name))
+    return [word for word in target if word]
+
+
+def _mentions_phrase(name, material, for_ocr):
+    if for_ocr:
+        # Introducing the sign suffices before asking for its name or price.
+        # Keep selectors attached to the sign itself (colour, shape, position).
+        name = re.sub(_OCR_ATTRIBUTE, "", name)
+    parts = _target_parts(name)
+    if not parts:
+        return False
+    # No cross-sentence or arbitrary-word match: e.g. a red car beside a blue
+    # sign does not establish a red sign. Allow grammatical particles and
+    # extra visual modifiers between consecutive anchors in the same phrase.
+    extra = r"の|に|は|を|が|ある|した|書かれた|光る|な|く|、|,|色"
+    modifiers = _MODIFIER
+    if any(re.fullmatch(_COLOR, part) for part in parts):
+        modifiers = r"縦長|横長|大き|小さ|丸|中央|正面|上部|手前"
+    gap = rf"(?:(?:{extra}|{modifiers})){{0,6}}"
+    pattern = gap.join(re.escape(word) for word in parts)
+    material = _noun_form(material)
+    for hit in re.finditer(pattern, material):
+        if not _NEGATIVE_MENTION.match(material[hit.end():]):
+            return True
+    return False
+
+
+def mentions_target(target: str, text: str, *, allow_paraphrase=False, for_ocr=False) -> bool:
     """Allow location and colour modifiers to occur in a different order."""
     name = re.sub(r"^(?:画面|写真|画像)(?:内)?の?", "", _normalized(target))
     material = _normalized(text)
@@ -44,6 +91,8 @@ def mentions_target(target: str, text: str) -> bool:
         return False
     if name.endswith("車") and not name.endswith(("自転車", "電車", "列車", "駐車", "客車")):
         material = re.sub(r"自転車|電車|列車|駐車場|駐車中", "", material)
+    if allow_paraphrase:
+        return _mentions_phrase(name, material, for_ocr)
     if name in material:
         return True
     parts = [piece for piece in re.split(r"にある|に見える|にいる|の|(?<=[赤青白黒色丸長]い)(?=.)", name) if piece]
@@ -210,12 +259,41 @@ def _quantities(text: str) -> list[int]:
     return values
 
 
-def _count_problem(task, question, answer, previous_assistant):
+def _short_count_reference(target, previous, question, answer):
+    """Resolve '看板はいくつ？' to the one qualified sign in the preceding turn."""
+    parts = _target_parts(_normalized(target))
+    if len(parts) < 2 or not mentions_target(target, previous, allow_paraphrase=True):
+        return False
+    head = parts[-1]
+    if previous.count(head) != 1:
+        return False
+    if not re.fullmatch(rf"(?:じゃあ[、,]?)?(?:その|あの)?{re.escape(head)}[はが、,]*"
+                        rf"(?:全部で|合わせて)?(?:いくつ|(?:何|なん)(?:{_COUNTER}))"
+                        r"(?:ある|あります|見え(?:る|ます)|います|いる)?(?:んです|です)?(?:か|かな|の)?[?？。]*",
+                        question):
+        return False
+    prefix, named, quantity = answer.partition(head)
+    # An explicitly different subset in the answer must not inherit the count.
+    allowed = "|".join(map(re.escape, sorted(parts[:-1], key=len, reverse=True)))
+    if named and not re.fullmatch(rf"(?:{allowed}|その|あの|に|は|の|な|、|,)*", _noun_form(prefix)):
+        return False
+    # The named object must itself be counted. Possessives (看板の写真が…)
+    # and another subject (看板の横に犬が…) cannot intervene before the quantity.
+    number = rf"{_NUMBER}(?:{_COUNTER})"
+    subject = r"(?:は|が|なら)?[、,]?" if named else ""
+    return bool(re.fullmatch(subject + rf"(?:全部で|合計で|少なくとも|約)?{number}"
+                             r"(?:くらい|ぐらい|ほど|以上)?(?:は|が)?"
+                             r"(?:見えます|見える|ある|あります|いる|います|だよ|です|だね)?"
+                             r"(?:よ|ね|かな)?[。!！]?", quantity if named else answer))
+
+
+def _count_problem(task, question, answer, previous_assistant, *, allow_paraphrase=False):
     if not (_QUESTION_UNIT.search(question) or _COUNT_QUESTION.search(question) or "数は" in question):
         return "question_does_not_ask_count"
     target = task["target"]
-    points_back = mentions_target(target, previous_assistant) and _COUNT_REFERENCE.search(question)
-    if not points_back and not (mentions_target(target, question) or mentions_target(target, answer)):
+    points_back = mentions_target(target, previous_assistant, allow_paraphrase=allow_paraphrase) and _COUNT_REFERENCE.search(question)
+    present = any(mentions_target(target, turn, allow_paraphrase=allow_paraphrase) for turn in (question, answer))
+    if not present and not points_back and not (allow_paraphrase and _short_count_reference(target, previous_assistant, question, answer)):
         return "count_target_missing_from_exchange"
     mode = task["mode"]
     if mode == "unknown":
@@ -253,7 +331,32 @@ def _count_problem(task, question, answer, previous_assistant):
     return None
 
 
-def _ocr_problem(task, question, answer):
+_ROMAJI = {}
+for _kana, _latin in (
+    ("あいうえお", "a i u e o"), ("かきくけこ", "ka ki ku ke ko"), ("がぎぐげご", "ga gi gu ge go"),
+    ("さしすせそ", "sa shi su se so"), ("ざじずぜぞ", "za ji zu ze zo"), ("たちつてと", "ta chi tsu te to"),
+    ("だぢづでど", "da ji zu de do"), ("なにぬねの", "na ni nu ne no"), ("はひふへほ", "ha hi fu he ho"),
+    ("ばびぶべぼ", "ba bi bu be bo"), ("ぱぴぷぺぽ", "pa pi pu pe po"), ("まみむめも", "ma mi mu me mo"),
+    ("やゆよ", "ya yu yo"), ("らりるれろ", "ra ri ru re ro"), ("わをん", "wa wo n"),
+):
+    _ROMAJI.update(zip(_kana, _latin.split()))
+
+
+def _bilingual_form(written, reading):
+    """Keep the Japanese half of a sign when the Latin half spells the supplied kana.
+
+    Only allow a complete plain Hepburn word. Mixed labels, product codes and
+    translations with a different pronunciation still need the recorded reading.
+    """
+    parts = re.fullmatch(r"([一-龯々ぁ-ゖァ-ヺー]+)([A-Za-z]+)|([A-Za-z]+)([一-龯々ぁ-ゖァ-ヺー]+)", written)
+    if not parts or not all(ch in _ROMAJI for ch in reading):
+        return None
+    japanese, latin = (parts[1], parts[2]) if parts[1] else (parts[4], parts[3])
+    romanized = "".join(_ROMAJI[ch] for ch in reading)
+    return japanese if latin.lower() == romanized else None
+
+
+def _ocr_problem(task, question, answer, *, allow_paraphrase=False):
     if not _OCR_QUESTION.search(question):
         return "question_does_not_ask_to_read"
     mode = task["mode"]
@@ -268,10 +371,17 @@ def _ocr_problem(task, question, answer):
     uses_reading = any(ch.isdecimal() or "LATIN" in unicodedata.name(ch, "") for ch in written)
     if uses_reading and re.search(r"[A-Za-z0-9]", answer):
         return "ocr_answer_needs_spoken_form"
-    if (uses_reading or written not in answer) and reading not in answer.translate(_KATAKANA_TO_HIRAGANA):
+    japanese = None
+    if allow_paraphrase and mode == "exact" and uses_reading:
+        surface = _bilingual_form(written, reading)
+        # Bind to the whole quoted string so a coincidental kanji substring
+        # (e.g. a station name followed by an invented suffix) cannot pass.
+        if surface and surface in _QUOTED.findall(answer):
+            japanese = surface
+    if not japanese and (uses_reading or written not in answer) and reading not in answer.translate(_KATAKANA_TO_HIRAGANA):
         return "ocr_answer_reading_mismatch"
     for quote in _QUOTED.findall(answer):
-        if quote != written and quote.translate(_KATAKANA_TO_HIRAGANA) != reading:
+        if quote != japanese and quote != written and quote.translate(_KATAKANA_TO_HIRAGANA) != reading:
             return "ocr_answer_contains_unsupported_text"
     if mode == "partial":
         # Guard a positive, unquoted transcription that extends a recorded fragment.
@@ -290,7 +400,8 @@ def _ocr_problem(task, question, answer):
     return None
 
 
-def task_problem(kind: str, evidence: dict, question: str, answer: str, previous_assistant: str = "") -> str | None:
+def task_problem(kind: str, evidence: dict, question: str, answer: str, previous_assistant: str = "",
+                 *, allow_paraphrase=False) -> str | None:
     """Check simple spoken/evidence contradictions; the reviewer verifies the image."""
     problem = _evidence_problem(kind, evidence)
     if problem:
@@ -299,5 +410,5 @@ def task_problem(kind: str, evidence: dict, question: str, answer: str, previous
         return "missing_task_exchange"
     q, a = _normalized(question), _normalized(answer)
     if kind == "counting":
-        return _count_problem(evidence, q, a, previous_assistant)
-    return _ocr_problem(evidence, q, a)
+        return _count_problem(evidence, q, a, previous_assistant, allow_paraphrase=allow_paraphrase)
+    return _ocr_problem(evidence, q, a, allow_paraphrase=allow_paraphrase)

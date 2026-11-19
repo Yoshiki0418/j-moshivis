@@ -106,6 +106,7 @@ def write_review(root: Path, run_dir: Path, manifest: dict, outcomes: dict) -> P
     order = sorted(uids, key=lambda uid: sha256(("pilot-ab-v1/" + uid).encode()).digest())
     sides = {uid: (_MODELS if index % 2 == 0 else _MODELS[::-1]) for index, uid in enumerate(order)}
     articles = []
+    comparable = []
     mapping = {}
     for sample in samples:
         uid = sample["uid"]
@@ -140,7 +141,10 @@ def write_review(root: Path, run_dir: Path, manifest: dict, outcomes: dict) -> P
                 body = f'<p>{label}</p>'
             candidates.append(f'<section><h3>候補 {side}</h3>{body}</section>')
         mapping[sample_id] = row
-        articles.append(f'<article><h2>画像 {len(articles) + 1}</h2>{_images(image)}'
+        number = len(articles) + 1
+        if all(item["status"] == "pending_review" for item in row["models"].values()):
+            comparable.append(f'<a href="#img-{number}">画像 {number}</a>')
+        articles.append(f'<article id="img-{number}"><h2>画像 {number}</h2>{_images(image)}'
                         f'<div class="columns">{"".join(candidates)}</div>'
                         '<details><summary>既存のQwen対話と比較</summary>'
                         f'{_dialogue(source, sample_id, "Qwen")}</details></article>')
@@ -149,5 +153,7 @@ def write_review(root: Path, run_dir: Path, manifest: dict, outcomes: dict) -> P
     _private_write(run_dir / "blind_key.json", json.dumps(mapping, ensure_ascii=False, indent=2))
     path = run_dir / "review.html"
     count = f'<p>現在の確認対象 {len(articles)} / 抽出時 {len(samples)} 画像</p>'
-    _private_write(path, _HEADER + count + "".join(articles) + _SCRIPT)
+    links = "　".join(comparable)
+    paired = f'<nav aria-label="全文を比較できる画像">両候補の全文が揃った画像 {len(comparable)} 枚　{links}</nav>'
+    _private_write(path, _HEADER + count + paired + "".join(articles) + _SCRIPT)
     return path
