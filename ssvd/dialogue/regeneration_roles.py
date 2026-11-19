@@ -4,6 +4,8 @@ import hashlib
 from itertools import combinations
 import json
 import random
+import re
+import unicodedata
 
 from .regeneration_grounding import (
     contains_grounded_answer,
@@ -123,7 +125,67 @@ def _place_tasks(tasks, pairs, rng):
     return {position: task for position, task in zip(rng.choice(choices), tasks)}
 
 
-def _utterance_problem(role, pair, utterance, dialogue, scheduled):
+_REGIONS = (
+    ("入口", "出口"), ("左側", "中央", "右側"), ("左端", "中央", "右端"),
+    ("上段", "中段", "下段"), ("前列", "後列"),
+)
+_VENUE_SIGN = re.compile(r"(赤|青|緑|黄|黒|白)(?:い|色の)(飲食店|スーパー|コンビニ|薬局)の(看板.*)")
+
+
+def _distinct_targets(left, right):
+    """Require positive evidence of separate referents, not just different descriptions."""
+    names = ["".join(unicodedata.normalize("NFKC", t).split()).replace("入り口", "入口")
+             for t in (left, right)]
+    if any(re.search(r"同じ|共通|兼用|以外|ではな|じゃな", name) for name in names):
+        return False
+    for regions in _REGIONS:
+        pattern = "(?:" + "|".join(regions) + ")(?=の|に|$)"
+        matches = [list(re.finditer(pattern, name)) for name in names]
+        if len(matches[0]) == len(matches[1]) == 1:
+            a, b = (found[0] for found in matches)
+            # Compare both the object and the relationship to the location.
+            # e.g. 左側にある看板 vs 右側にある看板, not 左側にある看板 vs 右側を向いた文字.
+            if (a[0] != b[0] and names[0][:a.start()] == names[1][:b.start()]
+                    and names[0][a.end():] == names[1][b.end():]):
+                return True
+    # Two signs of the same type described by BOTH different venues and colours.
+    a, b = (_VENUE_SIGN.fullmatch(name) for name in names)
+    return bool(a and b and a[1] != b[1] and a[2] != b[2] and a[3] == b[3])
+
+
+def _recover_observation(kind, observation):
+    """Repair formatting only on an observation the original replay already rejected."""
+    if not isinstance(observation, dict) or observation.get("status") != "ok":
+        return observation
+    tasks = observation.get("tasks")
+    if not isinstance(tasks, list) or not 1 <= len(tasks) <= 2:
+        return observation
+    cleaned = []
+    for task in tasks:
+        if not isinstance(task, dict):
+            return observation
+        if task.get("kind") == "ocr" and isinstance(task.get("reading"), str) and isinstance(task.get("written"), str):
+            # Preserve the pause separating written lines and the exact displayed text.
+            # A slash only present in the pronunciation may denote competing readings.
+            readings = task["reading"].replace("／", "/").split("/")
+            written = task["written"].replace("／", "/").split("/")
+            if len(readings) > 1 and len(readings) == len(written) and all(s.strip() for s in [*written, *readings]):
+                task = {**task, "reading": "、".join(readings)}
+        if grounding_problem(kind, {**observation, "tasks": [task]}):
+            return observation
+        cleaned.append(task)
+    if len(cleaned) == 2 and cleaned[0]["kind"] == cleaned[1]["kind"]:
+        first, second = cleaned
+        if not _distinct_targets(first["target"], second["target"]):
+            return observation
+        if any(contains_grounded_answer(t["kind"], t, other["target"])
+               for t, other in ((first, second), (second, first))):
+            return observation
+        cleaned = [first]
+    return {**observation, "tasks": cleaned}
+
+
+def _utterance_problem(role, pair, utterance, dialogue, scheduled, recovery):
     active = scheduled.get(pair)
     for position, task in scheduled.items():
         before_answer = pair < position or (pair == position and role == "user")
@@ -134,11 +196,17 @@ def _utterance_problem(role, pair, utterance, dialogue, scheduled):
         if explicit_question_kinds(utterance) - allowed:
             return "unrecorded_visual_task_question"
     elif active:
-        return task_problem(active["kind"], active, dialogue[-1]["text"], utterance,
-                            previous_assistant=dialogue[-2]["text"])
+        arguments = (active["kind"], active, dialogue[-1]["text"], utterance, dialogue[-2]["text"])
+        problem = task_problem(*arguments)
+        if problem and recovery:
+            return task_problem(*arguments, allow_paraphrase=True)
+        return problem
     else:
         upcoming = scheduled.get(pair + 1)
         if upcoming and not mentions_target(upcoming["target"], utterance):
+            if recovery and mentions_target(upcoming["target"], utterance, allow_paraphrase=True,
+                                            for_ocr=upcoming["kind"] == "ocr"):
+                return None
             return "target_not_introduced_before_question"
     return None
 
@@ -151,6 +219,7 @@ def next_step(
     *,
     model: str = "gpt-6-luna",
     pairs: int | None = None,
+    recovery: bool = False,
 ) -> dict:
     """Replay decoded replies for one image. Only the observation step receives pixels."""
     if not isinstance(uid, str) or not uid.strip():
@@ -182,6 +251,9 @@ def next_step(
 
     observation = replies[0]
     problem = grounding_problem(kind, observation)
+    if recovery and problem in {"invalid_or_duplicate_task", "ocr_needs_spoken_kana_reading"}:
+        observation = _recover_observation(kind, observation)
+        problem = grounding_problem(kind, observation)
     if problem:
         return _hold(kind, pairs, {}, problem, 1, total)
     scheduled = _place_tasks(observation["tasks"], pairs, rng)
@@ -192,7 +264,7 @@ def next_step(
         utterance = reply.get("text") if isinstance(reply, dict) else None
         if not isinstance(utterance, str) or not utterance.strip() or set(reply) != {"text"}:
             return _hold(kind, pairs, positions, f"invalid {role} utterance", index + 2, total)
-        problem = _utterance_problem(role, index // 2 + 1, utterance, dialogue, scheduled)
+        problem = _utterance_problem(role, index // 2 + 1, utterance, dialogue, scheduled, recovery)
         if problem:
             return _hold(kind, pairs, positions, problem, index + 2, total)
         dialogue.append({"role": role, "text": utterance.strip()})

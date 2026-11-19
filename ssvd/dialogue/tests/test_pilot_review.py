@@ -67,6 +67,8 @@ class PilotReviewTests(unittest.TestCase):
     def test_blinded_balanced_stable_offline(self):
         html, key = self.render()
         self.assertEqual(len(key), 6)
+        self.assertEqual(html.count('<a href="#img-'), 6)
+        self.assertIn('id="img-6"', html)
         self.assertEqual(sum(r["models"]["A"]["model"] == self.models[0] for r in key.values()), 3)
         self.samples.reverse()
         self.assertEqual(self.render()[1], key)
@@ -96,6 +98,7 @@ class PilotReviewTests(unittest.TestCase):
         del self.outcomes[self.samples[5]["uid"], self.models[0]]
         html, key = self.render()
         self.assertEqual(len(key), 2)
+        self.assertNotIn('<a href="#img-', html)
         self.assertIn("保留", html)
         self.assertIn("照合エラー", html)
         self.assertIn("未生成", html)

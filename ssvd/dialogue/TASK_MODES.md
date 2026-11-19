@@ -223,6 +223,18 @@ python3 -m ssvd.dialogue.preview_regeneration --uid "$PENDING_UID" > /tmp/jmv-ne
 
 この試行の生成予算は累計2米ドル。送信前に画像・履歴を含む入力トークン数を公式APIで調べ、推論を含む最大出力分まで予約する。実績額は返された使用量とStandardの公表単価で算出する。課金状態が不明のまま終了した場合は、台帳を保持したまま同じコマンドで再開する。その呼び出しの予約は保持し、当該画像・モデルは保留として残りの組を処理する。照会に必要な送信時刻と `X-Client-Request-Id` は台帳の `calls` にある。[トークン数の確認](https://developers.openai.com/api/docs/guides/token-counting)・[Lunaの単価](https://developers.openai.com/api/docs/models/gpt-6-luna)・[Terraの単価](https://developers.openai.com/api/docs/models/gpt-6.1-terra)
 
+### 保留を再検査して、未生成の発話を補う
+
+初回40件の結果を確定してから、同じ20枚・同じモデルの応答を台帳から再生する。`recover` は、例えば直前の返答で「白い看板」を紹介し、次の質問で「その看板」と呼んだ場合などに、自然な言い換えや省略を再検査する。画像観察に同じ種類の独立した課題が二つあり、それぞれ単独で検査を通る場合は、先頭の課題を会話に使う。元の観察と応答は初回の台帳に残る。
+
+```bash
+.venv-data/bin/python -m ssvd.dialogue.pilot recover --api-key-file /path/to/private-key
+.venv-data/bin/python -m ssvd.dialogue.pilot recovery-status
+.venv-data/bin/python -m ssvd.dialogue.pilot recovery-review
+```
+
+追加比較は、既に受け取った各発話のリクエスト指紋を照合してから、次の未生成の発話を要求する。初回に全文が揃った候補は引き継ぐ。対応する根拠が取れないものは保留が続く。推定費用の上限は初回と共通の2米ドルで、人手確認と採用の条件も共通。`review.html` は初回、`recovery/review.html` は追加比較で作成した匿名の確認画面。各ページでは両モデルの全文が揃った画像に直接移動できる。
+
 ## テストの実行
 
 ```bash
