@@ -1,0 +1,71 @@
+name: "作業・実験（リポジトリ変更なし）"
+description: "人手承認、データ生成、評価実験などの実行と結果を管理します。"
+title: "chore: "
+labels:
+  - "type:operation"
+  - "status:todo"
+body:
+  - type: markdown
+    attributes:
+      value: |
+        タイトルは `chore: 日本語タイトル` を基本とします。研究実験は `chore`、テストコードの変更は `test` です。
+        **リポジトリ変更がなければブランチ・PRは不要です。** 空コミットや空PRは作らず、実施結果と完了条件を確認してIssueを閉じます。
+        途中でコード・設定・文書の変更が必要になったら、関連する実装Issueを分けてください。実装PRのマージだけで、この作業Issueを閉じないでください。
+
+        **優先度の選択だけではラベルは付きません。** 作成者（人またはAI）が選択と一致する `priority:P0`〜`priority:P3` を1つだけ付けてください。
+        公開Issueにはデータ本文・画像・UID一覧・秘密情報を貼らず、集計と保存先を記録してください。
+        [共通の運用ルール](https://github.com/Yoshiki0418/j-moshivis/blob/main/CONTRIBUTING.md)
+  - type: textarea
+    id: purpose
+    attributes:
+      label: "背景・目的"
+      description: "何を行い、何を確かめたいかを記載してください。"
+    validations:
+      required: true
+  - type: textarea
+    id: scope
+    attributes:
+      label: "対象・作業範囲"
+      description: "対象データ、件数、抽出条件、実行する処理を記載してください。"
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: "完了条件"
+      description: "実行・確認・結果記録まで含めて、作業を終了する条件を記載してください。"
+      placeholder: "- [ ] 対象の処理が完了し、結果と残件理由を記録する"
+    validations:
+      required: true
+  - type: textarea
+    id: progress
+    attributes:
+      label: "件数・結果・保存先"
+      description: "作業中と完了時に更新してください。件数が適さない作業では該当なしと記載できます。"
+      placeholder: |
+        対象件数:
+        完了件数:
+        残件・失敗・保留の理由:
+        結果・確認方法:
+        成果物の保存先:
+  - type: dropdown
+    id: priority
+    attributes:
+      label: "優先度"
+      description: "対応するpriorityラベルを1つだけ付けてください。"
+      default: 2
+      options:
+        - "P0 — 即時対応が必要"
+        - "P1 — 次に進める／期限や依存がある"
+        - "P2 — 通常の優先度"
+        - "P3 — 将来候補・低い優先度"
+    validations:
+      required: true
+  - type: textarea
+    id: coordination
+    attributes:
+      label: "依存・期限・担当"
+      placeholder: |
+        依存・関連Issue: #
+        期限: 未設定
+        担当: 未定
