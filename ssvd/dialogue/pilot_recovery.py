@@ -37,9 +37,9 @@ def _outcomes(db):
 
 def recover(root, run_dir, api):
     store = ReviewStore(root / DEFAULT_REVIEW_EVENTS)
-    with pilot.shared_operation(run_dir) as (previous_manifest, previous_commitment), closing(pilot.open_db(run_dir)) as db:
+    with pilot.shared_operation(run_dir) as (predecessors, previous_commitment), closing(pilot.open_db(run_dir)) as db:
         manifest, initial = _initial(db)
-        pilot.check_predecessor(manifest, previous_manifest)
+        pilot.check_predecessors(manifest, predecessors)
         if not store.path.is_file():
             raise RuntimeError("Human decision history is unavailable")
         if db.execute("SELECT 1 FROM calls WHERE charged>reserved LIMIT 1").fetchone():

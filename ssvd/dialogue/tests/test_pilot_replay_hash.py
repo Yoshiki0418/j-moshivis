@@ -6,7 +6,7 @@ import unittest
 
 from ssvd.dialogue.pilot import encode
 from ssvd.dialogue.pilot_api import OpenAIPilotAPI
-from ssvd.dialogue.regeneration_roles import next_step
+from ssvd.dialogue.regeneration_roles_v3 import next_step
 
 
 def assistant_body(task, *, image="data:image/png;base64,AA==", greeting="どんな写真？"):

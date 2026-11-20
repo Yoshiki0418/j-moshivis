@@ -9,7 +9,7 @@ from urllib.error import HTTPError, URLError
 from urllib.request import HTTPRedirectHandler, Request, build_opener
 from uuid import UUID
 
-from ssvd.dialogue.regeneration_roles import GROUNDING_OUTPUT_LIMIT, UTTERANCE_OUTPUT_LIMIT
+from ssvd.dialogue.regeneration_roles import UTTERANCE_OUTPUT_LIMIT
 
 MODELS = ("gpt-6-luna", "gpt-6.1-terra")
 _ENDPOINT = "https://api.openai.com/v1/responses"
@@ -105,7 +105,7 @@ class OpenAIPilotAPI:
         if not isinstance(body.get("instructions"), str):
             raise ValueError("Expected role instructions")
         limit = body.get("max_output_tokens")
-        if type(limit) is not int or limit not in (GROUNDING_OUTPUT_LIMIT, UTTERANCE_OUTPUT_LIMIT):
+        if type(limit) is not int or limit != UTTERANCE_OUTPUT_LIMIT:
             raise ValueError("Expected the pilot output limit for this step")
         # Construct a fresh, allowlisted request. In particular no tools, cache markers,
         # previous responses, regional endpoints or project-selected premium tier.

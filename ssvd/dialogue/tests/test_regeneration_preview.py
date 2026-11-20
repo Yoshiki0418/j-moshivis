@@ -51,7 +51,7 @@ class PreviewTests(unittest.TestCase):
         identity = dict(step["identity"], uid="other")
         with self.assertRaisesRegex(ValueError, "different source"):
             preview(self.root, "test", transcript={"identity": identity, "replies": []})
-        for old_version in ("grounded_roles_v1", "grounded_roles_v2"):
+        for old_version in ("grounded_roles_v1", "grounded_roles_v2", "grounded_roles_v3"):
             earlier = dict(step["identity"], prompt_version=old_version)
             with self.assertRaisesRegex(ValueError, "different source"):
                 preview(self.root, "test", transcript={"identity": earlier, "replies": []})
@@ -67,13 +67,12 @@ class PreviewTests(unittest.TestCase):
 
     def replay(self, tasks, exchanges, pairs):
         identity = preview(self.root, "test", pairs=pairs)["identity"]
-        replies = [{"status": "ok", "tasks": tasks, "scene": "駅前に看板と自転車が見える。"}]
+        replies = []
         transcript = {"identity": identity, "replies": replies}
-        step = preview(self.root, "test", pairs=pairs, transcript=transcript)
         for pair in range(1, pairs + 1):
-            selected = next((k for k, pos in step["task_pairs"].items() if pos == pair), None)
-            q, a = exchanges[selected] if selected else ("どんな様子？", "看板と自転車が見えるよ。")
-            replies.extend([{"text": q}, {"text": a}])
+            task = tasks[pair - 1] if pair <= len(tasks) else None
+            q, a = exchanges[task["kind"]] if task else ("どんな様子？", "看板と自転車が見えるよ。")
+            replies.extend([{"text": q}, {"text": a, "tasks": [task] if task else []}])
             step = preview(self.root, "test", pairs=pairs, transcript=transcript)
             self.assertNotEqual(step["status"], "hold", step.get("reason"))
         self.assertEqual(step["status"], "pending_review")
@@ -89,7 +88,7 @@ class PreviewTests(unittest.TestCase):
         auxiliary = candidate["auxiliary_task"]
         self.assertEqual(auxiliary["recognized_text"], "SAMPLE")
         self.assertEqual(auxiliary["spoken_reading"], "サンプル")
-        self.assertEqual(auxiliary["question_turn_index"], 2 * (result["task_pairs"]["ocr"] - 1))
+        self.assertEqual(auxiliary["question_turn_index"], 0)
         second = auxiliary["additional_tasks"][0]
         self.assertEqual(second["minimum_count"], 3)
         self.assertNotIn("answer_count", second)

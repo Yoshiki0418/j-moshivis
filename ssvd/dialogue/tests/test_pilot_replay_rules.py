@@ -1,11 +1,15 @@
 """Check that the follow-up can replay the first pilot without changing its requests."""
 
+from functools import partial
 import copy
 import unittest
 from unittest.mock import patch
 
-from ssvd.dialogue.preview_regeneration import preview
-from ssvd.dialogue.regeneration_roles import next_step
+from ssvd.dialogue.preview_regeneration import OBSERVATION_VERSION, preview as preview_dialogue
+
+from ssvd.dialogue.regeneration_roles_v3 import next_step
+
+preview = partial(preview_dialogue, prompt_version=OBSERVATION_VERSION)
 
 
 IMAGE = "data:image/png;base64,AA=="

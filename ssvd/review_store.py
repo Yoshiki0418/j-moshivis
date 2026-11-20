@@ -67,6 +67,9 @@ def content_fingerprint(
     """Return the SHA-256 for the exact reviewable dialogue content."""
 
     payload = {key: record.get(key) for key in _FINGERPRINT_FIELDS}
+    # Older records have no warning field and retain their original review ID.
+    if "review_warnings" in record:
+        payload["review_warnings"] = record["review_warnings"]
     if payload["image"] is None and image is not None:
         payload["image"] = image
     # An explicit hash is an independently recomputed current-image hash and

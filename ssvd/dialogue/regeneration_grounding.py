@@ -125,7 +125,7 @@ _MODES = {"counting": {"exact", "approximate", "lower_bound", "unknown"},
           "ocr": {"exact", "partial", "unknown"}}
 
 
-def _evidence_problem(kind: str, task: dict) -> str | None:
+def evidence_problem(kind: str, task: dict, *, allow_zero=False) -> str | None:
     mode = task.get("mode")
     if kind not in _MODES or not isinstance(mode, str) or mode not in _MODES[kind]:
         return "invalid_task_mode"
@@ -137,7 +137,7 @@ def _evidence_problem(kind: str, task: dict) -> str | None:
     if mode == "unknown":
         return "unknown_task_contains_answer" if values else None
     if kind == "counting":
-        if values != {"count"} or type(task["count"]) is not int or task["count"] <= 0:
+        if values != {"count"} or type(task["count"]) is not int or task["count"] < (0 if allow_zero and mode == "exact" else 1):
             return "count_must_be_positive_integer"
         if _normalized(task["target"]) in task_profiles.GENERIC_COUNT_TARGETS:
             return "unspecified_count_target"
@@ -168,7 +168,7 @@ def grounding_problem(kind: str, evidence: dict) -> str | None:
         if not isinstance(task, dict) or not isinstance(task.get("kind"), str) or task["kind"] in seen:
             return "invalid_or_duplicate_task"
         seen.add(task["kind"])
-        problem = _evidence_problem(task["kind"], task)
+        problem = evidence_problem(task["kind"], task)
         if problem:
             return problem
     public = [evidence["scene"], *(task["target"] for task in tasks)]
@@ -287,8 +287,8 @@ def _short_count_reference(target, previous, question, answer):
                              r"(?:よ|ね|かな)?[。!！]?", quantity if named else answer))
 
 
-def _count_problem(task, question, answer, previous_assistant, *, allow_paraphrase=False):
-    if not (_QUESTION_UNIT.search(question) or _COUNT_QUESTION.search(question) or "数は" in question):
+def _count_problem(task, question, answer, previous_assistant, *, allow_paraphrase=False, conversational=False):
+    if not conversational and not (_QUESTION_UNIT.search(question) or _COUNT_QUESTION.search(question) or "数は" in question):
         return "question_does_not_ask_count"
     target = task["target"]
     points_back = mentions_target(target, previous_assistant, allow_paraphrase=allow_paraphrase) and _COUNT_REFERENCE.search(question)
@@ -356,8 +356,8 @@ def _bilingual_form(written, reading):
     return japanese if latin.lower() == romanized else None
 
 
-def _ocr_problem(task, question, answer, *, allow_paraphrase=False):
-    if not _OCR_QUESTION.search(question):
+def _ocr_problem(task, question, answer, *, allow_paraphrase=False, conversational=False):
+    if not conversational and not _OCR_QUESTION.search(question):
         return "question_does_not_ask_to_read"
     # Explicitly asking about the right sign contradicts evidence for the left
     # sign. Short references like 「その看板」「何て書いてある？」 are fine.
@@ -369,8 +369,11 @@ def _ocr_problem(task, question, answer, *, allow_paraphrase=False):
     mode = task["mode"]
     if mode == "unknown":
         illegible = _UNKNOWN.search(answer) or re.search(r"文字.{0,4}(?:つぶれ|潰れ|ぼやけ|かすれ)", answer)
+        # In a refusal, 「何と書いてあるか」 introduces an indirect question.
+        # Keep checking the rest of the answer for actual positive claims.
+        claims = re.sub(r"(?:何|なに|なん)(?:と|て|って)書(?:いてあ|かれてい)る(?:の)?か", "", answer) if conversational else answer
         if (not illegible or _QUOTED.search(answer) or re.search(r"[A-Za-z0-9]", answer)
-                or re.search(r"(?:と|って)(?:書いてあ|読め(?:る|ます)|読めそう(?!に(?:ない|もない|ありません)))|きっと|たぶん|多分|おそらく|かもしれ|だと思", answer)):
+                or re.search(r"(?:と|って)(?:書いてあ|読め(?:る|ます)|読めそう(?!に(?:ない|もない|ありません)))|きっと|たぶん|多分|おそらく|かもしれ|だと思", claims)):
             return "unknown_ocr_needs_unreadable_answer"
         return None
     written = _normalized(task["written"])
@@ -408,14 +411,14 @@ def _ocr_problem(task, question, answer, *, allow_paraphrase=False):
 
 
 def task_problem(kind: str, evidence: dict, question: str, answer: str, previous_assistant: str = "",
-                 *, allow_paraphrase=False) -> str | None:
+                 *, allow_paraphrase=False, conversational=False) -> str | None:
     """Check simple spoken/evidence contradictions; the reviewer verifies the image."""
-    problem = _evidence_problem(kind, evidence)
+    problem = evidence_problem(kind, evidence, allow_zero=conversational)
     if problem:
         return problem
     if not _nonempty(question) or not _nonempty(answer):
         return "missing_task_exchange"
     q, a = _normalized(question), _normalized(answer)
     if kind == "counting":
-        return _count_problem(evidence, q, a, previous_assistant, allow_paraphrase=allow_paraphrase)
-    return _ocr_problem(evidence, q, a, allow_paraphrase=allow_paraphrase)
+        return _count_problem(evidence, q, a, previous_assistant, allow_paraphrase=allow_paraphrase, conversational=conversational)
+    return _ocr_problem(evidence, q, a, allow_paraphrase=allow_paraphrase, conversational=conversational)

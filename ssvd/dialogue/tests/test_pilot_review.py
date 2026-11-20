@@ -86,6 +86,43 @@ class PilotReviewTests(unittest.TestCase):
             self.render()
         self.assertFalse((self.run / "review.html").exists())
 
+    def test_review_warnings_link_to_the_candidate_and_mark_the_exact_utterance(self):
+        uid = self.samples[0]["uid"]
+        model = self.models[0]
+        candidate = self.outcomes[uid, model]["candidate"]
+        candidate["dialogue"].append({"speaker": "アシスタント", "text": "テスト回答"})
+        candidate["auxiliary_task"] = {"kind": "counting", "answer_turn_index": 1,
+                                       "counted_target": "箱の中のもの", "minimum_count": 3}
+        candidate["review_warnings"] = [
+            {"code": "topic_not_covered", "turn": None},
+            {"code": "spoken_form", "turn": 2},
+            {"code": "<script>future_warning()</script>", "turn": 2},
+        ]
+        candidate.update(review_metadata(candidate))
+        html, key = self.render()
+        self.assertIn("注意付きの候補 1 件", html)
+        row = next(r for r in key.values() if r["uid"] == uid)
+        side = next(s for s, m in row["models"].items() if m["model"] == model)
+        self.assertEqual(row["models"][side]["status"], "pending_review")
+        self.assertIn(f'href="#img-1-{side}"', html)
+        section = html.split(f'<section id="img-1-{side}">', 1)[1].split("</section>", 1)[0]
+        heading, turns = section.split("<ol>", 1)
+        self.assertIn("個数・文字の記録なし", heading)
+        question, answer = turns.split("</li>", 1)
+        self.assertNotIn('class="review-warning"', question)
+        self.assertIn("自然に読み上げられる表記", answer)
+        self.assertIn("画像・会話の流れと照合", answer)
+        self.assertIn("箱の中のもの", answer)
+        self.assertIn("確認できる最小の数</dt><dd>3", answer)
+        self.assertNotIn("箱の中のもの", question)
+        self.assertNotIn("future_warning", html)
+        self.assertIn('name="decision"', section)
+
+        candidate["review_warnings"].clear()
+        html, _ = self.render()
+        self.assertIn("照合エラー", html)
+        self.assertNotIn("注意付きの候補 1 件", html)
+
     def test_stale_or_protected_sources_removed_on_refresh(self):
         self.render()
         self.touched.add(self.samples[0]["uid"])

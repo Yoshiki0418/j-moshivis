@@ -64,6 +64,14 @@ class ReviewStoreTests(unittest.TestCase):
     def tearDown(self) -> None:
         self.temp.cleanup()
 
+    def test_warning_labels_are_versioned_without_changing_existing_review_ids(self):
+        legacy = "973bfb4400dabcb1df563cbcd95c8136731f07a7df1fe71d5afc9a7d9c558a96"
+        self.assertEqual(content_fingerprint(self.record), legacy)
+        flagged = dict(self.record, review_warnings=[{"turn": 2, "code": "spoken_form"}])
+        moved = dict(flagged, review_warnings=[{"turn": 1, "code": "spoken_form"}])
+        self.assertNotEqual(content_fingerprint(flagged), legacy)
+        self.assertNotEqual(content_fingerprint(moved), content_fingerprint(flagged))
+
     def test_fingerprint_is_content_bound_and_image_hashable(self) -> None:
         image = self.root / "a.jpg"
         image.write_bytes(b"image bytes")

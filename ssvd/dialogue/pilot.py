@@ -17,10 +17,11 @@ from ssvd.ai_suggestion_store import human_touched_uids
 from ssvd.dialogue.pilot_api import MODELS, OpenAIPilotAPI, PilotRequestRejected
 from ssvd.dialogue.pilot_review import write_review
 from ssvd.dialogue.pilot_selection import prepare_manifest
-from ssvd.dialogue.preview_regeneration import COLLECTION, PROMPT_VERSION, ROOT, preview
+from ssvd.dialogue.preview_regeneration import COLLECTION, OBSERVATION_VERSION, PROMPT_VERSION, ROOT, preview
 from ssvd.review_store import DEFAULT_REVIEW_EVENTS, ReviewStore
 
 LEGACY_VERSION = "grounded_roles_v2"
+ARCHIVED_VERSIONS = (LEGACY_VERSION, OBSERVATION_VERSION)
 LEGACY_RUN_DIR = ROOT / "data/curation/gpt_pilot_issue12"
 RUN_DIR = LEGACY_RUN_DIR / PROMPT_VERSION
 BUDGET_USD = Decimal("2.00")
@@ -49,36 +50,45 @@ def operation(run_dir):
         yield
 
 
-def legacy_snapshot(run_dir):
-    """Read the fixed predecessor's cohort and include even unsettled reservations."""
-    if not (run_dir / "pilot.sqlite3").is_file():
-        if (run_dir / "manifest.json").exists():
-            raise RuntimeError("Legacy pilot ledger missing. Restore it before spending or preparing again.")
-        return None, 0
-    with closing(open_db(run_dir, readonly=True)) as legacy:
-        legacy.execute("BEGIN")
-        manifest = load_manifest(legacy, prompt_version=LEGACY_VERSION)
-        if legacy.execute("SELECT 1 FROM calls WHERE charged>reserved LIMIT 1").fetchone():
-            raise RuntimeError("Reconcile the legacy pilot price discrepancy before continuing.")
-        return manifest, committed(legacy)
+def predecessor_snapshots(base, *, prompt_version=PROMPT_VERSION):
+    """Read each earlier ledger once. Outstanding reservations still count as spending."""
+    manifests = {}
+    previous_commitment = 0
+    for version in ARCHIVED_VERSIONS:
+        if version == prompt_version:
+            break
+        directory = base if version == LEGACY_VERSION else base / version
+        if not (directory / "pilot.sqlite3").is_file():
+            if (directory / "manifest.json").exists():
+                raise RuntimeError(f"{version} pilot ledger missing. Restore it before continuing.")
+            continue
+        with closing(open_db(directory, readonly=True)) as db:
+            db.execute("BEGIN")
+            manifest = load_manifest(db, prompt_version=version)
+            check_predecessors(manifest, manifests)
+            if db.execute("SELECT 1 FROM calls WHERE charged>reserved LIMIT 1").fetchone():
+                raise RuntimeError(f"Reconcile the {version} pilot price discrepancy before continuing.")
+            manifests[version] = manifest
+            previous_commitment += committed(db)
+    return manifests, previous_commitment
 
 
 @contextmanager
 def shared_operation(run_dir):
-    # A process running the old generator locks the parent for its entire operation.
+    # v2 holds the common parent lock; v3 and v4 acquire it before their run lock.
     with operation(run_dir.parent), operation(run_dir):
-        yield legacy_snapshot(run_dir.parent)
+        yield predecessor_snapshots(run_dir.parent)
 
 
 def prepare(root, run_dir):
-    with shared_operation(run_dir) as (previous_manifest, _):
+    with shared_operation(run_dir) as (predecessors, _):
         if (run_dir / "manifest.json").exists() and not (run_dir / "pilot.sqlite3").exists():
             raise RuntimeError("Pilot ledger missing. Restore the original ledger before preparing again.")
         with closing(sqlite3.connect(run_dir / "pilot.sqlite3")) as db:
-            return prepare_cohort(root, run_dir, db, previous_manifest)
+            return prepare_cohort(root, run_dir, db, predecessors)
 
 
-def prepare_cohort(root, run_dir, db, previous_manifest):
+def prepare_cohort(root, run_dir, db, predecessors):
     db.executescript("""
         CREATE TABLE IF NOT EXISTS cohort (
             id INTEGER PRIMARY KEY CHECK(id = 1), manifest TEXT NOT NULL,
@@ -92,10 +102,12 @@ def prepare_cohort(root, run_dir, db, previous_manifest):
             uid TEXT, model TEXT, outcome TEXT NOT NULL, PRIMARY KEY(uid, model));
     """)
     if not db.execute("SELECT 1 FROM cohort").fetchone():
-        if previous_manifest is None:
-            manifest = prepare_manifest(root)
+        if predecessors:
+            manifest = dict(next(reversed(predecessors.values())))
+            manifest.pop("budget_predecessor", None)
+            manifest["budget_predecessors"] = list(predecessors)
         else:
-            manifest = {**previous_manifest, "budget_predecessor": LEGACY_VERSION}
+            manifest = prepare_manifest(root)
         samples = manifest["samples"]
         if (manifest["schema_version"] != 1 or len({x["uid"] for x in samples}) != 20
                 or Counter(x["kind"] for x in samples) != {"ocr": 14, "counting": 6}
@@ -105,7 +117,7 @@ def prepare_cohort(root, run_dir, db, previous_manifest):
             db.execute("INSERT INTO cohort VALUES (1,?,?,?)",
                        (encode(manifest), PROMPT_VERSION, encode(MODELS)))
     manifest = load_manifest(db)
-    check_predecessor(manifest, previous_manifest)
+    check_predecessors(manifest, predecessors)
     # The database is authoritative. Re-export the same frozen list on a second prepare.
     temp = run_dir / "manifest.json.tmp"
     temp.write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
@@ -125,9 +137,15 @@ def load_manifest(db, *, prompt_version=PROMPT_VERSION):
     return json.loads(row[0])
 
 
-def check_predecessor(manifest, previous_manifest):
-    if manifest.get("budget_predecessor") and previous_manifest is None:
-        raise RuntimeError("The legacy pilot ledger used by this cohort must be restored.")
+def check_predecessors(manifest, predecessors):
+    required = manifest.get("budget_predecessors", [])
+    if manifest.get("budget_predecessor"):  # older v3 manifests specify just v2
+        required = [manifest["budget_predecessor"]]
+    for version in required:
+        if version not in predecessors:
+            raise RuntimeError(f"The {version} pilot ledger used by this cohort must be restored.")
+    if any(manifest["samples"] != other["samples"] for other in predecessors.values()):
+        raise RuntimeError("The archived pilot does not match the frozen comparison cohort.")
 
 
 def committed(db):
@@ -137,8 +155,8 @@ def committed(db):
 def shared_budget_report(run_dir, db, manifest, prompt_version):
     if prompt_version == LEGACY_VERSION:
         return {}
-    previous_manifest, previous_commitment = legacy_snapshot(run_dir.parent)
-    check_predecessor(manifest, previous_manifest)
+    predecessors, previous_commitment = predecessor_snapshots(run_dir.parent, prompt_version=prompt_version)
+    check_predecessors(manifest, predecessors)
     total = previous_commitment + committed(db)
     return {"shared_budget": {"legacy_committed_usd": previous_commitment / NANOS,
                               "committed_usd": total / NANOS,
@@ -166,12 +184,23 @@ def status(run_dir, *, prompt_version=PROMPT_VERSION):
         comparison = {}
         for model in MODELS:
             results = [v for (_, m), v in outcomes.items() if m == model]
-            task_mix, modes = Counter(), Counter()
+            task_mix, modes, warning_counts = Counter(), Counter(), Counter()
+            candidates_with_warnings = 0
             for outcome in results:
-                if outcome["status"] == "pending_review":
-                    tasks = outcome["grounding"]["tasks"]
-                    task_mix["+".join(sorted(t["kind"] for t in tasks)) or "none"] += 1
-                    modes.update(f"{t['kind']}/{t['mode']}" for t in tasks)
+                if outcome["status"] != "pending_review":
+                    continue
+                if prompt_version in ARCHIVED_VERSIONS:
+                    tasks = [(t["kind"], t["mode"]) for t in outcome["grounding"]["tasks"]]
+                else:
+                    candidate = outcome["candidate"]
+                    auxiliary = candidate["auxiliary_task"]
+                    tasks = [(t["kind"], t["answer_mode"]) for t in (auxiliary, *auxiliary.get("additional_tasks", []))
+                             if t["kind"] != "none"]
+                    warnings = candidate["review_warnings"]
+                    candidates_with_warnings += bool(warnings)
+                    warning_counts.update(w["code"] for w in warnings)
+                task_mix["+".join(sorted({kind for kind, _ in tasks})) or "none"] += 1
+                modes.update(f"{kind}/{mode}" for kind, mode in tasks)
             receipts = db.execute(f"SELECT charged,receipt FROM calls WHERE model=? AND charged IS NOT NULL AND {initial}",
                                   (model,))
             tokens = Counter()
@@ -183,6 +212,9 @@ def status(run_dir, *, prompt_version=PROMPT_VERSION):
             comparison[model] = dict(outcomes=dict(Counter(v["status"] for v in results)),
                                      generated_tasks=dict(task_mix), answer_modes=dict(modes),
                                      tokens=dict(tokens), cost_usd=cost/NANOS)
+            if prompt_version not in ARCHIVED_VERSIONS:
+                comparison[model].update(candidates_with_warnings=candidates_with_warnings,
+                                         review_warnings_by_code=dict(warning_counts))
     return dict(images=len(manifest["samples"]), old_tasks=dict(Counter(s["kind"] for s in manifest["samples"])),
                 models=comparison, remaining=len(manifest["samples"])*len(MODELS)-len(outcomes),
                 settled_requests=settled, generation_cost_usd=actual/NANOS, unresolved_requests=uncertain,
@@ -200,7 +232,7 @@ def generate_one(root, db, sample, model, api, *, previous_commitment, recovery=
         existing, last = db.execute("SELECT count(*),max(step) FROM calls WHERE uid=? AND model=?",
                                     (uid, model)).fetchone()
         if not existing:
-            raise RuntimeError("Recovery requires the retained initial image observation")
+            raise RuntimeError("Recovery requires the retained first generation request")
         if last != existing - 1:
             raise RuntimeError("Stored pilot transcript has missing steps")
     while True:
@@ -259,9 +291,9 @@ def generate_one(root, db, sample, model, api, *, previous_commitment, recovery=
 
 
 def run_pilot(root, run_dir, api):
-    with shared_operation(run_dir) as (previous_manifest, previous_commitment), closing(open_db(run_dir)) as db:
+    with shared_operation(run_dir) as (predecessors, previous_commitment), closing(open_db(run_dir)) as db:
         manifest = load_manifest(db)
-        check_predecessor(manifest, previous_manifest)
+        check_predecessors(manifest, predecessors)
         if db.execute("SELECT 1 FROM calls WHERE charged>reserved LIMIT 1").fetchone():
             raise RuntimeError("Reconcile the price discrepancy before resuming.")
         # On explicit restart, retire the interrupted chain. The original call can
@@ -290,15 +322,18 @@ def main():
     commands = parser.add_subparsers(dest="command", required=True)
     commands.add_parser("prepare")
     for name in ("status", "review", "recovery-status", "recovery-review"):
-        commands.add_parser(name).add_argument("--legacy", action="store_true",
-                                               help="Read the original observation-only pilot")
+        archive = commands.add_parser(name).add_mutually_exclusive_group()
+        archive.add_argument("--legacy", dest="archive", action="store_const", const=LEGACY_VERSION,
+                             help="Read the original v2 pilot")
+        archive.add_argument("--archive", choices=ARCHIVED_VERSIONS,
+                             help="Read an archived pilot without altering its ledger or HTML")
     for name in ("run", "recover"):
         commands.add_parser(name).add_argument("--api-key-file", type=Path,
                                                help="Private file containing only the project API key")
     args = parser.parse_args()
-    legacy = getattr(args, "legacy", False)
-    run_dir = LEGACY_RUN_DIR if legacy else RUN_DIR
-    prompt_version = LEGACY_VERSION if legacy else PROMPT_VERSION
+    archived = getattr(args, "archive", None)
+    prompt_version = archived or PROMPT_VERSION
+    run_dir = LEGACY_RUN_DIR if archived == LEGACY_VERSION else LEGACY_RUN_DIR / prompt_version
     os.umask(0o077)
     try:
         if args.command == "prepare":
@@ -315,7 +350,7 @@ def main():
             else:
                 from ssvd.dialogue.pilot_recovery import recover
                 recover(ROOT, RUN_DIR, OpenAIPilotAPI(key))
-        elif legacy and args.command in ("review", "recovery-review"):
+        elif archived and args.command in ("review", "recovery-review"):
             directory = run_dir / "recovery" if args.command == "recovery-review" else run_dir
             path = directory / "review.html"
             if not path.is_file():

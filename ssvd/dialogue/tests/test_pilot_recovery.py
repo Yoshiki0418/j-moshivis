@@ -44,7 +44,8 @@ class RecoveryTests(unittest.TestCase):
         with patch.object(pilot, "prepare_manifest", return_value={"schema_version": 1, "samples": self.samples}):
             pilot.prepare(self.root, self.run_dir)
         self.first = (self.samples[0]["uid"], pilot.MODELS[0])
-        self.complete = {"status": "pending_review", "grounding": {"tasks": []}}
+        self.complete = {"status": "pending_review",
+                         "candidate": {"auxiliary_task": {"kind": "none"}, "review_warnings": []}}
         self.hold = {"status": "hold", "reason": "initial validation"}
         self.api = FakeAPI()
         with closing(pilot.open_db(self.run_dir)) as db, db:
@@ -137,10 +138,10 @@ class RecoveryTests(unittest.TestCase):
             self.recover()
         self.assertFalse(self.api.sent)
 
-    def test_missing_original_observation_cannot_trigger_a_new_image_request(self):
+    def test_missing_original_request_cannot_trigger_a_new_call(self):
         with closing(pilot.open_db(self.run_dir)) as db, db:
             db.execute("DELETE FROM calls")
-        with self.assertRaisesRegex(RuntimeError, "retained initial image observation"):
+        with self.assertRaisesRegex(RuntimeError, "retained first generation request"):
             self.recover()
         self.assertFalse(self.api.sent)
 
