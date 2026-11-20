@@ -30,10 +30,10 @@ class ExampleAPI:
         self.sent.append(request_id)
         if self.error:
             raise self.error
-        if body["max_output_tokens"] == 2048:
-            reply = {"status": "ok", "scene": "公園にベンチがある。", "tasks": []}
+        if body["instructions"] == _USER:
+            reply = {"text": "公園の様子を教えて。"}
         else:
-            reply = {"text": "公園の様子を教えて。" if body["instructions"] == _USER else "木の下にベンチがあるよ。"}
+            reply = {"text": "木の下にベンチがあるよ。", "tasks": []}
         return reply, {"response_id": "resp_example", "usage": {"input_tokens": 50, "output_tokens": 10},
                        "cost_usd": .0005}
 
@@ -72,19 +72,21 @@ class PilotTests(unittest.TestCase):
     def test_real_roles_and_idempotent_resume(self):
         api = ExampleAPI()
         self.run_with(api)
-        self.assertEqual(len(set(api.sent)), 40 * 9)
+        self.assertEqual(len(set(api.sent)), 40 * 8)
         result = pilot.status(self.run_dir)
         self.assertEqual(result["remaining"], 0)
-        self.assertEqual(result["generation_cost_usd"], .18)
+        self.assertEqual(result["generation_cost_usd"], .16)
         for model in pilot.MODELS:
             self.assertEqual(result["models"][model]["outcomes"], {"pending_review": 20})
             self.assertEqual(result["models"][model]["generated_tasks"], {"none": 20})
+            self.assertEqual(result["models"][model]["candidates_with_warnings"], 20)
+            self.assertEqual(result["models"][model]["review_warnings_by_code"]["repeated_question"], 60)
         with closing(pilot.open_db(self.run_dir)) as db:
             sample = pilot.read_outcomes(db)[self.samples[0]["uid"], pilot.MODELS[0]]["candidate"]
         dialogue = [(turn["speaker"], turn["text"]) for turn in sample["dialogue"]]
         self.assertEqual(dialogue, [("ユーザー", "公園の様子を教えて。"), ("アシスタント", "木の下にベンチがあるよ。")] * 4)
         self.run_with(api)
-        self.assertEqual(len(api.sent), 40 * 9)
+        self.assertEqual(len(api.sent), 40 * 8)
 
     def test_replay_paid_call_after_interruption_without_resending(self):
         api = ExampleAPI()
@@ -160,6 +162,46 @@ class PilotTests(unittest.TestCase):
         with self.assertRaisesRegex(RuntimeError, "ledger missing"):
             pilot.prepare(self.root, current)
         (legacy / "manifest.json").rename(legacy / "backup.json")
+        with self.assertRaisesRegex(RuntimeError, "must be restored"):
+            pilot.run_pilot(self.root, current, api)
+        self.assertFalse(api.sent)
+
+    def test_both_archives_count_toward_the_limit_and_must_match_the_cohort(self):
+        base = self.run_dir
+        middle = base / pilot.OBSERVATION_VERSION
+        current = base / pilot.PROMPT_VERSION
+        with closing(pilot.open_db(base)) as db, db:
+            db.execute("UPDATE cohort SET prompt=?", (pilot.LEGACY_VERSION,))
+            db.execute("INSERT INTO calls(uid,model,step,request_hash,client_id,reserved) "
+                       "VALUES('a',?,0,'v2','v2',12000000)", (pilot.MODELS[0],))
+        pilot.prepare(self.root, middle)
+        with closing(pilot.open_db(middle)) as db, db:
+            manifest = pilot.load_manifest(db)
+            manifest.pop("budget_predecessors")
+            manifest["budget_predecessor"] = pilot.LEGACY_VERSION
+            db.execute("UPDATE cohort SET prompt=?, manifest=?", (pilot.OBSERVATION_VERSION, pilot.encode(manifest)))
+            db.execute("INSERT INTO calls(uid,model,step,request_hash,client_id,reserved,charged,receipt) "
+                       "VALUES('b',?,0,'v3','v3',15000000,10000000,?)", (pilot.MODELS[1], pilot.encode(
+                           {"usage": {"input_tokens": 4, "output_tokens": 1}})))
+            db.execute("INSERT INTO calls(uid,model,step,request_hash,client_id,reserved) "
+                       "VALUES('b',?,1,'unsettled','unknown',3000000)", (pilot.MODELS[1],))
+        with patch.object(pilot, "prepare_manifest", side_effect=AssertionError("cohort must stay frozen")):
+            selected = pilot.prepare(self.root, current)
+        self.assertEqual(selected["budget_predecessors"], list(pilot.ARCHIVED_VERSIONS))
+        self.assertEqual(selected["samples"], self.samples)
+        budget = pilot.status(current)["shared_budget"]
+        self.assertEqual((budget["legacy_committed_usd"], budget["remaining_usd"]), (.025, 1.975))
+        middle_report = pilot.status(middle, prompt_version=pilot.OBSERVATION_VERSION)
+        self.assertEqual(middle_report["shared_budget"]["legacy_committed_usd"], .012)
+        api = ExampleAPI()
+        with patch.object(pilot, "BUDGET_USD", .025), self.assertRaisesRegex(RuntimeError, "spending limit"):
+            pilot.run_pilot(self.root, current, api)
+        with closing(pilot.open_db(middle)) as db, db:
+            manifest["samples"][0]["uid"] = "different"
+            db.execute("UPDATE cohort SET manifest=?", (pilot.encode(manifest),))
+        with self.assertRaisesRegex(RuntimeError, "frozen comparison cohort"):
+            pilot.run_pilot(self.root, current, api)
+        middle.rename(base / "removed-archive")
         with self.assertRaisesRegex(RuntimeError, "must be restored"):
             pilot.run_pilot(self.root, current, api)
         self.assertFalse(api.sent)

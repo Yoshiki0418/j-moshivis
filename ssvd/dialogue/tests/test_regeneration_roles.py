@@ -3,7 +3,7 @@
 import json
 import unittest
 
-from ssvd.dialogue.regeneration_roles import PAIR_COUNTS, next_step
+from ssvd.dialogue.regeneration_roles_v3 import PAIR_COUNTS, next_step
 
 IMAGE = "data:image/png;base64,AA=="  # Only the request/replay contract is tested.
 COUNT = {"kind": "counting", "mode": "exact", "target": "ベンチ", "count": 3}

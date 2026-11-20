@@ -10,6 +10,7 @@ import sqlite3
 
 from ssvd.ai_suggestion_store import human_touched_uids
 from ssvd.dialogue.regeneration_roles import PAIR_COUNTS, next_step
+from ssvd.dialogue import regeneration_roles_v3
 from ssvd.review_store import (
     DEFAULT_REVIEW_EVENTS, REVIEW_REQUIRED_STATUS, ReviewStore,
     content_fingerprint, review_metadata,
@@ -17,7 +18,8 @@ from ssvd.review_store import (
 
 ROOT = Path(__file__).resolve().parents[2]
 COLLECTION = "japanese_daily_v1"
-PROMPT_VERSION = "grounded_roles_v3"
+PROMPT_VERSION = "visual_dialogue_v4"
+OBSERVATION_VERSION = "grounded_roles_v3"
 
 
 def _load_source(root, uid):
@@ -84,14 +86,17 @@ def _review_task(task, pair):
     return result
 
 
-def preview(root, uid, *, model="gpt-6-luna", pairs=None, transcript=None, recovery=False):
+def preview(root, uid, *, model="gpt-6-luna", pairs=None, transcript=None, recovery=False,
+            prompt_version=PROMPT_VERSION):
     """Replay decoded replies bound to the same image, review revision and settings."""
     if pairs is not None and (type(pairs) is not int or pairs not in PAIR_COUNTS):
         raise ValueError("Japanese Daily candidates use 4 to 8 question-answer pairs")
+    if prompt_version not in (PROMPT_VERSION, OBSERVATION_VERSION):
+        raise ValueError("Unsupported prompt version")
     source, kind, image, base = _load_source(root, uid)
     identity = dict(collection=COLLECTION, uid=uid, base_fingerprint=base,
                     image_sha256=source["image_sha256"], kind=kind, model=model,
-                    pairs=pairs, prompt_version=PROMPT_VERSION)
+                    pairs=pairs, prompt_version=prompt_version)
     replies = []
     if transcript is not None:
         if not isinstance(transcript, dict) or transcript.get("identity") != identity:
@@ -99,26 +104,35 @@ def preview(root, uid, *, model="gpt-6-luna", pairs=None, transcript=None, recov
         replies = transcript.get("replies")
         if not isinstance(replies, list):
             raise ValueError("Expected a list of decoded JSON replies")
-    step = next_step(uid, kind, image, replies, model=model, pairs=pairs, recovery=recovery)
+    if prompt_version == OBSERVATION_VERSION:
+        step = regeneration_roles_v3.next_step(uid, kind, image, replies, model=model, pairs=pairs, recovery=recovery)
+    else:
+        step = next_step(uid, kind, image, replies, model=model, pairs=pairs)
     if step["status"] != "pending_review":
         return {"identity": identity, **step}
 
-    evidence = step["grounding"]
-    tasks = [_review_task(task, step["task_pairs"][task["kind"]]) for task in evidence["tasks"]]
+    if prompt_version == OBSERVATION_VERSION:
+        evidence = step["grounding"]
+        tasks = [_review_task(task, step["task_pairs"][task["kind"]]) for task in evidence["tasks"]]
+    else:
+        tasks = [_review_task(exchange["task"], exchange["pair"]) for exchange in step["exchanges"]]
     auxiliary = tasks[0] if tasks else {"kind": "none", "grounding_source": "none"}
     # The review fingerprint covers this entire dictionary, including a second exchange.
     if len(tasks) > 1:
         auxiliary["additional_tasks"] = tasks[1:]
     speakers = {"user": "ユーザー", "assistant": "アシスタント"}
     candidate = dict(uid=uid, image=source["image"], image_sha256=identity["image_sha256"],
-                     task_mode="normal", generator=model, prompt_version=PROMPT_VERSION,
+                     task_mode="normal", generator=model, prompt_version=prompt_version,
                      dialogue=[{"speaker": speakers[t["role"]], "text": t["text"]} for t in step["dialogue"]],
                      auxiliary_task=auxiliary, verification_status=REVIEW_REQUIRED_STATUS)
+    if "review_warnings" in step:
+        candidate["review_warnings"] = step["review_warnings"]
     if "split_group_key" in source:
         candidate["split_group_key"] = source["split_group_key"]
     candidate.update(review_metadata(candidate))
     return {"identity": identity, "status": "pending_review", "candidate": candidate,
-            "grounding": evidence, "pair_count": step["pair_count"], "task_pairs": step["task_pairs"]}
+            "pair_count": step["pair_count"],
+            **{key: step[key] for key in ("grounding", "task_pairs") if key in step}}
 
 
 def main():
@@ -127,12 +141,13 @@ def main():
     parser.add_argument("--model", default="gpt-6-luna")
     parser.add_argument("--pairs", type=int, choices=PAIR_COUNTS)
     parser.add_argument("--transcript", type=Path, help="JSON with identity and ordered decoded replies")
+    parser.add_argument("--prompt-version", choices=(PROMPT_VERSION, OBSERVATION_VERSION), default=PROMPT_VERSION)
     parser.add_argument("--recovery", action="store_true", help="Apply the follow-up pilot replay checks")
     args = parser.parse_args()
     try:
         transcript = json.loads(args.transcript.read_text(encoding="utf-8")) if args.transcript else None
         result = preview(ROOT, args.uid, model=args.model, pairs=args.pairs,
-                         transcript=transcript, recovery=args.recovery)
+                         transcript=transcript, recovery=args.recovery, prompt_version=args.prompt_version)
     except (ValueError, OSError, sqlite3.Error) as error:
         parser.exit(1, f"{error}\n")
     print(json.dumps(result, ensure_ascii=False))
