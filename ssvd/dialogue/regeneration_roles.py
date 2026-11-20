@@ -141,7 +141,8 @@ def next_step(uid: str, kind: str, image_data_url: str, replies: list[dict], *,
                     review_warnings=[{"turn": n, "code": code} for n, code in dict.fromkeys(warnings)])
 
     asking = len(dialogue) % 2 == 0
-    context = {"公開された会話": dialogue}
+    # Responses JSON mode requires the format name in the input message itself.
+    context = {"公開された会話": dialogue, "出力形式": "今回の発話を指示に沿ったJSONオブジェクトで返す。"}
     if not dialogue:
         context["画像に合えば扱える話題の一例"] = {"ocr": "画像内の文字", "counting": "物や人の数"}[kind]
     if asking and exchanges:
