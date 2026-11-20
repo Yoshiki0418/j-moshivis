@@ -20,7 +20,9 @@ from ssvd.dialogue.pilot_selection import prepare_manifest
 from ssvd.dialogue.preview_regeneration import COLLECTION, PROMPT_VERSION, ROOT, preview
 from ssvd.review_store import DEFAULT_REVIEW_EVENTS, ReviewStore
 
-RUN_DIR = ROOT / "data/curation/gpt_pilot_issue12"
+LEGACY_VERSION = "grounded_roles_v2"
+LEGACY_RUN_DIR = ROOT / "data/curation/gpt_pilot_issue12"
+RUN_DIR = LEGACY_RUN_DIR / PROMPT_VERSION
 BUDGET_USD = Decimal("2.00")
 NANOS = 10**9
 
@@ -47,15 +49,36 @@ def operation(run_dir):
         yield
 
 
+def legacy_snapshot(run_dir):
+    """Read the fixed predecessor's cohort and include even unsettled reservations."""
+    if not (run_dir / "pilot.sqlite3").is_file():
+        if (run_dir / "manifest.json").exists():
+            raise RuntimeError("Legacy pilot ledger missing. Restore it before spending or preparing again.")
+        return None, 0
+    with closing(open_db(run_dir, readonly=True)) as legacy:
+        legacy.execute("BEGIN")
+        manifest = load_manifest(legacy, prompt_version=LEGACY_VERSION)
+        if legacy.execute("SELECT 1 FROM calls WHERE charged>reserved LIMIT 1").fetchone():
+            raise RuntimeError("Reconcile the legacy pilot price discrepancy before continuing.")
+        return manifest, committed(legacy)
+
+
+@contextmanager
+def shared_operation(run_dir):
+    # A process running the old generator locks the parent for its entire operation.
+    with operation(run_dir.parent), operation(run_dir):
+        yield legacy_snapshot(run_dir.parent)
+
+
 def prepare(root, run_dir):
-    with operation(run_dir):
+    with shared_operation(run_dir) as (previous_manifest, _):
         if (run_dir / "manifest.json").exists() and not (run_dir / "pilot.sqlite3").exists():
             raise RuntimeError("Pilot ledger missing. Restore the original ledger before preparing again.")
         with closing(sqlite3.connect(run_dir / "pilot.sqlite3")) as db:
-            return prepare_cohort(root, run_dir, db)
+            return prepare_cohort(root, run_dir, db, previous_manifest)
 
 
-def prepare_cohort(root, run_dir, db):
+def prepare_cohort(root, run_dir, db, previous_manifest):
     db.executescript("""
         CREATE TABLE IF NOT EXISTS cohort (
             id INTEGER PRIMARY KEY CHECK(id = 1), manifest TEXT NOT NULL,
@@ -69,7 +92,10 @@ def prepare_cohort(root, run_dir, db):
             uid TEXT, model TEXT, outcome TEXT NOT NULL, PRIMARY KEY(uid, model));
     """)
     if not db.execute("SELECT 1 FROM cohort").fetchone():
-        manifest = prepare_manifest(root)
+        if previous_manifest is None:
+            manifest = prepare_manifest(root)
+        else:
+            manifest = {**previous_manifest, "budget_predecessor": LEGACY_VERSION}
         samples = manifest["samples"]
         if (manifest["schema_version"] != 1 or len({x["uid"] for x in samples}) != 20
                 or Counter(x["kind"] for x in samples) != {"ocr": 14, "counting": 6}
@@ -79,6 +105,7 @@ def prepare_cohort(root, run_dir, db):
             db.execute("INSERT INTO cohort VALUES (1,?,?,?)",
                        (encode(manifest), PROMPT_VERSION, encode(MODELS)))
     manifest = load_manifest(db)
+    check_predecessor(manifest, previous_manifest)
     # The database is authoritative. Re-export the same frozen list on a second prepare.
     temp = run_dir / "manifest.json.tmp"
     temp.write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
@@ -86,19 +113,36 @@ def prepare_cohort(root, run_dir, db):
     return manifest
 
 
-def open_db(run_dir):
-    return sqlite3.connect((run_dir / "pilot.sqlite3").resolve().as_uri() + "?mode=rw", uri=True)
+def open_db(run_dir, *, readonly=False):
+    mode = "ro" if readonly else "rw"
+    return sqlite3.connect((run_dir / "pilot.sqlite3").resolve().as_uri() + "?mode=" + mode, uri=True)
 
 
-def load_manifest(db):
+def load_manifest(db, *, prompt_version=PROMPT_VERSION):
     row = db.execute("SELECT manifest,prompt,models FROM cohort WHERE id=1").fetchone()
-    if row is None or row[1:] != (PROMPT_VERSION, encode(MODELS)):
+    if row is None or row[1:] != (prompt_version, encode(MODELS)):
         raise RuntimeError("Pilot not prepared for this prompt version and model pair")
     return json.loads(row[0])
 
 
+def check_predecessor(manifest, previous_manifest):
+    if manifest.get("budget_predecessor") and previous_manifest is None:
+        raise RuntimeError("The legacy pilot ledger used by this cohort must be restored.")
+
+
 def committed(db):
     return db.execute("SELECT COALESCE(sum(COALESCE(charged,reserved)),0) FROM calls").fetchone()[0]
+
+
+def shared_budget_report(run_dir, db, manifest, prompt_version):
+    if prompt_version == LEGACY_VERSION:
+        return {}
+    previous_manifest, previous_commitment = legacy_snapshot(run_dir.parent)
+    check_predecessor(manifest, previous_manifest)
+    total = previous_commitment + committed(db)
+    return {"shared_budget": {"legacy_committed_usd": previous_commitment / NANOS,
+                              "committed_usd": total / NANOS,
+                              "remaining_usd": max(nanos(BUDGET_USD) - total, 0) / NANOS}}
 
 
 def read_outcomes(db):
@@ -106,10 +150,11 @@ def read_outcomes(db):
             for uid, model, outcome in db.execute("SELECT uid,model,outcome FROM outcomes")}
 
 
-def status(run_dir):
-    with closing(open_db(run_dir)) as db, db:
+def status(run_dir, *, prompt_version=PROMPT_VERSION):
+    with closing(open_db(run_dir, readonly=True)) as db, db:
         db.execute("BEGIN")
-        manifest = load_manifest(db)
+        manifest = load_manifest(db, prompt_version=prompt_version)
+        budget = shared_budget_report(run_dir, db, manifest, prompt_version)
         outcomes = read_outcomes(db)
         has_phase = any(col[1] == "phase" for col in db.execute("PRAGMA table_info(calls)"))
         initial = "phase='initial'" if has_phase else "1"
@@ -141,10 +186,10 @@ def status(run_dir):
     return dict(images=len(manifest["samples"]), old_tasks=dict(Counter(s["kind"] for s in manifest["samples"])),
                 models=comparison, remaining=len(manifest["samples"])*len(MODELS)-len(outcomes),
                 settled_requests=settled, generation_cost_usd=actual/NANOS, unresolved_requests=uncertain,
-                unresolved_reserve_usd=reserved/NANOS, budget_usd=float(BUDGET_USD))
+                unresolved_reserve_usd=reserved/NANOS, budget_usd=float(BUDGET_USD), **budget)
 
 
-def generate_one(root, db, sample, model, api, *, recovery=False):
+def generate_one(root, db, sample, model, api, *, previous_commitment, recovery=False):
     uid = sample["uid"]
     store = ReviewStore(root / DEFAULT_REVIEW_EVENTS)
     identity = {key: sample[key] for key in ("uid", "kind", "pairs", "base_fingerprint", "image_sha256")}
@@ -177,18 +222,14 @@ def generate_one(root, db, sample, model, api, *, recovery=False):
         key = (uid, model, len(replies))
         saved = db.execute("SELECT request_hash,reply FROM calls WHERE uid=? AND model=? AND step=?", key).fetchone()
         if saved:
-            matched = saved[0] == request_hash
-            if recovery and not matched:
-                from ssvd.dialogue.pilot_replay_hash import matches_saved_request
-                matched = matches_saved_request(body, saved[0])
-            if not matched or saved[1] is None:
+            if saved[0] != request_hash or saved[1] is None:
                 raise RuntimeError("Unresolved or changed request. Reconcile the original call before continuing.")
             replies.append(json.loads(saved[1]))
             continue
         reserve = nanos(api.reserve_usd(body))
         if reserve <= 0:
             raise ValueError("Expected a positive reservation for a paid request")
-        if committed(db) + reserve > nanos(BUDGET_USD):
+        if previous_commitment + committed(db) + reserve > nanos(BUDGET_USD):
             raise RuntimeError("Pilot spending limit reached. No additional generation request was sent.")
         if not Path(store.path).is_file():
             raise RuntimeError("Human decision history is unavailable")
@@ -214,13 +255,13 @@ def generate_one(root, db, sample, model, api, *, recovery=False):
                        (encode(reply), encode(receipt), charge, *key))
         if charge > reserve:
             raise RuntimeError("Reported cost exceeded the reservation. Check pricing before continuing.")
-        # Recovery appends the same JSON representation it will read on resumption.
-        replies.append(json.loads(encode(reply)) if recovery else reply)
+        replies.append(reply)
 
 
 def run_pilot(root, run_dir, api):
-    with operation(run_dir), closing(open_db(run_dir)) as db:
+    with shared_operation(run_dir) as (previous_manifest, previous_commitment), closing(open_db(run_dir)) as db:
         manifest = load_manifest(db)
+        check_predecessor(manifest, previous_manifest)
         if db.execute("SELECT 1 FROM calls WHERE charged>reserved LIMIT 1").fetchone():
             raise RuntimeError("Reconcile the price discrepancy before resuming.")
         # On explicit restart, retire the interrupted chain. The original call can
@@ -236,7 +277,7 @@ def run_pilot(root, run_dir, api):
                 key = (sample["uid"], model)
                 if key in finished:
                     continue
-                result = generate_one(root, db, sample, model, api)
+                result = generate_one(root, db, sample, model, api, previous_commitment=previous_commitment)
                 with db:
                     db.execute("INSERT INTO outcomes VALUES(?,?,?)", (*key, encode(result)))
                 print(f"{len(finished)+1}/{len(manifest['samples'])*len(MODELS)} {model} {result['status']}", flush=True)
@@ -247,12 +288,17 @@ def run_pilot(root, run_dir, api):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     commands = parser.add_subparsers(dest="command", required=True)
-    for name in ("prepare", "status", "review", "recovery-status", "recovery-review"):
-        commands.add_parser(name)
+    commands.add_parser("prepare")
+    for name in ("status", "review", "recovery-status", "recovery-review"):
+        commands.add_parser(name).add_argument("--legacy", action="store_true",
+                                               help="Read the original observation-only pilot")
     for name in ("run", "recover"):
         commands.add_parser(name).add_argument("--api-key-file", type=Path,
                                                help="Private file containing only the project API key")
     args = parser.parse_args()
+    legacy = getattr(args, "legacy", False)
+    run_dir = LEGACY_RUN_DIR if legacy else RUN_DIR
+    prompt_version = LEGACY_VERSION if legacy else PROMPT_VERSION
     os.umask(0o077)
     try:
         if args.command == "prepare":
@@ -269,17 +315,23 @@ def main():
             else:
                 from ssvd.dialogue.pilot_recovery import recover
                 recover(ROOT, RUN_DIR, OpenAIPilotAPI(key))
+        elif legacy and args.command in ("review", "recovery-review"):
+            directory = run_dir / "recovery" if args.command == "recovery-review" else run_dir
+            path = directory / "review.html"
+            if not path.is_file():
+                raise FileNotFoundError(f"Archived comparison page is unavailable: {path}")
+            print(path)
         elif args.command == "review":
-            with operation(RUN_DIR), closing(open_db(RUN_DIR)) as db:
-                print(write_review(ROOT, RUN_DIR, load_manifest(db), read_outcomes(db)))
+            with operation(run_dir), closing(open_db(run_dir, readonly=True)) as db:
+                print(write_review(ROOT, run_dir, load_manifest(db), read_outcomes(db)))
         elif args.command == "recovery-review":
             from ssvd.dialogue.pilot_recovery import recovery_review
-            print(recovery_review(ROOT, RUN_DIR))
+            print(recovery_review(ROOT, run_dir))
         if args.command in ("recover", "recovery-status", "recovery-review"):
             from ssvd.dialogue.pilot_recovery import recovery_status
-            report = recovery_status(RUN_DIR)
+            report = recovery_status(run_dir, prompt_version=prompt_version)
         else:
-            report = status(RUN_DIR)
+            report = status(run_dir, prompt_version=prompt_version)
         print(json.dumps(report, ensure_ascii=False, indent=2))
     except (OSError, ValueError, RuntimeError, sqlite3.Error) as exc:
         print(str(exc), file=sys.stderr)

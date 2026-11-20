@@ -11,8 +11,8 @@ from ssvd.dialogue.preview_regeneration import _load_source
 from ssvd.review_store import DEFAULT_REVIEW_EVENTS, ReviewStore
 
 
-def _initial(db):
-    manifest = pilot.load_manifest(db)
+def _initial(db, *, prompt_version=pilot.PROMPT_VERSION):
+    manifest = pilot.load_manifest(db, prompt_version=prompt_version)
     samples = manifest["samples"]
     expected = {(s["uid"], model) for s in samples for model in pilot.MODELS}
     initial = pilot.read_outcomes(db)
@@ -37,8 +37,9 @@ def _outcomes(db):
 
 def recover(root, run_dir, api):
     store = ReviewStore(root / DEFAULT_REVIEW_EVENTS)
-    with pilot.operation(run_dir), closing(pilot.open_db(run_dir)) as db:
+    with pilot.shared_operation(run_dir) as (previous_manifest, previous_commitment), closing(pilot.open_db(run_dir)) as db:
         manifest, initial = _initial(db)
+        pilot.check_predecessor(manifest, previous_manifest)
         if not store.path.is_file():
             raise RuntimeError("Human decision history is unavailable")
         if db.execute("SELECT 1 FROM calls WHERE charged>reserved LIMIT 1").fetchone():
@@ -79,7 +80,8 @@ def recover(root, run_dir, api):
                 elif db.execute("SELECT 1 FROM calls WHERE uid=? AND model=? AND charged IS NULL", key).fetchone():
                     result = {"status": "hold", "reason": "unresolved_billing"}
                 else:
-                    result = pilot.generate_one(root, db, sample, model, api, recovery=True)
+                    result = pilot.generate_one(root, db, sample, model, api, recovery=True,
+                                                previous_commitment=previous_commitment)
                 with db:
                     db.execute("INSERT INTO recovery_outcomes VALUES(?,?,?)", (*key, pilot.encode(result)))
                 finished[key] = result
@@ -87,10 +89,11 @@ def recover(root, run_dir, api):
         return write_review(root, run_dir / "recovery", manifest, finished)
 
 
-def recovery_status(run_dir):
-    with closing(pilot.open_db(run_dir)) as db, db:
+def recovery_status(run_dir, *, prompt_version=pilot.PROMPT_VERSION):
+    with closing(pilot.open_db(run_dir, readonly=True)) as db, db:
         db.execute("BEGIN")
-        manifest, initial = _initial(db)
+        manifest, initial = _initial(db, prompt_version=prompt_version)
+        budget = pilot.shared_budget_report(run_dir, db, manifest, prompt_version)
         started = _started(db)
         finished = _outcomes(db)
         comparison = {}
@@ -124,10 +127,10 @@ def recovery_status(run_dir):
                     additional_generation_cost_usd=all_added_cost/pilot.NANOS,
                     total_generation_cost_usd=(all_initial_cost + all_added_cost)/pilot.NANOS,
                     additional_requests=all_extra_calls, unresolved_requests=uncertain,
-                    unresolved_reserve_usd=reserve/pilot.NANOS, budget_usd=float(pilot.BUDGET_USD))
+                    unresolved_reserve_usd=reserve/pilot.NANOS, budget_usd=float(pilot.BUDGET_USD), **budget)
 
 
 def recovery_review(root, run_dir):
-    with pilot.operation(run_dir), closing(pilot.open_db(run_dir)) as db:
+    with pilot.operation(run_dir), closing(pilot.open_db(run_dir, readonly=True)) as db:
         manifest, _ = _initial(db)
         return write_review(root, run_dir / "recovery", manifest, _outcomes(db))

@@ -10,8 +10,12 @@ from ssvd.dialogue.pilot_api import MODELS, OpenAIPilotAPI, PilotRequestRejected
 from ssvd.dialogue.regeneration_roles import next_step
 
 
-def request(model=MODELS[0], *, image=True):
-    replies = [] if image else [{"status": "ok", "scene": "空が青い。", "tasks": []}]
+def request(model=MODELS[0], *, phase="grounding"):
+    replies = []
+    if phase in ("user", "assistant"):
+        replies.append({"status": "ok", "scene": "空が青い。", "tasks": []})
+    if phase == "assistant":
+        replies.append({"text": "空はどんな色？"})
     return next_step("synthetic", "ocr", "data:image/png;base64,AA==", replies, model=model)["request"]
 
 
@@ -39,9 +43,9 @@ class PilotAPITests(unittest.TestCase):
         self.addCleanup(guard.stop)
 
     def test_count_has_the_same_image_instructions_and_format_no_paid_tools(self):
-        for with_image, limit in ((True, 2048), (False, 1024)):
-            original = request(image=with_image)
-            body = self.api.prepare({**original, "tools": [{"type": "web_search"}], "max_output_tokens": 99999})
+        for phase, limit in (("grounding", 2048), ("user", 1024), ("assistant", 1024)):
+            original = request(phase=phase)
+            body = self.api.prepare({**original, "tools": [{"type": "web_search"}]})
             self.assertNotIn("tools", body)
             self.assertEqual(body["max_output_tokens"], limit)
             self.assertEqual(body["reasoning"], {"effort": "low"})
@@ -49,6 +53,9 @@ class PilotAPITests(unittest.TestCase):
             self.assertEqual(body["service_tier"], "default")
             self.assertFalse(body["store"])
             self.assertEqual(body["input"], original["input"])
+            self.assertEqual(body["input"][0]["content"][1], {
+                "type": "input_image", "image_url": "data:image/png;base64,AA==", "detail": "high"
+            })
             self.assertEqual(self.api.prepare(body), body)
             with patch.object(self.api, "_post", return_value=counted()) as post:
                 cost = self.api.reserve_usd(body)
@@ -56,6 +63,19 @@ class PilotAPITests(unittest.TestCase):
             self.assertTrue(url.endswith("/v1/responses/input_tokens"))
             self.assertEqual(sent, {k: body[k] for k in ("model", "input", "instructions", "reasoning", "text")})
             self.assertAlmostEqual(cost, (1000 * 0.125 + limit * 0.5) / 1e6, places=12)
+            with patch.object(self.api, "_post", return_value=generated(MODELS[0])) as send:
+                self.api.generate(body)
+            self.assertEqual(send.call_args.args[1]["input"], sent["input"])
+
+    def test_missing_image_or_invalid_cap_is_rejected_before_billing(self):
+        for phase in ("user", "assistant"):
+            body = request(phase=phase)
+            with self.assertRaises(ValueError):
+                self.api.reserve_usd({**body, "max_output_tokens": 99999})
+            body["input"][0]["content"].pop()
+            with self.assertRaises(ValueError):
+                self.api.reserve_usd(body)
+        self.open.assert_not_called()
 
     def test_usage_covers_cache_writes_and_reads_and_includes_reasoning_once(self):
         for model, expected_cost in ((MODELS[0], 0.00018775), (MODELS[1], 0.00187)):

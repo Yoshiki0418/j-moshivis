@@ -7,7 +7,8 @@ import tempfile
 import unittest
 from unittest.mock import patch
 
-from ssvd.dialogue import pilot
+from ssvd.dialogue import pilot, pilot_recovery
+from ssvd.dialogue.regeneration_roles import _USER
 from ssvd.review_store import DEFAULT_REVIEW_EVENTS, ReviewStore
 
 
@@ -29,11 +30,10 @@ class ExampleAPI:
         self.sent.append(request_id)
         if self.error:
             raise self.error
-        parts = body["input"][0]["content"]
-        if len(parts) == 2:
+        if body["max_output_tokens"] == 2048:
             reply = {"status": "ok", "scene": "公園にベンチがある。", "tasks": []}
         else:
-            reply = {"text": "公園の様子を教えて。" if "聞き手" in body["instructions"] else "木の下にベンチがあるよ。"}
+            reply = {"text": "公園の様子を教えて。" if body["instructions"] == _USER else "木の下にベンチがあるよ。"}
         return reply, {"response_id": "resp_example", "usage": {"input_tokens": 50, "output_tokens": 10},
                        "cost_usd": .0005}
 
@@ -79,6 +79,10 @@ class PilotTests(unittest.TestCase):
         for model in pilot.MODELS:
             self.assertEqual(result["models"][model]["outcomes"], {"pending_review": 20})
             self.assertEqual(result["models"][model]["generated_tasks"], {"none": 20})
+        with closing(pilot.open_db(self.run_dir)) as db:
+            sample = pilot.read_outcomes(db)[self.samples[0]["uid"], pilot.MODELS[0]]["candidate"]
+        dialogue = [(turn["speaker"], turn["text"]) for turn in sample["dialogue"]]
+        self.assertEqual(dialogue, [("ユーザー", "公園の様子を教えて。"), ("アシスタント", "木の下にベンチがあるよ。")] * 4)
         self.run_with(api)
         self.assertEqual(len(api.sent), 40 * 9)
 
@@ -116,6 +120,50 @@ class PilotTests(unittest.TestCase):
             self.run_with(ExampleAPI(error=pilot.PilotRequestRejected("rejected")))
         self.assertEqual(pilot.status(self.run_dir)["unresolved_requests"], 0)
 
+    def test_new_cohort_reuses_only_frozen_images_and_shares_legacy_budget_and_lock(self):
+        legacy = self.run_dir
+        current = legacy / pilot.PROMPT_VERSION
+        with closing(pilot.open_db(legacy)) as db, db:
+            db.execute("UPDATE cohort SET prompt=?", (pilot.LEGACY_VERSION,))
+            for step, charge in enumerate((10_000_000, None)):
+                db.execute("INSERT INTO calls(uid,model,step,request_hash,client_id,reserved,charged,receipt) "
+                           "VALUES(?,?,?,?,?,?,?,?)",
+                           (self.samples[0]["uid"], pilot.MODELS[0], step, "old", str(step),
+                            12_000_000, charge, '{"usage":{"input_tokens":1,"output_tokens":1}}'))
+        with patch.object(pilot, "prepare_manifest", side_effect=AssertionError("cohort must stay frozen")):
+            prepared = pilot.prepare(self.root, current)
+        self.assertEqual(prepared["samples"], self.samples)
+        report = pilot.status(current)
+        self.assertEqual(report["settled_requests"], 0)
+        self.assertEqual(report["shared_budget"],
+                         {"legacy_committed_usd": .022, "committed_usd": .022, "remaining_usd": 1.978})
+        history = pilot.status(legacy, prompt_version=pilot.LEGACY_VERSION)
+        self.assertEqual((history["generation_cost_usd"], history["unresolved_reserve_usd"]), (.01, .012))
+        api = ExampleAPI()
+        with pilot.operation(legacy), self.assertRaisesRegex(RuntimeError, "Another pilot operation"):
+            pilot.run_pilot(self.root, current, api)
+        with patch.object(pilot, "BUDGET_USD", .0225), self.assertRaisesRegex(RuntimeError, "spending limit"):
+            pilot.run_pilot(self.root, current, api)
+        with self.assertRaisesRegex(RuntimeError, "prompt version"):
+            pilot.run_pilot(self.root, legacy, api)
+        self.assertFalse(api.sent)
+        self.assertEqual(history, pilot.status(legacy, prompt_version=pilot.LEGACY_VERSION))
+        with closing(pilot.open_db(current)) as db, db:
+            db.executemany("INSERT INTO outcomes VALUES(?,?,?)",
+                           ((s["uid"], model, '{"status":"protected"}') for s in self.samples for model in pilot.MODELS))
+            db.execute("INSERT INTO calls(uid,model,step,request_hash,client_id,reserved) VALUES(?,?,?,?,?,?)",
+                       (self.samples[0]["uid"], pilot.MODELS[0], 0, "new", "new", 3_000_000))
+        expected = {"legacy_committed_usd": .022, "committed_usd": .025, "remaining_usd": 1.975}
+        self.assertEqual(pilot_recovery.recovery_status(current)["shared_budget"], expected)
+        self.assertEqual(pilot.status(current)["shared_budget"], expected)
+        (legacy / "pilot.sqlite3").rename(legacy / "backup.sqlite3")
+        with self.assertRaisesRegex(RuntimeError, "ledger missing"):
+            pilot.prepare(self.root, current)
+        (legacy / "manifest.json").rename(legacy / "backup.json")
+        with self.assertRaisesRegex(RuntimeError, "must be restored"):
+            pilot.run_pilot(self.root, current, api)
+        self.assertFalse(api.sent)
+
     def test_protection_and_budget_checked_before_submit(self):
         api = ExampleAPI(reserve=3.0)
         with self.assertRaisesRegex(RuntimeError, "spending limit"):
@@ -128,6 +176,6 @@ class PilotTests(unittest.TestCase):
             api.before_quote_returns = lambda: None
         api.before_quote_returns = decision
         with closing(pilot.open_db(self.run_dir)) as db:
-            out = pilot.generate_one(self.root, db, self.samples[0], pilot.MODELS[0], api)
+            out = pilot.generate_one(self.root, db, self.samples[0], pilot.MODELS[0], api, previous_commitment=0)
         self.assertEqual(out["status"], "protected")
         self.assertFalse(api.sent)

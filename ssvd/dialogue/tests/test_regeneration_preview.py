@@ -51,9 +51,10 @@ class PreviewTests(unittest.TestCase):
         identity = dict(step["identity"], uid="other")
         with self.assertRaisesRegex(ValueError, "different source"):
             preview(self.root, "test", transcript={"identity": identity, "replies": []})
-        v1 = dict(step["identity"], prompt_version="grounded_roles_v1")
-        with self.assertRaisesRegex(ValueError, "different source"):
-            preview(self.root, "test", transcript={"identity": v1, "replies": []})
+        for old_version in ("grounded_roles_v1", "grounded_roles_v2"):
+            earlier = dict(step["identity"], prompt_version=old_version)
+            with self.assertRaisesRegex(ValueError, "different source"):
+                preview(self.root, "test", transcript={"identity": earlier, "replies": []})
 
     def test_prior_human_event_and_image_replacement(self):
         self.image.write_bytes(b"changed")

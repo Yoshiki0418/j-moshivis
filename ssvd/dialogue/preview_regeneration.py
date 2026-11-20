@@ -17,7 +17,7 @@ from ssvd.review_store import (
 
 ROOT = Path(__file__).resolve().parents[2]
 COLLECTION = "japanese_daily_v1"
-PROMPT_VERSION = "grounded_roles_v2"
+PROMPT_VERSION = "grounded_roles_v3"
 
 
 def _load_source(root, uid):
