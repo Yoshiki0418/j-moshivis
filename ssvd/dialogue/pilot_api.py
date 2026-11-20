@@ -9,12 +9,11 @@ from urllib.error import HTTPError, URLError
 from urllib.request import HTTPRedirectHandler, Request, build_opener
 from uuid import UUID
 
+from ssvd.dialogue.regeneration_roles import GROUNDING_OUTPUT_LIMIT, UTTERANCE_OUTPUT_LIMIT
 
 MODELS = ("gpt-6-luna", "gpt-6.1-terra")
 _ENDPOINT = "https://api.openai.com/v1/responses"
 _COUNT_FIELDS = ("model", "input", "instructions", "text", "reasoning")
-_GROUNDING_LIMIT = 2048
-_UTTERANCE_LIMIT = 1024
 # Above this threshold both models change pricing for the *entire* request.
 _SHORT_CONTEXT_LIMIT = 272_000
 
@@ -93,19 +92,21 @@ class OpenAIPilotAPI:
                 or messages[0].get("role") != "user"):
             raise ValueError("Expected one user message")
         parts = messages[0].get("content")
-        if not isinstance(parts, list) or len(parts) not in (1, 2) or not all(isinstance(p, dict) for p in parts):
-            raise ValueError("Expected text and optionally one image")
+        if not isinstance(parts, list) or len(parts) != 2 or not all(isinstance(p, dict) for p in parts):
+            raise ValueError("Expected text and one source image for every pilot step")
         if parts[0].get("type") != "input_text" or not isinstance(parts[0].get("text"), str):
             raise ValueError("Invalid pilot text")
         content = [{"type": "input_text", "text": parts[0]["text"]}]
-        if len(parts) == 2:
-            image = parts[1]
-            if (image.get("type") != "input_image" or not isinstance(image.get("image_url"), str)
-                    or not image["image_url"].startswith("data:image/") or image.get("detail") != "high"):
-                raise ValueError("Expected a high-detail inline image")
-            content.append({"type": "input_image", "image_url": image["image_url"], "detail": "high"})
+        image = parts[1]
+        if (image.get("type") != "input_image" or not isinstance(image.get("image_url"), str)
+                or not image["image_url"].startswith("data:image/") or image.get("detail") != "high"):
+            raise ValueError("Expected a high-detail inline image")
+        content.append({"type": "input_image", "image_url": image["image_url"], "detail": "high"})
         if not isinstance(body.get("instructions"), str):
             raise ValueError("Expected role instructions")
+        limit = body.get("max_output_tokens")
+        if type(limit) is not int or limit not in (GROUNDING_OUTPUT_LIMIT, UTTERANCE_OUTPUT_LIMIT):
+            raise ValueError("Expected the pilot output limit for this step")
         # Construct a fresh, allowlisted request. In particular no tools, cache markers,
         # previous responses, regional endpoints or project-selected premium tier.
         return {
@@ -113,7 +114,7 @@ class OpenAIPilotAPI:
             "instructions": body["instructions"], "text": {"format": {"type": "json_object"}},
             "reasoning": {"effort": "low"}, "store": False, "service_tier": "default",
             "prompt_cache_options": {"mode": "explicit"},
-            "max_output_tokens": _GROUNDING_LIMIT if len(content) == 2 else _UTTERANCE_LIMIT,
+            "max_output_tokens": limit,
         }
 
     def _post(self, url, body, *, request_id=None):

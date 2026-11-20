@@ -108,7 +108,11 @@ class RecoveryTests(unittest.TestCase):
         self.assertEqual(result["additional_generation_cost_usd"], .0004)
         self.assertEqual(result["models"][self.first[1]]["transitions"], {"pending_review->pending_review": 19,
                                                                          "hold->pending_review": 1})
-        self.assertEqual(pilot.status(self.run_dir), self.original_report)
+        initial = pilot.status(self.run_dir)
+        self.assertEqual(initial["shared_budget"], result["shared_budget"])
+        self.assertEqual(initial.pop("shared_budget"), {"legacy_committed_usd": 0, "committed_usd": .0008,
+                                                       "remaining_usd": 1.9992})
+        self.assertEqual(initial, {k: v for k, v in self.original_report.items() if k != "shared_budget"})
 
     def test_interrupt_after_settlement_replays_prefix_from_both_phases(self):
         def interrupt(*args, **kwargs):

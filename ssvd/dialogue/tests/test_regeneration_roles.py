@@ -88,13 +88,16 @@ class RegenerationRoleTests(unittest.TestCase):
         self.assertEqual(result["status"], "pending_review", result)
         self.assertEqual(len(result["dialogue"]), 16)
 
-    def test_questioner_only_knows_public_history_and_ocr_answer_stays_private_until_due(self):
+    def test_both_roles_receive_source_image_every_turn_and_answers_stay_private_until_due(self):
         result, _, requests = self.exercise([COUNT, OCR], model="gpt-6.1-terra")
         self.assertEqual(result["status"], "pending_review", result)
         for pair, phase, request in requests:
             wire = json.dumps(request, ensure_ascii=False)
             self.assertEqual(request["model"], "gpt-6.1-terra")
-            self.assertNotIn(IMAGE, wire)
+            parts = request["input"][0]["content"]
+            self.assertEqual([part["type"] for part in parts], ["input_text", "input_image"])
+            self.assertEqual(parts[1], {"type": "input_image", "image_url": IMAGE, "detail": "high"})
+            self.assertEqual(request["max_output_tokens"], 1024)
             due = result["task_pairs"]["ocr"]
             if pair < due or (pair == due and phase == "user"):
                 self.assertNotIn(OCR["written"], wire)
@@ -103,6 +106,58 @@ class RegenerationRoleTests(unittest.TestCase):
                 self.assertIn(OCR["written"], wire)
             if phase == "user":
                 self.assertNotIn("画像の観察情報", wire)
+                payload = json.loads(parts[0]["text"].splitlines()[1])
+                self.assertNotIn("この返答の根拠", wire)
+                for kind, target in ((COUNT["kind"], COUNT["target"]), (OCR["kind"], OCR["target"])):
+                    if pair == result["task_pairs"][kind]:
+                        self.assertEqual(payload["質問の対象"], target)
+                        self.assertEqual(set(payload), {"質問の対象", "公開された会話"})
+        observation = self.step([])["request"]
+        self.assertEqual(observation["max_output_tokens"], 2048)
+        self.assertEqual(observation["input"][0]["content"][1]["image_url"], IMAGE)
+
+    def test_question_can_introduce_a_new_target_directly_from_the_image(self):
+        for task, questions in [
+            (COUNT, [("手前のベンチは何脚ある？", "pending_review"), ("自転車は何台ある？", "hold")]),
+            ({**OCR, "target": "看板中央の白い文字"}, [
+                ("この看板、何て書いてあるんだろう？", "pending_review"), ("何て書いてある？", "pending_review")]),
+        ]:
+            def override(pair, phase, positions, old):
+                if phase == "assistant" and pair < positions[task["kind"]]:
+                    return "手前に芝生が見えるよ。"
+                if phase == "user" and pair == positions[task["kind"]]:
+                    return question
+                return old
+            for question, expected in questions:
+                with self.subTest(task=task["kind"], question=question):
+                    result, _, _ = self.exercise([task], override=override)
+                    self.assertEqual(result["status"], expected, result)
+
+    def test_reference_to_the_previous_sign_does_not_license_asking_about_a_different_sign(self):
+        task = {**OCR, "target": "左の看板"}
+        def replace(pair, phase, positions, old):
+            if phase == "assistant" and pair + 1 == positions["ocr"]:
+                return "木の隣に左の看板があるよ。"
+            if phase == "user" and pair == positions["ocr"]:
+                return question
+            return old
+        for question, expected in [
+            ("その看板には何て書いてある？", "pending_review"),
+            ("何て書いてある？", "pending_review"),
+            ("右の看板には何て書いてある？", "hold"),
+        ]:
+            with self.subTest(question=question):
+                result, _, _ = self.exercise([task], override=replace)
+                self.assertEqual(result["status"], expected, result)
+
+    def test_embedded_evidence_is_reproducible_after_json_roundtrip_with_sorted_keys(self):
+        observation = {"status": "ok", "scene": SCENE, "tasks": [OCR]}
+        result, replies, _ = self.exercise([OCR])
+        answer_due = 2 * result["task_pairs"]["ocr"]
+        prefix = [observation, *replies[1:answer_due]]
+        request = self.step(prefix)
+        self.assertEqual(request["phase"], "assistant")
+        self.assertEqual(request, self.step(json.loads(json.dumps(prefix, sort_keys=True))))
 
     def test_uncertainty_modes_can_finish_as_pending(self):
         for kind, mode, gold, answer in [

@@ -359,6 +359,13 @@ def _bilingual_form(written, reading):
 def _ocr_problem(task, question, answer, *, allow_paraphrase=False):
     if not _OCR_QUESTION.search(question):
         return "question_does_not_ask_to_read"
+    # Explicitly asking about the right sign contradicts evidence for the left
+    # sign. Short references like 「その看板」「何て書いてある？」 are fine.
+    for side, noun in re.findall(r"([左右])(?:側|端)?の([一-龯ァ-ヺー]+)", task["target"]):
+        other = "右" if side == "左" else "左"
+        subject = rf"(?:側|端)?の{re.escape(noun)}(?=[にはをが、,？?])"
+        if re.search(other + subject, question) and not re.search(side + subject, question):
+            return "ocr_question_refers_to_different_target"
     mode = task["mode"]
     if mode == "unknown":
         illegible = _UNKNOWN.search(answer) or re.search(r"文字.{0,4}(?:つぶれ|潰れ|ぼやけ|かすれ)", answer)

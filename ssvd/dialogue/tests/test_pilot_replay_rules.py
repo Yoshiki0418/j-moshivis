@@ -116,7 +116,7 @@ class PilotReplayRulesTests(unittest.TestCase):
             example = observe(first, {**SECOND_SIGN, "target": right})
             self.assertEqual(step([example], recovery=True), step([observe(first)]))
 
-    def test_recover_introduction_without_rewriting_the_prior_utterance(self):
+    def test_reference_to_an_introduced_ocr_target_does_not_require_recovery(self):
         task = {**SIGN, "target": "案内板中央の白い文字"}
         replies = [observe(task)]
         while True:
@@ -127,10 +127,12 @@ class PilotReplayRulesTests(unittest.TestCase):
             replies.append({"text": "どんな様子？" if stage["phase"] == "user" else "建物があるよ。"})
         introduction = "案内板の中央には白い文字があるよ。"
         replies.append({"text": introduction})
-        self.assertEqual(step(replies)["reason"], "target_not_introduced_before_question")
-        recovered = step(replies, recovery=True)
-        self.assertEqual(recovered["phase"], "user")
-        self.assertIn(introduction, recovered["request"]["input"][0]["content"][0]["text"])
+        request = step(replies)
+        self.assertEqual(request, step(replies, recovery=True))
+        self.assertEqual(request["phase"], "user")
+        self.assertIn(introduction, request["request"]["input"][0]["content"][0]["text"])
+        replies.append({"text": "何と書いてあるの？"})
+        self.assertEqual(step(replies)["phase"], "assistant")
 
     def test_preview_keeps_first_transcript_identity_and_opt_in(self):
         source = {"image": "image.png", "image_sha256": "b" * 64}

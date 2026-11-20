@@ -1,60 +1,47 @@
-"""The fallback matches the bytes sent, never just a semantically similar request."""
+"""An image-backed request must have the same wire body after a ledger round trip."""
 
-import copy
+import hashlib
 import json
 import unittest
 
+from ssvd.dialogue.pilot import encode
 from ssvd.dialogue.pilot_api import OpenAIPilotAPI
-from ssvd.dialogue.pilot_replay_hash import matches_saved_request, request_digest
 from ssvd.dialogue.regeneration_roles import next_step
 
 
+def assistant_body(task, *, image="data:image/png;base64,AA==", greeting="どんな写真？"):
+    observation = {"scene": "入口に札が掛かっている", "status": "ok", "tasks": [task]}
+    replies = [observation]
+    while True:
+        stage = next_step("synthetic", "ocr", image, replies, pairs=4)
+        pair = (len(replies) - 1) // 2 + 1
+        active = pair == stage["task_pairs"]["ocr"]
+        if stage["phase"] == "assistant" and active:
+            return OpenAIPilotAPI("offline").prepare(stage["request"])
+        if stage["phase"] == "user":
+            text = "入口の札には何と書いてあるの？" if active else greeting
+        else:
+            text = "入口に札が掛かっているね。"
+        replies.append({"text": text})
+
+
 class ReplayHashTests(unittest.TestCase):
-    def prompt(self, task):
-        observation = {"scene": "入口に札が掛かっている", "status": "ok", "tasks": [task]}
-        replies = [observation]
-        while True:
-            stage = next_step("synthetic", "ocr", "data:image/png;base64,AA==", replies, pairs=4)
-            pair = 1 + (len(replies) - 1) // 2
-            active = pair == stage["task_pairs"]["ocr"]
-            if stage["phase"] == "assistant" and active:
-                return OpenAIPilotAPI("offline").prepare(stage["request"])
-            if stage["phase"] == "user":
-                replies.append({"text": "何と書いてあるの？" if active else "どんな様子？"})
-            else:
-                replies.append({"text": "入口に札が掛かっているね。"})
+    def test_reloading_sorted_task_keys_preserves_the_paid_request(self):
+        task = dict(target="入口の札", mode="partial", kind="ocr", written="北", reading="きた", reason="端が切れている")
+        from_ledger = json.loads(encode(task))
+        self.assertNotEqual(list(task), list(from_ledger))
+        self.assertEqual(assistant_body(task), assistant_body(from_ledger))
 
-    def test_original_key_order_reproduces_digest_but_new_values_do_not(self):
-        task = dict(kind="ocr", target="札", mode="partial", written="北", reading="きた", reason="端が切れている")
-        body = self.prompt(task)
-        original = copy.deepcopy(body)
-        digest = request_digest(self.prompt(dict(reversed(list(task.items())))))
-        self.assertNotEqual(request_digest(body), digest)
-        self.assertTrue(matches_saved_request(body, digest))
-        self.assertEqual(body, original)
-        for change in (dict(target="入口の札"), dict(written="南", reading="みなみ"), dict(reason="陰になる")):
-            self.assertFalse(matches_saved_request(self.prompt({**task, **change}), digest))
-        different_model = {**body, "model": "different"}
-        self.assertFalse(matches_saved_request(different_model, digest))
+    def test_digest_still_binds_image_evidence_and_dialogue(self):
+        task = dict(target="入口の札", mode="exact", kind="ocr", written="北", reading="きた")
 
-    def test_does_not_accept_reordered_dialogue_or_expand_large_or_unknown_task_keys(self):
-        task = dict(kind="ocr", target="札", mode="exact", written="北", reading="きた")
-        body = self.prompt(task)
-        original_text = body["input"][0]["content"][0]["text"]
-        cue, payload, last = original_text.split("\n")
-        for field in ("history", "extra"):
-            context = json.loads(payload)
-            if field == "history":
-                turns = context["公開された会話"]
-                turns[0] = dict(reversed(list(turns[0].items())))
-            else:
-                context["画像の観察情報"]["この返答の根拠"]["extra"] = "unknown"
-            modified = copy.deepcopy(body)
-            modified["input"][0]["content"][0]["text"] = "\n".join((cue, json.dumps(context, ensure_ascii=False), last))
-            self.assertFalse(matches_saved_request(modified, request_digest(body)))
-        self.assertFalse(matches_saved_request(body, "no-digest"))
+        def digest(body):
+            return hashlib.sha256(encode(body).encode()).hexdigest()
 
-    def test_exact_hash_for_any_phase(self):
-        body = {"instructions": "synthetic grounding", "input": []}
-        self.assertTrue(matches_saved_request(body, request_digest(body)))
-        self.assertFalse(matches_saved_request(body, "0" * 64))
+        original = digest(assistant_body(task))
+        for changed in (
+            assistant_body(task, image="data:image/png;base64,AQ=="),
+            assistant_body({**task, "written": "南", "reading": "みなみ"}),
+            assistant_body(task, greeting="ここはどんな場所？"),
+        ):
+            self.assertNotEqual(digest(changed), original)
