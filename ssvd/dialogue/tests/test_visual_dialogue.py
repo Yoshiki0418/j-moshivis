@@ -23,6 +23,7 @@ class VisualDialogueTests(unittest.TestCase):
             self.assertEqual(stage["phase"], role)
             prompt, image = stage["request"]["input"][0]["content"]
             context = json.loads(prompt["text"])
+            self.assertIn("JSON", context["出力形式"])
             self.assertEqual(context["公開された会話"], history)
             self.assertEqual(image, {"type": "input_image", "image_url": IMAGE, "detail": "high"})
             self.assertNotIn('AOBA', prompt["text"])
