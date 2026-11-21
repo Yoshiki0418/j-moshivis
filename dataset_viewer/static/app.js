@@ -1299,7 +1299,8 @@ function renderReview(item) {
   const origin = candidate || (reviewedCandidate && item.human_revision);
   if (origin) {
     facts.unshift(["表示中の版", candidate ? "本番再生成・人手確認待ち" : terraVersion],
-      ["生成モデル", origin.model || "gpt-6.1-terra"]);
+      ["生成モデル", origin.model || "gpt-6.1-terra"],
+      ["生成経路", origin.generation_backend === "codex_cli" ? "Codex CLI" : "OpenAI API"]);
     if (origin.prompt_version) facts.push(["プロンプト版", origin.prompt_version]);
     if (origin.created_at || origin.generated_at) facts.push(["生成日時", formatDateTime(origin.created_at || origin.generated_at)]);
   }

@@ -25,7 +25,7 @@ def _write_jsonl(path: Path, records: list[dict], partial: dict | None = None) -
 
 
 class DatasetCatalogTest(unittest.TestCase):
-    def _generated_dialogue(self):
+    def _generated_dialogue(self, *, backend="openai_api"):
         source, record, original, suggestion = self._required_ai_suggestion()
         candidate = {**record, "generator": "gpt-6.1-terra", "prompt_version": "visual_dialogue_v10",
                      "review_required": True, "review_warnings": [], "dialogue": record["dialogue"] + [
@@ -35,10 +35,13 @@ class DatasetCatalogTest(unittest.TestCase):
                          "grounding_source": "vlm_visual", "additional_tasks": [
                              {"kind": "counting", "question_turn_index": 0, "answer_turn_index": 1,
                               "grounding_source": "vlm_visual"}]}}
+        if backend == "codex_cli":
+            candidate.update(generation_backend=backend, prompt_version="visual_dialogue_v11")
         candidate.update(review_metadata(candidate))
         key = dict(collection=original["collection"], uid=original["uid"],
                    base_fingerprint=original["review_id"], image_sha256=record["image_sha256"])
-        draft = {"candidate": candidate, "source": "production_v10_terra", "created_at": "2026-11-21T00:00:00Z"}
+        draft = {"candidate": candidate, "generation_backend": backend, "created_at": "2026-11-21T00:00:00Z",
+                 "source": "codex_regeneration_terra_v11" if backend == "codex_cli" else "production_v10_terra"}
         mocked = patch.object(self.catalog.terra_candidates, "get", side_effect=lambda **kw: draft if kw == key else None)
         mocked.start()
         self.addCleanup(mocked.stop)
@@ -58,6 +61,7 @@ class DatasetCatalogTest(unittest.TestCase):
         self.assertEqual(shown["original_dialogue"], original["dialogue"])
         self.assertEqual(shown["original_ai_suggestion"]["suggestion_id"], suggestion["suggestion_id"])
         self.assertEqual(shown["regeneration_candidate"]["candidate_id"], candidate["review_id"])
+        self.assertEqual(shown["regeneration_candidate"]["generation_backend"], "openai_api")
         self.assertEqual(shown["navigation"]["total"], 1)
         for stale in ({}, {"regeneration_candidate_id": "a" * 64}):
             with self.assertRaises(ReviewConflictError):
@@ -71,6 +75,7 @@ class DatasetCatalogTest(unittest.TestCase):
                                          decision="approved", regeneration_candidate_id=candidate["review_id"])
         self.assertEqual(result["review_status"], "approved")
         self.assertEqual(result["event"]["regeneration_review"]["action"], "approved")
+        self.assertEqual(result["event"]["regeneration_review"]["generation_backend"], "openai_api")
         self.assertEqual(result["review_id"], candidate["review_id"])
         self.assertEqual(source.read_bytes(), original_bytes)
         self.assertEqual(self.catalog.review_store.resolve_record(record)["generator"], candidate["generator"])
@@ -79,7 +84,9 @@ class DatasetCatalogTest(unittest.TestCase):
             self.catalog.get_item(original["token"], {"ai_status": "regenerated"})
 
     def test_edit_terra_second_marker_without_requiring_a_ground_truth_value(self):
-        _, record, original, _, candidate = self._generated_dialogue()
+        _, record, original, _, candidate = self._generated_dialogue(backend="codex_cli")
+        preview = self.catalog.get_item(original["token"], {"ai_status": "regenerated"})
+        self.assertEqual(preview["regeneration_candidate"]["generation_backend"], "codex_cli")
         turns = [dict(t) for t in candidate["dialogue"]]
         turns[-1]["text"] = "赤い字は一部だけ読めるよ。"
         auxiliary = {**candidate["auxiliary_task"], "answer_mode": "partial", "additional_tasks": [
@@ -88,7 +95,10 @@ class DatasetCatalogTest(unittest.TestCase):
             regeneration_candidate_id=candidate["review_id"], dialogue=turns, auxiliary_task=auxiliary,
             active_ms=2400, error_kinds=["reading"])
         self.assertEqual(result["event"]["regeneration_review"]["action"], "edited")
+        self.assertEqual(result["event"]["regeneration_review"]["generation_backend"], "codex_cli")
         revised = self.catalog.review_store.resolve_record(record)
+        self.assertEqual(revised["human_revision"]["generation_backend"], "codex_cli")
+        self.assertEqual(revised["generation_backend"], "codex_cli")
         self.assertNotEqual(revised["review_id"], candidate["review_id"])
         self.assertEqual(revised["dialogue"], turns)
         self.assertEqual(revised["auxiliary_task"], auxiliary)
@@ -96,12 +106,13 @@ class DatasetCatalogTest(unittest.TestCase):
         self.assertEqual(result["item"]["original_generator"], record["generator"])
 
     def test_reject_terra_preserves_version_and_decision_after_refresh(self):
-        source, record, original, _, candidate = self._generated_dialogue()
+        source, record, original, _, candidate = self._generated_dialogue(backend="codex_cli")
         source_bytes = source.read_bytes()
         result = self.catalog.review_item(original["token"], fingerprint=original["review_id"], decision="rejected",
                                          regeneration_candidate_id=candidate["review_id"])
         self.assertFalse(result["dataset_usable"])
         self.assertEqual(result["event"]["regeneration_review"]["action"], "rejected")
+        self.assertEqual(result["event"]["regeneration_review"]["generation_backend"], "codex_cli")
         self.assertEqual(result["review_id"], candidate["review_id"])
         self.catalog.refresh()
         current = self.catalog.get_item(original["token"])

@@ -218,7 +218,7 @@ v11では、直近のユーザー発話が続けて質問らしい言い方な�
 
 モデル選定には同じ20画像（元ラベルで OCR 14、カウント 6）の比較を用いた。確認の観点は、読める対象に答えられるか、曖昧な対象を断定していないか、追質問や言い回しが自然か。`generated_tasks` はラベルの組み合わせ別の対話数、`marked_turns_by_kind` は各ラベルが付いた往復数を示す。一つの往復に両方付けば、OCR・カウントにそれぞれ1件を計上する。[少数試行 #12](https://github.com/Yoshiki0418/j-moshivis/issues/12)
 
-### 本番の進捗確認と中断後の再開
+### OpenAI API 枠の進捗確認と再開（3,600枚）
 
 本番は `gpt-6.1-terra` の Flex で画像ごとに4〜8往復を生成する。最初の固定キューは3,600画像。過去の生成と人手判断の続きを扱うため、元画像とQwenのJSONL、ビューアのカタログと人手判断履歴、固定評価データ、少数試行・先行100件・本番の各台帳がある環境で実行する。[本番生成 #13](https://github.com/Yoshiki0418/j-moshivis/issues/13)
 
@@ -244,6 +244,39 @@ production_manifest_sha=295cdc50e643f3de07c36cf6112f1d2105df1bcd718bf1ecb478633c
 - 生成結果は `data/curation/gpt_regeneration_issue13/production_v10_terra/production.sqlite3` に発話単位で保存する。`summary.json` と `pending_candidates.jsonl` は確認用の出力。完成した対話はビューアの `/#annotate-terra` から確認し、本人が承認した版を音声合成に使う。途中で元の対話を承認・編集・却下した場合もその判断が優先される。[人手確認 #9](https://github.com/Yoshiki0418/j-moshivis/issues/9)
 
 別の対象群を検討する際は `production_cohort dry-run --limit 枚数` で抽出数と除外理由を調べられる（モジュール名は上の `verify` と共通）。新しい保存先に `freeze --manifest パス --limit 枚数` を実行すると固定リストと照合用のSHA-256が得られる。選定と凍結にAPI料金は発生しない。上の `run` は初回クレジット用の本番保存先を使用する。
+
+### Codex CLI 枠の進捗確認と再開（20,505枚）
+
+2026年11月21日、API本番3,600枚と先行試行、人手判断済みの対話、固定評価用画像との重複・類似を除き、残りの20,505枚を固定した。旧対話の分類でカウント6,281枚、OCR 14,224枚。長さは計123,067往復。生成時のモデルはAPIと同じ `gpt-6.1-terra` で、両役にv11のプロンプト、元画像と直前までの全発話を渡す。認証にはChatGPTのCodex利用枠を使う。APIの70ドル枠と課金台帳は別に管理する。[CLI生成の運用 #57](https://github.com/Yoshiki0418/j-moshivis/issues/57)
+
+進捗はリポジトリ直下で確認できる。初回起動では画像と元対話を全件照合するため、最初の発話を生成するまで数分かかる。
+
+```bash
+cli_manifest_sha=b76864e29c9444bf4948e7f2bcff6f4901609130721d0c27e50da78b210566a6
+.venv-data/bin/python -m ssvd.dialogue.codex_production status --manifest-sha "$cli_manifest_sha"
+```
+
+| 項目 | 読み方 |
+|---|---|
+| `queue` / `remaining` | 固定した画像数と、処理結果がまだ確定していない画像数。途中まで会話がある画像も残りに含む。 |
+| `received_turns` / `outstanding_turns` | 受領済みの発話数と、送信を記録して受領が確定していない発話数。一往復でユーザーとアシスタントの二発話。 |
+| `outcomes.pending_review` | 全発話を生成して人手確認用に保存した対話の累計。実際に今から確認できる件数はビューアに表示される。 |
+| `outcomes.protected` / `outcomes.hold` | 元データの変更・人手判断などで保護した件数と、受領未確定などで保留した件数。 |
+
+開始・再開には同じ固定リストと台帳を使う。ChatGPTでログイン済みのサーバーユーザーから次を実行する。`--workers 2` は最大2画像を並行処理する指定で、各画像内では発話順を守る。`--limit` を省略すると全対象を処理する。
+
+```bash
+codex login status
+.venv-data/bin/python -m ssvd.dialogue.codex_production run --manifest-sha "$cli_manifest_sha" --workers 2
+```
+
+サーバーの本番プロセスはリモート接続を切っても続くように独立したセッションで起動する。固定リストと同じディレクトリに、最初の5枚は `pilot5.pid` / `pilot5.log`、全件処理は `generation.pid` / `generation.log` を置く。ログは終了時の記録が中心で、途中の件数は上の `status` で確認する。手動停止にはフォアグラウンドで Ctrl+C、切り離したプロセスではPIDが該当の `ssvd.dialogue.codex_production run` と一致することを確認して SIGTERM を送る。送信中の処理を終えた後の状態は `operator_stop` になる。
+
+一時的な混雑（429）ではすべてのワーカーが新規送信を待ち、待機時間を延ばして再試行する。再試行を使い切ると `rate_limited`、Codexの利用枠を使い切ると `usage_limit` で停止する。前者は混雑の解消後、後者はアカウントの枠の回復後に同じコマンドで手動再開する。完了した発話を台帳から復元し、途中の画像から順に続ける。
+
+通信断などで受領を確定できない場合は `invocation_error` や未受領の記録を確認する。再起動時、受領が未確定の発話を含む対話は `hold` に残し、他の対象を続ける。固定リスト・契約・発話・確認候補は `data/curation/codex_regeneration_terra_v11/` の `manifest.json`、`run_contract.json`、`generation.sqlite3` に保存する。
+
+完成候補は既存のAPI生成分と同じ「Terraの本番対話を確認」に表示される。「生成経路」が `Codex CLI` の対話は、元画像と対話全文を確認して承認・編集後承認・却下できる。人が承認した版を音声合成に使う。[アノテーション画面](http://127.0.0.1:8765/#annotate-terra)・[ビューアの操作手順](../../dataset_viewer/README.md)
 
 ### 少数試行で使ったコマンド（20画像）
 

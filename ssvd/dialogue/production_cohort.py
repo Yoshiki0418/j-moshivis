@@ -25,6 +25,7 @@ SEED = "japanese-daily-issue13-terra-production-v10-20261121"
 PILOTS = Path("data/curation/gpt_pilot_issue12")
 WAVES = Path("data/curation/gpt_regeneration_issue13")
 DEFAULT_MANIFEST = WAVES / "production_v10_terra/manifest.json"
+CLI_MANIFEST = Path("data/curation/codex_regeneration_terra_v11/manifest.json")
 KINDS = ("counting", "ocr")
 SHA256 = re.compile("[a-f0-9]{64}")
 
@@ -33,13 +34,13 @@ def _readonly(path):
     return sqlite3.connect(path.resolve().as_uri() + "?mode=ro", uri=True)
 
 
-def load_manifest(path: Path, expected_sha: str) -> dict:
+def load_manifest(path: Path, expected_sha: str, *, prompt_version: str = PROMPT_VERSION) -> dict:
     raw = path.read_bytes()
     if hashlib.sha256(raw).hexdigest() != expected_sha:
         raise ValueError("Frozen production manifest checksum differs")
     manifest = json.loads(raw)
     if (manifest.get("schema_version") != 1 or manifest.get("model") != MODEL
-            or manifest.get("collection") != COLLECTION or manifest.get("prompt_version") != PROMPT_VERSION):
+            or manifest.get("collection") != COLLECTION or manifest.get("prompt_version") != prompt_version):
         raise ValueError("Unexpected production manifest contract")
     samples = manifest["samples"]
     seen_aliases, hashes, bases = set(), set(), set()
@@ -75,13 +76,29 @@ def _touched(root):
     return {uid for collection, uid in human_touched_uids(ReviewStore(path)) if collection == COLLECTION}
 
 
-def _previous(root, current):
+def _previous(root, current, *, verifying_sha=None):
     pilot, waves = root / PILOTS, root / WAVES
     first = waves / "first100_v10/manifest.json"
     # These preceding cohorts used paid calls. An incomplete history can select a duplicate.
     if not (pilot / "manifest.json").is_file() or len(json.loads(first.read_bytes())["samples"]) != 100:
         raise ValueError("Restore the original comparison and first-100 manifests")
     manifests = [*pilot.rglob("manifest.json"), *pilot.rglob("sample.json"), *waves.glob("*/manifest.json")]
+    cli = root / CLI_MANIFEST
+    if cli != current:
+        # An established paid cohort was the input to the CLI exclusion pass.
+        # Auditing it does not depend on access to the later CLI archive.
+        contract = current.parent / "billing-contract.json"
+        verifying_original = (current == root / DEFAULT_MANIFEST and verifying_sha and contract.is_file()
+                              and verifying_sha == json.loads(contract.read_bytes())["manifest_sha"])
+        if not verifying_original:
+            marker = cli.parent / "run_contract.json"
+            if marker.is_file():
+                if not cli.is_file() or sha256_file(cli) != json.loads(marker.read_bytes())["manifest_sha256"]:
+                    raise ValueError("Restore the original Codex CLI manifest before selecting more images")
+            elif (cli.parent / "generation.sqlite3").exists():
+                raise ValueError("Restore the original Codex CLI run contract before selecting more images")
+            if cli.is_file():
+                manifests.append(cli)
     previous = {}
     for path in sorted(manifests):
         if path.resolve() == current.resolve():
@@ -147,8 +164,9 @@ def _protected(db, root, current):
     return blocked, index, fixed, touched, len(previous)
 
 
-def prepare_manifest(root: Path, current: Path, limit: int, seed: str = SEED) -> dict:
-    if limit < 1 or not seed:
+def prepare_manifest(root: Path, current: Path, limit: int | None, seed: str = SEED) -> dict:
+    """Freeze an exact quota, or exhaust every eligible image when limit is None."""
+    if (limit is not None and limit < 1) or not seed:
         raise ValueError("Specify a positive image count and a nonempty seed")
     root = root.resolve()
     started = datetime.now(timezone.utc).isoformat()
@@ -163,16 +181,22 @@ def prepare_manifest(root: Path, current: Path, limit: int, seed: str = SEED) ->
                 queues[row["auxiliary_kind"]].append(row)
         available = {k: len(v) for k, v in queues.items()}
         total = sum(available.values())
-        if total < limit:
-            raise ValueError(f"Requested {limit} images, only {total} eligible before pixel matching")
+        exhaustive = limit is None
+        target = total if exhaustive else limit
+        if not target or total < target:
+            raise ValueError(f"Requested {target} images, only {total} eligible before pixel matching")
         queues = {k: iter(sorted(v, key=lambda r: hashlib.sha256(f"{seed}:{r['uid']}".encode()).digest()))
                   for k, v in queues.items()}
-        n_count = (limit * available["counting"] + total // 2) // total
-        kept, skipped, samples = Counter(), Counter(), []
+        n_count = (target * available["counting"] + total // 2) // total
+        scheduled, kept, skipped, samples = Counter(), Counter(), Counter(), []
         selected_fingerprints = []
-        for n in range(1, limit + 1):
-            kind = "counting" if kept["counting"] < (n * n_count + limit // 2) // limit else "ocr"
-            for hint_row in queues[kind]:
+        for n in range(1, target + 1):
+            kind = "counting" if scheduled["counting"] < (n * n_count + target // 2) // target else "ocr"
+            scheduled[kind] += 1
+            # With a fixed quota, replace an excluded row with the next of the
+            # same kind. On the exhaustive pass, each input has its own slot.
+            candidates = (next(queues[kind]),) if exhaustive else queues[kind]
+            for hint_row in candidates:
                 uid = hint_row["uid"]
                 row, fp, source, path = _source(db, root, uid)
                 aliases = {key for key in (uid, row["source_uid"], source.get("split_group_key")) if key}
@@ -199,7 +223,10 @@ def prepare_manifest(root: Path, current: Path, limit: int, seed: str = SEED) ->
                 kept[kind] += 1
                 break
             else:
-                raise ValueError(f"Insufficient eligible {kind} images after overlap exclusions")
+                if not exhaustive:
+                    raise ValueError(f"Insufficient eligible {kind} images after overlap exclusions")
+        if not samples:
+            raise ValueError("No eligible images after overlap exclusions")
         newly_reviewed = _touched(root) - touched
         if newly_reviewed:
             selected = selection.KnownImageIndex(near_threshold=4, review_threshold=8)
@@ -215,7 +242,7 @@ def prepare_manifest(root: Path, current: Path, limit: int, seed: str = SEED) ->
     return dict(schema_version=1, collection=COLLECTION, seed=seed, prompt_version=PROMPT_VERSION, model=MODEL,
                 sampled_from_utc=started, created_utc=datetime.now(timezone.utc).isoformat(),
                 candidate_pool=dict(pool), pool_without_previous_or_eval_id=available,
-                sampling_target={"counting": n_count, "ocr": limit - n_count}, sample_size=limit,
+                sampling_target={k: kept[k] for k in KINDS}, sample_size=len(samples),
                 pairs=sum(s["pairs"] for s in samples), previous_pilot_and_first100_excluded=previous,
                 human_reviewed_ids_excluded=len(touched), fixed_evaluation=fixed,
                 overlap_thresholds=dict(near=4, review=8), overlap_exclusions_encountered=dict(skipped), samples=samples)
@@ -241,11 +268,11 @@ def _publish(path, manifest):
     return hashlib.sha256(payload).hexdigest()
 
 
-def verify_manifest(root, path, digest):
+def verify_manifest(root, path, digest, *, prompt_version=PROMPT_VERSION):
     """Verify the original bytes and report current review eligibility separately."""
-    manifest = load_manifest(path, digest)
+    manifest = load_manifest(path, digest, prompt_version=prompt_version)
     catalogue_pending = set()
-    previous = _previous(root, path)
+    previous = _previous(root, path, verifying_sha=digest)
     heldout, index, fixed = selection._fixed_evaluation(root)
     if fixed != manifest["fixed_evaluation"] or manifest.get("overlap_thresholds") != {"near": 4, "review": 8}:
         raise ValueError("The frozen evaluation reference changed")
