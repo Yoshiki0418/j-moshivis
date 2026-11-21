@@ -1393,6 +1393,7 @@ function renderAiSuggestion(item) {
   if (compareTerra) {
     dom.aiSuggestionLabel.textContent = "以前の対話と比較";
     appendComparisonDialogue(`元の対話（${item.original_generator || "ローカル生成"}）`, item.original_dialogue);
+    if (item.unedited_regeneration_dialogue) appendComparisonDialogue("編集前のTerra対話", item.unedited_regeneration_dialogue);
     const earlier = item.original_ai_suggestion;
     if (earlier?.dialogue) appendComparisonDialogue(["以前のAI修正案", earlier.model, earlier.created_at && formatDateTime(earlier.created_at)].filter(Boolean).join("・"), earlier.dialogue);
     for (const warning of candidate?.review_warnings || []) {
@@ -1463,6 +1464,7 @@ function candidateDecisionFields(item) {
 async function submitReview(decision) {
   const item = state.selectedItem;
   if (!item?.token || !item.review_available || state.reviewBusy || state.editingDialogue) return;
+  if (state.filters.ai_status === "regenerated" && !item.regeneration_candidate) return;
   const nextToken = state.annotationMode && dom.annotationAutoNext.checked && decision !== "pending" ? state.navigation.next : "";
   const queueScope = detailScope();
   let succeeded = false;
@@ -1470,7 +1472,6 @@ async function submitReview(decision) {
   const review = item.reviewState;
   const suggestion = activeAiSuggestion(item);
   const approveSuggestion = decision === "approved" && suggestion;
-  if (state.filters.ai_status === "regenerated" && !item.regeneration_candidate) return;
   dom.reviewError.hidden = true;
   dom.reviewError.textContent = "";
   setReviewButtonsBusy(true);

@@ -313,6 +313,9 @@ vm.runInContext(`(async()=>{
   assert.strictEqual(window.history.url,'/#annotate-terra');
   assert.strictEqual(filterParams().get('ai_status'),'regenerated');
   assert.strictEqual(state.selectedItem,null);
+  state.selectedItem=normalizeItem(raw);
+  api=async()=>{throw new Error('A missing candidate must not send a decision');};
+  await submitReview('approved');assert.strictEqual(state.reviewBusy,false);
   const info={candidate_id:'terra-v10',model:'gpt-6.1-terra',prompt_version:'v10',
     review_warnings:[{turn:2,code:'spoken_form'}]};
   const terra={...marked,regeneration_candidate:info,original_dialogue:raw.dialogue,auxiliary_task:dual};
