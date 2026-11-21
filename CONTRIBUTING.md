@@ -114,6 +114,8 @@ docs/17/issue-workflow-rules
 
 原則、一つの実装Issueに一つのブランチ・PRとする。大きな作業は子Issueに分割する。マージ済みのブランチを次のIssueに使い回さず、mainへ直接作業コミットしない。
 
+Codexが共同作業したコミットの主著者は `YAMAMOTO YOSHIKI <145079668+Yoshiki0418@users.noreply.github.com>` とし、本文末尾の独立した段落に `Co-authored-by: Codex <199175422+chatgpt-codex-connector[bot]@users.noreply.github.com>` を置く。PR本文にも両者を記し、squash時は最終コミットにも同じトレーラーを含め、GitHubの著者表示を確認する。
+
 PR本文では、マージにより完了する実装Issueにだけ `Closes #10` のような終了キーワードを使う。親Issueや運用・実験Issueには `Refs #8`、`Refs #12` と書く。レビューと必要なチェックを経てマージし、リポジトリに承認・保護ルールがあれば従う。
 
 ## 6. コード変更のない作業の記録例
