@@ -38,6 +38,8 @@ _FLEX_RATES = {"gpt-6.1-terra": _Rates(500, 25, 625, 2500)}
 class PilotRequestRejected(RuntimeError):
     """A definite HTTP rejection before generation. Safe to release this reservation."""
 
+    code: str = ""
+
 
 class _NoRedirect(HTTPRedirectHandler):
     def redirect_request(self, req, fp, code, msg, headers, newurl):
@@ -136,11 +138,21 @@ class OpenAIPilotAPI:
                 result = json.load(response)
         except HTTPError as error:
             status = error.code
+            rejected = PilotRequestRejected(f"OpenAI rejected the request (HTTP {status})")
+            if status == 429:
+                # Pass only a known billing code to the caller. Never log provider bodies.
+                try:
+                    envelope = json.loads(error.read(16_384))
+                    problem = envelope.get("error") if isinstance(envelope, dict) else None
+                    if isinstance(problem, dict) and problem.get("code") == "insufficient_quota":
+                        rejected.code = "insufficient_quota"
+                except (OSError, HTTPException, ValueError, RecursionError):
+                    pass
             error.close()
             # Only unconditional authentication, route, size, format or quota rejections.
             # Generic 400, timeout, conflict and server errors retain the reservation.
             if status in (401, 403, 404, 413, 415, 422, 429):
-                raise PilotRequestRejected(f"OpenAI rejected the request (HTTP {status})") from None
+                raise rejected from None
             raise RuntimeError(f"OpenAI request outcome unknown (HTTP {status})") from None
         except (URLError, OSError, HTTPException, ValueError, RecursionError):
             raise RuntimeError("OpenAI transport or response decoding failed; outcome unknown") from None

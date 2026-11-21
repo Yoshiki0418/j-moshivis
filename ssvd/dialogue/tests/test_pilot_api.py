@@ -170,6 +170,15 @@ class PilotAPITests(unittest.TestCase):
             with self.assertRaises(ValueError):
                 self.api.generate(body)
 
+    def test_quota_rejection_is_distinct_from_transient_flex_capacity(self):
+        for code, expected in (("insufficient_quota", "insufficient_quota"), ("rate_limit_exceeded", "")):
+            body = json.dumps({"error": {"code": code, "message": "private"}}).encode()
+            self.open.side_effect = HTTPError("https://private", 429, "private", {}, io.BytesIO(body))
+            with self.assertRaises(PilotRequestRejected) as caught:
+                self.api.reserve_usd(request())
+            self.assertEqual(caught.exception.code, expected)
+            self.assertNotIn("private", str(caught.exception))
+
     def test_ambiguous_transport_failure_consumes_quote_and_redacts_input(self):
         body = request()
         with patch.object(self.api, "_post", return_value=counted()):
