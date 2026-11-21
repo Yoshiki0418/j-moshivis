@@ -2275,6 +2275,7 @@ class DatasetCatalog:
                 auxiliary_task=candidate.get("auxiliary_task"), auxiliary_kind=candidate.get("auxiliary_kind"),
                 regeneration_candidate={"candidate_id": candidate["review_id"], "model": candidate["generator"],
                     "prompt_version": candidate["prompt_version"], "created_at": regenerated.get("created_at"),
+                    "generation_backend": regenerated["generation_backend"],
                     "source": regenerated["source"], "review_warnings": candidate.get("review_warnings", [])},
             )
             # Existing speech belongs to the local source, not to this unapproved version.
@@ -2448,10 +2449,12 @@ class DatasetCatalog:
                 }
                 if candidate:
                     provenance = dict(regeneration_candidate_id=candidate["review_id"], model=candidate["generator"],
-                                      prompt_version=candidate["prompt_version"], generated_at=regenerated.get("created_at"))
+                                      prompt_version=candidate["prompt_version"], generated_at=regenerated.get("created_at"),
+                                      generation_backend=regenerated["generation_backend"])
                 if provenance.get("regeneration_candidate_id"):
                     for field in ("regeneration_candidate_id", "model", "prompt_version", "generated_at"):
                         revised["human_revision"][field] = provenance.get(field)
+                    revised["human_revision"]["generation_backend"] = provenance.get("generation_backend", "openai_api")
                     revised.update(review_id=new_id, fingerprint=new_id, content_sha256=new_id)
                 review_info = None
                 if candidate:

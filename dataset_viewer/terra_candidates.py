@@ -19,9 +19,11 @@ COLLECTION = "japanese_daily_v1"
 MODEL = "gpt-6.1-terra"
 _RUNS = Path("data/curation/gpt_regeneration_issue13")
 _PRODUCTION_LEDGER = "production_v10_terra/production.sqlite3"
+_CLI_LEDGER = Path("data/curation/codex_regeneration_terra_v11/generation.sqlite3")
 _LEDGERS = (
-    *(f"first100_v10/shard{i}.sqlite3" for i in range(4)),
-    _PRODUCTION_LEDGER,
+    *(_RUNS / f"first100_v10/shard{i}.sqlite3" for i in range(4)),
+    _RUNS / _PRODUCTION_LEDGER,
+    _CLI_LEDGER,
 )
 _SHA = re.compile(r"[0-9a-f]{64}\Z")
 Key = tuple[str, str, str, str]
@@ -45,6 +47,12 @@ def _stamp(path):
 
 def _outcome_select(db, path):
     """Use the producer's immutable assignment; legacy unassigned rows used v10."""
+    if path.name == _CLI_LEDGER.name:
+        return """
+            SELECT o.rowid, o.uid, o.model, o.outcome,
+                strftime('%Y-%m-%dT%H:%M:%SZ', o.finished_at), 'visual_dialogue_v11'
+            FROM outcomes o
+        """
     version = "'visual_dialogue_v10'"
     join = ""
     if path.parts[-2:] == Path(_PRODUCTION_LEDGER).parts and db.execute(
@@ -61,11 +69,17 @@ def _outcome_select(db, path):
     """
 
 
-def _record(uid, model, raw, finished_at, expected_version, run):
+def _record(uid, model, raw, finished_at, expected_version, path):
     outcome = json.loads(raw)
     if outcome["status"] != "pending_review":
         return None
     c, identity = outcome["candidate"], outcome["identity"]
+    cli = path.name == _CLI_LEDGER.name
+    backend = "codex_cli" if cli else "openai_api"
+    # Old API outcomes predate the backend tag. The new CLI producer always writes both tags.
+    for record in (outcome, c):
+        if record.get("generation_backend", None if cli else backend) != backend:
+            raise ValueError("Candidate generation backend differs from its ledger")
     base, image = identity["base_fingerprint"], identity["image_sha256"]
     pairs = identity["pairs"]
     if not (model == identity["model"] == c["generator"] == MODEL
@@ -87,15 +101,15 @@ def _record(uid, model, raw, finished_at, expected_version, run):
                 or not isinstance(turn["text"], str) or not turn["text"].strip()):
             raise ValueError("Incomplete candidate dialogue")
     return (COLLECTION, uid, base, image), {
-        "candidate": c, "source": run, "created_at": finished_at,
+        "candidate": c, "source": path.parent.name, "generation_backend": backend, "created_at": finished_at,
     }
 
 
 class TerraCandidateStore:
-    """Index immutable, committed outcome rows. Generators own all five source DBs."""
+    """Index immutable, committed outcomes in the configured producer-owned ledgers."""
 
     def __init__(self, repo_root):
-        self._paths = [Path(repo_root).resolve() / _RUNS / name for name in _LEDGERS]
+        self._paths = [Path(repo_root).resolve() / name for name in _LEDGERS]
         self._indices: dict[Path, _Index] = {}
         self._lock = Lock()
         self._records: dict[Key, dict] = {}
@@ -137,7 +151,7 @@ class TerraCandidateStore:
                 changed = True
             for rowid, *row in rows:
                 try:
-                    entry = _record(*row, path.parent.name)
+                    entry = _record(*row, path)
                 except (TypeError, KeyError, ValueError, AttributeError, RecursionError):
                     logging.getLogger(__name__).warning("Skipping invalid Terra outcome %s:%d", path.name, rowid)
                     entry = None
@@ -154,8 +168,10 @@ class TerraCandidateStore:
             ambiguous = set()
             for idx in self._indices.values():
                 for key, record in idx.records.items():
-                    if key in records and any(records[key]["candidate"][field] != record["candidate"][field]
-                                              for field in ("review_id", "prompt_version")):
+                    previous = records.get(key)
+                    if previous and (previous["generation_backend"] != record["generation_backend"]
+                            or any(previous["candidate"][field] != record["candidate"][field]
+                                   for field in ("review_id", "prompt_version"))):
                         ambiguous.add(key)
                     records[key] = record
             for key in ambiguous:
@@ -208,7 +224,7 @@ class TerraCandidateStore:
                     with closing(sqlite3.connect(path.as_uri() + "?mode=ro", uri=True, timeout=0.25)) as db:
                         db.execute("BEGIN")
                         row = db.execute(_outcome_select(db, path) + " WHERE o.uid=?", (uid,)).fetchone()
-                    current = _record(*row[1:], path.parent.name) if row else None
+                    current = _record(*row[1:], path) if row else None
                 except sqlite3.DatabaseError as error:
                     raise ReviewConflictError("生成台帳を照合できませんでした。再読み込みしてから確認してください。") from error
                 except (TypeError, KeyError, ValueError, AttributeError, RecursionError):

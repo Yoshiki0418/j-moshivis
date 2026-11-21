@@ -5,7 +5,7 @@ import json
 import sqlite3
 from unittest import TestCase, mock
 
-from ssvd.dialogue import production_cohort as cohort
+from ssvd.dialogue import codex_cohort as cli, production_cohort as cohort
 from ssvd.dialogue.tests import test_pilot_selection as fixtures
 from ssvd.images.collect_japanese_daily_v1 import image_fingerprints
 from ssvd.review_store import DEFAULT_REVIEW_EVENTS, ReviewStore
@@ -104,3 +104,49 @@ class ProductionSelectionTests(TestCase):
             db.commit()
         with self.assertRaisesRegex(ValueError, "no corresponding source"):
             cohort._previous(self.root, self.path)
+
+    def test_codex_exhausts_the_unassigned_pool_and_excludes_every_api_uid(self):
+        with mock.patch.object(cohort, "_previous", return_value={}):
+            full = cohort.prepare_manifest(self.root, self.path, None)
+            api, api_sha = cohort.freeze_manifest(self.root, self.path, 6, cohort.SEED)
+        (self.path.parent / "billing-contract.json").write_text(json.dumps({"manifest_sha": api_sha}))
+        paid = {s["uid"]: s for s in api["samples"]}
+        with mock.patch.object(cohort, "_previous", return_value=paid):
+            work, cli_sha = cli.freeze(self.root)
+            path = self.root / cli.CLI_MANIFEST
+            self.assertEqual(cli.load_cli_manifest(path, cli_sha), work)
+            self.assertEqual(len(work["samples"]) + len(paid), len(full["samples"]))
+            self.assertEqual(work["backend"], "codex_cli")
+            self.assertEqual(work["prompt_version"], "visual_dialogue_v11")
+            self.assertEqual(work["excluded_api_manifest_sha256"], api_sha)
+            self.assertFalse({s["uid"] for s in work["samples"]} & (paid.keys() | self.protected))
+            self.assertEqual(cli.verify(self.root, cli_sha)["verified_samples"], len(work["samples"]))
+            with self.assertRaisesRegex(ValueError, "Unexpected production manifest contract"):
+                cohort.load_manifest(path, cli_sha)
+            with self.assertRaises(FileExistsError):
+                cli.freeze(self.root)
+            path.unlink()
+            (path.parent / "generation.sqlite3").touch()
+            with self.assertRaisesRegex(ValueError, "Restore the CLI manifest"):
+                cli.freeze(self.root)
+
+    def test_future_api_selection_protects_frozen_cli_even_before_generation(self):
+        pilot = self.root / cohort.PILOTS
+        pilot.mkdir(parents=True)
+        first = self.root / cohort.WAVES / "first100_v10"
+        first.mkdir(parents=True)
+        rows = [dict(uid=str(i), image_path=f"{i}.jpg", image_sha256=f"{i:064x}") for i in range(101)]
+        (pilot / "manifest.json").write_text(json.dumps({"samples": []}))
+        (first / "manifest.json").write_text(json.dumps({"samples": rows[:100]}))
+        cli_path = self.root / cli.CLI_MANIFEST
+        cli_path.parent.mkdir()
+        cli_path.write_text(json.dumps({"samples": rows[100:], "excluded_api_manifest_sha256": "a" * 64}))
+        self.path.parent.mkdir()
+        (self.path.parent / "billing-contract.json").write_text(json.dumps({"manifest_sha": "a" * 64}))
+        self.assertIn("100", cohort._previous(self.root, self.path))
+        self.assertNotIn("100", cohort._previous(self.root, self.path, verifying_sha="a" * 64))
+        self.assertIn("100", cohort._previous(self.root, first.parent / "next/manifest.json", verifying_sha="a" * 64))
+        (cli_path.parent / "run_contract.json").write_text(json.dumps({"manifest_sha256": "b" * 64}))
+        with self.assertRaisesRegex(ValueError, "Restore the original Codex CLI manifest"):
+            cohort._previous(self.root, first.parent / "next/manifest.json")
+        self.assertNotIn("100", cohort._previous(self.root, self.path, verifying_sha="a" * 64))

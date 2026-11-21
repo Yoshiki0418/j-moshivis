@@ -308,6 +308,7 @@ class ReviewStore:
                 raise ValueError("Unknown regeneration review error category")
             event["regeneration_review"] = dict(candidate_id=candidate_id, action=action,
                 model=revised_record["generator"], prompt_version=revised_record["prompt_version"],
+                generation_backend=revised_record.get("generation_backend", "openai_api"),
                 active_ms=active_ms, error_kinds=sorted(set(errors)))
         if revised_record is not None:
             if (decision != "approved" and regeneration_review is None) or content_fingerprint(revised_record) != fingerprint:

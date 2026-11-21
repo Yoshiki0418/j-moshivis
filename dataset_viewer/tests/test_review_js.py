@@ -316,12 +316,13 @@ vm.runInContext(`(async()=>{
   state.selectedItem=normalizeItem(raw);
   api=async()=>{throw new Error('A missing candidate must not send a decision');};
   await submitReview('approved');assert.strictEqual(state.reviewBusy,false);
-  const info={candidate_id:'terra-v10',model:'gpt-6.1-terra',prompt_version:'v10',
+  const info={candidate_id:'terra-v11',model:'gpt-6.1-terra',prompt_version:'v11',generation_backend:'codex_cli',
     review_warnings:[{turn:2,code:'spoken_form'}]};
   const terra={...marked,regeneration_candidate:info,original_dialogue:raw.dialogue,auxiliary_task:dual};
   state.selectedItem=normalizeItem(terra);renderReview(state.selectedItem);renderAiSuggestion(state.selectedItem);
   assert.ok(dom.dialogueSectionTitle.textContent.includes('Terra'));
   assert.ok(dom.reviewApprove.textContent.includes('Terra'));
+  assert.ok(dom.reviewFacts.querySelectorAll('dd').some(node=>node.textContent==='Codex CLI'));
   assert.ok(dom.aiSuggestionDiff.querySelectorAll('p').some(node=>node.textContent.includes('猫です。')));
   let candidateSave;
   api=async(path,opts)=>{candidateSave={path,body:JSON.parse(opts.body)};return {item:{...terra,

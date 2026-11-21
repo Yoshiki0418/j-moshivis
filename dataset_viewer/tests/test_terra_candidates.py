@@ -142,6 +142,52 @@ class TerraCandidateTests(unittest.TestCase):
             self.assertIsNone(self.get("new"))
         self.assertEqual([key[1] for key in self.store.keys()], ["legacy"])
 
+    def test_cli_and_api_share_the_queue_but_require_their_own_version_and_source(self):
+        v11 = "visual_dialogue_v11"
+        prod = self.create("production_v10_terra/production.sqlite3")
+        with prod:
+            add(prod, "existing-api")
+            prod.execute("CREATE TABLE dialogue_prompt_versions(uid TEXT PRIMARY KEY, prompt_version TEXT NOT NULL)")
+            prod.execute("INSERT INTO dialogue_prompt_versions VALUES('duplicate',?)", (v11,))
+            add(prod, "duplicate", outcome("duplicate", version=v11))
+            forged_api = outcome("wrong-api-source")
+            forged_api["candidate"]["generation_backend"] = "codex_cli"
+            add(prod, "wrong-api-source", forged_api)
+
+        path = self.root / "data/curation/codex_regeneration_terra_v11/generation.sqlite3"
+        path.parent.mkdir(parents=True)
+        cli = sqlite3.connect(path)
+        self.addCleanup(cli.close)
+        cli.execute("PRAGMA journal_mode=WAL")
+        cli.execute("CREATE TABLE outcomes(uid TEXT PRIMARY KEY, model TEXT, outcome TEXT, finished_at TEXT)")
+        when = "2026-11-21 13:00:00"
+        def insert(uid, version=v11, root_tag="codex_cli", candidate_tag="codex_cli"):
+            row = outcome(uid, version=version)
+            if root_tag:
+                row["generation_backend"] = root_tag
+            if candidate_tag:
+                row["candidate"]["generation_backend"] = candidate_tag
+            cli.execute("INSERT INTO outcomes VALUES(?,?,?,?)", (uid, MODEL, json.dumps(row), when))
+
+        with cli:
+            insert("new-cli")
+            insert("duplicate")  # Same content and version from two producers must not be silently relabelled.
+            insert("no-root-tag", root_tag=None)
+            insert("no-candidate-tag", candidate_tag=None)
+            insert("wrong-source-tag", candidate_tag="openai_api")
+            insert("wrong-version", version="visual_dialogue_v10")
+        with self.assertLogs("dataset_viewer.terra_candidates", level="WARNING"):
+            keys = self.store.queue_keys()
+        self.assertEqual({key[1] for key in keys}, {"existing-api", "new-cli"})
+        self.assertEqual(self.get("existing-api")["generation_backend"], "openai_api")
+        draft = self.get("new-cli")
+        self.assertEqual(draft["generation_backend"], "codex_cli")
+        self.assertEqual(draft["created_at"], "2026-11-21T13:00:00Z")
+        insert("just-generated")
+        self.assertIsNone(self.get("just-generated"))
+        cli.commit()
+        self.assertEqual(self.get("just-generated")["candidate"]["prompt_version"], v11)
+
     def test_selected_candidate_is_rechecked_after_in_place_repair_or_deletion(self):
         prod = self.create("production_v10_terra/production.sqlite3")
         with prod:
