@@ -8,7 +8,7 @@ import unittest
 from unittest.mock import patch
 
 from ssvd.dialogue import pilot, pilot_recovery
-from ssvd.dialogue.regeneration_roles import _USER
+from ssvd.dialogue.visual_dialogue_prompts import USER
 from ssvd.review_store import DEFAULT_REVIEW_EVENTS, ReviewStore
 
 
@@ -30,7 +30,7 @@ class ExampleAPI:
         self.sent.append(request_id)
         if self.error:
             raise self.error
-        if body["instructions"] == _USER:
+        if body["instructions"] == USER:
             reply = {"text": "公園の様子を教えて。"}
         else:
             reply = {"text": "木の下にベンチがあるよ。", "tasks": []}
@@ -190,6 +190,7 @@ class PilotTests(unittest.TestCase):
         v4 = base / pilot.VISUAL_V4
         v5 = base / pilot.VISUAL_V5
         v6 = base / pilot.VISUAL_V6
+        v7 = base / pilot.VISUAL_V7
         current = base / pilot.PROMPT_VERSION
         with closing(pilot.open_db(base)) as db, db:
             db.execute("UPDATE cohort SET prompt=?", (pilot.LEGACY_VERSION,))
@@ -229,12 +230,20 @@ class PilotTests(unittest.TestCase):
             db.execute("INSERT INTO calls(uid,model,step,request_hash,client_id,reserved,charged,receipt) "
                        "VALUES('supplement',?,0,'supplement','supplement',4000000,2000000,?)",
                        (pilot.MODELS[0], pilot.encode({"usage": {"input_tokens": 6, "output_tokens": 2}})))
+        pilot.prepare(self.root, v7)
+        with closing(pilot.open_db(v7)) as db, db:
+            db.execute("UPDATE cohort SET prompt=?", (pilot.VISUAL_V7,))
+            db.execute("INSERT INTO calls(uid,model,step,request_hash,client_id,reserved) "
+                       "VALUES('e',?,0,'v7','v7',9000000)", (pilot.MODELS[0],))
         with patch.object(pilot, "prepare_manifest", side_effect=AssertionError("cohort must stay frozen")):
             selected = pilot.prepare(self.root, current)
         self.assertEqual(selected["budget_predecessors"], list(pilot.ARCHIVED_VERSIONS))
         self.assertEqual(selected["samples"], self.samples)
         budget = pilot.status(current)["shared_budget"]
-        self.assertEqual((budget["legacy_committed_usd"], budget["remaining_usd"]), (.043, 1.957))
+        self.assertEqual((budget["legacy_committed_usd"], budget["remaining_usd"]), (.052, 1.948))
+        v7_report = pilot.status(v7, prompt_version=pilot.VISUAL_V7)
+        self.assertEqual(v7_report["shared_budget"]["legacy_committed_usd"], .043)
+        self.assertEqual(v7_report["unresolved_reserve_usd"], .009)
         v6_report = pilot.status(v6, prompt_version=pilot.VISUAL_V6)
         self.assertEqual(v6_report["shared_budget"]["legacy_committed_usd"], .036)
         self.assertEqual((v6_report["unresolved_reserve_usd"], v6_report["generation_cost_usd"]), (.005, .002))
@@ -247,7 +256,7 @@ class PilotTests(unittest.TestCase):
         middle_report = pilot.status(middle, prompt_version=pilot.OBSERVATION_VERSION)
         self.assertEqual(middle_report["shared_budget"]["legacy_committed_usd"], .012)
         api = ExampleAPI()
-        with patch.object(pilot, "BUDGET_USD", .043), self.assertRaisesRegex(RuntimeError, "spending limit"):
+        with patch.object(pilot, "BUDGET_USD", .052), self.assertRaisesRegex(RuntimeError, "spending limit"):
             pilot.run_pilot(self.root, current, api)
         with closing(pilot.open_db(middle)) as db, db:
             manifest["samples"][0]["uid"] = "different"
