@@ -10,7 +10,8 @@ import sqlite3
 
 from ssvd.ai_suggestion_store import human_touched_uids
 from ssvd.dialogue.regeneration_roles import (
-    PAIR_COUNTS, PROMPT_VERSION, VISUAL_V4, VISUAL_V5, VISUAL_V6, VISUAL_V7, VISUAL_V8, VISUAL_V9, next_step,
+    MARKER_VERSIONS, PAIR_COUNTS, PROMPT_VERSION, VISUAL_V4, VISUAL_V5, VISUAL_V6, VISUAL_V7, VISUAL_V8,
+    VISUAL_V9, VISUAL_V11, next_step,
 )
 from ssvd.dialogue import regeneration_roles_v3
 from ssvd.review_store import (
@@ -21,7 +22,7 @@ from ssvd.review_store import (
 ROOT = Path(__file__).resolve().parents[2]
 COLLECTION = "japanese_daily_v1"
 OBSERVATION_VERSION = "grounded_roles_v3"
-PREVIEW_VERSIONS = (PROMPT_VERSION, VISUAL_V9, VISUAL_V8, VISUAL_V7, VISUAL_V6, VISUAL_V5, VISUAL_V4,
+PREVIEW_VERSIONS = (VISUAL_V11, PROMPT_VERSION, VISUAL_V9, VISUAL_V8, VISUAL_V7, VISUAL_V6, VISUAL_V5, VISUAL_V4,
                     OBSERVATION_VERSION)
 
 
@@ -122,7 +123,7 @@ def preview(root, uid, *, model="gpt-6-luna", pairs=None, transcript=None, recov
         evidence = step["grounding"]
         tasks = [_review_task(task, step["task_pairs"][task["kind"]]) for task in evidence["tasks"]]
     else:
-        tasks = [_review_task(exchange["task"], exchange["pair"], marker_only=prompt_version == PROMPT_VERSION)
+        tasks = [_review_task(exchange["task"], exchange["pair"], marker_only=prompt_version in MARKER_VERSIONS)
                  for exchange in step["exchanges"]]
     auxiliary = tasks[0] if tasks else {"kind": "none", "grounding_source": "none"}
     # The review fingerprint covers this entire dictionary, including a second exchange.

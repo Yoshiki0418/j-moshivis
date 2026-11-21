@@ -18,9 +18,10 @@ from ssvd.review_store import REVIEW_REQUIRED_STATUS, ReviewConflictError, conte
 COLLECTION = "japanese_daily_v1"
 MODEL = "gpt-6.1-terra"
 _RUNS = Path("data/curation/gpt_regeneration_issue13")
+_PRODUCTION_LEDGER = "production_v10_terra/production.sqlite3"
 _LEDGERS = (
     *(f"first100_v10/shard{i}.sqlite3" for i in range(4)),
-    "production_v10_terra/production.sqlite3",
+    _PRODUCTION_LEDGER,
 )
 _SHA = re.compile(r"[0-9a-f]{64}\Z")
 Key = tuple[str, str, str, str]
@@ -42,7 +43,25 @@ def _stamp(path):
     return stat.st_dev, stat.st_ino, stat.st_size, stat.st_mtime_ns, stat.st_ctime_ns
 
 
-def _record(uid, model, raw, finished_at, run):
+def _outcome_select(db, path):
+    """Use the producer's immutable assignment; legacy unassigned rows used v10."""
+    version = "'visual_dialogue_v10'"
+    join = ""
+    if path.parts[-2:] == Path(_PRODUCTION_LEDGER).parts and db.execute(
+        "SELECT 1 FROM sqlite_master WHERE type='table' AND name='dialogue_prompt_versions'"
+    ).fetchone():
+        join = "LEFT JOIN dialogue_prompt_versions AS v ON v.uid=o.uid"
+        version = "CASE WHEN v.uid IS NULL THEN 'visual_dialogue_v10' ELSE v.prompt_version END"
+    return f"""
+        SELECT o.rowid, o.uid, o.model, o.outcome,
+            (SELECT strftime('%Y-%m-%dT%H:%M:%SZ', c.finished_at)
+             FROM calls c WHERE c.uid=o.uid AND c.model=o.model AND c.charged IS NOT NULL
+             ORDER BY c.step DESC LIMIT 1), {version}
+        FROM outcomes o {join}
+    """
+
+
+def _record(uid, model, raw, finished_at, expected_version, run):
     outcome = json.loads(raw)
     if outcome["status"] != "pending_review":
         return None
@@ -52,7 +71,8 @@ def _record(uid, model, raw, finished_at, run):
     if not (model == identity["model"] == c["generator"] == MODEL
             and uid == identity["uid"] == c["uid"] and identity["collection"] == COLLECTION
             and _SHA.fullmatch(base) and _SHA.fullmatch(image) and c["image_sha256"] == image
-            and identity["prompt_version"] == c["prompt_version"] == "visual_dialogue_v10"
+            and expected_version in ("visual_dialogue_v10", "visual_dialogue_v11")
+            and identity["prompt_version"] == c["prompt_version"] == expected_version
             and c["review_required"] is True and c["verification_status"] == REVIEW_REQUIRED_STATUS
             and c["review_id"] == content_fingerprint(c)
             and type(pairs) is int and 4 <= pairs <= 8 and len(c["dialogue"]) == pairs * 2):
@@ -115,9 +135,9 @@ class TerraCandidateStore:
             if rebuilt:
                 idx = _Index()
                 changed = True
-            for rowid, uid, model, outcome, finished_at in rows:
+            for rowid, *row in rows:
                 try:
-                    entry = _record(uid, model, outcome, finished_at, path.parent.name)
+                    entry = _record(*row, path.parent.name)
                 except (TypeError, KeyError, ValueError, AttributeError, RecursionError):
                     logging.getLogger(__name__).warning("Skipping invalid Terra outcome %s:%d", path.name, rowid)
                     entry = None
@@ -134,7 +154,8 @@ class TerraCandidateStore:
             ambiguous = set()
             for idx in self._indices.values():
                 for key, record in idx.records.items():
-                    if key in records and records[key]["candidate"]["review_id"] != record["candidate"]["review_id"]:
+                    if key in records and any(records[key]["candidate"][field] != record["candidate"][field]
+                                              for field in ("review_id", "prompt_version")):
                         ambiguous.add(key)
                     records[key] = record
             for key in ambiguous:
@@ -153,14 +174,7 @@ class TerraCandidateStore:
         with closing(sqlite3.connect(path.as_uri() + "?mode=ro", uri=True, timeout=0.25)) as db:
             db.execute("BEGIN")
             count = db.execute("SELECT count(*) FROM outcomes").fetchone()[0]
-            # Only the final utterance timestamp is looked up in the (uid,model,step) index.
-            statement = """
-                SELECT o.rowid, o.uid, o.model, o.outcome,
-                    (SELECT strftime('%Y-%m-%dT%H:%M:%SZ', c.finished_at)
-                     FROM calls c WHERE c.uid=o.uid AND c.model=o.model AND c.charged IS NOT NULL
-                     ORDER BY c.step DESC LIMIT 1)
-                FROM outcomes o WHERE o.rowid>? ORDER BY o.rowid
-            """
+            statement = _outcome_select(db, path) + " WHERE o.rowid>? ORDER BY o.rowid"
             rows = db.execute(statement, (idx.last_rowid,)).fetchall()
             rebuilt = idx.row_count + len(rows) != count
             if rebuilt:
@@ -192,8 +206,9 @@ class TerraCandidateStore:
                     continue
                 try:
                     with closing(sqlite3.connect(path.as_uri() + "?mode=ro", uri=True, timeout=0.25)) as db:
-                        row = db.execute("SELECT model,outcome FROM outcomes WHERE uid=?", (uid,)).fetchone()
-                    current = _record(uid, *row, record["created_at"], path.parent.name) if row else None
+                        db.execute("BEGIN")
+                        row = db.execute(_outcome_select(db, path) + " WHERE o.uid=?", (uid,)).fetchone()
+                    current = _record(*row[1:], path.parent.name) if row else None
                 except sqlite3.DatabaseError as error:
                     raise ReviewConflictError("生成台帳を照合できませんでした。再読み込みしてから確認してください。") from error
                 except (TypeError, KeyError, ValueError, AttributeError, RecursionError):

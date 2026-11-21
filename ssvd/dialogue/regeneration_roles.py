@@ -10,7 +10,7 @@ from .regeneration_grounding import (
     contains_grounded_answer, evidence_problem, explicit_question_kinds, mentions_target, task_problem,
 )
 from .visual_dialogue_prompts import ASSISTANT, USER
-from . import visual_dialogue_prompts_v8, visual_dialogue_prompts_v9
+from . import visual_dialogue_prompts_v8, visual_dialogue_prompts_v9, visual_dialogue_prompts_v11
 
 PAIR_COUNTS = range(4, 9)
 UTTERANCE_OUTPUT_LIMIT = 1024
@@ -21,6 +21,8 @@ VISUAL_V7 = "visual_dialogue_v7"
 VISUAL_V8 = "visual_dialogue_v8"
 VISUAL_V9 = "visual_dialogue_v9"
 PROMPT_VERSION = "visual_dialogue_v10"
+VISUAL_V11 = "visual_dialogue_v11"
+MARKER_VERSIONS = (PROMPT_VERSION, VISUAL_V11)
 
 
 def default_pair_count(uid: str) -> int:
@@ -120,6 +122,7 @@ _ROLE_PROMPTS = {
     VISUAL_V8: (visual_dialogue_prompts_v8.USER, visual_dialogue_prompts_v8.ASSISTANT),
     VISUAL_V9: (visual_dialogue_prompts_v9.USER, visual_dialogue_prompts_v9.ASSISTANT),
     PROMPT_VERSION: (USER, ASSISTANT),
+    VISUAL_V11: (visual_dialogue_prompts_v11.USER, visual_dialogue_prompts_v11.ASSISTANT),
 }
 _SAME_TEXT = re.compile(r"[\s。、．.,！？!?「」『』]+")
 
@@ -238,7 +241,7 @@ def next_step(uid: str, kind: str, image_data_url: str, replies: list[dict], *,
             warnings.append((turn, "spoken_form"))
         dialogue.append({"role": role, "text": text})
         if role == "assistant":
-            if version == PROMPT_VERSION:
+            if version in MARKER_VERSIONS:
                 tasks = _review_markers(reply, turn, warnings)
             else:
                 tasks = _review_answer(reply, dialogue, turn, exchanges, warnings, require_reason=archived)
@@ -255,6 +258,8 @@ def next_step(uid: str, kind: str, image_data_url: str, replies: list[dict], *,
     asking = len(dialogue) % 2 == 0
     # Responses JSON mode requires the format name in the input message itself.
     context = {"公開された会話": dialogue, "出力形式": "今回の発話を指示に沿ったJSONオブジェクトで返す。"}
+    if version == VISUAL_V11 and asking:
+        context["今回の会話のヒント"] = visual_dialogue_prompts_v11.user_turn_hint(dialogue)
     if archived and not dialogue:
         context["画像に合えば扱える話題の一例"] = {"ocr": "画像内の文字", "counting": "物や人の数"}[kind]
     if archived and asking and exchanges:

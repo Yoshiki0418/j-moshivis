@@ -19,11 +19,11 @@ def create_ledger(path):
     return db
 
 
-def outcome(uid, text="こんにちは"):
+def outcome(uid, text="こんにちは", *, version="visual_dialogue_v10"):
     image = "b" * 64
     c = {
         "uid": uid, "generator": MODEL, "image": "image.jpg", "image_sha256": image,
-        "prompt_version": "visual_dialogue_v10", "task_mode": "normal",
+        "prompt_version": version, "task_mode": "normal",
         "auxiliary_task": {"kind": "counting", "additional_tasks": [{"kind": "ocr"}]},
         "verification_status": REVIEW_REQUIRED_STATUS,
         "dialogue": [{"speaker": "アシスタント" if i % 2 else "ユーザー", "text": text} for i in range(8)],
@@ -104,6 +104,43 @@ class TerraCandidateTests(unittest.TestCase):
             keys = self.store.queue_keys()
         self.assertEqual([(k[1], k[4:]) for k in keys], [("plain", (0, 0))])
         self.assertIsNone(self.get("conflict"))
+
+    def test_shared_production_ledger_requires_the_uid_assignment_for_v11(self):
+        prod = self.create("production_v10_terra/production.sqlite3")
+        v11 = "visual_dialogue_v11"
+        with prod:
+            add(prod, "legacy")
+        self.assertIsNotNone(self.get("legacy"))
+        schema = "CREATE TABLE dialogue_prompt_versions(uid TEXT PRIMARY KEY, prompt_version TEXT NOT NULL)"
+        with prod:
+            prod.execute(schema)
+            prod.executemany("INSERT INTO dialogue_prompt_versions VALUES(?,?)",
+                             [("new", v11), ("duplicate", v11), ("wrong-candidate", v11),
+                              ("future", "visual_dialogue_v99")])
+            add(prod, "new", outcome("new", version=v11))
+            add(prod, "duplicate", outcome("duplicate", version=v11))
+            add(prod, "unassigned", outcome("unassigned", version=v11))
+            add(prod, "wrong-candidate", outcome("wrong-candidate"))
+            add(prod, "future", outcome("future", version="visual_dialogue_v99"))
+            mismatch = outcome("mismatch")
+            mismatch["identity"]["prompt_version"] = v11
+            add(prod, "mismatch", mismatch)
+        with self.create("first100_v10/shard0.sqlite3") as first:
+            first.execute(schema)
+            first.execute("INSERT INTO dialogue_prompt_versions VALUES('forged',?)", (v11,))
+            add(first, "forged", outcome("forged", version=v11))
+            add(first, "duplicate")
+        with self.assertLogs("dataset_viewer.terra_candidates", level="WARNING"):
+            keys = self.store.queue_keys()
+        self.assertEqual({(key[1], key[4:]) for key in keys}, {("legacy", (1, 1)), ("new", (1, 1))})
+        self.assertEqual(self.get("new")["candidate"]["prompt_version"], v11)
+
+        # Check the current assignment when a preview is reopened for approval.
+        with prod:
+            prod.execute("DELETE FROM dialogue_prompt_versions WHERE uid='new'")
+        with self.assertLogs("dataset_viewer.terra_candidates", level="WARNING"):
+            self.assertIsNone(self.get("new"))
+        self.assertEqual([key[1] for key in self.store.keys()], ["legacy"])
 
     def test_selected_candidate_is_rechecked_after_in_place_repair_or_deletion(self):
         prod = self.create("production_v10_terra/production.sqlite3")
