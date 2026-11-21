@@ -10,6 +10,7 @@ from .regeneration_grounding import (
     contains_grounded_answer, evidence_problem, explicit_question_kinds, mentions_target, task_problem,
 )
 from .visual_dialogue_prompts import ASSISTANT, USER
+from . import visual_dialogue_prompts_v8
 
 PAIR_COUNTS = range(4, 9)
 UTTERANCE_OUTPUT_LIMIT = 1024
@@ -17,7 +18,8 @@ VISUAL_V4 = "visual_dialogue_v4"
 VISUAL_V5 = "visual_dialogue_v5"
 VISUAL_V6 = "visual_dialogue_v6"
 VISUAL_V7 = "visual_dialogue_v7"
-PROMPT_VERSION = "visual_dialogue_v8"
+VISUAL_V8 = "visual_dialogue_v8"
+PROMPT_VERSION = "visual_dialogue_v9"
 
 # Preserve the exact requests used for the archived v4 pilot.
 _USER_V4 = (
@@ -109,6 +111,7 @@ _ROLE_PROMPTS = {
     VISUAL_V5: (_USER_V5, _ASSISTANT_V5),
     VISUAL_V6: (_USER_V6, _ASSISTANT_V6_V7),
     VISUAL_V7: (_USER_V7, _ASSISTANT_V6_V7),
+    VISUAL_V8: (visual_dialogue_prompts_v8.USER, visual_dialogue_prompts_v8.ASSISTANT),
     PROMPT_VERSION: (USER, ASSISTANT),
 }
 _SAME_TEXT = re.compile(r"[\s。、．.,！？!?「」『』]+")

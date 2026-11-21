@@ -10,7 +10,7 @@ import sqlite3
 
 from ssvd.ai_suggestion_store import human_touched_uids
 from ssvd.dialogue.regeneration_roles import (
-    PAIR_COUNTS, PROMPT_VERSION, VISUAL_V4, VISUAL_V5, VISUAL_V6, VISUAL_V7, next_step,
+    PAIR_COUNTS, PROMPT_VERSION, VISUAL_V4, VISUAL_V5, VISUAL_V6, VISUAL_V7, VISUAL_V8, next_step,
 )
 from ssvd.dialogue import regeneration_roles_v3
 from ssvd.review_store import (
@@ -21,7 +21,7 @@ from ssvd.review_store import (
 ROOT = Path(__file__).resolve().parents[2]
 COLLECTION = "japanese_daily_v1"
 OBSERVATION_VERSION = "grounded_roles_v3"
-PREVIEW_VERSIONS = (PROMPT_VERSION, VISUAL_V7, VISUAL_V6, VISUAL_V5, VISUAL_V4, OBSERVATION_VERSION)
+PREVIEW_VERSIONS = (PROMPT_VERSION, VISUAL_V8, VISUAL_V7, VISUAL_V6, VISUAL_V5, VISUAL_V4, OBSERVATION_VERSION)
 
 
 def _load_source(root, uid):

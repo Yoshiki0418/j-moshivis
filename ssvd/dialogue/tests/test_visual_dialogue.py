@@ -21,7 +21,7 @@ class VisualDialogueTests(unittest.TestCase):
     def test_archived_requests_match_original_generation(self):
         question = {"text": "札には営業時間が書いてあるの？"}
         answer = {"text": "アオバって書いてあるね。", "tasks": [OCR]}
-        # Hashes from the original v4/v5 (0d4409f), v6 (d813b51) and v7 (acea45d) builders.
+        # Builders: v4/v5 (0d4409f), v6 (d813b51), v7 (acea45d), v8 (40c63e3).
         # The third request follows an answer with private task metadata.
         expected = {
             "visual_dialogue_v4": [
@@ -43,6 +43,11 @@ class VisualDialogueTests(unittest.TestCase):
                 "8b713e3dd673f19d75bde618647b70af1bd1279031888b10498f1fe5606f8e12",
                 "6930c1db3229c592dbe837c7a4b882bf9da6227add3866ee7985577b2e889de2",
                 "02816a52423ac30c75f30bda9fbc09e97b798b9e7e75023b137eedb161bfc7fe",
+            ],
+            "visual_dialogue_v8": [
+                "3d16bdc2c0898ec6f88e757cc8335e36c8f6335cbe2a6cd756a2b4a49ce13c70",
+                "069b40d83cfa37d3c77cbbb1694af704d9138d328763e2e21a7ef0fe56e8e49b",
+                "a3903b0fa8b3187471c6f1048f54c3d46ae5e0e230afb7d32bea5cb84d962d1f",
             ],
         }
         for version, digests in expected.items():
@@ -93,11 +98,13 @@ class VisualDialogueTests(unittest.TestCase):
             role = "assistant" if turn % 2 else "user"
             self.assertEqual(stage["phase"], role)
             wire = api.prepare(stage["request"])
-            previous = next_step("example", "ocr", IMAGE, replies, pairs=4, version="visual_dialogue_v7")
+            previous = next_step("example", "ocr", IMAGE, replies, pairs=4, version="visual_dialogue_v8")
             previous_wire = api.prepare(previous["request"])
             instructions = wire["instructions"]
             self.assertNotEqual(instructions, previous_wire["instructions"])
             self.assertEqual(wire, {**previous_wire, "instructions": instructions})
+            for photo_persona in ("一緒に写真を眺め", "同じ写真を隣で見", "写真を見て"):
+                self.assertNotIn(photo_persona, instructions)
             if role == "user":
                 self.assertEqual(instructions, USER)
                 self.assertIn("尋ね", instructions)
@@ -130,13 +137,14 @@ class VisualDialogueTests(unittest.TestCase):
             {"text": "木陰が気持ちよさそう。"}, {"text": "ベンチまで日陰になっているね。", "tasks": []},
             {"text": "座るならどこがいい？"}, {"text": "川が見える端のほうかな。", "tasks": []},
             {"text": "水面がきらきらしてるね。"}, {"text": "風で光が揺れてるみたい。", "tasks": []},
-            {"text": "ゆっくり眺めたくなるな。"}, {"text": "ここならひと休みできそうだね。", "tasks": []},
+            {"text": "ベンチの横に飾ってあるのは？"}, {"text": "昔の街並みの写真みたい。", "tasks": []},
         ]
         done = step(dialogue)
         self.assertEqual(done["status"], "pending_review")
         self.assertTrue(done["requires_human_review"])
         self.assertEqual(done["exchanges"], [])
         self.assertEqual(done["review_warnings"], [])
+        self.assertEqual(done["dialogue"][-1]["text"], dialogue[-1]["text"])
         for version in ("visual_dialogue_v4", "visual_dialogue_v5"):
             archived = next_step("example", "ocr", IMAGE, dialogue, pairs=4, version=version)
             self.assertEqual(archived["review_warnings"], [{"turn": None, "code": "topic_not_covered"}])
