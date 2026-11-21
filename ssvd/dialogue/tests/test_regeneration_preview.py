@@ -41,17 +41,21 @@ class PreviewTests(unittest.TestCase):
                        (COLLECTION, "test", self.image.name, self.source["review_id"], len(raw)))
             db.commit()
 
-    def test_only_image_and_task_sent_to_model(self):
+    def test_source_dialogue_and_task_are_private(self):
         with self.assertRaisesRegex(ValueError, "4 to 8"):
             preview(self.root, "test", pairs=9)
         step = preview(self.root, "test")
+        self.assertEqual(step["identity"]["kind"], "ocr")
+        context = json.loads(step["request"]["input"][0]["content"][0]["text"])
+        self.assertEqual(set(context), {"公開された会話", "出力形式"})
         wire = json.dumps(step["request"])
         for private in ("OLD_DIALOGUE", "OLD_TRANSCRIPTION", "image.jpg", self.source["review_id"]):
             self.assertNotIn(private, wire)
         identity = dict(step["identity"], uid="other")
         with self.assertRaisesRegex(ValueError, "different source"):
             preview(self.root, "test", transcript={"identity": identity, "replies": []})
-        for old_version in ("grounded_roles_v1", "grounded_roles_v2", "grounded_roles_v3", "visual_dialogue_v4"):
+        for old_version in ("grounded_roles_v1", "grounded_roles_v2", "grounded_roles_v3",
+                            "visual_dialogue_v4", "visual_dialogue_v5"):
             earlier = dict(step["identity"], prompt_version=old_version)
             with self.assertRaisesRegex(ValueError, "different source"):
                 preview(self.root, "test", transcript={"identity": earlier, "replies": []})
@@ -105,6 +109,15 @@ class PreviewTests(unittest.TestCase):
         self.assertEqual(candidate["auxiliary_kind"], "none")
         self.assertEqual(len(candidate["dialogue"]), 14)
         self.assertTrue(candidate["review_required"])
+
+    def test_unknown_reading_does_not_need_an_invented_reason(self):
+        task = dict(kind="ocr", mode="unknown", target="入口の看板")
+        result = self.replay([task], {"ocr": ("入口の看板、何て書いてある？", "そこまでは読めないな。")}, pairs=4)
+        candidate = result["candidate"]
+        self.assertTrue(candidate["review_required"])
+        self.assertEqual(candidate["auxiliary_task"]["answer_mode"], "unknown")
+        self.assertNotIn("reason", candidate["auxiliary_task"])
+        self.assertNotIn("recognized_text", candidate["auxiliary_task"])
 
     def test_uncertain_observations_keep_only_supported_values(self):
         for kind, mode, values, answer, expected in [

@@ -17,12 +17,14 @@ from ssvd.ai_suggestion_store import human_touched_uids
 from ssvd.dialogue.pilot_api import MODELS, OpenAIPilotAPI, PilotRequestRejected
 from ssvd.dialogue.pilot_review import write_review
 from ssvd.dialogue.pilot_selection import prepare_manifest
-from ssvd.dialogue.preview_regeneration import COLLECTION, OBSERVATION_VERSION, PROMPT_VERSION, ROOT, VISUAL_V4, preview
+from ssvd.dialogue.preview_regeneration import (
+    COLLECTION, OBSERVATION_VERSION, PROMPT_VERSION, ROOT, VISUAL_V4, VISUAL_V5, preview,
+)
 from ssvd.review_store import DEFAULT_REVIEW_EVENTS, ReviewStore
 
 LEGACY_VERSION = "grounded_roles_v2"
 GROUNDING_VERSIONS = (LEGACY_VERSION, OBSERVATION_VERSION)
-ARCHIVED_VERSIONS = (*GROUNDING_VERSIONS, VISUAL_V4)
+ARCHIVED_VERSIONS = (*GROUNDING_VERSIONS, VISUAL_V4, VISUAL_V5)
 LEGACY_RUN_DIR = ROOT / "data/curation/gpt_pilot_issue12"
 RUN_DIR = LEGACY_RUN_DIR / PROMPT_VERSION
 BUDGET_USD = Decimal("2.00")

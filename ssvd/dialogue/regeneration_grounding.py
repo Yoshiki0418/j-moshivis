@@ -125,13 +125,13 @@ _MODES = {"counting": {"exact", "approximate", "lower_bound", "unknown"},
           "ocr": {"exact", "partial", "unknown"}}
 
 
-def evidence_problem(kind: str, task: dict, *, allow_zero=False) -> str | None:
+def evidence_problem(kind: str, task: dict, *, allow_zero=False, require_reason=True) -> str | None:
     mode = task.get("mode")
     if kind not in _MODES or not isinstance(mode, str) or mode not in _MODES[kind]:
         return "invalid_task_mode"
     if not _nonempty(task.get("target")):
         return "missing_target"
-    if mode != "exact" and not _nonempty(task.get("reason")):
+    if mode != "exact" and require_reason and not _nonempty(task.get("reason")):
         return "uncertainty_needs_visual_reason"
     values = set(task) - {"kind", "target", "mode", "reason"}
     if mode == "unknown":
@@ -411,9 +411,9 @@ def _ocr_problem(task, question, answer, *, allow_paraphrase=False, conversation
 
 
 def task_problem(kind: str, evidence: dict, question: str, answer: str, previous_assistant: str = "",
-                 *, allow_paraphrase=False, conversational=False) -> str | None:
+                 *, allow_paraphrase=False, conversational=False, require_reason=True) -> str | None:
     """Check simple spoken/evidence contradictions; the reviewer verifies the image."""
-    problem = evidence_problem(kind, evidence, allow_zero=conversational)
+    problem = evidence_problem(kind, evidence, allow_zero=conversational, require_reason=require_reason)
     if problem:
         return problem
     if not _nonempty(question) or not _nonempty(answer):

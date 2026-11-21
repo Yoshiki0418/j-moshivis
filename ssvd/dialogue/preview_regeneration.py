@@ -9,7 +9,7 @@ from pathlib import Path
 import sqlite3
 
 from ssvd.ai_suggestion_store import human_touched_uids
-from ssvd.dialogue.regeneration_roles import PAIR_COUNTS, next_step
+from ssvd.dialogue.regeneration_roles import PAIR_COUNTS, PROMPT_VERSION, VISUAL_V4, VISUAL_V5, next_step
 from ssvd.dialogue import regeneration_roles_v3
 from ssvd.review_store import (
     DEFAULT_REVIEW_EVENTS, REVIEW_REQUIRED_STATUS, ReviewStore,
@@ -18,9 +18,8 @@ from ssvd.review_store import (
 
 ROOT = Path(__file__).resolve().parents[2]
 COLLECTION = "japanese_daily_v1"
-PROMPT_VERSION = "visual_dialogue_v5"
-VISUAL_V4 = "visual_dialogue_v4"
 OBSERVATION_VERSION = "grounded_roles_v3"
+PREVIEW_VERSIONS = (PROMPT_VERSION, VISUAL_V5, VISUAL_V4, OBSERVATION_VERSION)
 
 
 def _load_source(root, uid):
@@ -70,7 +69,7 @@ def _review_task(task, pair):
     question_index = 2 * (pair - 1)
     result = dict(kind=kind, answer_mode=mode, grounding_source="vlm_visual",
                   question_turn_index=question_index, answer_turn_index=question_index + 1)
-    if mode != "exact":
+    if mode != "exact" and isinstance(task.get("reason"), str) and task["reason"].strip():
         result["reason"] = task["reason"]
     if kind == "counting":
         result["counted_target"] = task["target"]
@@ -92,7 +91,7 @@ def preview(root, uid, *, model="gpt-6-luna", pairs=None, transcript=None, recov
     """Replay decoded replies bound to the same image, review revision and settings."""
     if pairs is not None and (type(pairs) is not int or pairs not in PAIR_COUNTS):
         raise ValueError("Japanese Daily candidates use 4 to 8 question-answer pairs")
-    if prompt_version not in (PROMPT_VERSION, VISUAL_V4, OBSERVATION_VERSION):
+    if prompt_version not in PREVIEW_VERSIONS:
         raise ValueError("Unsupported prompt version")
     source, kind, image, base = _load_source(root, uid)
     identity = dict(collection=COLLECTION, uid=uid, base_fingerprint=base,
@@ -108,8 +107,7 @@ def preview(root, uid, *, model="gpt-6-luna", pairs=None, transcript=None, recov
     if prompt_version == OBSERVATION_VERSION:
         step = regeneration_roles_v3.next_step(uid, kind, image, replies, model=model, pairs=pairs, recovery=recovery)
     else:
-        step = next_step(uid, kind, image, replies, model=model, pairs=pairs,
-                         legacy_v4=prompt_version == VISUAL_V4)
+        step = next_step(uid, kind, image, replies, model=model, pairs=pairs, version=prompt_version)
     if step["status"] != "pending_review":
         return {"identity": identity, **step}
 
@@ -143,7 +141,7 @@ def main():
     parser.add_argument("--model", default="gpt-6-luna")
     parser.add_argument("--pairs", type=int, choices=PAIR_COUNTS)
     parser.add_argument("--transcript", type=Path, help="JSON with identity and ordered decoded replies")
-    parser.add_argument("--prompt-version", choices=(PROMPT_VERSION, VISUAL_V4, OBSERVATION_VERSION), default=PROMPT_VERSION)
+    parser.add_argument("--prompt-version", choices=PREVIEW_VERSIONS, default=PROMPT_VERSION)
     parser.add_argument("--recovery", action="store_true", help="Apply the follow-up pilot replay checks")
     args = parser.parse_args()
     try:
