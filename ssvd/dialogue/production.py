@@ -256,6 +256,11 @@ def run(root, manifest_sha, api_factory, *, workers=4, retry_delays=RETRY_DELAYS
         setup(run_dir, manifest_sha, previous)
         with closing(connect(run_dir)) as db:
             enrolled = _enrolled_dialogues(db)
+            summary_path = run_dir / "summary.json"
+            if enrolled is None and summary_path.is_file():
+                published = json.loads(summary_path.read_bytes()).get("new_dialogue_prompt")
+                if published == VISUAL_V11:
+                    raise RuntimeError("Restore the production ledger that contains the published prompt rollout")
             if new_dialogue_prompt == VISUAL_V11 and enrolled is None:
                 _activate_prompt(db, samples)
                 enrolled = _enrolled_dialogues(db)

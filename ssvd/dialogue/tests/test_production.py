@@ -7,6 +7,7 @@ import json
 from pathlib import Path
 import sqlite3
 import tempfile
+import threading
 import unittest
 from unittest.mock import patch
 
@@ -158,6 +159,22 @@ class ProductionTests(unittest.TestCase):
         self.assertEqual(json.loads((self.run_dir / "pending_candidates.jsonl").read_text())["prompt_version"], VISUAL_V11)
         self.generate(new_dialogue_prompt=VISUAL_V11)
         self.assertEqual(len(self.api.attempts), 9)
+
+    def test_stale_backup_cannot_silently_undo_a_published_rollout(self):
+        # No paid turns between the two snapshots: invoice totals alone cannot detect a rollback.
+        stop = threading.Event()
+        stop.set()
+        self.generate(stop=stop)
+        ledger = self.run_dir / "production.sqlite3"
+        with closing(sqlite3.connect(":memory:")) as backup:
+            with closing(sqlite3.connect(ledger)) as db:
+                db.backup(backup)
+            self.generate(new_dialogue_prompt=VISUAL_V11, stop=stop)
+            with closing(sqlite3.connect(ledger)) as db:
+                backup.backup(db)
+        with self.assertRaisesRegex(RuntimeError, "published prompt rollout"):
+            self.generate()
+        self.assertEqual(self.api.attempts, [])
 
     def test_partial_receipts_resume_without_repaying_and_yield_a_reviewable_record(self):
         self.reject_attempt(3)
