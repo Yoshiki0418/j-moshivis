@@ -4,7 +4,9 @@ import hashlib
 import json
 import unittest
 
+from ssvd.dialogue.pilot_api import OpenAIPilotAPI
 from ssvd.dialogue.regeneration_roles import next_step
+from ssvd.dialogue.visual_dialogue_prompts import ASSISTANT, USER
 
 IMAGE = "data:image/jpeg;base64,AA=="
 OCR = {"kind": "ocr", "target": "入口の看板", "mode": "exact", "written": "AOBA", "reading": "アオバ"}
@@ -19,7 +21,7 @@ class VisualDialogueTests(unittest.TestCase):
     def test_archived_requests_match_original_generation(self):
         question = {"text": "札には営業時間が書いてあるの？"}
         answer = {"text": "アオバって書いてあるね。", "tasks": [OCR]}
-        # Hashes from the original v4/v5 (0d4409f) and v6 (d813b51) builders.
+        # Hashes from the original v4/v5 (0d4409f), v6 (d813b51) and v7 (acea45d) builders.
         # The third request follows an answer with private task metadata.
         expected = {
             "visual_dialogue_v4": [
@@ -37,6 +39,11 @@ class VisualDialogueTests(unittest.TestCase):
                 "6930c1db3229c592dbe837c7a4b882bf9da6227add3866ee7985577b2e889de2",
                 "9f52610afe0252633994901e0e74d95bbb5316ba01b3a39eca1ee64de8d3078c",
             ],
+            "visual_dialogue_v7": [
+                "8b713e3dd673f19d75bde618647b70af1bd1279031888b10498f1fe5606f8e12",
+                "6930c1db3229c592dbe837c7a4b882bf9da6227add3866ee7985577b2e889de2",
+                "02816a52423ac30c75f30bda9fbc09e97b798b9e7e75023b137eedb161bfc7fe",
+            ],
         }
         for version, digests in expected.items():
             for replies, digest in zip(([], [question], [question, answer]), digests):
@@ -45,12 +52,12 @@ class VisualDialogueTests(unittest.TestCase):
                     wire = json.dumps(old, sort_keys=True, ensure_ascii=False, separators=(",", ":")).encode()
                     self.assertEqual(hashlib.sha256(wire).hexdigest(), digest)
 
-    def test_new_pilot_changes_only_the_user_instructions(self):
+    def test_v7_changed_only_the_v6_user_instructions(self):
         question = {"text": "この看板、どっちを指してる？"}
         answer = {"text": "左を指しているよ。", "tasks": []}
         for replies in ([], [question], [question, answer]):
             with self.subTest(turn=len(replies) + 1):
-                current = step(replies)["request"]
+                current = next_step("example", "ocr", IMAGE, replies, pairs=4, version="visual_dialogue_v7")["request"]
                 previous = next_step("example", "ocr", IMAGE, replies, pairs=4, version="visual_dialogue_v6")["request"]
                 if len(replies) % 2 == 0:
                     self.assertIn("相手に質問してください", current["instructions"])
@@ -76,15 +83,31 @@ class VisualDialogueTests(unittest.TestCase):
         self.assertEqual(result["exchanges"][0]["task"]["written"], "定員12名")
         self.assertTrue(result["requires_human_review"])
 
-    def test_image_and_all_public_turns_in_every_request_and_no_observer(self):
+    def test_personas_receive_image_and_all_public_turns_in_every_outgoing_request(self):
         replies, history = [], []
+        api = OpenAIPilotAPI("offline")
         for turn in range(8):
             stage = step(replies)
             counting = next_step("example", "counting", IMAGE, replies, pairs=4)
             self.assertEqual(stage["request"], counting["request"])
             role = "assistant" if turn % 2 else "user"
             self.assertEqual(stage["phase"], role)
-            message, = stage["request"]["input"]
+            wire = api.prepare(stage["request"])
+            previous = next_step("example", "ocr", IMAGE, replies, pairs=4, version="visual_dialogue_v7")
+            previous_wire = api.prepare(previous["request"])
+            instructions = wire["instructions"]
+            self.assertNotEqual(instructions, previous_wire["instructions"])
+            self.assertEqual(wire, {**previous_wire, "instructions": instructions})
+            if role == "user":
+                self.assertEqual(instructions, USER)
+                self.assertIn("尋ね", instructions)
+                self.assertNotIn("tasks", instructions)
+            else:
+                self.assertEqual(instructions, ASSISTANT)
+                self.assertIn("答え", instructions)
+                self.assertIn("tasks", instructions)
+                self.assertIn("unknown", instructions)
+            message, = wire["input"]
             prompt, image = message["content"]
             context = json.loads(prompt["text"])
             self.assertEqual(set(context), {"公開された会話", "出力形式"})
