@@ -44,6 +44,7 @@ def recover(root, run_dir, api):
             raise RuntimeError("Human decision history is unavailable")
         if db.execute("SELECT 1 FROM calls WHERE charged>reserved LIMIT 1").fetchone():
             raise RuntimeError("Reconcile the price discrepancy before resuming.")
+        cap, check_deadline = pilot.pilot_credit_limits(root, run_dir, db, previous_commitment)
         # Install the recovery-only schema atomically, after checking the frozen original.
         with db:
             db.execute("BEGIN IMMEDIATE")
@@ -81,7 +82,8 @@ def recover(root, run_dir, api):
                     result = {"status": "hold", "reason": "unresolved_billing"}
                 else:
                     result = pilot.generate_one(root, db, sample, model, api, recovery=True,
-                                                previous_commitment=previous_commitment)
+                                                previous_commitment=previous_commitment,
+                                                budget_nanos=cap, before_reserve=check_deadline)
                 with db:
                     db.execute("INSERT INTO recovery_outcomes VALUES(?,?,?)", (*key, pilot.encode(result)))
                 finished[key] = result

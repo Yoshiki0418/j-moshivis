@@ -11,9 +11,10 @@ import os
 from pathlib import Path
 import sqlite3
 import sys
+import time
 from uuid import uuid4
 
-from ssvd.ai_suggestion_store import human_touched_uids
+from ssvd.ai_suggestion_store import locked_human_uids
 from ssvd.dialogue.pilot_api import MODELS, OpenAIPilotAPI, PilotRequestRejected
 from ssvd.dialogue.pilot_review import write_review
 from ssvd.dialogue.pilot_selection import prepare_manifest
@@ -229,7 +230,41 @@ def status(run_dir, *, prompt_version=PROMPT_VERSION):
                 unresolved_reserve_usd=reserved/NANOS, budget_usd=float(BUDGET_USD), **budget)
 
 
-def generate_one(root, db, sample, model, api, *, previous_commitment, recovery=False):
+class SpendingLimitReached(RuntimeError):
+    """No generation request was sent because the next reservation exceeds the cap."""
+
+
+def pilot_credit_limits(root, run_dir, db, previous_commitment):
+    """Keep the pilot cap and the shared credit ceiling when resuming an earlier pilot."""
+    from ssvd.dialogue import production_budget
+    from ssvd.dialogue.production_cohort import DEFAULT_MANIFEST, PILOTS
+
+    wave = (root / DEFAULT_MANIFEST).parent
+    pilot_cap = nanos(BUDGET_USD)
+    evidence = ("billing-contract.json", "production.sqlite3", "summary.json", "pending_candidates.jsonl")
+    if not any((wave / name).exists() for name in evidence):
+        return pilot_cap, None
+    # Both writers must own the same root lock. An alternate pilot DB could not
+    # be accounted for by the production runner on its next resume.
+    if run_dir.resolve() != (root / PILOTS / PROMPT_VERSION).resolve():
+        raise RuntimeError("The shared credit requires the canonical pilot ledger")
+    prior = production_budget.prior_commitment(root, wave)
+    digest = hashlib.sha256((wave / "manifest.json").read_bytes()).hexdigest()
+    production_budget.validate_existing(wave, digest, prior)
+    with closing(production_budget.connect(wave, readonly=True)) as production:
+        elsewhere = prior + committed(production) - (previous_commitment + committed(db))
+    if elsewhere < 0:
+        raise RuntimeError("The project and pilot ledgers disagree")
+
+    def check_deadline():
+        if time.time() >= production_budget.CUTOFF:
+            raise SpendingLimitReached("The shared credit expired. No additional generation request was sent.")
+
+    return min(pilot_cap, production_budget.CREDIT - elsewhere), check_deadline
+
+
+def generate_one(root, db, sample, model, api, *, previous_commitment, recovery=False,
+                 budget_nanos=None, before_reserve=None):
     uid = sample["uid"]
     store = ReviewStore(root / DEFAULT_REVIEW_EVENTS)
     identity = {key: sample[key] for key in ("uid", "kind", "pairs", "base_fingerprint", "image_sha256")}
@@ -266,18 +301,23 @@ def generate_one(root, db, sample, model, api, *, previous_commitment, recovery=
                 raise RuntimeError("Unresolved or changed request. Reconcile the original call before continuing.")
             replies.append(json.loads(saved[1]))
             continue
+        if before_reserve is not None:
+            before_reserve()
         reserve = nanos(api.reserve_usd(body))
         if reserve <= 0:
             raise ValueError("Expected a positive reservation for a paid request")
-        if previous_commitment + committed(db) + reserve > nanos(BUDGET_USD):
-            raise RuntimeError("Pilot spending limit reached. No additional generation request was sent.")
-        if not Path(store.path).is_file():
-            raise RuntimeError("Human decision history is unavailable")
-        if (COLLECTION, uid) in human_touched_uids(store):
-            return {"status": "protected", "reason": "Human review recorded before submission"}
+        cap = nanos(BUDGET_USD) if budget_nanos is None else budget_nanos
+        if previous_commitment + committed(db) + reserve > cap:
+            raise SpendingLimitReached("Pilot spending limit reached. No additional generation request was sent.")
         # A crash or ambiguous network failure must leave a durable reservation.
         client_id = str(uuid4())
-        with db:
+        if not Path(store.path).is_file():
+            raise RuntimeError("Human decision history is unavailable")
+        with locked_human_uids(store) as touched, db:
+            if (COLLECTION, uid) in touched:
+                return {"status": "protected", "reason": "Human review recorded before submission"}
+            if before_reserve is not None:
+                before_reserve()
             db.execute("INSERT INTO calls(uid,model,step,request_hash,client_id,reserved) VALUES(?,?,?,?,?,?)",
                        (*key, request_hash, client_id, reserve))
             if recovery:
@@ -307,6 +347,7 @@ def run_pilot(root, run_dir, api, *, model=None):
         check_predecessors(manifest, predecessors)
         if db.execute("SELECT 1 FROM calls WHERE charged>reserved LIMIT 1").fetchone():
             raise RuntimeError("Reconcile the price discrepancy before resuming.")
+        cap, check_deadline = pilot_credit_limits(root, run_dir, db, previous_commitment)
         # On explicit restart, retire the interrupted chain. The original call can
         # never be submitted again, and its full reservation still counts toward the cap.
         with db:
@@ -322,7 +363,8 @@ def run_pilot(root, run_dir, api, *, model=None):
                 key = (sample["uid"], selected_model)
                 if key in finished:
                     continue
-                result = generate_one(root, db, sample, selected_model, api, previous_commitment=previous_commitment)
+                result = generate_one(root, db, sample, selected_model, api, previous_commitment=previous_commitment,
+                                      budget_nanos=cap, before_reserve=check_deadline)
                 with db:
                     db.execute("INSERT INTO outcomes VALUES(?,?,?)", (*key, encode(result)))
                 completed += 1

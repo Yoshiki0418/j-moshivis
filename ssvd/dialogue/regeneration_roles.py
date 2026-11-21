@@ -22,6 +22,11 @@ VISUAL_V8 = "visual_dialogue_v8"
 VISUAL_V9 = "visual_dialogue_v9"
 PROMPT_VERSION = "visual_dialogue_v10"
 
+
+def default_pair_count(uid: str) -> int:
+    """Choose the reproducible conversation length shared by selection and generation."""
+    return random.Random(hashlib.sha256(uid.encode("utf-8")).digest()).choice(PAIR_COUNTS)
+
 # Preserve the exact requests used for the archived v4 pilot.
 _USER_V4 = (
     "相手と同じ写真を見ながら日本語で話すユーザー役。元画像と会話の最初から直前までを読んでから、"
@@ -211,7 +216,7 @@ def next_step(uid: str, kind: str, image_data_url: str, replies: list[dict], *,
         raise ValueError("Unsupported visual dialogue version")
     archived = version in (VISUAL_V4, VISUAL_V5)
     if pairs is None:
-        pairs = random.Random(hashlib.sha256(uid.encode("utf-8")).digest()).choice(PAIR_COUNTS)
+        pairs = default_pair_count(uid)
     if type(pairs) is not int or pairs not in PAIR_COUNTS:
         raise ValueError("expected 4 to 8 question-answer pairs")
     if len(replies) > 2 * pairs:

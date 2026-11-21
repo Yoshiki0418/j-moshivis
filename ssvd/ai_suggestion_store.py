@@ -7,6 +7,7 @@ the human review log. Readers do not create a missing suggestion database.
 
 from __future__ import annotations
 
+from contextlib import contextmanager
 import datetime as dt
 import fcntl
 import hashlib
@@ -303,30 +304,19 @@ def default_ai_suggestion_store(root: str | os.PathLike[str]) -> AISuggestionSto
     return AISuggestionStore(Path(root) / DEFAULT_AI_SUGGESTIONS)
 
 
-def human_touched_uids(review_store: Any) -> set[tuple[str, str]]:
-    """All valid human-review identities, including superseded decisions.
-
-    A content fingerprint does not include the collection. Looking only at the
-    latest decision per fingerprint can therefore hide an earlier review in
-    another collection. Scan the append-only history without collapsing it.
-    """
+@contextmanager
+def locked_human_uids(review_store: Any):
+    """Keep a shared lock on the decision log while comparing and publishing a candidate."""
     path = Path(review_store.path).resolve()
     key = str(path)
-    with _HUMAN_HISTORY_LOCK:
-        try:
-            stream = path.open("r", encoding="utf-8")
-        except FileNotFoundError:
-            _HUMAN_HISTORY_CACHE.pop(key, None)
-            return set()
-        result: set[tuple[str, str]] = set()
-        with stream:
-            fcntl.flock(stream.fileno(), fcntl.LOCK_SH)
-            try:
-                stat = os.fstat(stream.fileno())
-                stamp = (stat.st_dev, stat.st_ino, stat.st_size, stat.st_mtime_ns, stat.st_ctime_ns)
-                cached = _HUMAN_HISTORY_CACHE.get(key)
-                if cached is not None and cached[0] == stamp:
-                    return set(cached[1])
+    with path.open("r", encoding="utf-8") as stream:
+        fcntl.flock(stream, fcntl.LOCK_SH)
+        with _HUMAN_HISTORY_LOCK:
+            stat = os.fstat(stream.fileno())
+            stamp = (stat.st_dev, stat.st_ino, stat.st_size, stat.st_mtime_ns, stat.st_ctime_ns)
+            cached = _HUMAN_HISTORY_CACHE.get(key)
+            if cached is None or cached[0] != stamp:
+                result = set()
                 for line in stream:
                     try:
                         event = json.loads(line)
@@ -344,7 +334,17 @@ def human_touched_uids(review_store: Any) -> set[tuple[str, str]]:
                         result.add((collection, uid))
                 if len(_HUMAN_HISTORY_CACHE) >= 64:
                     _HUMAN_HISTORY_CACHE.pop(next(iter(_HUMAN_HISTORY_CACHE)))
-                _HUMAN_HISTORY_CACHE[key] = (stamp, frozenset(result))
-            finally:
-                fcntl.flock(stream.fileno(), fcntl.LOCK_UN)
-        return result
+                cached = (stamp, frozenset(result))
+                _HUMAN_HISTORY_CACHE[key] = cached
+        yield cached[1]
+
+
+def human_touched_uids(review_store: Any) -> set[tuple[str, str]]:
+    """All human decisions, including superseded decisions and decisions in other collections."""
+    try:
+        with locked_human_uids(review_store) as touched:
+            return set(touched)
+    except FileNotFoundError:
+        with _HUMAN_HISTORY_LOCK:
+            _HUMAN_HISTORY_CACHE.pop(str(Path(review_store.path).resolve()), None)
+        return set()

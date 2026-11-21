@@ -214,9 +214,34 @@ python3 -m ssvd.dialogue.preview_regeneration --uid "$PENDING_UID" > /tmp/jmv-ne
 
 現在の方式は `visual_dialogue_v10`。v6の20対話では、ユーザーの127発話で相手に情報を求めたものが0件だった。v7ではユーザーに質問する目的を与えた。v8では相づちを任意と明示し、回答役に直接答える目的と、相手の見立てに誤りがあるときの応じ方を与えた。v9では両役の会話を、そのとき見えている対象から始められるようにした。v10では回答役の記録を往復のラベルに絞った。4〜8往復あたり画像付き生成は8〜16回。過去の応答をオフライン再生する場合は `--prompt-version` で生成時の版を指定する。[v6の試行結果](https://github.com/Yoshiki0418/j-moshivis/issues/12#issuecomment-7058420549)
 
-人手比較は同じ 20 画像（元ラベルで OCR 14、カウント 6）で行う。確定できる画像で過度に「分からない」と答えていないか、曖昧な画像で断定していないか、追質問や言い回しが自然か、全文を承認するまでの修正時間を記録する。媒体を持ち出す定型の前置きと、実際に写真などが話題になった発話は区別して読む。`generated_tasks` はラベルの組み合わせ別の対話数、`marked_turns_by_kind` は各ラベルが付いた往復数を示す。一つの往復に両方付けば、OCR・カウントにそれぞれ1件を計上する。[少数試行 #12](https://github.com/Yoshiki0418/j-moshivis/issues/12)
+モデル選定には同じ20画像（元ラベルで OCR 14、カウント 6）の比較を用いた。確認の観点は、読める対象に答えられるか、曖昧な対象を断定していないか、追質問や言い回しが自然か。`generated_tasks` はラベルの組み合わせ別の対話数、`marked_turns_by_kind` は各ラベルが付いた往復数を示す。一つの往復に両方付けば、OCR・カウントにそれぞれ1件を計上する。[少数試行 #12](https://github.com/Yoshiki0418/j-moshivis/issues/12)
 
-### 20画像で試行する
+### 本番の進捗確認と中断後の再開
+
+本番は `gpt-6.1-terra` の Flex で画像ごとに4〜8往復を生成する。最初の固定キューは3,600画像。過去の生成と人手判断の続きを扱うため、元画像とQwenのJSONL、ビューアのカタログと人手判断履歴、固定評価データ、少数試行・先行100件・本番の各台帳がある環境で実行する。[本番生成 #13](https://github.com/Yoshiki0418/j-moshivis/issues/13)
+
+稼働中でも、リポジトリ直下から次のコマンドで確認できる。`status` は課金明細・確認待ち件数・残額を読み取る。`verify` は画像と元対話が凍結時の版と一致するか、固定評価画像との重複や凍結後の人手判断があるかを調べる。どちらもAPI呼び出しは0回。
+
+```bash
+# 最初の3,600画像を固定したときのSHA-256
+production_manifest_sha=295cdc50e643f3de07c36cf6112f1d2105df1bcd718bf1ecb478633c263f67b5
+.venv-data/bin/python -m ssvd.dialogue.production status --manifest-sha "$production_manifest_sha"
+.venv-data/bin/python -m ssvd.dialogue.production_cohort verify --sha256 "$production_manifest_sha"
+```
+
+本番が中断したら、同じキューと台帳を使って次のコマンドで再開する。これは有料の操作。最大4対話を並行して扱い、同じキューに対して二つ目の生成プロセスを起動すると、送信前に終了する。APIキーには既存の非公開キーファイルを使える。
+
+```bash
+.venv-data/bin/python -m ssvd.dialogue.production run --manifest-sha "$production_manifest_sha" --workers 4
+```
+
+- 受領済みの発話は台帳の応答から復元する。送信後に応答の受領を確認できなかったときは最大見積額を予約したまま、その対話を `hold` とする。明細との照合に使うリクエストIDは台帳の `calls.client_id` にある。
+- Flexの混雑で明確に拒否された発話は、待機時間を延ばしながら最大6回再試行する。利用枠切れや認証エラーでは停止する。初回の70ドルには少数試行と先行100件の計5.8958804ドル（未確定予約込み）も含む。残額はプロジェクト台帳からの見積もり。今回の停止時刻は2026年12月10日 0時（日本時間）。
+- 生成結果は `data/curation/gpt_regeneration_issue13/production_v10_terra/production.sqlite3` に発話単位で保存する。`summary.json` と `pending_candidates.jsonl` は確認用の出力。完成した対話はビューアの `/#annotate-terra` から確認し、本人が承認した版を音声合成に使う。途中で元の対話を承認・編集・却下した場合もその判断が優先される。[人手確認 #9](https://github.com/Yoshiki0418/j-moshivis/issues/9)
+
+別の対象群を検討する際は `production_cohort dry-run --limit 枚数` で抽出数と除外理由を調べられる（モジュール名は上の `verify` と共通）。新しい保存先に `freeze --manifest パス --limit 枚数` を実行すると固定リストと照合用のSHA-256が得られる。選定と凍結にAPI料金は発生しない。上の `run` は初回クレジット用の本番保存先を使用する。
+
+### 少数試行で使ったコマンド（20画像）
 
 リポジトリ直下で実行する。`prepare` は人手未確認の旧 Qwen 対話から抽出し、v3 の評価画像、固定の外部視覚評価・キャプション評価画像、試行内の画像と重複・類似する候補を除く。元の OCR／カウント分類や選定時の難しさは旧記録からの目印。元画像で実際に判別できる内容は各モデルが改めて観察し、人が確認する。
 
