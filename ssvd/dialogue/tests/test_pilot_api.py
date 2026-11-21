@@ -86,6 +86,32 @@ class PilotAPITests(unittest.TestCase):
             self.assertAlmostEqual(receipt["cost_usd"], expected_cost, places=12)
             self.assertGreaterEqual(reserved, receipt["cost_usd"])
 
+    def test_terra_flex_uses_confirmed_rates_and_reserves_standard_ceiling(self):
+        api = OpenAIPilotAPI("test-token", service_tier="flex")
+        model = "gpt-6.1-terra"
+        body = request(model)
+        response = generated(model, service_tier="flex")
+        with patch.object(api, "_post", side_effect=[counted(), response]) as send:
+            reserved = api.reserve_usd(body)
+            _, receipt = api.generate(body)
+        self.assertEqual(send.call_args.args[1]["service_tier"], "flex")
+        self.assertAlmostEqual(reserved, (1000 * 1250 + 1024 * 5000) / 1e9, places=12)
+        self.assertEqual(receipt["service_tier"], "flex")
+        self.assertAlmostEqual(receipt["cost_usd"], 0.000935, places=12)
+        for tier in ("default", None):
+            response = generated(model)
+            if tier is None:
+                del response["service_tier"]
+            with patch.object(api, "_post", side_effect=[counted(), response]) as send:
+                api.reserve_usd(body)
+                with self.assertRaisesRegex(RuntimeError, "verify billing"):
+                    api.generate(body)
+                self.assertEqual(send.call_count, 2)
+        with self.assertRaises(ValueError):
+            api.prepare(request("gpt-6-luna"))
+        with self.assertRaises(ValueError):
+            OpenAIPilotAPI("test-token", service_tier="auto")
+
     def test_content_failures_still_return_a_billable_receipt(self):
         body = request()
         for response in (generated(MODELS[0], "not JSON"), generated(MODELS[0], "[]"),
@@ -143,6 +169,15 @@ class PilotAPITests(unittest.TestCase):
             self.open.assert_called_once()
             with self.assertRaises(ValueError):
                 self.api.generate(body)
+
+    def test_quota_rejection_is_distinct_from_transient_flex_capacity(self):
+        for code, expected in (("insufficient_quota", "insufficient_quota"), ("rate_limit_exceeded", "")):
+            body = json.dumps({"error": {"code": code, "message": "private"}}).encode()
+            self.open.side_effect = HTTPError("https://private", 429, "private", {}, io.BytesIO(body))
+            with self.assertRaises(PilotRequestRejected) as caught:
+                self.api.reserve_usd(request())
+            self.assertEqual(caught.exception.code, expected)
+            self.assertNotIn("private", str(caught.exception))
 
     def test_ambiguous_transport_failure_consumes_quote_and_redacts_input(self):
         body = request()

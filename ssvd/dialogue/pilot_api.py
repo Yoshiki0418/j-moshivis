@@ -1,4 +1,4 @@
-"""Synchronous, standard-tier Responses calls for the Luna/Terra comparison."""
+"""Budgeted synchronous Responses calls for visual dialogue generation."""
 
 import hashlib
 import json
@@ -32,10 +32,13 @@ _RATES = {
     "gpt-6-luna": _Rates(100, 10, 125, 500),
     "gpt-6.1-terra": _Rates(1000, 50, 1250, 5000),
 }
+_FLEX_RATES = {"gpt-6.1-terra": _Rates(500, 25, 625, 2500)}
 
 
 class PilotRequestRejected(RuntimeError):
     """A definite HTTP rejection before generation. Safe to release this reservation."""
+
+    code: str = ""
 
 
 class _NoRedirect(HTTPRedirectHandler):
@@ -75,18 +78,22 @@ def _reply(response):
 
 
 class OpenAIPilotAPI:
-    def __init__(self, api_key: str):
+    def __init__(self, api_key: str, *, service_tier: str = "default"):
         if not api_key or not api_key.isascii() or any(ord(c) <= 32 or ord(c) >= 127 for c in api_key):
             raise ValueError("A valid OPENAI_API_KEY is required")
         self._api_key = api_key
+        if service_tier not in ("default", "flex"):
+            raise ValueError("Unsupported service tier")
+        self._service_tier = service_tier
+        self._rates = _FLEX_RATES if service_tier == "flex" else _RATES
         self._opener = build_opener(_NoRedirect())
         self._quoted = None
 
     def prepare(self, body: dict) -> dict:
         """Accept only the one-message requests emitted by regeneration_roles."""
         model = body.get("model")
-        if model not in MODELS:
-            raise ValueError("Unsupported pilot model")
+        if model not in self._rates:
+            raise ValueError("Unsupported model for this service tier")
         messages = body.get("input")
         if (not isinstance(messages, list) or len(messages) != 1 or not isinstance(messages[0], dict)
                 or messages[0].get("role") != "user"):
@@ -112,7 +119,7 @@ class OpenAIPilotAPI:
         return {
             "model": model, "input": [{"role": "user", "content": content}],
             "instructions": body["instructions"], "text": {"format": {"type": "json_object"}},
-            "reasoning": {"effort": "low"}, "store": False, "service_tier": "default",
+            "reasoning": {"effort": "low"}, "store": False, "service_tier": self._service_tier,
             "prompt_cache_options": {"mode": "explicit"},
             "max_output_tokens": limit,
         }
@@ -126,15 +133,26 @@ class OpenAIPilotAPI:
         request = Request(url, data=json.dumps(body, ensure_ascii=False).encode(), method="POST",
                           headers=headers)
         try:
-            with self._opener.open(request, timeout=120) as response:
+            timeout = 900 if self._service_tier == "flex" and url == _ENDPOINT else 120
+            with self._opener.open(request, timeout=timeout) as response:
                 result = json.load(response)
         except HTTPError as error:
             status = error.code
+            rejected = PilotRequestRejected(f"OpenAI rejected the request (HTTP {status})")
+            if status == 429:
+                # Pass only a known billing code to the caller. Never log provider bodies.
+                try:
+                    envelope = json.loads(error.read(16_384))
+                    problem = envelope.get("error") if isinstance(envelope, dict) else None
+                    if isinstance(problem, dict) and problem.get("code") == "insufficient_quota":
+                        rejected.code = "insufficient_quota"
+                except (OSError, HTTPException, ValueError, RecursionError):
+                    pass
             error.close()
             # Only unconditional authentication, route, size, format or quota rejections.
             # Generic 400, timeout, conflict and server errors retain the reservation.
             if status in (401, 403, 404, 413, 415, 422, 429):
-                raise PilotRequestRejected(f"OpenAI rejected the request (HTTP {status})") from None
+                raise rejected from None
             raise RuntimeError(f"OpenAI request outcome unknown (HTTP {status})") from None
         except (URLError, OSError, HTTPException, ValueError, RecursionError):
             raise RuntimeError("OpenAI transport or response decoding failed; outcome unknown") from None
@@ -158,6 +176,7 @@ class OpenAIPilotAPI:
         input_tokens = _tokens(count.get("input_tokens"))
         if not 0 < input_tokens <= _SHORT_CONTEXT_LIMIT:
             raise ValueError("Request outside the pilot's short-context pricing")
+        # Keep a Standard upper bound outstanding until the receipt confirms the tier.
         rates = _RATES[body["model"]]
         upper = input_tokens * rates.written + body["max_output_tokens"] * rates.output
         self._quoted = _fingerprint(body), input_tokens
@@ -175,7 +194,7 @@ class OpenAIPilotAPI:
         model = body["model"]
         if (not isinstance(response_id, str) or not response_id.startswith("resp_")
                 or not re.fullmatch(re.escape(model) + r"(-\d{4}-\d{2}-\d{2})?", response.get("model") or "")
-                or response.get("service_tier", "default") != "default"
+                or response.get("service_tier", "default") != self._service_tier
                 or response.get("status") not in ("completed", "incomplete", "failed", "cancelled")):
             raise RuntimeError("Unexpected OpenAI response or non-final status; verify billing")
         usage = response.get("usage")
@@ -193,9 +212,9 @@ class OpenAIPilotAPI:
         ordinary = input_tokens - cached - written
         if ordinary < 0 or input_tokens > counted_input or output_tokens > body["max_output_tokens"]:
             raise RuntimeError("OpenAI usage outside reserved pricing; verify billing")
-        rates = _RATES[model]
+        rates = self._rates[model]
         cost = ordinary * rates.ordinary + cached * rates.cached + written * rates.written + output_tokens * rates.output
         return _reply(response), {
             "response_id": response_id, "model": response["model"], "status": response.get("status"),
-            "usage": usage, "cost_usd": cost / 1_000_000_000,
+            "service_tier": self._service_tier, "usage": usage, "cost_usd": cost / 1_000_000_000,
         }
