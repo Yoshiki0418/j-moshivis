@@ -179,7 +179,7 @@ price dataset.
 [論文 §3.3・付録 E](https://arxiv.org/html/2503.15633v1#S3.SS3)・[公開コードの長さ指定](https://github.com/kyutai-labs/moshivis/blob/main/ssvd/generate.py#L305-L310)・[話者交替](https://github.com/kyutai-labs/moshivis/blob/main/ssvd/multiturn_prompting.py#L181-L214)
 
 1. 最初の質問から最後の返答まで、質問役と回答役に同じ元画像を1枚ずつ渡す。各発話の入力には、そこまでの会話全文を発話順に載せる。事前の画像要約や切り抜き・拡大は行わない。
-2. 質問役は写真と会話から気になったことを話す。旧対話のOCR・カウント種別は比較用の画像選定と集計に使う。文字や個数が自然に話題になればどちらも扱え、普通の会話だけでもよい。
+2. ユーザー役は、写真について知りたいことを相手に尋ねる人として話す。最初は写真を見て気になったことを一つ質問する。続きでは相手の答えを受け、感想や相づちを交えつつ、新たに知りたいことを聞く。例えば本数が気になったら「看板の下の柱、何本見える？」と聞き、相手が数を答えられるようにする。話題は写真と会話から選ぶ。旧対話のOCR・カウント種別は選定と集計に使う。
 3. 回答役は写真から分かる範囲で応じる。例えば、文字が一部だけ読めた場合はその部分を答える。数は「手前に三台は見える」「五台くらいかな」と言ってよく、判断がつかなければ「分からない」と答えられる。
 4. 回答役は発話と一緒に、その返答で扱った課題を記録する。OCRでは英字を含む原表記を注釈に残し、発話には自然な日本語の読みを使う。印刷された数字の読みはOCR、実際に見分けた物の数はカウントとして扱う。各課題の質問・回答位置と答えを `auxiliary_task` と `additional_tasks` に保存する。人が元画像と対話を見て承認する。
 
@@ -199,7 +199,7 @@ python3 -m ssvd.dialogue.preview_regeneration --uid "$PENDING_UID" > /tmp/jmv-ne
 
 再生時は初回の `identity` と、受信順の JSON 配列 `replies` を `--transcript` に渡す。最初の応答はユーザー発話、次は回答役の発話となる。結果は `request`、実行を続けられない場合の `hold`、完了時の `pending_review`。`--model` と `--pairs` で比較条件を揃えられる。
 
-現在の方式は `visual_dialogue_v6`。4〜8往復あたり画像付き生成は8〜16回。過去の応答をオフライン再生する場合は `--prompt-version` で生成時の版（例 `visual_dialogue_v5`）を指定する。[予算管理と人手判断の照合 #10](https://github.com/Yoshiki0418/j-moshivis/issues/10)
+現在の方式は `visual_dialogue_v7`。v6で質問と感想を同列に許した試行では、20対話・127回のユーザー発話のうち、相手に情報を求めた発話は0件だった。v7はユーザー役の目的だけを変え、回答役と入力条件を揃えて比較できる。4〜8往復あたり画像付き生成は8〜16回。過去の応答をオフライン再生する場合は `--prompt-version` で生成時の版を指定する。[v6の試行結果](https://github.com/Yoshiki0418/j-moshivis/issues/12#issuecomment-7058420549)
 
 人手比較は同じ 20 画像（元ラベルで OCR 14、カウント 6）で行う。確定できる画像で過度に「分からない」と答えていないか、曖昧な画像で断定していないか、追質問や言い回しが自然か、全文を承認するまでの修正時間を記録する。生成後の通常・片方・両方の内訳と各回答種別、注意ラベルと実行未完了の件数も報告する。[少数試行 #12](https://github.com/Yoshiki0418/j-moshivis/issues/12)
 
@@ -213,7 +213,7 @@ python3 -m ssvd.dialogue.preview_regeneration --uid "$PENDING_UID" > /tmp/jmv-ne
 .venv-data/bin/python -m ssvd.dialogue.pilot review
 ```
 
-`data/curation/gpt_pilot_issue12/visual_dialogue_v6/` に固定した画像リスト、SQLite台帳、匿名比較用の `review.html` を保存する。過去の台帳がある場合は同じ20枚・同じ往復数で比較し、生成時には最新の人手判断も確認する。v2 の集計は `status --legacy`、v3〜v5 は `status --archive` または `review --archive` に版名を指定して参照できる。候補生成後は、両モデルの全文と既存Qwen対話を原画像・448px画像で比較できる。正式な承認とTTSへの投入は既存の確認手順で行う。
+`data/curation/gpt_pilot_issue12/visual_dialogue_v7/` に固定した画像リスト、SQLite台帳、匿名比較用の `review.html` を保存する。過去の台帳がある場合は同じ20枚・同じ往復数で比較し、生成時には最新の人手判断も確認する。v2 の集計は `status --legacy`、v3〜v6 は `status --archive` または `review --archive` に版名を指定して参照できる。候補生成後は、両モデルの全文と既存Qwen対話を原画像・448px画像で比較できる。正式な承認とTTSへの投入は既存の確認手順で行う。
 
 有料の `run` は同期 Responses API を使用する。`--model gpt-6-luna` で対象の20画像をLunaだけで生成できる。モデルを省略した場合は両モデルを対象とする。`OPENAI_API_KEY` または権限600のキーファイルを使う。既定のファイルは `~/.config/j-moshivis/openai_api_key`、別パスは `--api-key-file` で指定できる。
 

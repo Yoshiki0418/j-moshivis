@@ -189,6 +189,7 @@ class PilotTests(unittest.TestCase):
         middle = base / pilot.OBSERVATION_VERSION
         v4 = base / pilot.VISUAL_V4
         v5 = base / pilot.VISUAL_V5
+        v6 = base / pilot.VISUAL_V6
         current = base / pilot.PROMPT_VERSION
         with closing(pilot.open_db(base)) as db, db:
             db.execute("UPDATE cohort SET prompt=?", (pilot.LEGACY_VERSION,))
@@ -219,12 +220,24 @@ class PilotTests(unittest.TestCase):
             db.execute("UPDATE cohort SET prompt=?", (pilot.VISUAL_V5,))
             db.execute("INSERT INTO calls(uid,model,step,request_hash,client_id,reserved) "
                        "VALUES('d',?,0,'v5','v5',4000000)", (pilot.MODELS[0],))
+        pilot.prepare(self.root, v6)
+        with closing(pilot.open_db(v6)) as db, db:
+            db.execute("UPDATE cohort SET prompt=?", (pilot.VISUAL_V6,))
+            db.execute("INSERT INTO calls(uid,model,step,request_hash,client_id,reserved) "
+                       "VALUES(?,?,0,'v6','hold',5000000)", (self.samples[0]["uid"], pilot.MODELS[0]))
+            # The separately saved v6 supplement was billed to the same ledger.
+            db.execute("INSERT INTO calls(uid,model,step,request_hash,client_id,reserved,charged,receipt) "
+                       "VALUES('supplement',?,0,'supplement','supplement',4000000,2000000,?)",
+                       (pilot.MODELS[0], pilot.encode({"usage": {"input_tokens": 6, "output_tokens": 2}})))
         with patch.object(pilot, "prepare_manifest", side_effect=AssertionError("cohort must stay frozen")):
             selected = pilot.prepare(self.root, current)
         self.assertEqual(selected["budget_predecessors"], list(pilot.ARCHIVED_VERSIONS))
         self.assertEqual(selected["samples"], self.samples)
         budget = pilot.status(current)["shared_budget"]
-        self.assertEqual((budget["legacy_committed_usd"], budget["remaining_usd"]), (.036, 1.964))
+        self.assertEqual((budget["legacy_committed_usd"], budget["remaining_usd"]), (.043, 1.957))
+        v6_report = pilot.status(v6, prompt_version=pilot.VISUAL_V6)
+        self.assertEqual(v6_report["shared_budget"]["legacy_committed_usd"], .036)
+        self.assertEqual((v6_report["unresolved_reserve_usd"], v6_report["generation_cost_usd"]), (.005, .002))
         v5_report = pilot.status(v5, prompt_version=pilot.VISUAL_V5)
         self.assertEqual(v5_report["shared_budget"]["legacy_committed_usd"], .032)
         self.assertEqual(v5_report["unresolved_reserve_usd"], .004)
@@ -234,7 +247,7 @@ class PilotTests(unittest.TestCase):
         middle_report = pilot.status(middle, prompt_version=pilot.OBSERVATION_VERSION)
         self.assertEqual(middle_report["shared_budget"]["legacy_committed_usd"], .012)
         api = ExampleAPI()
-        with patch.object(pilot, "BUDGET_USD", .036), self.assertRaisesRegex(RuntimeError, "spending limit"):
+        with patch.object(pilot, "BUDGET_USD", .043), self.assertRaisesRegex(RuntimeError, "spending limit"):
             pilot.run_pilot(self.root, current, api)
         with closing(pilot.open_db(middle)) as db, db:
             manifest["samples"][0]["uid"] = "different"
