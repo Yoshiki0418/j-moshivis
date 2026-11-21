@@ -1,4 +1,4 @@
-"""Generate one image-backed utterance per request and annotate the actual exchanges."""
+"""Generate one image-backed utterance per request and mark exchanges for review."""
 
 import hashlib
 import json
@@ -10,7 +10,7 @@ from .regeneration_grounding import (
     contains_grounded_answer, evidence_problem, explicit_question_kinds, mentions_target, task_problem,
 )
 from .visual_dialogue_prompts import ASSISTANT, USER
-from . import visual_dialogue_prompts_v8
+from . import visual_dialogue_prompts_v8, visual_dialogue_prompts_v9
 
 PAIR_COUNTS = range(4, 9)
 UTTERANCE_OUTPUT_LIMIT = 1024
@@ -19,7 +19,8 @@ VISUAL_V5 = "visual_dialogue_v5"
 VISUAL_V6 = "visual_dialogue_v6"
 VISUAL_V7 = "visual_dialogue_v7"
 VISUAL_V8 = "visual_dialogue_v8"
-PROMPT_VERSION = "visual_dialogue_v9"
+VISUAL_V9 = "visual_dialogue_v9"
+PROMPT_VERSION = "visual_dialogue_v10"
 
 # Preserve the exact requests used for the archived v4 pilot.
 _USER_V4 = (
@@ -112,6 +113,7 @@ _ROLE_PROMPTS = {
     VISUAL_V6: (_USER_V6, _ASSISTANT_V6_V7),
     VISUAL_V7: (_USER_V7, _ASSISTANT_V6_V7),
     VISUAL_V8: (visual_dialogue_prompts_v8.USER, visual_dialogue_prompts_v8.ASSISTANT),
+    VISUAL_V9: (visual_dialogue_prompts_v9.USER, visual_dialogue_prompts_v9.ASSISTANT),
     PROMPT_VERSION: (USER, ASSISTANT),
 }
 _SAME_TEXT = re.compile(r"[\s。、．.,！？!?「」『』]+")
@@ -174,6 +176,21 @@ def _review_answer(reply, dialogue, turn, exchanges, warnings, *, require_reason
     return tasks
 
 
+def _review_markers(reply, turn, warnings):
+    """A marker selects a turn for a reviewer; it supplies no reference answer."""
+    declared = reply.get("tasks", [])
+    if not isinstance(declared, list):
+        warnings.append((turn, "invalid_task_marker"))
+        return []
+    kinds = []
+    for kind in declared:
+        if kind not in ("ocr", "counting"):
+            warnings.append((turn, "invalid_task_marker"))
+        elif kind not in kinds:
+            kinds.append(kind)
+    return [{"kind": kind} for kind in kinds]
+
+
 def next_step(uid: str, kind: str, image_data_url: str, replies: list[dict], *,
               model: str = "gpt-6-luna", pairs: int | None = None, version: str = PROMPT_VERSION,
               legacy_v4: bool = False) -> dict:
@@ -216,7 +233,11 @@ def next_step(uid: str, kind: str, image_data_url: str, replies: list[dict], *,
             warnings.append((turn, "spoken_form"))
         dialogue.append({"role": role, "text": text})
         if role == "assistant":
-            for task in _review_answer(reply, dialogue, turn, exchanges, warnings, require_reason=archived):
+            if version == PROMPT_VERSION:
+                tasks = _review_markers(reply, turn, warnings)
+            else:
+                tasks = _review_answer(reply, dialogue, turn, exchanges, warnings, require_reason=archived)
+            for task in tasks:
                 exchanges.append({"pair": turn // 2, "task": task})
 
     if len(dialogue) == 2 * pairs:

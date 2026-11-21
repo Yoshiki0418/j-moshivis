@@ -40,7 +40,7 @@ SSVD_DIR = Path(__file__).resolve().parents[1]
 if str(SSVD_DIR) not in sys.path:
     sys.path.insert(0, str(SSVD_DIR))
 
-from review_store import content_fingerprint, default_review_store, image_file_sha256  # noqa: E402
+from review_store import content_fingerprint, default_review_store, image_file_sha256, review_warning_fields  # noqa: E402
 
 TARGET_SR = 24000
 EMOTIVE_RE = re.compile(r"^(わあ|わー|おお|お、|あ、|あっ|へえ|えっ|うわ|すごい|素敵|いいですね|かわいい|きれい|楽しそう|おいしそう|美味しそう|いいなあ|いいなぁ)|[!！]|すごく|とても(きれい|素敵|かわいい)|楽し(い|そう)|嬉し|素敵|かわいい|きれいです")
@@ -143,6 +143,7 @@ def _review_record_from_source(
         "auxiliary_task": record.get("auxiliary_task"),
         "verification_status": record.get("verification_status"),
         "generator": record.get("generator"),
+        **review_warning_fields(record),
     }
 
 
@@ -167,6 +168,7 @@ def _review_record_from_speech_meta(meta: Mapping[str, object]) -> dict:
         "auxiliary_task": meta.get("auxiliary_task"),
         "verification_status": meta.get("verification_status"),
         "generator": meta.get("generator"),
+        **review_warning_fields(meta),
     }
 
 
@@ -450,6 +452,7 @@ def build_one(
         "dataset_collection": rec.get("dataset_collection") or (rec.get("human_revision") or {}).get("collection"),
         "auxiliary_task": rec.get("auxiliary_task"),
         "verification_status": rec.get("verification_status"),
+        **review_warning_fields(rec),
         "review_required": review_required,
         "review_id": review_id,
         "source_fingerprint": (rec.get("human_revision") or {}).get("base_fingerprint", review_id),

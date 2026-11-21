@@ -105,6 +105,19 @@ class PilotTests(unittest.TestCase):
         self.assertEqual(len(api.sent), 3)
         self.assertEqual(result["unresolved_requests"], 0)
 
+    def test_marker_report_separates_dialogues_from_turn_counts(self):
+        candidate = {"auxiliary_task": {"kind": "ocr", "answer_turn_index": 1, "additional_tasks": [
+            {"kind": "counting", "answer_turn_index": 1}, {"kind": "ocr", "answer_turn_index": 3}]},
+                     "review_warnings": []}
+        model = pilot.MODELS[0]
+        with closing(pilot.open_db(self.run_dir)) as db, db:
+            db.execute("INSERT INTO outcomes VALUES(?,?,?)", (self.samples[0]["uid"], model,
+                       pilot.encode({"status": "pending_review", "candidate": candidate})))
+        report = pilot.status(self.run_dir)["models"][model]
+        self.assertEqual(report["generated_tasks"], {"counting+ocr": 1})
+        self.assertEqual(report["marked_turns_by_kind"], {"counting": 1, "ocr": 2})
+        self.assertEqual(report["answer_modes"], {})
+
     def test_single_model_run_leaves_other_arm_untouched(self):
         selected, other = pilot.MODELS
         api = ExampleAPI()
@@ -192,6 +205,7 @@ class PilotTests(unittest.TestCase):
         v6 = base / pilot.VISUAL_V6
         v7 = base / pilot.VISUAL_V7
         v8 = base / pilot.VISUAL_V8
+        v9 = base / pilot.VISUAL_V9
         current = base / pilot.PROMPT_VERSION
         with closing(pilot.open_db(base)) as db, db:
             db.execute("UPDATE cohort SET prompt=?", (pilot.LEGACY_VERSION,))
@@ -241,12 +255,24 @@ class PilotTests(unittest.TestCase):
             db.execute("UPDATE cohort SET prompt=?", (pilot.VISUAL_V8,))
             db.execute("INSERT INTO calls(uid,model,step,request_hash,client_id,reserved) "
                        "VALUES('f',?,0,'v8','v8',6000000)", (pilot.MODELS[0],))
+        pilot.prepare(self.root, v9)
+        with closing(pilot.open_db(v9)) as db, db:
+            db.execute("UPDATE cohort SET prompt=?", (pilot.VISUAL_V9,))
+            db.execute("INSERT INTO calls(uid,model,step,request_hash,client_id,reserved,charged,receipt) "
+                       "VALUES('g',?,0,'v9','v9',9000000,8000000,?)", (pilot.MODELS[0], pilot.encode(
+                           {"usage": {"input_tokens": 2, "output_tokens": 1}})))
+            db.execute("INSERT INTO outcomes VALUES(?,?,?)", (self.samples[0]["uid"], pilot.MODELS[0],
+                       pilot.encode({"status": "pending_review", "candidate": {
+                           "auxiliary_task": {"kind": "ocr", "answer_mode": "partial"}, "review_warnings": []}})))
         with patch.object(pilot, "prepare_manifest", side_effect=AssertionError("cohort must stay frozen")):
             selected = pilot.prepare(self.root, current)
         self.assertEqual(selected["budget_predecessors"], list(pilot.ARCHIVED_VERSIONS))
         self.assertEqual(selected["samples"], self.samples)
         budget = pilot.status(current)["shared_budget"]
-        self.assertEqual((budget["legacy_committed_usd"], budget["remaining_usd"]), (.058, 1.942))
+        self.assertEqual((budget["legacy_committed_usd"], budget["remaining_usd"]), (.066, 1.934))
+        v9_report = pilot.status(v9, prompt_version=pilot.VISUAL_V9)
+        self.assertEqual(v9_report["shared_budget"]["legacy_committed_usd"], .058)
+        self.assertEqual(v9_report["models"][pilot.MODELS[0]]["answer_modes"], {"ocr/partial": 1})
         v8_report = pilot.status(v8, prompt_version=pilot.VISUAL_V8)
         self.assertEqual(v8_report["shared_budget"]["legacy_committed_usd"], .052)
         self.assertEqual(v8_report["unresolved_reserve_usd"], .006)
@@ -265,7 +291,7 @@ class PilotTests(unittest.TestCase):
         middle_report = pilot.status(middle, prompt_version=pilot.OBSERVATION_VERSION)
         self.assertEqual(middle_report["shared_budget"]["legacy_committed_usd"], .012)
         api = ExampleAPI()
-        with patch.object(pilot, "BUDGET_USD", .058), self.assertRaisesRegex(RuntimeError, "spending limit"):
+        with patch.object(pilot, "BUDGET_USD", .066), self.assertRaisesRegex(RuntimeError, "spending limit"):
             pilot.run_pilot(self.root, current, api)
         with closing(pilot.open_db(middle)) as db, db:
             manifest["samples"][0]["uid"] = "different"

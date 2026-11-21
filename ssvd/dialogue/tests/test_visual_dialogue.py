@@ -5,7 +5,7 @@ import json
 import unittest
 
 from ssvd.dialogue.pilot_api import OpenAIPilotAPI
-from ssvd.dialogue.regeneration_roles import next_step
+from ssvd.dialogue.regeneration_roles import PROMPT_VERSION, VISUAL_V9, next_step
 from ssvd.dialogue.visual_dialogue_prompts import ASSISTANT, USER
 
 IMAGE = "data:image/jpeg;base64,AA=="
@@ -13,15 +13,15 @@ OCR = {"kind": "ocr", "target": "入口の看板", "mode": "exact", "written": "
 COUNT = {"kind": "counting", "target": "自転車", "mode": "exact", "count": 2}
 
 
-def step(replies):
-    return next_step("example", "ocr", IMAGE, replies, pairs=4)
+def step(replies, *, version=PROMPT_VERSION):
+    return next_step("example", "ocr", IMAGE, replies, pairs=4, version=version)
 
 
 class VisualDialogueTests(unittest.TestCase):
     def test_archived_requests_match_original_generation(self):
         question = {"text": "札には営業時間が書いてあるの？"}
         answer = {"text": "アオバって書いてあるね。", "tasks": [OCR]}
-        # Builders: v4/v5 (0d4409f), v6 (d813b51), v7 (acea45d), v8 (40c63e3).
+        # Builders: v4/v5 (0d4409f), v6 (d813b51), v7 (acea45d), v8 (40c63e3), v9 (9165aa6).
         # The third request follows an answer with private task metadata.
         expected = {
             "visual_dialogue_v4": [
@@ -48,6 +48,11 @@ class VisualDialogueTests(unittest.TestCase):
                 "3d16bdc2c0898ec6f88e757cc8335e36c8f6335cbe2a6cd756a2b4a49ce13c70",
                 "069b40d83cfa37d3c77cbbb1694af704d9138d328763e2e21a7ef0fe56e8e49b",
                 "a3903b0fa8b3187471c6f1048f54c3d46ae5e0e230afb7d32bea5cb84d962d1f",
+            ],
+            "visual_dialogue_v9": [
+                "0f11e3fa1887aa8a0adda0ff3897707bd7ac8f9daaf71afd46eabb0034634226",
+                "0975555aae7de21ff96058abee9ac3972dcf5940de2a126df49d2b0d444ff4d4",
+                "27d3fd306e86f60707955369f5d021dcd8baa921e1debb305607aab70832cba4",
             ],
         }
         for version, digests in expected.items():
@@ -82,7 +87,7 @@ class VisualDialogueTests(unittest.TestCase):
             {"text": "窓から光が差してるね。"}, {"text": "床まで明るいね。", "tasks": []},
             {"text": "一息つきたくなるね。"}, {"text": "窓際が気持ちよさそう。", "tasks": []},
         ]
-        result = step(replies)
+        result = step(replies, version=VISUAL_V9)
         self.assertEqual(result["status"], "pending_review")
         self.assertEqual([e["task"]["kind"] for e in result["exchanges"]], ["ocr", "counting"])
         self.assertEqual(result["exchanges"][0]["task"]["written"], "定員12名")
@@ -98,22 +103,25 @@ class VisualDialogueTests(unittest.TestCase):
             role = "assistant" if turn % 2 else "user"
             self.assertEqual(stage["phase"], role)
             wire = api.prepare(stage["request"])
-            previous = next_step("example", "ocr", IMAGE, replies, pairs=4, version="visual_dialogue_v8")
+            previous = step(replies, version=VISUAL_V9)
             previous_wire = api.prepare(previous["request"])
             instructions = wire["instructions"]
-            self.assertNotEqual(instructions, previous_wire["instructions"])
             self.assertEqual(wire, {**previous_wire, "instructions": instructions})
             for photo_persona in ("一緒に写真を眺め", "同じ写真を隣で見", "写真を見て"):
                 self.assertNotIn(photo_persona, instructions)
             if role == "user":
                 self.assertEqual(instructions, USER)
+                self.assertEqual(instructions, previous_wire["instructions"])
                 self.assertIn("尋ね", instructions)
                 self.assertNotIn("tasks", instructions)
             else:
                 self.assertEqual(instructions, ASSISTANT)
+                self.assertNotEqual(instructions, previous_wire["instructions"])
                 self.assertIn("答え", instructions)
                 self.assertIn("tasks", instructions)
-                self.assertIn("unknown", instructions)
+                self.assertIn("カタカナ", instructions)
+                for field in ("written", "reading", "mode", "target", "reason", "unknown"):
+                    self.assertNotIn(field, instructions)
             message, = wire["input"]
             prompt, image = message["content"]
             context = json.loads(prompt["text"])
@@ -124,13 +132,46 @@ class VisualDialogueTests(unittest.TestCase):
             text = f"発話{turn}"
             reply = {"text": text}
             if role == "assistant":
-                reply["tasks"] = [OCR] if turn == 1 else []
+                reply["tasks"] = ["ocr"] if turn == 1 else []
             replies.append(reply)
             history.append({"role": role, "text": text})
         final = step(replies)
         self.assertEqual(final["status"], "pending_review")
         self.assertEqual(final["dialogue"], history)
-        self.assertEqual(final["exchanges"], [{"pair": 1, "task": OCR}])
+        self.assertEqual(final["exchanges"], [{"pair": 1, "task": {"kind": "ocr"}}])
+
+    def test_marks_only_answerers_reading_or_counting_in_the_current_pair(self):
+        dialogue = [
+            {"text": "三つ並んでいるのって何？"}, {"text": "植木鉢だよ。", "tasks": []},
+            {"text": "青い札には何て書いてある？"}, {"text": "小さくて読めないね。", "tasks": ["ocr"]},
+            {"text": "札に書かれた定員は？"}, {"text": "十二名って書いてあるよ。", "tasks": ["ocr"]},
+            {"text": "受付の札と、並んでる人は見える？"},
+            {"text": "アオバと読めるよ。人は少なくとも三人かな。", "tasks": ["ocr", "counting"]},
+        ]
+        done = step(dialogue)
+        self.assertEqual(done["exchanges"], [
+            {"pair": 2, "task": {"kind": "ocr"}},
+            {"pair": 3, "task": {"kind": "ocr"}},
+            {"pair": 4, "task": {"kind": "ocr"}},
+            {"pair": 4, "task": {"kind": "counting"}},
+        ])
+        self.assertEqual(done["review_warnings"], [])
+        self.assertTrue(done["requires_human_review"])
+
+    def test_unmarked_or_malformed_markers_do_not_block_review_or_invent_evidence(self):
+        dialogue = [
+            {"text": "奥に何人いる？"}, {"text": "重なっていて数えきれないね。", "tasks": []},
+            {"text": "机は何台？"}, {"text": "手前に二台あるね。"},
+            {"text": "看板は読める？"}, {"text": "アオバだよ。", "tasks": [OCR, "other", "ocr", "ocr"]},
+            {"text": "目印は？"}, {"text": "入口の青いのぼりかな。", "tasks": "ocr"},
+        ]
+        done = step(dialogue)
+        self.assertEqual(done["status"], "pending_review")
+        self.assertEqual(done["exchanges"], [{"pair": 3, "task": {"kind": "ocr"}}])
+        self.assertEqual(done["review_warnings"], [
+            {"turn": 6, "code": "invalid_task_marker"}, {"turn": 8, "code": "invalid_task_marker"},
+        ])
+        self.assertTrue(done["requires_human_review"])
 
     def test_ordinary_conversation_is_complete_without_a_task(self):
         dialogue = [
@@ -154,7 +195,7 @@ class VisualDialogueTests(unittest.TestCase):
                    {"text": "入口の看板は何て書いてある？"}, {"text": "アオバだね。", "tasks": [OCR]},
                    {"text": "この自転車、二台かな。何台ある？"}, {"text": "三台あるね。", "tasks": [COUNT]},
                    {"text": "入口の看板は何て書いてある？"}, {"text": "AOBAだね。", "tasks": [OCR]}]
-        done = step(replies)
+        done = step(replies, version=VISUAL_V9)
         self.assertEqual(done["status"], "pending_review")
         self.assertTrue(done["requires_human_review"])
         flags = {(w["turn"], w["code"]) for w in done["review_warnings"]}
@@ -169,7 +210,7 @@ class VisualDialogueTests(unittest.TestCase):
                     {"text": "自転車は何台ある？"}, {"text": "自転車は〇台です。", "tasks": [{**COUNT, "count": 0}]},
                     {"text": "どんな場所かな。"}, {"text": "森に見えるね。", "tasks": []},
                     {"text": "空も暗いね。"}, {"text": "そろそろ夕方かな。", "tasks": []}]
-        done = step(sequence)
+        done = step(sequence, version=VISUAL_V9)
         self.assertEqual(done["review_warnings"], [])
         self.assertEqual([e["task"] for e in done["exchanges"]], [task, {**COUNT, "count": 0}])
         for version in ("visual_dialogue_v4", "visual_dialogue_v5"):
@@ -186,7 +227,7 @@ class VisualDialogueTests(unittest.TestCase):
             {"text": "窓辺の鉢はいくつある？"}, {"text": "少なくとも三つは見えるよ。", "tasks": [minimum]},
             {"text": "木漏れ日が差してるね。"}, {"text": "明るい窓辺だね。", "tasks": []},
         ]
-        done = step(dialogue)
+        done = step(dialogue, version=VISUAL_V9)
         self.assertEqual(done["status"], "pending_review")
         self.assertEqual(done["review_warnings"], [])
         self.assertEqual([e["task"] for e in done["exchanges"]], [fragment, estimate, minimum])
@@ -196,7 +237,7 @@ class VisualDialogueTests(unittest.TestCase):
                    {"text": "青い看板は何て書いてある？"}, {"text": "ぼやけていて読めないね。"},
                    {"text": "近くに何人いる？"}, {"text": "一人かな。", "tasks": [{}]},
                    {"text": "街は静かだね。"}, {"text": "落ち着いた感じだね。", "tasks": []}]
-        done = step(replies)
+        done = step(replies, version=VISUAL_V9)
         codes = {w["code"] for w in done["review_warnings"]}
         self.assertTrue({"missing_task_metadata", "invalid_task_metadata"} <= codes)
         self.assertEqual(len(done["dialogue"]), 8)

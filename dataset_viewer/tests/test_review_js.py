@@ -292,6 +292,21 @@ vm.runInContext(`(async()=>{
   state.editingDialogue=false;await loadStatus();assert.strictEqual(aiQueueLoads,1);
   assert.strictEqual(state.aiListRefreshPending,false);
   clearFilters(false);assert.strictEqual(state.filters.ai_status,'');
+  const marker={kind:'ocr',grounding_source:'vlm_visual',question_turn_index:0,answer_turn_index:1};
+  const count={...marker,kind:'counting',question_turn_index:2,answer_turn_index:3};
+  const dual={...marker,additional_tasks:[count,{...count,kind:'ocr'}]};
+  const marked={...raw,review_required:true,review_status:'pending',dialogue:[...raw.dialogue,...raw.dialogue]};
+  state.selectedItem=normalizeItem({...marked,auxiliary_task:dual});
+  renderReview(state.selectedItem);startDialogueEdit();
+  assert.strictEqual(dom.reviewQa.querySelectorAll('span').map(node=>node.textContent).join('|'),
+    '発話1　OCR質問|発話2　OCR回答|発話3　カウント質問・OCR質問|発話4　カウント回答・OCR回答');
+  assert.strictEqual(dom.detailDialogue.querySelectorAll('article')
+    .filter(node=>node.classList.contains('is-review-target')).length,4);
+  assert.strictEqual(dom.dialogueEditorFacts.querySelectorAll('input').length,0);
+  cancelDialogueEdit();
+  state.selectedItem=normalizeItem({...marked,auxiliary_task:count});startDialogueEdit();
+  assert.strictEqual(dom.dialogueEditorFacts.querySelectorAll('input').length,0);
+  cancelDialogueEdit();
 })()`,context).catch(error=>{console.error(error);process.exitCode=1;});
 """
         result = subprocess.run([shutil.which("node"), "-e", script, str(source)],

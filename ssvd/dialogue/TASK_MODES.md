@@ -163,9 +163,8 @@ as colour, position and state, before starting the full run.
 ## OCR mode
 
 Use the same commands with `--task-mode ocr` and a short scene-text manifest.
-Current JSSODa pages are 115 characters or longer and intentionally produce no
-eligible OCR rows; the mode is ready for the upcoming shop-sign/telephone/
-price dataset.
+Long JSSODa pages use the [dedicated OCR generator](generate_jssoda_ocr_dataset.py),
+which checks passages against the supplied page transcription.
 
 ## 日本の日常画像の要確認対話を新規生成する場合
 
@@ -189,16 +188,20 @@ price dataset.
 
 例えば「入口の青い看板、何て書いてある？」のように対象から話し始められる。会話の舞台や話者の居場所は設定しない。看板に貼られた写真など、写真自体が話題のときはその語も使える。一枚から確かめられない前後の出来事や、話者が近づいたり手に取ったりした体験は作らない。
 
-両役の発話は声に出す日本語にする。英字はカタカナで、数字は用途に合う読みで伝える。例えば、架空の看板に「CAFE」とあれば、発話は「カフェって書いてあるよ」、回答側のOCR注釈は `written="CAFE"`、`reading="カフェ"` になる。共通の発話指示と各役の指示の全文を一つのファイルで確認できる。[送信するプロンプト全文](visual_dialogue_prompts.py)
+両役の発話は声に出す日本語にする。英字はカタカナで、数字は用途に合う読みで伝える。例えば「CAFE」と読める看板についての回答は「カフェって書いてあるよ」となる。[送信するプロンプト全文](visual_dialogue_prompts.py)
 
-回答役はその発話で読み取り・計数したものを記録する。尋ねられて判別できなかった場合も不明として記録する。相手が言っただけの文字や数は記録しない。普通の会話では空配列、両方を扱ったときは両方を記録する。生成後は各課題の質問・回答位置と答えを `auxiliary_task` と `additional_tasks` に保存する。人が元画像と対話を見て承認する。
+回答役は `{"text":"カフェって書いてあるよ","tasks":["ocr"]}` のように、発話とその往復の確認用ラベルを返す。文字列・読み・個数・確度を別に生成させると、同じ誤読を二か所に記録してしまう。正しさは人が元画像と発話を見比べて判断する。
 
-| 課題 | 選べる回答 | 保存する情報 |
-|---|---|---|
-| カウント | 確定数・概数・見えている下限・不明 | 数値はそれぞれ `answer_count`・`estimated_count`・`minimum_count`。不明には数を割り当てない。 |
-| OCR | 全部読める・一部だけ読める・判読できない | 全文は `recognized_text`、断片は `visible_fragment`。英数字を含む原表記と発話用の読みを別々に残す。不明には文字列を補わない。 |
+| 回答で扱ったこと | `tasks` |
+|---|---|
+| 文字や看板の数字を読む。直接聞かれて一部だけ読めた、または読めないと答えた場合も含む | `["ocr"]` |
+| 見える人や物の数を答える。「三台くらい」「少なくとも二人」のような答えも含む | `["counting"]` |
+| 同じ往復で文字を読み、実物の数も答える | `["ocr","counting"]` |
+| 色や位置などの通常の回答、個数を尋ねられて「数えきれない」とだけ答えた場合 | `[]` |
 
-不確かさの理由は、写真から分かるときに記録する。「手前に三台は見える。奥は重なっている」の三台は `minimum_count` に入る。読みの不一致、既出の質問、明確な読み取り質問に対する注釈漏れなどは `review_warnings` に保存し、比較用HTMLの該当発話に表示する。通常の会話は課題が空でもそのまま人手確認に進む。空の発話や課金状態が不明な送信は途中停止し、人手判断済み・変更済みの元データを保護する。
+ラベルは各往復の質問・回答位置とともに `auxiliary_task` に保存し、二つ目以降を `additional_tasks` に保存する。旧対話から引き継ぐ要確認条件は候補全体にかかる。ラベルがゼロでも、人が全文を確認して承認してから音声合成に進む。生成した発話やラベルに確認事項があれば `review_warnings` として表示する。空の発話、未確定の課金、人手判断済みの元データは、それぞれ既存の保護処理の対象になる。
+
+この形式は日本の日常画像のGPT再生成に使う。JSSODaの転記文や、カウント専用画像に付属する個数は、専用データの生成・照合に引き続き使う。
 
 ローカルで次の Responses API リクエストを組み立てる例。下のコマンドは外部送信や台帳の更新を行わない。
 リポジトリ直下で、対象 UID を指定する。出力には画像が含まれるので Git 管理外に保存する。
@@ -209,9 +212,9 @@ python3 -m ssvd.dialogue.preview_regeneration --uid "$PENDING_UID" > /tmp/jmv-ne
 
 再生時は初回の `identity` と、受信順の JSON 配列 `replies` を `--transcript` に渡す。最初の応答はユーザー発話、次は回答役の発話となる。結果は `request`、実行を続けられない場合の `hold`、完了時の `pending_review`。`--model` と `--pairs` で比較条件を揃えられる。
 
-現在の方式は `visual_dialogue_v9`。v6の20対話では、ユーザーの127発話で相手に情報を求めたものが0件だった。v7ではユーザーに質問する目的を与えた。v8では相づちを任意と明示し、回答役に直接答える目的と、相手の見立てに誤りがあるときの応じ方を与えた。v9では両役の会話を、そのとき見えている対象から始められるようにした。4〜8往復あたり画像付き生成は8〜16回。過去の応答をオフライン再生する場合は `--prompt-version` で生成時の版を指定する。[v6の試行結果](https://github.com/Yoshiki0418/j-moshivis/issues/12#issuecomment-7058420549)
+現在の方式は `visual_dialogue_v10`。v6の20対話では、ユーザーの127発話で相手に情報を求めたものが0件だった。v7ではユーザーに質問する目的を与えた。v8では相づちを任意と明示し、回答役に直接答える目的と、相手の見立てに誤りがあるときの応じ方を与えた。v9では両役の会話を、そのとき見えている対象から始められるようにした。v10では回答役の記録を往復のラベルに絞った。4〜8往復あたり画像付き生成は8〜16回。過去の応答をオフライン再生する場合は `--prompt-version` で生成時の版を指定する。[v6の試行結果](https://github.com/Yoshiki0418/j-moshivis/issues/12#issuecomment-7058420549)
 
-人手比較は同じ 20 画像（元ラベルで OCR 14、カウント 6）で行う。確定できる画像で過度に「分からない」と答えていないか、曖昧な画像で断定していないか、追質問や言い回しが自然か、全文を承認するまでの修正時間を記録する。媒体を持ち出す定型の前置きと、実際に写真などが話題になった発話は区別して読む。生成後の通常・片方・両方の内訳と各回答種別、注意ラベルと実行未完了の件数も報告する。[少数試行 #12](https://github.com/Yoshiki0418/j-moshivis/issues/12)
+人手比較は同じ 20 画像（元ラベルで OCR 14、カウント 6）で行う。確定できる画像で過度に「分からない」と答えていないか、曖昧な画像で断定していないか、追質問や言い回しが自然か、全文を承認するまでの修正時間を記録する。媒体を持ち出す定型の前置きと、実際に写真などが話題になった発話は区別して読む。`generated_tasks` はラベルの組み合わせ別の対話数、`marked_turns_by_kind` は各ラベルが付いた往復数を示す。一つの往復に両方付けば、OCR・カウントにそれぞれ1件を計上する。[少数試行 #12](https://github.com/Yoshiki0418/j-moshivis/issues/12)
 
 ### 20画像で試行する
 
@@ -223,7 +226,7 @@ python3 -m ssvd.dialogue.preview_regeneration --uid "$PENDING_UID" > /tmp/jmv-ne
 .venv-data/bin/python -m ssvd.dialogue.pilot review
 ```
 
-`data/curation/gpt_pilot_issue12/visual_dialogue_v9/` に固定した画像リスト、SQLite台帳、匿名比較用の `review.html` を保存する。過去の台帳がある場合は同じ20枚・同じ往復数で比較し、生成時には最新の人手判断も確認する。v2 の集計は `status --legacy`、v3〜v8 の既存台帳は `status --archive` または `review --archive` に版名を指定して参照できる。候補生成後は、両モデルの全文と既存Qwen対話を原画像・448px画像で比較できる。正式な承認とTTSへの投入は既存の確認手順で行う。
+`data/curation/gpt_pilot_issue12/visual_dialogue_v10/` に固定した画像リスト、SQLite台帳、匿名比較用の `review.html` を保存する。過去の台帳がある場合は同じ20枚・同じ往復数で比較し、生成時には最新の人手判断も確認する。v2 の集計は `status --legacy`、v3〜v9 の既存台帳は `status --archive` または `review --archive` に版名を指定して参照できる。候補生成後は、両モデルの全文と既存Qwen対話を原画像・448px画像で比較できる。正式な承認とTTSへの投入は既存の確認手順で行う。
 
 有料の `run` は同期 Responses API を使用する。`--model gpt-6-luna` で対象の20画像をLunaだけで生成できる。モデルを省略した場合は両モデルを対象とする。`OPENAI_API_KEY` または権限600のキーファイルを使う。既定のファイルは `~/.config/j-moshivis/openai_api_key`、別パスは `--api-key-file` で指定できる。
 

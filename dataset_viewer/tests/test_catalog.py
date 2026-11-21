@@ -1018,6 +1018,38 @@ class DatasetCatalogTest(unittest.TestCase):
         self.assertTrue(item["availability"]["audio"])
         self.assertEqual(item["uid"], "ocr:doc")
 
+    def test_turn_markers_filter_on_either_kind_and_edit_without_reference_answers(self) -> None:
+        path = self.data / "dialogues_counting/full/qwen3vl_30b_normal_s0.jsonl"
+        first = {"kind": "counting", "grounding_source": "vlm_visual",
+                 "question_turn_index": 0, "answer_turn_index": 1}
+        second = {**first, "kind": "ocr", "question_turn_index": 2, "answer_turn_index": 3}
+        # Multiple exchanges can share a kind or have both kinds on one pair.
+        auxiliary = {**first, "additional_tasks": [{**second, "kind": "counting"}, second]}
+        turns = [{"speaker": speaker, "text": text} for speaker, text in [
+            ("ユーザー", "看板は何枚？"), ("アシスタント", "二枚かな。"),
+            ("ユーザー", "店名は何と読める？"), ("アシスタント", "よく読めないよ。")]]
+        record = {"uid": "count:one", "image": str(self.counting_one_image),
+                  "image_sha256": image_file_sha256(self.counting_one_image), "task_mode": "normal",
+                  "review_required": True, "auxiliary_task": auxiliary, "dialogue": turns}
+        _write_jsonl(path, [record])
+        self.catalog.refresh()
+        for kind in ("counting", "ocr"):
+            filters = dict(collection="counting_v4", review_status="pending", auxiliary_kind=kind)
+            listed = self.catalog.list_items(**filters)
+            self.assertEqual([item["uid"] for item in listed["items"]], [record["uid"]])
+            detail = self.catalog.get_item(listed["items"][0]["token"], filters)
+            self.assertEqual(detail["navigation"]["total"], 1)
+            self.assertFalse(detail["dataset_usable"])
+        turns[1] = {"speaker": "アシスタント", "text": "手前に二枚見えるよ。"}
+        saved = self.catalog.edit_dialogue(detail["token"], fingerprint=detail["content_sha256"],
+            dialogue=turns, auxiliary_task={**auxiliary, "answer_count": 999, "counted_target": "追加"})
+        self.assertTrue(saved["item"]["dataset_usable"])
+        self.assertEqual(saved["item"]["auxiliary_task"], auxiliary)
+        self.assertEqual(self.catalog.list_items(**filters)["total"], 0)
+        self.catalog.refresh(force=True)
+        self.assertEqual(self.catalog.list_items(collection="counting_v4", auxiliary_kind="ocr",
+                                                review_status="approved")["total"], 1)
+
     def test_unverified_adaptive_dialogue_requires_exact_review(self) -> None:
         source = (
             self.data

@@ -8,7 +8,7 @@ import sqlite3
 import tempfile
 import unittest
 
-from ssvd.dialogue.preview_regeneration import COLLECTION, preview
+from ssvd.dialogue.preview_regeneration import COLLECTION, PROMPT_VERSION, VISUAL_V9, preview
 from ssvd.review_store import DEFAULT_REVIEW_EVENTS, ReviewStore, content_fingerprint, review_metadata
 
 
@@ -55,7 +55,7 @@ class PreviewTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "different source"):
             preview(self.root, "test", transcript={"identity": identity, "replies": []})
         for old_version in ("grounded_roles_v1", "grounded_roles_v2", "grounded_roles_v3", "visual_dialogue_v4",
-                            "visual_dialogue_v5", "visual_dialogue_v6", "visual_dialogue_v7", "visual_dialogue_v8"):
+                            "visual_dialogue_v5", "visual_dialogue_v6", "visual_dialogue_v7", "visual_dialogue_v8", VISUAL_V9):
             earlier = dict(step["identity"], prompt_version=old_version)
             with self.assertRaisesRegex(ValueError, "different source"):
                 preview(self.root, "test", transcript={"identity": earlier, "replies": []})
@@ -72,15 +72,15 @@ class PreviewTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "human"):
             preview(self.root, "test")
 
-    def replay(self, tasks, exchanges, pairs):
-        identity = preview(self.root, "test", pairs=pairs)["identity"]
+    def replay(self, tasks, exchanges, pairs, version=VISUAL_V9):
+        identity = preview(self.root, "test", pairs=pairs, prompt_version=version)["identity"]
         replies = []
         transcript = {"identity": identity, "replies": replies}
         for pair in range(1, pairs + 1):
             task = tasks[pair - 1] if pair <= len(tasks) else None
             q, a = exchanges[task["kind"]] if task else ("どんな様子？", "看板と自転車が見えるよ。")
             replies.extend([{"text": q}, {"text": a, "tasks": [task] if task else []}])
-            step = preview(self.root, "test", pairs=pairs, transcript=transcript)
+            step = preview(self.root, "test", pairs=pairs, transcript=transcript, prompt_version=version)
             self.assertNotEqual(step["status"], "hold", step.get("reason"))
         self.assertEqual(step["status"], "pending_review")
         return step
@@ -108,10 +108,32 @@ class PreviewTests(unittest.TestCase):
         self.assertNotEqual(content_fingerprint(candidate), candidate["review_id"])
 
     def test_ordinary_candidate_from_ocr_source_still_requires_review(self):
-        candidate = self.replay([], {}, pairs=7)["candidate"]
+        candidate = self.replay([], {}, pairs=7, version=PROMPT_VERSION)["candidate"]
         self.assertEqual(candidate["auxiliary_kind"], "none")
         self.assertEqual(len(candidate["dialogue"]), 14)
         self.assertTrue(candidate["review_required"])
+
+    def test_current_markers_keep_their_exchange_without_answer_values(self):
+        identity = preview(self.root, "test", pairs=4)["identity"]
+        replies = []
+        for question, answer, tasks in [
+            ("入口には何がある？", "看板が見えるよ。", []),
+            ("何て書いてある？", "サンプルって書いてあるよ。", ["ocr"]),
+            ("奥の看板は何枚で、何て書いてある？", "二枚見えるけど、字は小さくて読めないね。", ["counting", "ocr"]),
+            ("どんな色？", "青いよ。", []),
+        ]:
+            replies.extend([{"text": question}, {"text": answer, "tasks": tasks}])
+        step = preview(self.root, "test", pairs=4, transcript={"identity": identity, "replies": replies})
+        self.assertEqual(step["status"], "pending_review")
+        candidate = step["candidate"]
+        self.assertTrue(candidate["review_required"])
+        first = dict(candidate["auxiliary_task"])
+        rest = first.pop("additional_tasks")
+        expected = [dict(kind=kind, grounding_source="vlm_visual", question_turn_index=index, answer_turn_index=index + 1)
+                    for kind, index in [("ocr", 2), ("counting", 4), ("ocr", 4)]]
+        self.assertCountEqual([first, *rest], expected)
+        rest[0]["question_turn_index"] = 0
+        self.assertNotEqual(content_fingerprint(candidate), candidate["review_id"])
 
     def test_unknown_reading_does_not_need_an_invented_reason(self):
         task = dict(kind="ocr", mode="unknown", target="入口の看板")

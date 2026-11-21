@@ -153,6 +153,48 @@ def approve_for_tts(root: Path, record: dict) -> ReviewStore:
 
 
 class ReviewGateTests(unittest.TestCase):
+    def test_approval_round_trip_preserves_optional_review_warnings(self):
+        marker = {"kind": "counting", "grounding_source": "vlm_visual", "question_turn_index": 4, "answer_turn_index": 5}
+        cases = (
+            ("legacy", {}),
+            ("unmarked", {"auxiliary_task": {"kind": "none", "grounding_source": "none"}, "review_warnings": []}),
+            ("marked", {"auxiliary_task": marker, "review_warnings": [{"turn": 6, "code": "spoken_form"}]}),
+        )
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            image = root / "source.png"
+            Image.new("RGB", (16, 12)).save(image)
+            store = ReviewStore(root / "reviews.jsonl")
+            voices, config = fake_tts_inputs()
+            out = root / "speech"
+            for uid, fields in cases:
+                with self.subTest(uid=uid):
+                    record = reviewed_record(image, uid=uid)
+                    record.update(fields)
+                    review_id = content_fingerprint(record)
+                    record["review_id"] = review_id
+                    self.assertEqual(build_one(record, voices, config, out, "cpu", review_store=store), "review_blocked")
+                    self.assertFalse((out / uid).exists())
+                    store.append(fingerprint=review_id, decision="approved", uid=uid, collection="japanese_daily_v1")
+                    self.assertEqual(build_one(record, voices, config, out, "cpu", review_store=store), "ok")
+                    self.assertEqual(build_one(record, voices, config, out, "cpu", review_store=store), "skip")
+                    meta = json.loads((out / uid / "dialogue.json").read_text())
+                    self.assertEqual(meta["review_id"], review_id)
+                    if "review_warnings" in fields:
+                        self.assertEqual(meta["review_warnings"], fields["review_warnings"])
+                    else:
+                        self.assertNotIn("review_warnings", meta)
+                    decisions = store.latest_decisions()
+                    image_hash = image_file_sha256(out / uid / "image.jpg")
+                    ok, reason, evidence = _review_gate(meta, decisions, {uid}, image_hash)
+                    self.assertTrue(ok, reason)
+                    self.assertEqual(evidence["review_id"], review_id)
+                    if "review_warnings" in meta:
+                        del meta["review_warnings"]
+                    else:
+                        meta["review_warnings"] = []
+                    self.assertEqual(_review_gate(meta, decisions, {uid}, image_hash)[1], "review_stale")
+
     def test_cli_blocks_required_before_loading_voice_pool(self):
         from build_speech_dataset import main as tts_main
         with tempfile.TemporaryDirectory() as directory:

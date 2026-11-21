@@ -10,7 +10,7 @@ import sqlite3
 
 from ssvd.ai_suggestion_store import human_touched_uids
 from ssvd.dialogue.regeneration_roles import (
-    PAIR_COUNTS, PROMPT_VERSION, VISUAL_V4, VISUAL_V5, VISUAL_V6, VISUAL_V7, VISUAL_V8, next_step,
+    PAIR_COUNTS, PROMPT_VERSION, VISUAL_V4, VISUAL_V5, VISUAL_V6, VISUAL_V7, VISUAL_V8, VISUAL_V9, next_step,
 )
 from ssvd.dialogue import regeneration_roles_v3
 from ssvd.review_store import (
@@ -21,7 +21,8 @@ from ssvd.review_store import (
 ROOT = Path(__file__).resolve().parents[2]
 COLLECTION = "japanese_daily_v1"
 OBSERVATION_VERSION = "grounded_roles_v3"
-PREVIEW_VERSIONS = (PROMPT_VERSION, VISUAL_V8, VISUAL_V7, VISUAL_V6, VISUAL_V5, VISUAL_V4, OBSERVATION_VERSION)
+PREVIEW_VERSIONS = (PROMPT_VERSION, VISUAL_V9, VISUAL_V8, VISUAL_V7, VISUAL_V6, VISUAL_V5, VISUAL_V4,
+                    OBSERVATION_VERSION)
 
 
 def _load_source(root, uid):
@@ -65,12 +66,16 @@ def _load_source(root, uid):
     return source, kind, data_url, row["review_id"]
 
 
-def _review_task(task, pair):
-    """Keep estimates and legible fragments distinct from exact annotations."""
-    kind, mode = task["kind"], task["mode"]
+def _review_task(task, pair, *, marker_only=False):
+    """Attach the review label to its exchange; only older formats carry answer details."""
+    kind = task["kind"]
     question_index = 2 * (pair - 1)
-    result = dict(kind=kind, answer_mode=mode, grounding_source="vlm_visual",
+    result = dict(kind=kind, grounding_source="vlm_visual",
                   question_turn_index=question_index, answer_turn_index=question_index + 1)
+    if marker_only:
+        return result
+    mode = task["mode"]
+    result["answer_mode"] = mode
     if mode != "exact" and isinstance(task.get("reason"), str) and task["reason"].strip():
         result["reason"] = task["reason"]
     if kind == "counting":
@@ -117,7 +122,8 @@ def preview(root, uid, *, model="gpt-6-luna", pairs=None, transcript=None, recov
         evidence = step["grounding"]
         tasks = [_review_task(task, step["task_pairs"][task["kind"]]) for task in evidence["tasks"]]
     else:
-        tasks = [_review_task(exchange["task"], exchange["pair"]) for exchange in step["exchanges"]]
+        tasks = [_review_task(exchange["task"], exchange["pair"], marker_only=prompt_version == PROMPT_VERSION)
+                 for exchange in step["exchanges"]]
     auxiliary = tasks[0] if tasks else {"kind": "none", "grounding_source": "none"}
     # The review fingerprint covers this entire dictionary, including a second exchange.
     if len(tasks) > 1:

@@ -123,6 +123,29 @@ class PilotReviewTests(unittest.TestCase):
         self.assertIn("照合エラー", html)
         self.assertNotIn("注意付きの候補 1 件", html)
 
+    def test_answer_turn_displays_each_marker_without_an_answer_key(self):
+        uid, model = self.samples[0]["uid"], self.models[0]
+        candidate = self.outcomes[uid, model]["candidate"]
+        candidate["dialogue"].extend([
+            {"speaker": "アシスタント", "text": "二つ見えて、左にはエーと書いてあるよ。"},
+            {"speaker": "ユーザー", "text": "右は何と読める？"},
+            {"speaker": "アシスタント", "text": "小さくて読めないね。"},
+        ])
+        candidate["auxiliary_task"] = {"kind": "counting", "answer_turn_index": 1, "additional_tasks": [
+            {"kind": "ocr", "answer_turn_index": 1}, {"kind": "ocr", "answer_turn_index": 3}]}
+        candidate.update(review_metadata(candidate))
+        html, key = self.render()
+        row = next(r for r in key.values() if r["uid"] == uid)
+        side = next(s for s, m in row["models"].items() if m["model"] == model)
+        section = html.split(f'<section id="img-1-{side}">', 1)[1].split("</section>", 1)[0]
+        first_q, first_a, second_q, second_a, _ = section.split("</li>")
+        self.assertNotIn("task-marker", first_q + second_q)
+        self.assertIn('class="task-marker">OCR<', first_a)
+        self.assertIn('class="task-marker">カウント<', first_a)
+        self.assertIn('class="task-marker">OCR<', second_a)
+        self.assertNotIn('class="task-marker">カウント<', second_a)
+        self.assertNotIn("<dt>", section)
+
     def test_stale_or_protected_sources_removed_on_refresh(self):
         self.render()
         self.touched.add(self.samples[0]["uid"])
