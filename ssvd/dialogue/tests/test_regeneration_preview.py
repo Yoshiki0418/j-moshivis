@@ -51,7 +51,7 @@ class PreviewTests(unittest.TestCase):
         identity = dict(step["identity"], uid="other")
         with self.assertRaisesRegex(ValueError, "different source"):
             preview(self.root, "test", transcript={"identity": identity, "replies": []})
-        for old_version in ("grounded_roles_v1", "grounded_roles_v2", "grounded_roles_v3"):
+        for old_version in ("grounded_roles_v1", "grounded_roles_v2", "grounded_roles_v3", "visual_dialogue_v4"):
             earlier = dict(step["identity"], prompt_version=old_version)
             with self.assertRaisesRegex(ValueError, "different source"):
                 preview(self.root, "test", transcript={"identity": earlier, "replies": []})

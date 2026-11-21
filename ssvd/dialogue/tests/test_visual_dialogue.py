@@ -1,5 +1,6 @@
 """Candidate generation receives the entire conversation; quality findings survive completion."""
 
+import hashlib
 import json
 import unittest
 
@@ -15,6 +16,40 @@ def step(replies):
 
 
 class VisualDialogueTests(unittest.TestCase):
+    def test_role_policies_change_without_changing_historical_requests(self):
+        question = {"text": "札には営業時間が書いてあるの？"}
+        # Taken from the v4 requests before the role instructions changed.
+        cases = [
+            ([], "位置・色・形", "32c834924b4691706ed0da21cdbc07abd834af65a2ce5abafe1bff1b057fbea5"),
+            ([question], "自分の目で確かめる", "4c2e21298347f3758d404dc528d782948a913d69ad10abf39ceca313b354698a"),
+        ]
+        for replies, cue, digest in cases:
+            with self.subTest(replies=replies):
+                current = step(replies)["request"]
+                old = next_step("example", "ocr", IMAGE, replies, pairs=4, legacy_v4=True)["request"]
+                self.assertIn(cue, current["instructions"])
+                self.assertNotIn(cue, old["instructions"])
+                self.assertEqual(current["input"], old["input"])
+                wire = json.dumps(old, sort_keys=True, ensure_ascii=False, separators=(",", ":")).encode()
+                self.assertEqual(hashlib.sha256(wire).hexdigest(), digest)
+
+    def test_false_premise_can_be_corrected_and_printed_quantity_stays_ocr(self):
+        printed = {"kind": "ocr", "target": "入口の札", "mode": "exact",
+                   "written": "定員12名", "reading": "ていいんじゅうにめい"}
+        replies = [
+            {"text": "入口の札、残り十二席ってこと？"},
+            {"text": "定員十二名と書いてあるよ。空席の数までは分からないね。", "tasks": [printed]},
+            {"text": "棚の前に見える椅子はいくつ？"},
+            {"text": "手前に二脚あるね。", "tasks": [{**COUNT, "target": "棚の前の椅子"}]},
+            {"text": "窓から光が差してるね。"}, {"text": "床まで明るいね。", "tasks": []},
+            {"text": "一息つきたくなるね。"}, {"text": "窓際が気持ちよさそう。", "tasks": []},
+        ]
+        result = step(replies)
+        self.assertEqual(result["status"], "pending_review")
+        self.assertEqual([e["task"]["kind"] for e in result["exchanges"]], ["ocr", "counting"])
+        self.assertEqual(result["exchanges"][0]["task"]["written"], "定員12名")
+        self.assertTrue(result["requires_human_review"])
+
     def test_image_and_all_public_turns_in_every_request_and_no_observer(self):
         replies, history = [], []
         for turn in range(8):

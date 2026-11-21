@@ -180,7 +180,8 @@ price dataset.
 
 1. 最初の質問から両役に同じ元画像を渡す。各発話の入力には、その時点までの両者の発話全文が順番どおり入る。初回の質問には画像選定時の種別を話題の一例として添える。旧対話の本文・未検証の個数や読み・画像タイトルは送信しない。
 2. 画像に合ったタイミングで、自然に読める文字・見分けられる個数を扱う。普通の会話、両方を含む会話、根拠を添えた概数や部分読みも可能。話題の位置を事前に決める工程はなく、質問役には実際に読み取り・個数に触れた往復の番号も伝える。すでに答えが出た話題は掘り下げるか、別の話題に進む。
-3. 回答役は発話と、その発話で扱った課題のメタデータを同じ応答で返す。公開された会話履歴には話者と発話本文だけを載せる。記録可能な各課題の実際の質問・回答位置、数値・原表記・読みは従来の `auxiliary_task` と `additional_tasks` に格納する。これはVLMの自己申告であり、最終的な正しさは人が画像で判断する。
+3. OCRを尋ねる質問役は、色・位置・形で対象を示す（例「入口の右の木箱には、何て書いてある？」）。回答役は相手や以前の発話が挙げた読みも画像と照合し、違う字が見えたら自然に訂正する。原綴りは注釈へ、実際に話す読みは発話へ入れる。カウントでは見分けられる実物を数える。「三両目」という掲示にはOCRの注釈を付け、車両を三つ数えた教師例にはしない。
+4. 回答役は発話と、その発話で扱った課題のメタデータを同じ応答で返す。公開された会話履歴には話者と発話本文だけを載せる。記録可能な各課題の実際の質問・回答位置、数値・原表記・読みは従来の `auxiliary_task` と `additional_tasks` に格納する。これはVLMの自己申告であり、最終的な正しさは人が画像で判断する。
 
 | 課題 | 選べる回答 | 保存する情報 |
 |---|---|---|
@@ -198,7 +199,7 @@ python3 -m ssvd.dialogue.preview_regeneration --uid "$PENDING_UID" > /tmp/jmv-ne
 
 再生時は初回の `identity` と、受信順の JSON 配列 `replies` を `--transcript` に渡す。最初の応答はユーザー発話、次は回答役の発話となる。結果は `request`、実行を続けられない場合の `hold`、完了時の `pending_review`。`--model` と `--pairs` で比較条件を揃えられる。
 
-現在の方式は `visual_dialogue_v4`。4〜8往復あたり画像付き生成は8〜16回。v3の独立した事前観察にかかった生成1回分を省く。過去の部分応答は版ごとに区別し、v4の有料リクエストには流用しない。v3のオフライン再生には `--prompt-version grounded_roles_v3` を使う。[予算管理と人手判断の照合 #10](https://github.com/Yoshiki0418/j-moshivis/issues/10)
+現在の方式は `visual_dialogue_v5`。v4と同じく、4〜8往復あたり画像付き生成は8〜16回。過去の応答は生成時の版に紐づけて保持する。オフライン再生には `--prompt-version visual_dialogue_v4` または `--prompt-version grounded_roles_v3` を使う。[予算管理と人手判断の照合 #10](https://github.com/Yoshiki0418/j-moshivis/issues/10)
 
 人手比較は同じ 20 画像（元ラベルで OCR 14、カウント 6）で行う。確定できる画像で過度に「分からない」と答えていないか、曖昧な画像で断定していないか、追質問や言い回しが自然か、全文を承認するまでの修正時間を記録する。生成後の通常・片方・両方の内訳と各回答種別、注意ラベルと実行未完了の件数も報告する。[少数試行 #12](https://github.com/Yoshiki0418/j-moshivis/issues/12)
 
@@ -212,12 +213,12 @@ python3 -m ssvd.dialogue.preview_regeneration --uid "$PENDING_UID" > /tmp/jmv-ne
 .venv-data/bin/python -m ssvd.dialogue.pilot review
 ```
 
-`data/curation/gpt_pilot_issue12/visual_dialogue_v4/` に固定した画像リスト、SQLite台帳、匿名比較用の `review.html` を保存する。過去の台帳がある場合は同じ20枚・同じ往復数で比較し、生成時には最新の人手判断も確認する。v2 の集計は `status --legacy` と `recovery-status --legacy`、v3は `--archive grounded_roles_v3` で参照できる。候補生成後は、両モデルの全文と既存Qwen対話を原画像・448px画像で比較できる。正式な承認とTTSへの投入は既存の確認手順で行う。
+`data/curation/gpt_pilot_issue12/visual_dialogue_v5/` に固定した画像リスト、SQLite台帳、匿名比較用の `review.html` を保存する。過去の台帳がある場合は同じ20枚・同じ往復数で比較し、生成時には最新の人手判断も確認する。v2 の集計は `status --legacy` と `recovery-status --legacy`、v3は `--archive grounded_roles_v3`、v4は `status --archive visual_dialogue_v4` または `review --archive visual_dialogue_v4` で参照できる。候補生成後は、両モデルの全文と既存Qwen対話を原画像・448px画像で比較できる。正式な承認とTTSへの投入は既存の確認手順で行う。
 
-有料の `run` は同期 Responses API で20画像を両モデルに投入する。`OPENAI_API_KEY` または権限600のキーファイルを使う。既定のファイルは `~/.config/j-moshivis/openai_api_key`、別パスは `--api-key-file` で指定できる。
+有料の `run` は同期 Responses API を使用する。`--model gpt-6-luna` で対象の20画像をLunaだけで生成できる。モデルを省略した場合は両モデルを対象とする。`OPENAI_API_KEY` または権限600のキーファイルを使う。既定のファイルは `~/.config/j-moshivis/openai_api_key`、別パスは `--api-key-file` で指定できる。
 
 ```bash
-.venv-data/bin/python -m ssvd.dialogue.pilot run
+.venv-data/bin/python -m ssvd.dialogue.pilot run --model gpt-6-luna
 ```
 
 この試行の生成予算は旧方式の請求額・未確定予約も含めて累計2米ドル。送信前に画像・履歴を含む入力トークン数を公式APIで調べ、推論を含む最大出力分まで予約する。実績額は返された使用量とStandardの公表単価で算出する。課金状態が不明のまま終了した場合は、台帳を保持したまま同じコマンドで再開する。その呼び出しの予約は保持し、当該画像・モデルは保留として残りの組を処理する。照会に必要な送信時刻と `X-Client-Request-Id` は台帳の `calls` にある。[トークン数の確認](https://developers.openai.com/api/docs/guides/token-counting)・[Lunaの単価](https://developers.openai.com/api/docs/models/gpt-6-luna)・[Terraの単価](https://developers.openai.com/api/docs/models/gpt-6.1-terra)
@@ -231,7 +232,7 @@ v2・v3には事前観察と予定した往復での整合性チェックがあ�
 .venv-data/bin/python -m ssvd.dialogue.pilot recovery-review --archive grounded_roles_v3
 ```
 
-v4では品質上の注意が付いた候補も最後まで生成される。初回の確認は `review.html` で行う。
+v4以降では品質上の注意が付いた候補も最後まで生成される。初回の確認は `review.html` で行う。
 
 ## テストの実行
 
