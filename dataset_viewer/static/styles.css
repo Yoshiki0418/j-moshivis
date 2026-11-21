@@ -2055,6 +2055,10 @@ td:nth-child(3) {
 .ai-suggestion-before { color: #765a40; }
 .ai-suggestion-after { color: #204c39; }
 .ai-suggestion-reason { font-size: 12px; }
+.regeneration-errors { display: flex; flex-wrap: wrap; gap: 6px 12px; margin: 10px 0; border: 0; padding: 0; }
+.regeneration-errors[hidden] { display: none; }
+.regeneration-errors legend { font-weight: 650; margin-bottom: 4px; }
+.regeneration-errors label { display: inline-flex; align-items: center; gap: 4px; }
 .message-ai-label { color: #8b5d11; margin-left: 8px; font-size: 11px; }
 .dialogue-heading-actions { margin: 0; flex: 1 0 100%; }
 .media-section { border: 1px solid var(--line); border-radius: var(--radius); background: var(--panel); }

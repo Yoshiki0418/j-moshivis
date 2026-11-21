@@ -4,6 +4,7 @@ const PAGE_SIZE = 50;
 const STATUS_POLL_INTERVAL_MS = 10000;
 const DETAIL_PREFETCH_TTL_MS = 30000;
 const DETAIL_PREFETCH_LIMIT = 3;
+const ANSWER_MODE_LABELS = { exact: "確定", approximate: "概数", lower_bound: "下限", partial: "部分判読", unknown: "不明" };
 const STAGES = [
   { key: "image", label: "画像" },
   { key: "dialogue", label: "対話" },
@@ -54,6 +55,10 @@ const state = {
   manualRefreshPending: false,
   catalogRevision: null,
   aiSuggestionCount: null,
+  regenerationCandidateCount: null,
+  regenerationCandidateRevision: null,
+  regenerationRefreshPending: false,
+  candidateActivity: null,
   aiListRefreshPending: false,
   statusPollTimer: null,
   statusPollRunning: false,
@@ -66,7 +71,7 @@ const dom = {};
 document.addEventListener("DOMContentLoaded", () => {
   collectDom();
   bindEvents();
-  setViewMode(window.location.hash === "#annotate", { reload: false, updateUrl: false });
+  applyModeFromHash(false);
   void initialize();
 });
 
@@ -84,10 +89,10 @@ function collectDom() {
     "metric-nonvisual-alignments", "metric-nonvisual-alignments-sub",
     "metric-review-required", "metric-review-pending", "metric-review-certified", "metric-review-certified-sub",
     "metric-review-regeneration", "metric-review-regeneration-sub", "metric-review-optional", "metric-review-rejected",
-    "filter-form", "category-filter", "stage-filter", "uid-search", "clear-filters",
+    "filter-form", "category-filter", "stage-filter", "uid-search", "clear-filters", "open-terra-queue",
     "review-status-filter", "auxiliary-kind-filter", "review-required-filter", "ai-status-filter",
     "collection-tree", "all-collections", "all-count", "active-collection", "result-count",
-    "list-loading", "list-empty", "list-error", "list-error-message", "list-retry",
+    "list-loading", "list-empty", "list-empty-hint", "list-error", "list-error-message", "list-retry",
     "dataset-list", "page-prev", "page-next", "page-current", "page-total",
     "tree-toggle", "tree-close", "detail-panel", "detail-empty", "detail-content",
     "detail-close", "detail-loading", "detail-category", "detail-uid", "detail-path",
@@ -103,7 +108,7 @@ function collectDom() {
     "browse-mode", "annotation-mode", "annotation-collection", "annotation-auto-next", "annotation-list-toggle",
     "annotation-image-open",
     "annotation-advanced-toggle",
-    "dialogue-heading-actions", "review-context-details",
+    "dialogue-heading-actions", "review-context-details", "dialogue-section-title", "regeneration-errors",
     "audio-section", "alignment-section",
     "ai-suggestion", "ai-suggestion-label", "ai-suggestion-concerns", "ai-suggestion-diff",
   ];
@@ -113,6 +118,12 @@ function collectDom() {
 
 function bindEvents() {
   dom.aiStatusFilter.addEventListener("change", () => {
+    if (state.savingDialogue || state.reviewBusy || (state.editingDialogue &&
+        !window.confirm("未保存の編集を取り消して確認対象を切り替えますか？"))) {
+      dom.aiStatusFilter.value = state.filters.ai_status;
+      return;
+    }
+    if (state.editingDialogue) cancelDialogueEdit();
     state.filters.ai_status = dom.aiStatusFilter.value;
     if (state.filters.ai_status) {
       state.filters.review_status = "pending";
@@ -121,12 +132,18 @@ function bindEvents() {
       dom.reviewRequiredFilter.checked = true;
     }
     state.page = 1;
-    clearDetailPrefetch();
+    clearQueueSelection();
     void loadItems({ selectFirst: true });
   });
   dom.browseMode.addEventListener("click", () => setViewMode(false));
-  dom.annotationMode.addEventListener("click", () => setViewMode(true));
-  window.addEventListener("hashchange", () => setViewMode(window.location.hash === "#annotate", { updateUrl: false }));
+  dom.annotationMode.addEventListener("click", openTerraQueue);
+  dom.openTerraQueue.addEventListener("click", openTerraQueue);
+  window.addEventListener("hashchange", () => applyModeFromHash(true));
+  for (const event of ["pointerdown", "keydown", "input", "wheel"]) {
+    document.addEventListener(event, () => noteCandidateActivity(true), { passive: true });
+  }
+  window.addEventListener("blur", () => noteCandidateActivity(false));
+  window.addEventListener("focus", () => noteCandidateActivity(!document.hidden));
   dom.annotationListToggle.addEventListener("click", () => {
     state.annotationListHidden = !state.annotationListHidden;
     updateAnnotationLayout();
@@ -268,6 +285,7 @@ function bindEvents() {
 
   window.addEventListener("resize", () => { updateBackdrop(); scheduleDialogueEditorSizing(); });
   document.addEventListener("visibilitychange", () => {
+    noteCandidateActivity(!document.hidden && document.hasFocus());
     if (!document.hidden) {
       window.clearTimeout(state.statusPollTimer);
       void pollStatus();
@@ -277,6 +295,7 @@ function bindEvents() {
 
 async function initialize() {
   const results = await Promise.allSettled([
+    loadItems(),
     loadStatus(),
     loadDashboard(),
     loadTree(),
@@ -284,7 +303,6 @@ async function initialize() {
   if (results.some((result) => result.status === "rejected")) {
     showToast("一部の集計情報を取得できませんでした。データ一覧は引き続き利用できます。", true);
   }
-  await loadItems();
   scheduleStatusPoll();
 }
 
@@ -342,6 +360,20 @@ async function loadStatus({ quiet = false } = {}) {
       state.aiListRefreshPending = true;
     }
     if (aiCount !== null) state.aiSuggestionCount = aiCount;
+    const regenCount = asNumber(raw.regeneration_candidate_count);
+    if (regenCount !== null) {
+      if (state.regenerationCandidateCount !== null && regenCount !== state.regenerationCandidateCount) {
+        state.regenerationRefreshPending = true;
+      }
+      state.regenerationCandidateCount = regenCount;
+    }
+    const regenRevision = raw.regeneration_candidate_revision;
+    if (regenRevision != null) {
+      if (state.regenerationCandidateRevision !== null && regenRevision !== state.regenerationCandidateRevision) {
+        state.regenerationRefreshPending = true;
+      }
+      state.regenerationCandidateRevision = regenRevision;
+    }
     const manualRefreshCompleted = state.manualRefreshPending && state.statusWasBusy && !busy;
 
     dom.indexState.classList.toggle("is-ready", !busy && !failed);
@@ -375,10 +407,12 @@ async function loadStatus({ quiet = false } = {}) {
       if (failed) showToast(`再索引に失敗しました: ${refreshError || "不明なエラー"}`, true);
       state.manualRefreshPending = false;
     }
-    if (state.aiListRefreshPending && state.filters.ai_status && !state.editingDialogue
+    const refreshCandidates = state.filters.ai_status === "regenerated"
+      ? state.regenerationRefreshPending : state.aiListRefreshPending && state.filters.ai_status;
+    if (refreshCandidates && !state.editingDialogue
         && !state.savingDialogue && !state.reviewBusy && !failed) {
       state.aiListRefreshPending = false;
-      clearDetailPrefetch();
+      state.regenerationRefreshPending = false;
       // Only refresh the queue. A newly completed AI draft must never replace
       // the current text/draft that a person is already inspecting.
       await loadItems();
@@ -735,6 +769,12 @@ async function loadItems({ scrollTop = false, selectFirst = false } = {}) {
     if (state.annotationMode && state.items.length && (selectFirst || !state.selectedToken)
         && !state.editingDialogue && !state.savingDialogue && !state.reviewBusy) {
       await selectItem(state.items[0].token);
+    } else if (state.filters.ai_status === "regenerated" && state.selectedItem?.token === state.selectedToken) {
+      // A new arrival can become the next item while a reviewer reads the former last item.
+      state.navigation.next ||= listNeighbor(state.selectedToken, 1);
+      state.navigation.previous ||= listNeighbor(state.selectedToken, -1);
+      dom.itemNext.disabled = !state.navigation.next;
+      dom.itemPrev.disabled = !state.navigation.previous;
     }
     prefetchNextDetails();
   } catch (error) {
@@ -862,7 +902,10 @@ function renderItems() {
     const main = createElement("span", "item-main");
     const top = createElement("span", "item-topline");
     top.append(createElement("span", "item-uid", item.uid));
-    top.append(createElement("span", "category-badge", item.category));
+    if (Array.isArray(item.regenerated_kinds)) {
+      const kinds = item.regenerated_kinds.map(auxiliaryKindLabel);
+      top.append(createElement("span", "category-badge", ["Terra", ...kinds].join("・")));
+    } else top.append(createElement("span", "category-badge", item.category));
     if (item.stageStatus.dialogue.state === "complete") top.append(renderReviewBadge(item.reviewState));
     if (item.regeneration_pending) top.append(createElement("span", "review-badge is-regeneration", "再作成待ち"));
     main.append(top);
@@ -1003,6 +1046,9 @@ function updatePagination() {
 function setListState(mode) {
   dom.listLoading.hidden = mode !== "loading";
   dom.listEmpty.hidden = mode !== "empty";
+  dom.listEmptyHint.textContent = state.filters.ai_status === "regenerated"
+    ? "この条件の未確認のTerra対話は現在ありません。新しく完成した対話は自動で追加されます。"
+    : "カテゴリや検索条件を変更してください。";
   dom.listError.hidden = mode !== "error";
   dom.datasetList.setAttribute("aria-busy", mode === "loading" ? "true" : "false");
 }
@@ -1125,6 +1171,9 @@ async function loadDetail(token, { scrollToStart = false, usePrefetch = false } 
     if (requestId !== state.detailRequestId || controller.signal.aborted || state.editingDialogue) return;
     const source = raw.item || raw.data || raw;
     const detail = normalizeItem(source);
+    if (state.filters.ai_status === "regenerated" && !detail.regeneration_candidate?.candidate_id) {
+      throw new Error("このTerra候補はすでに処理されたか、現在は確認対象外です。");
+    }
     detail.token = detail.token || token;
     const navigation = raw.navigation || source.navigation || {};
     state.navigation.previous = navigationToken(navigation.previous ?? navigation.prev ?? raw.previous_token ?? source.previous_token) || listNeighbor(token, -1);
@@ -1221,10 +1270,24 @@ function renderReview(item) {
   if (!visible) return;
 
   const status = reviewStatusInfo(review.status);
+  const candidate = item.regeneration_candidate;
+  const reviewedCandidate = item.human_revision?.regeneration_candidate_id;
+  const terraVersion = review.status === "approved" ? "Terraから採用した対話"
+    : review.status === "rejected" ? "却下したTerraの対話" : "Terraの対話・未確認";
   dom.reviewStatusBadge.className = `review-status-badge is-${status.key}`;
   dom.reviewStatusBadge.textContent = status.label;
   dom.reviewNote.value = review.note;
-  dom.reviewApprove.textContent = activeAiSuggestion(item) ? "AI修正案を承認して保存" : "承認して利用する";
+  dom.dialogueSectionTitle.textContent = candidate ? "Terra 本番対話・確認中"
+    : reviewedCandidate ? terraVersion : activeAiSuggestion(item) ? "AI修正案・確認中" : "対話テキスト";
+  dom.reviewApprove.textContent = candidate ? "Terraの対話を承認"
+    : activeAiSuggestion(item) ? "AI修正案を承認して保存" : "承認して利用する";
+  dom.reviewReject.textContent = candidate ? "この候補を却下" : "却下する";
+  dom.regenerationErrors.hidden = !candidate;
+  if (candidate?.candidate_id !== state.candidateActivity?.id) {
+    state.candidateActivity = candidate ? { id: candidate.candidate_id, activeMs: 0, since: null } : null;
+    noteCandidateActivity(!document.hidden && document.hasFocus?.() !== false);
+    for (const input of dom.regenerationErrors.querySelectorAll("input")) input.checked = false;
+  }
   dom.reviewDescription.textContent = review.required
     ? "人間の承認が必須です。画像と対話全文を確認してください。未確認・却下の間は音声生成に進めません。"
     : "承認は任意です。未確認でも利用できますが、対話全体を確認して承認すると認証ラベルが付きます。本文も編集できます。";
@@ -1233,6 +1296,13 @@ function renderReview(item) {
     ["確認対象", [...new Set(item.auxiliaryTasks.map(task => auxiliaryKindLabel(task.kind)))].join("・")],
     ["根拠", groundingSourceLabel(auxiliary.grounding_source)],
   ];
+  const origin = candidate || (reviewedCandidate && item.human_revision);
+  if (origin) {
+    facts.unshift(["表示中の版", candidate ? "本番再生成・人手確認待ち" : terraVersion],
+      ["生成モデル", origin.model || "gpt-6.1-terra"]);
+    if (origin.prompt_version) facts.push(["プロンプト版", origin.prompt_version]);
+    if (origin.created_at || origin.generated_at) facts.push(["生成日時", formatDateTime(origin.created_at || origin.generated_at)]);
+  }
   if (auxiliary.kind === "counting") {
     if (auxiliary.counted_target) facts.push(["数えた対象", auxiliary.counted_target]);
     if (auxiliary.answer_count !== undefined && auxiliary.answer_count !== null) {
@@ -1273,7 +1343,9 @@ function renderReviewQa(item) {
     const label = auxiliaryTurnLabel(item.auxiliaryTasks, index);
     if (!label) continue;
     const row = createElement("div", "review-qa-row");
-    row.append(createElement("span", "review-qa-label", `発話${index + 1}　${label}`));
+    const answerModes = item.auxiliaryTasks.filter(task => task.answer_turn_index === index && task.answer_mode)
+      .map(task => ANSWER_MODE_LABELS[task.answer_mode] || task.answer_mode);
+    row.append(createElement("span", "review-qa-label", [`発話${index + 1}　${label}`, ...answerModes].join("・")));
     row.append(createElement("p", "review-qa-text", turn.text || "（空の発話）"));
     dom.reviewQa.append(row);
   }
@@ -1310,12 +1382,26 @@ function activeAiSuggestion(item) {
 }
 
 function renderAiSuggestion(item) {
+  const candidate = item.regeneration_candidate;
   const suggestion = activeAiSuggestion(item);
-  dom.aiSuggestion.hidden = !suggestion;
+  const compareTerra = candidate || (item.human_revision?.regeneration_candidate_id && item.original_dialogue);
+  dom.aiSuggestion.hidden = !compareTerra && !suggestion;
   dom.aiSuggestion.open = false;
   dom.aiSuggestionConcerns.replaceChildren();
   dom.aiSuggestionConcerns.hidden = !suggestion?.concerns?.length;
   dom.aiSuggestionDiff.replaceChildren();
+  if (compareTerra) {
+    dom.aiSuggestionLabel.textContent = "以前の対話と比較";
+    appendComparisonDialogue(`元の対話（${item.original_generator || "ローカル生成"}）`, item.original_dialogue);
+    const earlier = item.original_ai_suggestion;
+    if (earlier?.dialogue) appendComparisonDialogue(["以前のAI修正案", earlier.model, earlier.created_at && formatDateTime(earlier.created_at)].filter(Boolean).join("・"), earlier.dialogue);
+    for (const warning of candidate?.review_warnings || []) {
+      const labels = { repeated_question: "同じ質問の繰り返し", repeated_answer: "同じ回答の繰り返し", spoken_form: "英数字の読み方", invalid_task_marker: "補助タスクの印を確認" };
+      dom.aiSuggestionConcerns.append(createElement("p", "review-error", [warning.turn && `発話${warning.turn}`, labels[warning.code] || warning.code || warning].filter(Boolean).join("　")));
+    }
+    dom.aiSuggestionConcerns.hidden = !candidate?.review_warnings?.length;
+    return;
+  }
   if (!suggestion) return;
   const label = suggestion.verdict === "unchanged" ? "AI事前確認（未承認・変更なし）"
     : suggestion.verdict === "needs_attention" ? "AI事前修正（未承認・要確認）" : "AI事前修正（未承認）";
@@ -1345,6 +1431,35 @@ function renderAiSuggestion(item) {
   }
 }
 
+function appendComparisonDialogue(title, dialogue) {
+  const group = createElement("section", "ai-suggestion-turn");
+  group.append(createElement("h4", "", title));
+  for (const [index, turn] of normalizeDialogue(dialogue).entries()) {
+    group.append(createElement("p", "", `${index + 1}. ${displaySpeaker(turn.speaker, /assistant|アシスタント/i.test(turn.speaker) ? "assistant" : "user")}　${turn.text}`));
+  }
+  dom.aiSuggestionDiff.append(group);
+}
+
+// Count foreground time up to one idle minute per interaction. No activity events leave the browser.
+function noteCandidateActivity(active) {
+  const activity = state.candidateActivity;
+  if (!activity) return;
+  const now = performance.now();
+  if (activity.since !== null) activity.activeMs += Math.min(now - activity.since, 60000);
+  activity.since = active && !document.hidden && document.hasFocus?.() !== false ? now : null;
+}
+
+function candidateDecisionFields(item) {
+  if (!item.regeneration_candidate) return {};
+  noteCandidateActivity(true);
+  return {
+    regeneration_candidate_id: item.regeneration_candidate.candidate_id,
+    ...(state.candidateActivity?.id === item.regeneration_candidate.candidate_id
+      ? { active_ms: Math.round(state.candidateActivity.activeMs) } : {}),
+    error_kinds: [...dom.regenerationErrors.querySelectorAll("input")].filter(input => input.checked).map(input => input.value),
+  };
+}
+
 async function submitReview(decision) {
   const item = state.selectedItem;
   if (!item?.token || !item.review_available || state.reviewBusy || state.editingDialogue) return;
@@ -1355,6 +1470,7 @@ async function submitReview(decision) {
   const review = item.reviewState;
   const suggestion = activeAiSuggestion(item);
   const approveSuggestion = decision === "approved" && suggestion;
+  if (state.filters.ai_status === "regenerated" && !item.regeneration_candidate) return;
   dom.reviewError.hidden = true;
   dom.reviewError.textContent = "";
   setReviewButtonsBusy(true);
@@ -1372,6 +1488,7 @@ async function submitReview(decision) {
         // keep the descriptive alias for clients and future API versions.
         fingerprint: review.content_sha256,
         note: dom.reviewNote.value.trim(),
+        ...candidateDecisionFields(item),
         ...(approveSuggestion ? {
           ai_suggestion_id: suggestion.suggestion_id,
           dialogue: normalizeDialogue(item.dialogue).map(turn => ({ text: turn.text })),
@@ -1388,6 +1505,7 @@ async function submitReview(decision) {
     const status = decision === "pending" && !review.required ? "not_required" : decision;
     const next = normalizeItem({
       ...item,
+      regeneration_candidate: null,
       ...(suggestion ? {
         ai_suggestion: null,
         dialogue: item.original_dialogue,
@@ -1411,7 +1529,7 @@ async function submitReview(decision) {
     applyReviewedItemToQueue(next, queueScope);
     if (!nextToken || queueScope !== detailScope()) renderDetail(next);
     showToast(decision === "approved"
-      ? approveSuggestion ? "表示中のAI修正案を保存し、人手承認しました。" : "承認しました。この対話は学習データセットで利用されます。"
+      ? item.regeneration_candidate ? "Terraの対話を人手承認しました。" : approveSuggestion ? "表示中のAI修正案を保存し、人手承認しました。" : "承認しました。この対話は学習データセットで利用されます。"
       : decision === "rejected"
         ? "却下しました。この対話は学習データセットから除外されます。"
         : review.required ? "未確認に戻しました。音声生成・学習を保留します。" : "認証ラベルを外しました。通常データとして利用可能です。");
@@ -1429,6 +1547,7 @@ async function submitReview(decision) {
     // Durable save first, then the next record. Aggregate queries must never
     // sit on the annotation navigation's critical path.
     if (nextToken && queueScope === detailScope()) await selectItem(nextToken);
+    else if (item.regeneration_candidate && state.annotationMode && dom.annotationAutoNext.checked && queueScope === detailScope()) clearQueueSelection();
     refreshAfterAnnotation();
   }
 }
@@ -1503,8 +1622,9 @@ async function flushAnnotationRefresh() {
 
 function setReviewButtonsBusy(busy) {
   document.body.classList.toggle("annotation-editing", state.editingDialogue);
+  const finishedTerra = state.filters.ai_status === "regenerated" && !state.selectedItem?.regeneration_candidate;
   for (const button of [dom.reviewApprove, dom.reviewReject, dom.reviewReset, dom.reviewEdit]) {
-    button.disabled = busy || state.editingDialogue;
+    button.disabled = busy || state.editingDialogue || finishedTerra;
   }
   dom.reviewNote.disabled = busy;
 }
@@ -1512,6 +1632,7 @@ function setReviewButtonsBusy(busy) {
 function startDialogueEdit() {
   const item = state.selectedItem;
   if (!item?.review_available || state.editingDialogue) return;
+  if (state.filters.ai_status === "regenerated" && !item.regeneration_candidate) return;
   state.editingDialogue = true;
   dom.dialogueEditorActions.hidden = false;
   dom.dialogueHeadingActions.hidden = false;
@@ -1520,6 +1641,23 @@ function startDialogueEdit() {
   setReviewButtonsBusy(false);
   dom.dialogueEditorFacts.replaceChildren();
   const aux = item.auxiliaryTask || {};
+  if (item.regeneration_candidate) {
+    for (const [index, marker] of item.auxiliaryTasks.entries()) {
+      const label = createElement("label", "review-note-label", `発話${marker.answer_turn_index + 1} ${auxiliaryKindLabel(marker.kind)}の答え方`);
+      const select = document.createElement("select");
+      select.dataset.markerIndex = String(index);
+      const keys = marker.kind === "ocr" ? ["exact", "partial", "unknown"] : ["exact", "approximate", "lower_bound", "unknown"];
+      for (const key of ["", ...keys]) {
+        const option = createElement("option", "", key ? ANSWER_MODE_LABELS[key] : "未指定");
+        option.value = key;
+        select.append(option);
+      }
+      select.value = marker.answer_mode || "";
+      label.append(select);
+      dom.dialogueEditorFacts.append(label);
+    }
+    return;
+  }
   const fields = aux.kind === "counting"
     ? [["counted_target", "数えた対象", "text"], ["answer_count", "正解の数", "number"]]
     : aux.kind === "ocr" ? [["recognized_text", "正しい読み取り文字", "text"]] : [];
@@ -1556,11 +1694,21 @@ async function saveDialogueEdit() {
   const inputs = [...dom.detailDialogue.querySelectorAll("textarea")];
   const facts = [...dom.dialogueEditorFacts.querySelectorAll("input")];
   if (![...inputs, ...facts].every((input) => input.reportValidity())) return;
-  const auxiliary = { ...item.auxiliaryTask };
+  const auxiliary = { ...(item.regeneration_candidate ? item.auxiliary_task : item.auxiliaryTask) };
   for (const input of facts) auxiliary[input.dataset.auxiliaryField] = input.type === "number" ? Number(input.value) : input.value.trim();
+  const modeInputs = [...dom.dialogueEditorFacts.querySelectorAll("select")];
+  if (modeInputs.length) {
+    if (auxiliary.additional_tasks) auxiliary.additional_tasks = auxiliary.additional_tasks.map(task => ({ ...task }));
+    const markers = [auxiliary, ...(auxiliary.additional_tasks || [])];
+    for (const input of modeInputs) {
+      const marker = markers[Number(input.dataset.markerIndex)];
+      if (input.value) marker.answer_mode = input.value;
+      else delete marker.answer_mode;
+    }
+  }
   state.savingDialogue = true;
   dom.dialogueSave.disabled = dom.dialogueCancel.disabled = true;
-  for (const input of [...inputs, ...facts]) input.disabled = true;
+  for (const input of [...inputs, ...facts, ...modeInputs]) input.disabled = true;
   dom.reviewNote.disabled = true;
   dom.dialogueEditorError.hidden = true;
   try {
@@ -1570,6 +1718,7 @@ async function saveDialogueEdit() {
         dialogue: inputs.map((input) => ({ text: input.value.trim() })),
         auxiliary_task: ["counting", "ocr"].includes(auxiliary.kind) ? auxiliary : null,
         ...(activeAiSuggestion(item) ? { ai_suggestion_id: item.ai_suggestion.suggestion_id } : {}),
+        ...candidateDecisionFields(item),
         note: dom.reviewNote.value.trim() }),
     });
     state.editingDialogue = false;
@@ -1589,11 +1738,12 @@ async function saveDialogueEdit() {
   } finally {
     state.savingDialogue = false;
     dom.dialogueSave.disabled = dom.dialogueCancel.disabled = false;
-    for (const input of [...inputs, ...facts]) input.disabled = false;
+    for (const input of [...inputs, ...facts, ...modeInputs]) input.disabled = false;
     setReviewButtonsBusy(false);
   }
   if (succeeded) {
     if (nextToken && queueScope === detailScope()) await selectItem(nextToken);
+    else if (item.regeneration_candidate && state.annotationMode && dom.annotationAutoNext.checked && queueScope === detailScope()) clearQueueSelection();
     refreshAfterAnnotation();
   }
 }
@@ -1891,6 +2041,42 @@ function filterParams() {
   return params;
 }
 
+function clearQueueSelection() {
+  state.detailController?.abort();
+  state.detailRequestId++;
+  clearDetailPrefetch();
+  state.selectedToken = "";
+  state.selectedItem = null;
+  state.candidateActivity = null;
+  state.navigation = { previous: "", next: "" };
+  dom.detailContent.hidden = true;
+  dom.detailLoading.hidden = true;
+  dom.detailEmpty.hidden = false;
+}
+
+function applyModeFromHash(reload) {
+  if (window.location.hash === "#annotate" || window.location.hash === "#annotate-terra") {
+    openTerraQueue({ reload, updateUrl: false });
+  } else {
+    setViewMode(false, { reload, updateUrl: false });
+  }
+}
+
+function openTerraQueue({ reload = true, updateUrl = true } = {}) {
+  if (state.savingDialogue || state.reviewBusy) return;
+  if (state.editingDialogue) {
+    if (state.filters.ai_status === "regenerated" || !window.confirm("未保存の編集を取り消してTerraの本番対話を開きますか？")) return;
+    cancelDialogueEdit();
+  }
+  clearFilters(false);
+  clearQueueSelection();
+  state.filters.ai_status = dom.aiStatusFilter.value = "regenerated";
+  state.filters.review_status = dom.reviewStatusFilter.value = "pending";
+  state.filters.review_required = "true";
+  dom.reviewRequiredFilter.checked = true;
+  setViewMode(true, { reload, updateUrl });
+}
+
 function setViewMode(annotation, { reload = true, updateUrl = true } = {}) {
   const changed = state.annotationMode !== annotation;
   state.annotationMode = annotation;
@@ -1903,7 +2089,8 @@ function setViewMode(annotation, { reload = true, updateUrl = true } = {}) {
     dom.reviewStatusFilter.value = "pending";
     dom.reviewRequiredFilter.checked = true;
   }
-  if (updateUrl) window.history.replaceState(null, "", `${window.location.pathname}${window.location.search}${annotation ? "#annotate" : ""}`);
+  const hash = annotation ? (state.filters.ai_status === "regenerated" ? "#annotate-terra" : "#annotate") : "";
+  if (updateUrl) window.history.replaceState(null, "", `${window.location.pathname}${window.location.search}${hash}`);
   updateAnnotationLayout();
   updateBackdrop();
   scheduleDialogueEditorSizing();

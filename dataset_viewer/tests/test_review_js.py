@@ -30,7 +30,7 @@ const elements = new Map();
 const document={addEventListener(){},createElement:tag=>new Element(tag),createDocumentFragment:()=>new Element(),
   getElementById:id=>{if(!elements.has(id))elements.set(id,new Element());return elements.get(id);},
   querySelector:()=>new Element(),querySelectorAll:()=>[],body:new Element('body')};
-const context=vm.createContext({document,console,URLSearchParams,Intl,AbortController,
+const context=vm.createContext({document,console,URLSearchParams,Intl,AbortController,performance,
   window:{addEventListener(){},clearTimeout(){},setTimeout(){},requestAnimationFrame:callback=>callback(),matchMedia:()=>({matches:false}),
     location:{pathname:'/',search:'',hash:''},history:{replaceState(...args){this.url=args[2];}}}});
 vm.runInContext(fs.readFileSync(process.argv[1],'utf8'),context);
@@ -307,6 +307,52 @@ vm.runInContext(`(async()=>{
   state.selectedItem=normalizeItem({...marked,auxiliary_task:count});startDialogueEdit();
   assert.strictEqual(dom.dialogueEditorFacts.querySelectorAll('input').length,0);
   cancelDialogueEdit();
+
+  // The annotation entry point selects only complete, pending Terra conversations.
+  state.navigation.next='';dom.annotationAutoNext.checked=false;openTerraQueue({reload:false});
+  assert.strictEqual(window.history.url,'/#annotate-terra');
+  assert.strictEqual(filterParams().get('ai_status'),'regenerated');
+  assert.strictEqual(state.selectedItem,null);
+  const info={candidate_id:'terra-v10',model:'gpt-6.1-terra',prompt_version:'v10',
+    review_warnings:[{turn:2,code:'spoken_form'}]};
+  const terra={...marked,regeneration_candidate:info,original_dialogue:raw.dialogue,auxiliary_task:dual};
+  state.selectedItem=normalizeItem(terra);renderReview(state.selectedItem);renderAiSuggestion(state.selectedItem);
+  assert.ok(dom.dialogueSectionTitle.textContent.includes('Terra'));
+  assert.ok(dom.reviewApprove.textContent.includes('Terra'));
+  assert.ok(dom.aiSuggestionDiff.querySelectorAll('p').some(node=>node.textContent.includes('猫です。')));
+  let candidateSave;
+  api=async(path,opts)=>{candidateSave={path,body:JSON.parse(opts.body)};return {item:{...terra,
+    regeneration_candidate:null,review_status:'approved',human_revision:{regeneration_candidate_id:info.candidate_id}}};};
+  await submitReview('approved');
+  assert.ok(candidateSave.path.endsWith('/review'));
+  assert.strictEqual(candidateSave.body.regeneration_candidate_id,info.candidate_id);
+  assert.strictEqual(candidateSave.body.dialogue,undefined);
+  assert.ok(Number.isInteger(candidateSave.body.active_ms));
+  assert.strictEqual(candidateSave.body.content_sha256,raw.content_sha256);
+  state.selectedItem=normalizeItem(terra);renderReview(state.selectedItem);startDialogueEdit();
+  const modes=dom.dialogueEditorFacts.querySelectorAll('select');
+  assert.strictEqual(modes.length,3);modes[0].value='partial';modes[1].value='lower_bound';
+  await saveDialogueEdit();
+  assert.ok(candidateSave.path.endsWith('/dialogue'));
+  assert.strictEqual(candidateSave.body.regeneration_candidate_id,info.candidate_id);
+  assert.strictEqual(candidateSave.body.dialogue.length,4);
+  assert.strictEqual(candidateSave.body.auxiliary_task.answer_mode,'partial');
+  assert.strictEqual(candidateSave.body.auxiliary_task.additional_tasks[0].answer_mode,'lower_bound');
+  assert.strictEqual(dual.additional_tasks[0].answer_mode,undefined);
+  state.selectedItem=normalizeItem(terra);await submitReview('rejected');
+  assert.strictEqual(candidateSave.body.regeneration_candidate_id,info.candidate_id);
+  assert.strictEqual(candidateSave.body.decision,'rejected');
+  state.regenerationCandidateCount=100;state.editingDialogue=true;let arrivals=0;
+  loadItems=async()=>{arrivals++;};
+  api=async()=>({ready:true,regeneration_candidate_count:120});
+  await loadStatus();assert.strictEqual(arrivals,0);
+  state.editingDialogue=false;await loadStatus();assert.strictEqual(arrivals,1);
+  // The first arrival after an empty queue opens its conversation without a click.
+  openTerraQueue({reload:false});loadItems=realLoadItems;let firstOpened='',queue=[];
+  selectItem=async token=>{firstOpened=token;state.selectedToken=token;};
+  api=async path=>path==='/api/status'?{ready:true,regeneration_candidate_count:121}:{items:queue,total:queue.length};
+  await loadItems();assert.strictEqual(firstOpened,'');
+  queue=[terra];await loadStatus();assert.strictEqual(firstOpened,terra.token);
 })()`,context).catch(error=>{console.error(error);process.exitCode=1;});
 """
         result = subprocess.run([shutil.which("node"), "-e", script, str(source)],

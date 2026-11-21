@@ -164,6 +164,7 @@
           <div class="section-heading">
             <div><h2 id="review-dashboard-title">人手確認・認証・再作成</h2>
               <p>「承認必須」と「人間が確認済み」は別管理。カードから対象を絞り込めます。</p></div>
+            <button type="button" class="button button-primary" id="open-terra-queue">Terraの本番対話を確認</button>
           </div>
           <div class="metric-grid review-metric-grid">
             <article class="metric-card"><div><p class="metric-label">人間の承認が必須</p><p class="metric-value" id="metric-review-required">—</p><p class="metric-sub">承認済み・要確認・却下の合計</p></div></article>
@@ -231,9 +232,10 @@
               </select>
             </label>
             <label>
-              <span>AI事前確認</span>
+              <span>確認する対話</span>
               <select id="ai-status-filter" name="ai_status">
-                <option value="">すべて</option>
+                <option value="">すべての対話</option>
+                <option value="regenerated">Terra 本番再生成・未確認</option>
                 <option value="ready">AI事前確認済み・人手未確認</option>
                 <option value="needs_attention">AIの注意点あり・人手未確認</option>
               </select>
@@ -259,7 +261,7 @@
         <section class="annotation-toolbar annotation-only" aria-label="アノテーション操作">
           <div><strong>確認・編集ワークスペース</strong><span>前後移動: Alt + ← / →。編集内容は自動更新で上書きされません。</span></div>
           <div class="annotation-toolbar-actions">
-            <label><input type="checkbox" id="annotation-auto-next" />判定・保存後に次へ</label>
+            <label><input type="checkbox" id="annotation-auto-next" checked />判定・保存後に次へ</label>
             <button type="button" class="button button-secondary" id="annotation-list-toggle" aria-expanded="true">一覧を隠す</button>
           </div>
         </section>
@@ -306,7 +308,7 @@
             <div class="empty-state" id="list-empty" hidden>
               <div class="empty-icon" aria-hidden="true">⌕</div>
               <h3>該当するデータがありません</h3>
-              <p>カテゴリや検索条件を変更してください。</p>
+              <p id="list-empty-hint">カテゴリや検索条件を変更してください。</p>
             </div>
             <div class="error-state" id="list-error" role="alert" hidden>
               <h3>一覧を取得できませんでした</h3>
@@ -388,7 +390,6 @@
                   <div id="ai-suggestion-concerns" class="ai-suggestion-concerns" hidden role="status"></div>
                   <details class="ai-suggestion" id="ai-suggestion" hidden>
                     <summary id="ai-suggestion-label">AI事前修正（未承認）・元の対話と差分</summary>
-                    <p>表示中の修正案は、まだ承認されていません。画像と対話全文を確認し、承認すると表示中の本文・正解情報が保存されます。</p>
                     <div id="ai-suggestion-diff"></div>
                   </details>
                   <details class="review-context-details" id="review-context-details" open>
@@ -399,6 +400,14 @@
                   <dl class="review-facts" id="review-facts"></dl>
                   <div class="review-qa" id="review-qa" aria-label="確認対象の質問と回答"></div>
                   <p class="review-usage" id="review-usage" role="status"></p>
+                  <fieldset id="regeneration-errors" class="regeneration-errors" hidden>
+                    <legend>見つけた問題（任意）</legend>
+                    <label><input type="checkbox" value="reading" />文字の読み取り</label>
+                    <label><input type="checkbox" value="counting" />個数</label>
+                    <label><input type="checkbox" value="grounding" />画像との矛盾</label>
+                    <label><input type="checkbox" value="conversation" />会話の流れ</label>
+                    <label><input type="checkbox" value="other" />その他</label>
+                  </fieldset>
                   <label class="review-note-label" for="review-note">
                     <span>確認メモ（任意）</span>
                     <textarea id="review-note" rows="3" maxlength="1000" placeholder="判断理由や修正時のメモを残せます"></textarea>

@@ -20,6 +20,22 @@ from ssvd.review_store import (
 
 
 class ReviewStoreTests(unittest.TestCase):
+    def test_stale_original_decision_cannot_follow_a_regenerated_revision(self):
+        first, second = ReviewStore(self.path), ReviewStore(self.path)
+        base = content_fingerprint(self.record)
+        candidate = dict(self.record, generator="gpt-6.1-terra", prompt_version="visual_dialogue_v10")
+        candidate_id = content_fingerprint(candidate)
+        first.append(fingerprint=candidate_id, decision="approved", uid="sample-1", collection="counting_v4",
+                     revised_record=candidate, base_fingerprint=base, parent_fingerprint=base,
+                     require_unreviewed=True, regeneration_review=dict(
+                         candidate_id=candidate_id, model=candidate["generator"], action="approved",
+                         prompt_version=candidate["prompt_version"]))
+        with self.assertRaises(ReviewConflictError):
+            second.append(fingerprint=base, decision="rejected", uid="sample-1", collection="counting_v4",
+                          base_fingerprint=base, parent_fingerprint=base)
+        self.assertIsNone(second.decision_for(base))
+        self.assertEqual(second.decision_for(candidate_id)["decision"], "approved")
+
     def test_revision_is_durable_content_bound_and_rejection_keeps_text(self):
         store = ReviewStore(self.path)
         original = content_fingerprint(self.record)
