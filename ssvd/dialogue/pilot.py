@@ -264,11 +264,14 @@ def pilot_credit_limits(root, run_dir, db, previous_commitment):
 
 
 def generate_one(root, db, sample, model, api, *, previous_commitment, recovery=False,
-                 budget_nanos=None, before_reserve=None):
+                 budget_nanos=None, before_reserve=None, prompt_version=PROMPT_VERSION):
     uid = sample["uid"]
     store = ReviewStore(root / DEFAULT_REVIEW_EVENTS)
     identity = {key: sample[key] for key in ("uid", "kind", "pairs", "base_fingerprint", "image_sha256")}
-    identity.update(collection=COLLECTION, model=model, prompt_version=PROMPT_VERSION)
+    identity.update(collection=COLLECTION, model=model, prompt_version=prompt_version)
+    preview_options = {"recovery": True} if recovery else {}
+    if prompt_version != PROMPT_VERSION:
+        preview_options["prompt_version"] = prompt_version
     replies = []
     existing = 0
     if recovery:
@@ -284,7 +287,7 @@ def generate_one(root, db, sample, model, api, *, previous_commitment, recovery=
         try:
             stage = preview(root, uid, model=model, pairs=sample["pairs"],
                             transcript={"identity": identity, "replies": replies},
-                            **({"recovery": True} if recovery else {}))
+                            **preview_options)
         except (ValueError, FileNotFoundError) as exc:
             # preview also validates the source and the immutable transcript identity.
             return {"status": "protected", "reason": str(exc)}

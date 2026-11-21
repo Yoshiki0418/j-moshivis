@@ -7,13 +7,16 @@ import json
 from pathlib import Path
 import sqlite3
 import tempfile
+import threading
 import unittest
 from unittest.mock import patch
 
 from ssvd.dialogue import pilot, production, production_budget
 from ssvd.dialogue.pilot_api import OpenAIPilotAPI, PilotRequestRejected
 from ssvd.dialogue.preview_regeneration import COLLECTION
-from ssvd.dialogue.visual_dialogue_prompts import USER
+from ssvd.dialogue.regeneration_roles import VISUAL_V11, default_pair_count
+from ssvd.dialogue.visual_dialogue_prompts import USER as LEGACY_USER
+from ssvd.dialogue.visual_dialogue_prompts_v11 import USER
 from ssvd.review_store import DEFAULT_REVIEW_EVENTS, ReviewStore, review_metadata
 
 
@@ -29,7 +32,7 @@ class OfflineTerra(OpenAIPilotAPI):
     def generate(self, body, *, request_id):
         self.attempts.append(request_id)
         self.on_generate()
-        reply = {"text": "何が見える？"} if body["instructions"] == USER else {"text": "リンゴが見えるよ。", "tasks": []}
+        reply = {"text": "何が見える？"} if body["instructions"] in (LEGACY_USER, USER) else {"text": "リンゴが見えるよ。", "tasks": []}
         return reply, {"response_id": "resp_" + request_id, "model": body["model"], "service_tier": "flex",
                        "usage": {"input_tokens": 1000, "output_tokens": 20}, "cost_usd": 0.00055}
 
@@ -46,40 +49,49 @@ class ProductionTests(unittest.TestCase):
         self.events.touch()
         viewer = self.root / "data/.dataset_viewer"
         viewer.mkdir()
-        self.uid = "fixture1"
-        image_path = "data/test.jpg"
-        raw = b"offline image bytes"
-        (self.root / image_path).write_bytes(raw)
-        image_sha = hashlib.sha256(raw).hexdigest()
-        source = dict(uid=self.uid, image=image_path, image_sha256=image_sha, generator="fixture-Qwen",
-                      task_mode="normal", dialogue=[{"speaker": "ユーザー", "text": "元の発話"}],
-                      verification_status="unverified_vlm_visual", auxiliary_task={"kind": "ocr"})
-        source.update(review_metadata(source))
-        source_path = self.root / "data/source.jsonl"
-        content = json.dumps(source).encode()
-        source_path.write_bytes(content)
-        with closing(sqlite3.connect(viewer / "catalog.sqlite3")) as db, db:
+        self.catalog = viewer / "catalog.sqlite3"
+        with closing(sqlite3.connect(self.catalog)) as db, db:
             db.executescript("""
                 CREATE TABLE sources(source_id, path);
                 CREATE TABLE items(collection, uid, review_required, review_status, has_image, has_dialogue,
                     auxiliary_kind, image_path, review_id, dialogue_offset, dialogue_length, dialogue_source);
                 INSERT INTO sources VALUES ('fixture', 'data/source.jsonl');
             """)
-            db.execute("INSERT INTO items VALUES (?, ?, 1, 'pending', 1, 1, 'ocr', ?, ?, 0, ?, 'fixture')",
-                       (COLLECTION, self.uid, image_path, source["review_id"], len(content)))
-        self.sample = dict(uid=self.uid, image_path=image_path, image_sha256=image_sha, pairs=4,
-                           kind="ocr", base_fingerprint=source["review_id"])
-        manifest = dict(schema_version=1, model=production.MODEL, collection=COLLECTION,
-                        prompt_version=pilot.PROMPT_VERSION, sample_size=1, pairs=4,
-                        samples=[self.sample], sampling_target={"ocr": 1})
-        manifest_bytes = json.dumps(manifest).encode()
-        (self.run_dir / "manifest.json").write_bytes(manifest_bytes)
-        self.digest = hashlib.sha256(manifest_bytes).hexdigest()
+        self.uid = "fixture1"
+        self.sample = self.add_source(self.uid)
+        self.freeze(self.sample)
         # The private fixed evaluation corpus and historical ledgers have separate integration tests.
         self.verify_fresh = self.resources.enter_context(patch.object(production, "verify_manifest"))
         self.prior = self.resources.enter_context(patch.object(production, "prior_commitment", return_value=0))
         for module in (production, production_budget):
             self.resources.enter_context(patch.object(module, "CUTOFF", 4_102_444_800))
+
+    def add_source(self, uid):
+        image_path = f"data/{uid}.jpg"
+        raw = uid.encode()
+        (self.root / image_path).write_bytes(raw)
+        image_sha = hashlib.sha256(raw).hexdigest()
+        source = dict(uid=uid, image=image_path, image_sha256=image_sha, generator="fixture-Qwen",
+                      task_mode="normal", dialogue=[{"speaker": "ユーザー", "text": "元の発話"}],
+                      verification_status="unverified_vlm_visual", auxiliary_task={"kind": "ocr"})
+        source.update(review_metadata(source))
+        content = json.dumps(source).encode() + b"\n"
+        with (self.root / "data/source.jsonl").open("ab") as stream:
+            offset = stream.tell()
+            stream.write(content)
+        with closing(sqlite3.connect(self.catalog)) as db, db:
+            db.execute("INSERT INTO items VALUES (?, ?, 1, 'pending', 1, 1, 'ocr', ?, ?, ?, ?, 'fixture')",
+                       (COLLECTION, uid, image_path, source["review_id"], offset, len(content)))
+        return dict(uid=uid, image_path=image_path, image_sha256=image_sha, pairs=default_pair_count(uid),
+                    kind="ocr", base_fingerprint=source["review_id"])
+
+    def freeze(self, *samples):
+        manifest = dict(schema_version=1, model=production.MODEL, collection=COLLECTION,
+                        prompt_version=pilot.PROMPT_VERSION, sample_size=len(samples),
+                        pairs=sum(s["pairs"] for s in samples), samples=samples, sampling_target={"ocr": len(samples)})
+        manifest_bytes = json.dumps(manifest).encode()
+        (self.run_dir / "manifest.json").write_bytes(manifest_bytes)
+        self.digest = hashlib.sha256(manifest_bytes).hexdigest()
 
     def generate(self, **options):
         with redirect_stdout(StringIO()):
@@ -89,13 +101,83 @@ class ProductionTests(unittest.TestCase):
     def summary(self):
         return json.loads((self.run_dir / "summary.json").read_text())
 
-    def test_partial_receipts_resume_without_repaying_and_yield_a_reviewable_record(self):
+    def reject_attempt(self, attempt):
         def out_of_quota():
-            if len(self.api.attempts) == 3:
+            if len(self.api.attempts) == attempt:
                 reason = PilotRequestRejected("OpenAI rejected the request (HTTP 429)")
                 reason.code = "insufficient_quota"
                 raise reason
         self.api.on_generate = out_of_quota
+
+    def test_rollout_keeps_previous_candidates_and_defers_partial_legacy_dialogues(self):
+        partial = self.add_source("fixture3")
+        fresh = self.add_source("fixture5")
+        self.freeze(self.sample, partial, fresh)
+        self.reject_attempt(11)  # Complete the first conversation; retain two paid turns in the second.
+        with self.assertRaises(RuntimeError):
+            self.generate()
+        ledger = self.run_dir / "production.sqlite3"
+        with closing(sqlite3.connect(ledger)) as db:
+            original = db.execute("SELECT outcome FROM outcomes WHERE uid=?", (self.uid,)).fetchone()
+            receipts = db.execute("SELECT * FROM calls WHERE uid=?", (partial["uid"],)).fetchall()
+
+        report = self.generate(new_dialogue_prompt=VISUAL_V11)
+        self.assertEqual(report["state"], "previous_prompt_deferred")
+        self.assertEqual(report["outcomes"], {"pending_review": 2})
+        self.assertEqual(report["deferred_previous_prompt"], 1)
+        self.assertEqual(report["unprocessed"], 1)
+        self.assertEqual(report["new_dialogue_prompt"], VISUAL_V11)
+        self.assertEqual(len(self.api.attempts), 11 + fresh["pairs"] * 2)
+        with closing(sqlite3.connect(ledger)) as db:
+            self.assertEqual(db.execute("SELECT outcome FROM outcomes WHERE uid=?", (self.uid,)).fetchone(), original)
+            self.assertEqual(db.execute("SELECT * FROM calls WHERE uid=?", (partial["uid"],)).fetchall(), receipts)
+            self.assertEqual(db.execute("SELECT * FROM dialogue_prompt_versions").fetchall(), [(fresh["uid"], VISUAL_V11)])
+            saved = json.loads(db.execute("SELECT outcome FROM outcomes WHERE uid=?", (fresh["uid"],)).fetchone()[0])
+            self.assertEqual(saved["identity"]["prompt_version"], VISUAL_V11)
+            self.assertEqual(saved["candidate"]["prompt_version"], VISUAL_V11)
+            # An old worker does not know this new prompt. Even fresh UID/step keys cannot pay for v10 after rollout.
+            with self.assertRaisesRegex(sqlite3.OperationalError, "generation_prompt"):
+                db.execute("""INSERT INTO calls(uid,model,step,request_hash,client_id,reserved)
+                              VALUES(?,?,99,'test','outdated-writer',1)""", (fresh["uid"], production.MODEL))
+        self.generate()
+        self.assertEqual(len(self.api.attempts), 11 + fresh["pairs"] * 2)
+        status = production.inspect_run(self.root, self.digest)
+        self.assertEqual(status["deferred_previous_prompt"], 1)
+        self.assertEqual(status["new_dialogue_prompt"], VISUAL_V11)
+
+    def test_v11_partial_resume_reuses_receipts_and_remembers_the_rollout(self):
+        self.reject_attempt(3)
+        with self.assertRaises(RuntimeError):
+            self.generate(new_dialogue_prompt=VISUAL_V11)
+        self.assertEqual(self.summary()["paid_receipts"], 2)
+        self.assertEqual(self.summary()["deferred_previous_prompt"], 0)
+        report = self.generate()
+        self.assertEqual(report["new_dialogue_prompt"], VISUAL_V11)
+        self.assertEqual(report["state"], "queue_complete")
+        self.assertEqual(report["paid_receipts"], 8)
+        self.assertEqual(len(self.api.attempts), 9)
+        self.assertEqual(json.loads((self.run_dir / "pending_candidates.jsonl").read_text())["prompt_version"], VISUAL_V11)
+        self.generate(new_dialogue_prompt=VISUAL_V11)
+        self.assertEqual(len(self.api.attempts), 9)
+
+    def test_stale_backup_cannot_silently_undo_a_published_rollout(self):
+        # No paid turns between the two snapshots: invoice totals alone cannot detect a rollback.
+        stop = threading.Event()
+        stop.set()
+        self.generate(stop=stop)
+        ledger = self.run_dir / "production.sqlite3"
+        with closing(sqlite3.connect(":memory:")) as backup:
+            with closing(sqlite3.connect(ledger)) as db:
+                db.backup(backup)
+            self.generate(new_dialogue_prompt=VISUAL_V11, stop=stop)
+            with closing(sqlite3.connect(ledger)) as db:
+                backup.backup(db)
+        with self.assertRaisesRegex(RuntimeError, "published prompt rollout"):
+            self.generate()
+        self.assertEqual(self.api.attempts, [])
+
+    def test_partial_receipts_resume_without_repaying_and_yield_a_reviewable_record(self):
+        self.reject_attempt(3)
         with self.assertRaises(RuntimeError):
             self.generate()
         self.assertEqual(self.summary()["paid_receipts"], 2)
