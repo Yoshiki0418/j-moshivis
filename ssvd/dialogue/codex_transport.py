@@ -46,6 +46,12 @@ _QUOTA = re.compile(r"(?:hit|reached|exceeded) (?:your |the )?usage limit|usage[
 _RATE = re.compile(r"(?:hit|reached|exceeded) (?:your |the )?rate limit|rate[ _-]limit[ _-](?:reached|exceeded)|"
                    r"rate[ _-]limited|too many requests|\b429\b", re.I)
 _RECONNECT = re.compile(r"^reconnecting(?:\.{3}|…)?\s+\d+/\d+\b", re.I)
+_CODE_MODE_DISABLED = ("Code Mode is unavailable because code-mode host is disabled. "
+                       "Code mode will fail closed; enable `features.code_mode_host` "
+                       "and install `codex-code-mode-host`.")
+_CLI_TOOL_ITEMS = frozenset({"command_execution", "file_change", "mcp_tool_call", "dynamic_tool_call",
+                             "collab_agent_tool_call", "web_search", "image_view", "image_generation",
+                             "function_call_output", "sub_agent_activity", "sleep"})
 
 
 def _failure(errors, stderr, returncode, response_started):
@@ -109,6 +115,7 @@ def _inputs(request, image_path):
 def _events(raw):
     errors, completed, reported_models = [], [], set()
     response_started = False
+    turn_started = False
     for line in raw.splitlines():
         if not line.strip():
             continue
@@ -119,6 +126,8 @@ def _events(raw):
         except ValueError:
             raise CodexInvocationError("Invalid CLI JSON event") from None
         kind = event.get("type")
+        if kind == "turn.started":
+            turn_started = True
         if event.get("model") is not None:
             if event["model"] != MODEL:
                 raise CodexInvocationError("CLI reported an unexpected model")
@@ -127,9 +136,16 @@ def _events(raw):
             errors.append(json.dumps(event))
         if kind in ("item.started", "item.updated", "item.completed"):
             item = event.get("item")
-            if not isinstance(item, dict) or item.get("type") not in ("reasoning", "agent_message"):
-                raise CodexInvocationError("Unexpected CLI tool activity")
-            response_started = True
+            item_type = item.get("type") if isinstance(item, dict) else None
+            if item_type == "error":
+                if not turn_started and kind == "item.completed" and item.get("message") == _CODE_MODE_DISABLED:
+                    continue
+                errors.append(json.dumps(item))
+            elif item_type in ("reasoning", "agent_message"):
+                response_started = True
+            elif item_type != "user_message":
+                category = item_type if isinstance(item_type, str) and item_type in _CLI_TOOL_ITEMS else "unknown item"
+                raise CodexInvocationError(f"Unexpected CLI activity ({category})")
         if kind == "turn.completed":
             completed.append(event)
     return errors, completed, next(iter(reported_models), None), response_started

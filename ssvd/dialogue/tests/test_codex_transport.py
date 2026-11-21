@@ -8,7 +8,7 @@ import tempfile
 import unittest
 from unittest.mock import patch
 
-from ssvd.dialogue.codex_transport import CodexInvocationError, CodexRateLimit, CodexTransport, CodexUsageLimit
+from ssvd.dialogue.codex_transport import CodexInvocationError, CodexRateLimit, CodexTransport, CodexUsageLimit, _events
 from ssvd.dialogue.production_budget import MODEL
 from ssvd.dialogue.regeneration_roles import next_step, VISUAL_V11
 from ssvd.dialogue.visual_dialogue_prompts_v11 import ASSISTANT, USER
@@ -135,3 +135,21 @@ class CodexTransportTests(unittest.TestCase):
         self.mode.write_text("reconnect")
         reply, _ = self.cli.generate(self.request(), self.image)
         self.assertIsInstance(reply["text"], str)
+
+    def test_real_cli_disabled_code_mode_advisory_before_turn_is_informational(self):
+        message = ("Code Mode is unavailable because code-mode host is disabled. Code mode will fail closed; "
+                   "enable `features.code_mode_host` and install `codex-code-mode-host`.")
+        advisory = {"type": "item.completed", "item": {"type": "error", "message": message}}
+        start = {"type": "turn.started"}
+        user = {"type": "item.completed", "item": {"type": "user_message"}}
+        reply = {"type": "item.completed", "item": {"type": "agent_message"}}
+        end = {"type": "turn.completed"}
+
+        def events(*items):
+            return _events("\n".join(json.dumps(item) for item in items).encode())
+
+        self.assertEqual(events(advisory, start, user, reply, end), ([], [end], None, True))
+        self.assertTrue(events(start, advisory, end)[0])
+        self.assertTrue(events({"type": "item.completed", "item": {"type": "error", "message": "model unavailable"}}, start, end)[0])
+        with self.assertRaisesRegex(CodexInvocationError, "command_execution"):
+            events(advisory, start, {"type": "item.started", "item": {"type": "command_execution"}})
