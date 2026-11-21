@@ -22,6 +22,7 @@ _WARNING_LABELS = {
     "spoken_form": "英字・数字を自然に読み上げられる表記か",
     "missing_task_metadata": "数えた対象や読み取った文字の記録を確認",
     "invalid_task_metadata": "タスクの記録が実際の発話に合うか",
+    "invalid_task_marker": "OCR・カウントの確認ラベルを確認",
     "topic_not_covered": "個数・文字の記録なし。会話が画像に合うか",
     "invalid_task_mode": "個数・読み取り結果の確かさを確認",
     "missing_target": "数えたもの・読んだ表示を画像で確認",
@@ -64,6 +65,7 @@ h1,h2,h3,p{margin:.3rem 0 .8rem}.columns{display:grid;grid-template-columns:repe
 section{min-width:0;border-top:2px solid #376467} img{max-width:100%;height:auto;display:block}
 figure{margin:0 0 1rem} summary,button{cursor:pointer} li{overflow-wrap:anywhere;margin-bottom:.45rem}
 .review-warning{display:block;border-left:3px solid #bd810d;padding:.15rem .5rem;background:#fff6dd;color:#664508;font-size:.9rem}
+.task-marker{display:inline-block;margin-left:.5em;padding:0 .4em;border:1px solid #648287;border-radius:.25em;color:#25494e}
 ol{padding-left:1.7rem} button,select,input,textarea{font:inherit} label{display:block;margin:.4rem 0} textarea{width:100%} select{max-width:100%}
 @media(max-width:700px){.columns{grid-template-columns:1fr}}
 </style><body><header><h1>日本の日常画像の対話比較</h1>
@@ -131,7 +133,7 @@ def _task_evidence(task):
     values = [f'<dt>{label}</dt><dd>{escape(str(task[key]))}</dd>'
               for key, label in fields if task.get(key) is not None and task[key] != ""]
     if not values:
-        return ""
+        return f'<small class="task-marker">{kind}</small>'
     return f'<details><summary>{kind}の記録を画像と照合</summary><dl>{"".join(values)}</dl></details>'
 
 

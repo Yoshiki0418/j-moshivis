@@ -58,6 +58,11 @@ def image_file_sha256(path: str | os.PathLike[str], chunk_size: int = 1024 * 102
     return digest.hexdigest()
 
 
+def review_warning_fields(record: Mapping[str, Any]) -> dict[str, Any]:
+    """An empty warning list is part of the approval; older records omit the field."""
+    return {"review_warnings": record["review_warnings"]} if "review_warnings" in record else {}
+
+
 def content_fingerprint(
     record: Mapping[str, Any],
     *,
@@ -67,9 +72,7 @@ def content_fingerprint(
     """Return the SHA-256 for the exact reviewable dialogue content."""
 
     payload = {key: record.get(key) for key in _FINGERPRINT_FIELDS}
-    # Older records have no warning field and retain their original review ID.
-    if "review_warnings" in record:
-        payload["review_warnings"] = record["review_warnings"]
+    payload.update(review_warning_fields(record))
     if payload["image"] is None and image is not None:
         payload["image"] = image
     # An explicit hash is an independently recomputed current-image hash and

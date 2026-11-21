@@ -22,6 +22,7 @@ from review_store import (  # noqa: E402
     content_fingerprint,
     image_file_sha256,
     requires_review,
+    review_warning_fields,
 )
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
@@ -48,6 +49,7 @@ def _review_record_from_speech_meta(meta: Mapping[str, Any]) -> dict[str, Any]:
         "auxiliary_task": meta.get("auxiliary_task"),
         "verification_status": meta.get("verification_status"),
         "generator": meta.get("generator"),
+        **review_warning_fields(meta),
     }
 
 

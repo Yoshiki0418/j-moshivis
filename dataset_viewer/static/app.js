@@ -760,6 +760,9 @@ function normalizeItem(raw) {
     raw.auxiliary_task ?? raw.auxiliaryTask ?? raw.summary?.auxiliary_task
       ?? raw.metadata?.auxiliary_task ?? raw.metadata?.auxiliaryTask,
   );
+  const additional = item.auxiliaryTask?.additional_tasks;
+  item.auxiliaryTasks = [item.auxiliaryTask, ...(Array.isArray(additional)
+    ? additional.map(normalizeAuxiliaryTask) : [])].filter(Boolean);
   item.reviewState = normalizeReview(item);
   return item;
 }
@@ -1227,7 +1230,7 @@ function renderReview(item) {
     : "承認は任意です。未確認でも利用できますが、対話全体を確認して承認すると認証ラベルが付きます。本文も編集できます。";
 
   const facts = [
-    ["補助タスク", auxiliaryKindLabel(auxiliary.kind)],
+    ["確認対象", [...new Set(item.auxiliaryTasks.map(task => auxiliaryKindLabel(task.kind)))].join("・")],
     ["根拠", groundingSourceLabel(auxiliary.grounding_source)],
   ];
   if (auxiliary.kind === "counting") {
@@ -1266,28 +1269,22 @@ function renderReviewQa(item) {
   const turns = normalizeDialogue(
     item.dialogue ?? item.turns ?? item.messages ?? item.dialogue_text ?? item.metadata?.dialogue,
   );
-  const auxiliary = item.auxiliaryTask;
-  const questionIndex = integerValue(auxiliary?.question_turn_index);
-  const answerIndex = integerValue(auxiliary?.answer_turn_index);
-  const entries = [
-    ["確認対象の質問", questionIndex === null ? null : turns[questionIndex]],
-    [activeAiSuggestion(item) ? "AI修正案の回答" : "VLMの回答", answerIndex === null ? null : turns[answerIndex]],
-  ].filter(([, turn]) => turn);
-  if (!entries.length) {
-    dom.reviewQa.append(createElement("p", "review-qa-missing", "該当する質問・回答の位置情報がありません。対話全体を確認してください。"));
-    return;
-  }
-  for (const [label, turn] of entries) {
+  for (const [index, turn] of turns.entries()) {
+    const label = auxiliaryTurnLabel(item.auxiliaryTasks, index);
+    if (!label) continue;
     const row = createElement("div", "review-qa-row");
-    row.append(createElement("span", "review-qa-label", label));
+    row.append(createElement("span", "review-qa-label", `発話${index + 1}　${label}`));
     row.append(createElement("p", "review-qa-text", turn.text || "（空の発話）"));
     dom.reviewQa.append(row);
+  }
+  if (!dom.reviewQa.firstElementChild) {
+    dom.reviewQa.append(createElement("p", "review-qa-missing", "該当する質問・回答の位置情報がありません。対話全体を確認してください。"));
   }
 }
 
 function auxiliaryKindLabel(kind) {
   if (kind === "counting") return "カウント";
-  if (kind === "ocr") return "日本語OCR";
+  if (kind === "ocr") return "OCR";
   return String(kind || "—");
 }
 
@@ -1527,6 +1524,9 @@ function startDialogueEdit() {
     ? [["counted_target", "数えた対象", "text"], ["answer_count", "正解の数", "number"]]
     : aux.kind === "ocr" ? [["recognized_text", "正しい読み取り文字", "text"]] : [];
   for (const [key, title, type] of fields) {
+    // Turn markers have no separately editable answer. Legacy records can
+    // expose the answer fields that were actually stored for that item.
+    if (!(key in aux)) continue;
     const label = createElement("label", "review-note-label", title);
     const input = document.createElement("input");
     input.type = type; input.dataset.auxiliaryField = key;
@@ -1610,7 +1610,7 @@ function renderDialogue(item, { resetScroll = false } = {}) {
   for (const [index, turn] of turns.entries()) {
     const role = /assistant|system|model|agent|bot|アシスタント/i.test(turn.speaker) ? "assistant" : "user";
     const card = createElement("article", `message is-${role}`);
-    const targetLabel = auxiliaryTurnLabel(item.auxiliaryTask, index);
+    const targetLabel = auxiliaryTurnLabel(item.auxiliaryTasks, index);
     if (targetLabel) card.classList.add("is-review-target");
     const speaker = createElement("p", "message-speaker", displaySpeaker(turn.speaker, role));
     if (targetLabel) speaker.append(createElement("span", "message-review-label", targetLabel));
@@ -1652,15 +1652,14 @@ function scheduleDialogueEditorSizing({ scrollTop = null } = {}) {
   else window.setTimeout(resize, 0);
 }
 
-function auxiliaryTurnLabel(auxiliary, index) {
-  if (!auxiliary) return "";
-  if (integerValue(auxiliary.question_turn_index) === index) {
-    return auxiliary.kind === "counting" ? "カウント質問" : "OCR質問";
+function auxiliaryTurnLabel(tasks, index) {
+  const labels = new Set();
+  for (const task of tasks) {
+    const kind = auxiliaryKindLabel(task.kind);
+    if (integerValue(task.question_turn_index) === index) labels.add(kind + "質問");
+    if (integerValue(task.answer_turn_index) === index) labels.add(kind + "回答");
   }
-  if (integerValue(auxiliary.answer_turn_index) === index) {
-    return auxiliary.kind === "counting" ? "カウント回答" : "OCR回答";
-  }
-  return "";
+  return [...labels].join("・");
 }
 
 function normalizeDialogue(raw) {

@@ -19,13 +19,13 @@ from ssvd.dialogue.pilot_review import write_review
 from ssvd.dialogue.pilot_selection import prepare_manifest
 from ssvd.dialogue.preview_regeneration import (
     COLLECTION, OBSERVATION_VERSION, PROMPT_VERSION, ROOT, VISUAL_V4, VISUAL_V5, VISUAL_V6, VISUAL_V7, VISUAL_V8,
-    preview,
+    VISUAL_V9, preview,
 )
 from ssvd.review_store import DEFAULT_REVIEW_EVENTS, ReviewStore
 
 LEGACY_VERSION = "grounded_roles_v2"
 GROUNDING_VERSIONS = (LEGACY_VERSION, OBSERVATION_VERSION)
-ARCHIVED_VERSIONS = (*GROUNDING_VERSIONS, VISUAL_V4, VISUAL_V5, VISUAL_V6, VISUAL_V7, VISUAL_V8)
+ARCHIVED_VERSIONS = (*GROUNDING_VERSIONS, VISUAL_V4, VISUAL_V5, VISUAL_V6, VISUAL_V7, VISUAL_V8, VISUAL_V9)
 LEGACY_RUN_DIR = ROOT / "data/curation/gpt_pilot_issue12"
 RUN_DIR = LEGACY_RUN_DIR / PROMPT_VERSION
 BUDGET_USD = Decimal("2.00")
@@ -188,7 +188,7 @@ def status(run_dir, *, prompt_version=PROMPT_VERSION):
         comparison = {}
         for model in MODELS:
             results = [v for (_, m), v in outcomes.items() if m == model]
-            task_mix, modes, warning_counts = Counter(), Counter(), Counter()
+            task_mix, task_turns, modes, warning_counts = Counter(), Counter(), Counter(), Counter()
             candidates_with_warnings = 0
             for outcome in results:
                 if outcome["status"] != "pending_review":
@@ -198,13 +198,14 @@ def status(run_dir, *, prompt_version=PROMPT_VERSION):
                 else:
                     candidate = outcome["candidate"]
                     auxiliary = candidate["auxiliary_task"]
-                    tasks = [(t["kind"], t["answer_mode"]) for t in (auxiliary, *auxiliary.get("additional_tasks", []))
+                    tasks = [(t["kind"], t.get("answer_mode")) for t in (auxiliary, *auxiliary.get("additional_tasks", []))
                              if t["kind"] != "none"]
                     warnings = candidate["review_warnings"]
                     candidates_with_warnings += bool(warnings)
                     warning_counts.update(w["code"] for w in warnings)
                 task_mix["+".join(sorted({kind for kind, _ in tasks})) or "none"] += 1
-                modes.update(f"{kind}/{mode}" for kind, mode in tasks)
+                task_turns.update(kind for kind, _ in tasks)
+                modes.update(f"{kind}/{mode}" for kind, mode in tasks if mode is not None)
             receipts = db.execute(f"SELECT charged,receipt FROM calls WHERE model=? AND charged IS NOT NULL AND {initial}",
                                   (model,))
             tokens = Counter()
@@ -217,6 +218,8 @@ def status(run_dir, *, prompt_version=PROMPT_VERSION):
                                      outcomes=dict(Counter(v["status"] for v in results)),
                                      generated_tasks=dict(task_mix), answer_modes=dict(modes),
                                      tokens=dict(tokens), cost_usd=cost/NANOS)
+            if prompt_version == PROMPT_VERSION:
+                comparison[model]["marked_turns_by_kind"] = dict(task_turns)
             if prompt_version not in GROUNDING_VERSIONS:
                 comparison[model].update(candidates_with_warnings=candidates_with_warnings,
                                          review_warnings_by_code=dict(warning_counts))

@@ -159,6 +159,18 @@ def _json_dumps(value: Any) -> str:
     return json.dumps(value, ensure_ascii=False, separators=(",", ":"))
 
 
+def _has_both_auxiliary_kinds(summary: Mapping[str, Any]) -> bool:
+    task = summary.get("auxiliary_task")
+    if not isinstance(task, Mapping) or task.get("kind") not in ("counting", "ocr"):
+        return False
+    additional = task.get("additional_tasks")
+    if not isinstance(additional, list):
+        return False
+    other = "ocr" if task["kind"] == "counting" else "counting"
+    return any(isinstance(entry, Mapping) and entry.get("kind") == other
+               for entry in additional)
+
+
 def _as_int(value: Any) -> int | None:
     try:
         return int(value)
@@ -351,6 +363,7 @@ class DatasetCatalog:
                     summary_json TEXT NOT NULL,
                     verification_status TEXT,
                     auxiliary_kind TEXT,
+                    has_both_auxiliary_kinds INTEGER NOT NULL DEFAULT 0,
                     review_required INTEGER NOT NULL DEFAULT 0,
                     review_id TEXT,
                     review_status TEXT NOT NULL DEFAULT 'not_required',
@@ -365,6 +378,7 @@ class DatasetCatalog:
             )
             # CREATE TABLE IF NOT EXISTS does not add fields to a v3 cache.
             # Additive guards make the cache upgrade safe before repopulation.
+            db.execute("BEGIN IMMEDIATE")
             item_columns = {
                 row["name"] for row in db.execute("PRAGMA table_info(items)")
             }
@@ -378,6 +392,13 @@ class DatasetCatalog:
             ):
                 if name not in item_columns:
                     db.execute(f"ALTER TABLE items ADD COLUMN {name} {declaration}")
+            if "has_both_auxiliary_kinds" not in item_columns:
+                db.execute("ALTER TABLE items ADD COLUMN has_both_auxiliary_kinds INTEGER NOT NULL DEFAULT 0")
+                db.execute("""UPDATE items SET has_both_auxiliary_kinds=1
+                    WHERE auxiliary_kind IN ('counting','ocr') AND EXISTS (
+                        SELECT 1 FROM json_each(items.summary_json, '$.auxiliary_task.additional_tasks') AS t
+                        WHERE t.type='object' AND json_extract(t.value, '$.kind') =
+                            CASE items.auxiliary_kind WHEN 'counting' THEN 'ocr' ELSE 'counting' END)""")
             source_columns = {
                 row["name"] for row in db.execute("PRAGMA table_info(sources)")
             }
@@ -391,6 +412,8 @@ class DatasetCatalog:
                    ON items(review_required,review_status,auxiliary_kind,collection,uid)"""
             )
             db.execute("CREATE INDEX IF NOT EXISTS items_review_uid ON items(uid)")
+            db.execute("""CREATE INDEX IF NOT EXISTS items_both_auxiliary ON items(has_both_auxiliary_kinds)
+                          WHERE has_both_auxiliary_kinds=1""")
             version = db.execute(
                 "SELECT value FROM meta WHERE key='schema_version'"
             ).fetchone()
@@ -832,7 +855,7 @@ class DatasetCatalog:
             stage = "complete" if has_audio and has_alignment else "audio" if has_audio else "dialogue"
             db.execute(
                 """UPDATE items SET review_id=?,verification_status=?,
-                       auxiliary_kind=?,summary_json=?,review_status=?,
+                       auxiliary_kind=?,has_both_auxiliary_kinds=?,summary_json=?,review_status=?,
                        dataset_usable=?,audio_path=?,alignment_path=?,speech_dialogue_path=?,
                        has_audio=?,has_alignment=?,stage=?
                    WHERE collection=? AND uid=?""",
@@ -840,6 +863,7 @@ class DatasetCatalog:
                     review_id,
                     verification_status,
                     auxiliary_kind,
+                    int(_has_both_auxiliary_kinds(summary)),
                     _json_dumps(summary),
                     "pending" if row["review_required"] else "not_required", int(not row["review_required"]),
                     *media_paths, has_audio, has_alignment, stage,
@@ -1646,9 +1670,9 @@ class DatasetCatalog:
                    alignment_path,speech_dialogue_path,metadata_source,metadata_offset,
                    metadata_length,dialogue_source,dialogue_offset,dialogue_length,
                    has_image,has_dialogue,has_audio,has_alignment,eligible,stage,
-                   search_text,summary_json,verification_status,auxiliary_kind,
+                   search_text,summary_json,verification_status,auxiliary_kind,has_both_auxiliary_kinds,
                    review_required,review_id,review_status,dataset_usable
-               ) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
+               ) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
             rows,
         )
 
@@ -1800,6 +1824,7 @@ class DatasetCatalog:
             _json_dumps(summary),
             verification_status,
             auxiliary_kind,
+            int(_has_both_auxiliary_kinds(summary)),
             review_required,
             review_id,
             review_status,
@@ -2304,15 +2329,13 @@ class DatasetCatalog:
                     if not isinstance(auxiliary_task, Mapping) or not isinstance(auxiliary, dict):
                         raise ValueError("invalid auxiliary_task")
                     # Kind, grounding provenance and turn positions are not client-editable.
-                    if auxiliary.get("kind") == "counting":
+                    if auxiliary.get("kind") == "counting" and "answer_count" in auxiliary:
                         count = auxiliary_task.get("answer_count", auxiliary.get("answer_count"))
                         if type(count) is not int or not 1 <= count <= 1000:
                             raise ValueError("数の正解は1〜1000の整数にしてください。")
                         auxiliary["answer_count"] = count
-                        key = "counted_target"
-                    else:
-                        key = "recognized_text"
-                    if key in auxiliary_task:
+                    key = "counted_target" if auxiliary.get("kind") == "counting" else "recognized_text"
+                    if key in auxiliary and key in auxiliary_task:
                         value = auxiliary_task[key]
                         if not isinstance(value, str) or not value.strip() or len(value) > 1000:
                             raise ValueError("対象・読み取り文字は1〜1000文字で入力してください。")
@@ -2576,7 +2599,14 @@ class DatasetCatalog:
         if auxiliary_kind:
             if auxiliary_kind not in {"none", "counting", "ocr"}:
                 raise ValueError(f"unsupported auxiliary kind: {auxiliary_kind}")
-            clauses.append("auxiliary_kind=?")
+            if auxiliary_kind == "none":
+                clauses.append("auxiliary_kind=?")
+            else:
+                # Keep the main queue/count on its covering review index. The
+                # sparse index supplies the extra rowids without loading each
+                # dialogue's JSON on every approval and navigation request.
+                clauses.append("""auxiliary_kind=? OR items.rowid IN
+                    (SELECT rowid FROM items WHERE has_both_auxiliary_kinds=1)""")
             params.append(auxiliary_kind)
         for column, expected in (
             ("has_image", has_image),
