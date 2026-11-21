@@ -26,6 +26,7 @@ from contextlib import contextmanager
 from pathlib import Path
 from typing import Any, Iterable, Iterator, Mapping, Sequence
 
+from dataset_viewer.terra_candidates import TerraCandidateStore
 from ssvd.ai_suggestion_store import (
     AISuggestionIntegrityError, default_ai_suggestion_store, human_touched_uids,
 )
@@ -206,6 +207,7 @@ class DatasetCatalog:
         self.db_path.parent.mkdir(parents=True, exist_ok=True)
         self.review_store = default_review_store(self.repo_root)
         self.ai_suggestion_store = default_ai_suggestion_store(self.repo_root)
+        self.terra_candidates = TerraCandidateStore(self.repo_root)
         self._refresh_lock = threading.Lock()
         self._interactive_lock = threading.Lock()
         self._interactive_waiters = 0
@@ -1869,6 +1871,8 @@ class DatasetCatalog:
             "last_changed": last_changed[0] if last_changed else None,
             "catalog_revision": int(revision[0]) if revision else 0,
             "ai_suggestion_count": ai_suggestion_count,
+            "regeneration_candidate_count": len(self.terra_candidates.keys()),
+            "regeneration_candidate_revision": self.terra_candidates.version(),
             "sources": sources,
             "errors": errors,
             "collections": collections,
@@ -2131,7 +2135,7 @@ class DatasetCatalog:
             has_alignment=has_alignment,
             review_status=review_status,
             review_required=review_required,
-            auxiliary_kind=auxiliary_kind,
+            auxiliary_kind=None if ai_status == "regenerated" else auxiliary_kind,
         )
         if offset is None:
             offset = (page - 1) * limit
@@ -2139,16 +2143,21 @@ class DatasetCatalog:
             offset = max(0, int(offset))
             page = offset // limit + 1
         with self._connect() as db:
-            where = self._with_ai_filter(db, where, ai_status)
+            where = self._with_ai_filter(db, where, ai_status, auxiliary_kind)
             items_source = self._query_items(ai_status)
             total = db.execute(f"SELECT COUNT(*) FROM {items_source} {where}", params).fetchone()[0]
+            task_flags = ",has_ocr,has_counting" if ai_status == "regenerated" else ""
             rows = db.execute(
-                f"""SELECT items.* FROM {items_source} {where}
+                f"""SELECT items.*{task_flags} FROM {items_source} {where}
                     ORDER BY collection,category,uid LIMIT ? OFFSET ?""",
                 [*params, limit, offset],
             ).fetchall()
+        items = [self._summary_from_row(row) for row in rows]
+        if ai_status == "regenerated":
+            for item, row in zip(items, rows):
+                item["regenerated_kinds"] = [kind for kind, col in (("ocr", "has_ocr"), ("counting", "has_counting")) if row[col]]
         return {
-            "items": [self._summary_from_row(row) for row in rows],
+            "items": items,
             "page": page,
             "limit": limit,
             "total": total,
@@ -2167,7 +2176,7 @@ class DatasetCatalog:
         }
 
     def get_item(
-        self, token: str, filters: Mapping[str, Any] | None = None
+        self, token: str, filters: Mapping[str, Any] | None = None, *, include_navigation: bool = True
     ) -> dict[str, Any]:
         collection, uid = self._decode_token(token)
         # Validate exact bytes without taking the background writer's lock.
@@ -2206,6 +2215,7 @@ class DatasetCatalog:
         )
         summary = json.loads(row["summary_json"] or "{}")
         revision = self.review_store.latest_revisions().get(summary.get("source_review_id"))
+        source_record = dialogue_record
         if revision and revision["fingerprint"] == row["review_id"]:
             dialogue_record = revision["revised_record"]
         dialogue = []
@@ -2247,11 +2257,32 @@ class DatasetCatalog:
                 "review": review,
                 "human_revision": summary.get("human_revision"),
                 "ai_suggestion": None,
-                "navigation": self._navigation(row, filters or {}),
+                "regeneration_candidate": None,
+                "original_generator": (source_record or {}).get("generator"),
+                "navigation": self._navigation(row, filters or {}) if include_navigation else None,
             }
         )
         suggestion = self._active_ai_suggestion(row, summary)
-        if suggestion is not None:
+        regenerated = self._active_regeneration(row, summary)
+        if (filters or {}).get("ai_status") == "regenerated" and regenerated is None:
+            raise ReviewConflictError("この候補は確認待ちリストから外れました。最新の一覧を確認してください。")
+        if regenerated is not None:
+            candidate = regenerated["candidate"]
+            detail.update(
+                original_dialogue=dialogue, original_auxiliary_task=detail.get("auxiliary_task"),
+                original_ai_suggestion=suggestion,
+                dialogue=self._normalise_dialogue(candidate["dialogue"]),
+                auxiliary_task=candidate.get("auxiliary_task"), auxiliary_kind=candidate.get("auxiliary_kind"),
+                regeneration_candidate={"candidate_id": candidate["review_id"], "model": candidate["generator"],
+                    "prompt_version": candidate["prompt_version"], "created_at": regenerated.get("created_at"),
+                    "source": regenerated["source"], "review_warnings": candidate.get("review_warnings", [])},
+            )
+            # Existing speech belongs to the local source, not to this unapproved version.
+            detail["availability"].update(audio=False, alignment=False)
+            detail["media"].update(audio=False, alignment=False)
+            detail["speech_metadata"] = None
+            detail["alignment"] = self._normalise_alignment(None)
+        elif suggestion is not None:
             # Suggestions are a display-only overlay. The content/review ID
             # continues to identify the original until a human saves approval.
             detail["original_dialogue"] = dialogue
@@ -2264,7 +2295,52 @@ class DatasetCatalog:
                     "suggestion_id", "model", "created_at", "changes", "concerns", "verdict",
                 )
             }
+        elif revision and (summary.get("human_revision") or {}).get("regeneration_candidate_id"):
+            detail["original_dialogue"] = self._normalise_dialogue((source_record or {}).get("dialogue"))
+            detail["original_auxiliary_task"] = (source_record or {}).get("auxiliary_task")
+            source_id = summary["source_review_id"]
+            detail["original_ai_suggestion"] = self._lookup_ai_suggestion(row, summary, source_id)
+            if row["review_id"] != summary["human_revision"]["regeneration_candidate_id"]:
+                submitted = self.terra_candidates.get(collection=row["collection"], uid=row["uid"],
+                    base_fingerprint=source_id, image_sha256=summary["current_image_sha256"])
+                if submitted and submitted["candidate"]["review_id"] == summary["human_revision"]["regeneration_candidate_id"]:
+                    detail["unedited_regeneration_dialogue"] = self._normalise_dialogue(submitted["candidate"]["dialogue"])
         return detail
+
+    def _active_regeneration(self, row: sqlite3.Row, summary: Mapping[str, Any]) -> dict | None:
+        if (not row["review_required"] or row["review_status"] != "pending"
+                or summary.get("human_revision") or not summary.get("current_image_sha256")
+                or summary.get("image_integrity_status") == "unavailable"):
+            return None
+        draft = self.terra_candidates.get(collection=row["collection"], uid=row["uid"],
+            base_fingerprint=summary.get("review_id") or row["review_id"],
+            image_sha256=summary["current_image_sha256"])
+        if draft is not None and (row["collection"], row["uid"]) not in human_touched_uids(self.review_store):
+            return draft
+        return None
+
+    @staticmethod
+    def _edit_regeneration_markers(original: dict, submitted: Mapping[str, Any]) -> None:
+        """Keep the exchange identity; a reviewer can optionally classify its answer."""
+        if not isinstance(original, dict) or not isinstance(submitted, Mapping):
+            raise ValueError("課題の情報が正しくありません。")
+        additional = submitted.get("additional_tasks", [])
+        if not isinstance(additional, list) or len(additional) != len(original.get("additional_tasks", [])):
+            raise ValueError("確認対象の発話が変更されています。")
+        original_tasks = [original, *original.get("additional_tasks", [])]
+        for task, values in zip(original_tasks, [submitted, *additional]):
+            if (not isinstance(values, Mapping) or any(task.get(k) != values.get(k)
+                    for k in ("kind", "question_turn_index", "answer_turn_index"))):
+                raise ValueError("確認対象の発話が変更されています。")
+            mode = values.get("answer_mode")
+            if mode in ("", None):
+                task.pop("answer_mode", None)
+                continue
+            allowed = {"ocr": ("exact", "partial", "unknown"),
+                       "counting": ("exact", "approximate", "lower_bound", "unknown")}
+            if mode not in allowed.get(task["kind"], ()):
+                raise ValueError("この課題に対応していない回答形式です。")
+            task["answer_mode"] = mode
 
     def _active_ai_suggestion(self, row: sqlite3.Row, summary: Mapping[str, Any]) -> dict[str, Any] | None:
         """Offer AI drafts only on untouched, required, exact pending content."""
@@ -2275,23 +2351,30 @@ class DatasetCatalog:
             return None
         if (row["collection"], row["uid"]) in human_touched_uids(self.review_store):
             return None
+        return self._lookup_ai_suggestion(row, summary, summary.get("review_id") or row["review_id"])
+
+    def _lookup_ai_suggestion(self, row: sqlite3.Row, summary: Mapping[str, Any], base: str) -> dict | None:
         try:
             return self.ai_suggestion_store.get_suggestion(
                 collection=row["collection"], uid=row["uid"],
-                base_fingerprint=summary.get("review_id") or row["review_id"],
+                base_fingerprint=base,
                 image_sha256=summary["current_image_sha256"],
             )
         except AISuggestionIntegrityError:
             logging.getLogger(__name__).warning("Ignoring invalid AI suggestion for %s/%s", row["collection"], row["uid"])
             return None
 
-    def edit_dialogue(self, token: str, *, fingerprint: str, dialogue: list,
+    def edit_dialogue(self, token: str, *, fingerprint: str, dialogue: list | None,
                       auxiliary_task: Mapping[str, Any] | None = None,
                       note: str = "", reviewer: str | None = None,
-                      ai_suggestion_id: str | None = None) -> dict[str, Any]:
-        """Save a human correction and its approval in a single durable event."""
+                      ai_suggestion_id: str | None = None, regeneration_candidate_id: str | None = None,
+                      active_ms: int | None = None, error_kinds: list | None = None,
+                      decision: str = "approved") -> dict[str, Any]:
+        """Save the exact version and its human decision in a single durable event."""
         if not isinstance(note, str) or len(note.strip()) > MAX_REVIEW_NOTE_CHARS:
             raise ValueError("確認メモは1000文字以内で入力してください。")
+        if decision != "approved" and not (regeneration_candidate_id and decision == "rejected" and dialogue is None):
+            raise ValueError("invalid decision for this dialogue")
         collection, uid = self._decode_token(token)
         with self._interactive_write():
             with self._connect() as db:
@@ -2305,6 +2388,13 @@ class DatasetCatalog:
                     db.commit()
                 if summary.get("image_integrity_status") == "unavailable" or fingerprint != summary.get("review_id"):
                     raise ReviewConflictError("画像または対話が変更されました。再読み込みしてから保存してください。")
+                regenerated = self._active_regeneration(row, summary)
+                candidate = regenerated["candidate"] if regenerated else None
+                if (candidate and candidate["review_id"] != regeneration_candidate_id
+                        or regeneration_candidate_id is not None and not candidate):
+                    raise ReviewConflictError("再生成候補または人手確認の状態が変わりました。再読み込みしてください。")
+                if ai_suggestion_id is not None and candidate:
+                    raise ValueError("一度に確認できる対話は1版です。")
                 if ai_suggestion_id is not None:
                     suggestion = self._active_ai_suggestion(row, summary)
                     if suggestion is None or suggestion.get("suggestion_id") != ai_suggestion_id:
@@ -2312,20 +2402,24 @@ class DatasetCatalog:
                 original = self._read_locator(row["dialogue_source"], row["dialogue_offset"], row["dialogue_length"])
                 base = summary.get("source_review_id", fingerprint)
                 previous = self.review_store.latest_revisions().get(base)
-                revised = copy.deepcopy(previous["revised_record"] if previous else original)
+                revised = copy.deepcopy(candidate or (previous["revised_record"] if previous else original))
                 if not isinstance(revised, dict):
                     raise ReviewConflictError("The source dialogue is unavailable.")
                 turns = revised.get("dialogue", [])
-                if not isinstance(dialogue, list) or len(dialogue) != len(turns) or not turns:
+                if dialogue is None and not candidate:
+                    raise ValueError("編集する発話の本文が必要です。")
+                if dialogue is not None and (not isinstance(dialogue, list) or len(dialogue) != len(turns) or not turns):
                     raise ValueError("発話数を変更せず、各発話の本文を編集してください。")
-                for old, new in zip(turns, dialogue):
+                for old, new in zip(turns, dialogue or []):
                     if not isinstance(new, Mapping) or not isinstance(new.get("text"), str) or not new["text"].strip():
                         raise ValueError("空の発話は保存できません。")
                     if len(new["text"]) > 10000:
                         raise ValueError("1発話は10000文字以内にしてください。")
                     old["text"] = new["text"].strip()
                 auxiliary = revised.get("auxiliary_task")
-                if auxiliary_task is not None:
+                if auxiliary_task is not None and (candidate or (revised.get("human_revision") or {}).get("regeneration_candidate_id")):
+                    self._edit_regeneration_markers(auxiliary, auxiliary_task)
+                elif auxiliary_task is not None:
                     if not isinstance(auxiliary_task, Mapping) or not isinstance(auxiliary, dict):
                         raise ValueError("invalid auxiliary_task")
                     # Kind, grounding provenance and turn positions are not client-editable.
@@ -2342,6 +2436,7 @@ class DatasetCatalog:
                         auxiliary[key] = value.strip()
                 revised["image_sha256"] = summary["current_image_sha256"]
                 new_id = content_fingerprint(revised)
+                provenance = revised.get("human_revision") or {}
                 revised["human_revision"] = {
                     "base_fingerprint": base, "parent_fingerprint": fingerprint,
                     "review_id": new_id, "edited_at": _utc_now(), "reviewer": reviewer,
@@ -2351,24 +2446,39 @@ class DatasetCatalog:
                         or any(path and self._stored_path_exists(path)
                                for path in (self._summary_value(row["summary_json"], "source_media_paths") or []))),
                 }
-                event = self.review_store.append(fingerprint=new_id, decision="approved", uid=uid,
+                if candidate:
+                    provenance = dict(regeneration_candidate_id=candidate["review_id"], model=candidate["generator"],
+                                      prompt_version=candidate["prompt_version"], generated_at=regenerated.get("created_at"))
+                if provenance.get("regeneration_candidate_id"):
+                    for field in ("regeneration_candidate_id", "model", "prompt_version", "generated_at"):
+                        revised["human_revision"][field] = provenance.get(field)
+                    revised.update(review_id=new_id, fingerprint=new_id, content_sha256=new_id)
+                review_info = None
+                if candidate:
+                    action = "rejected" if decision == "rejected" else "approved" if new_id == candidate["review_id"] else "edited"
+                    review_info = dict(candidate_id=candidate["review_id"], model=candidate["generator"],
+                        prompt_version=candidate["prompt_version"], action=action, active_ms=active_ms,
+                        error_kinds=[] if error_kinds is None else error_kinds)
+                event = self.review_store.append(fingerprint=new_id, decision=decision, uid=uid,
                     collection=collection, note=note, reviewer=reviewer,
                     task_mode=str(revised.get("task_mode") or "normal"),
                     revised_record=revised if new_id != fingerprint else None,
                     base_fingerprint=base, parent_fingerprint=fingerprint,
                     # The preview check above is advisory. Recheck under the
                     # ledger's writer lock even when the text is unchanged.
-                    require_unreviewed=ai_suggestion_id is not None)
+                    require_unreviewed=ai_suggestion_id is not None or candidate is not None,
+                    **({"regeneration_review": review_info} if review_info else {}))
                 fresh = db.execute("SELECT * FROM items WHERE collection=? AND uid=?", (collection, uid)).fetchone()
                 self._refresh_review_identity(db, fresh, force_hash=True)
-                updated = db.execute("""UPDATE items SET review_status='approved',dataset_usable=1
-                    WHERE collection=? AND uid=? AND review_id=?""", (collection, uid, new_id))
+                updated = db.execute("""UPDATE items SET review_status=?,dataset_usable=?
+                    WHERE collection=? AND uid=? AND review_id=?""", (decision, int(decision == "approved"), collection, uid, new_id))
                 if not updated.rowcount:
                     db.commit()  # The new image/content remains pending, never approved by an old edit.
                     raise ReviewConflictError("保存中に画像または元データが変更されました。再読み込みして確認してください。")
                 db.execute("UPDATE meta SET value=CAST(value AS INTEGER)+1 WHERE key='catalog_revision'")
                 db.execute("INSERT OR REPLACE INTO meta(key,value) VALUES('last_changed',?)", (_utc_now(),))
-        return {"ok": True, "item": self.get_item(token), "event": event, "content_changed": new_id != fingerprint}
+        return {"ok": True, "item": self.get_item(token, include_navigation=candidate is None),
+                "event": event, "content_changed": new_id != fingerprint}
 
     def review_item(
         self,
@@ -2378,11 +2488,22 @@ class DatasetCatalog:
         decision: str,
         note: str = "",
         reviewer: str | None = None,
+        regeneration_candidate_id: str | None = None,
+        active_ms: int | None = None,
+        error_kinds: list | None = None,
     ) -> dict[str, Any]:
         """Append a decision for the current exact content and update its row."""
 
         if decision not in REVIEW_DECISIONS:
             raise ValueError("decision must be pending, approved, or rejected")
+        if regeneration_candidate_id is not None:
+            saved = self.edit_dialogue(token, fingerprint=fingerprint, dialogue=None,
+                regeneration_candidate_id=regeneration_candidate_id, decision=decision,
+                note=note, reviewer=reviewer, active_ms=active_ms, error_kinds=error_kinds)
+            item = saved["item"]
+            return {**saved, "decision": decision, "review_status": item["review_status"],
+                    "review_id": item["review_id"], "content_sha256": item["content_sha256"],
+                    "dataset_usable": item["dataset_usable"], "review": item["review"]}
         if not isinstance(note, str):
             raise ValueError("note must be a string")
         if len(note.strip()) > MAX_REVIEW_NOTE_CHARS:
@@ -2418,12 +2539,16 @@ class DatasetCatalog:
                     raise ReviewConflictError(
                         "The dialogue changed after it was opened. Reload before reviewing."
                     )
+                if self._active_regeneration(row, summary) is not None:
+                    raise ReviewConflictError("Terraの再生成候補が届いています。再読み込みして新版を確認してください。")
 
                 event = self.review_store.append(
                     fingerprint=current_fingerprint,
                     decision=decision,
                     uid=uid,
                     collection=collection,
+                    base_fingerprint=summary.get("source_review_id") or current_fingerprint,
+                    parent_fingerprint=current_fingerprint,
                     note=note,
                     reviewer=reviewer,
                     task_mode=str(summary.get("task_mode") or "normal"),
@@ -2508,7 +2633,8 @@ class DatasetCatalog:
         return ("ai_ready_keys CROSS JOIN items ON collection=ai_collection AND uid=ai_uid"
                 if ai_status else "items")
 
-    def _with_ai_filter(self, db: sqlite3.Connection, where: str, ai_status: str | None) -> str:
+    def _with_ai_filter(self, db: sqlite3.Connection, where: str, ai_status: str | None,
+                        auxiliary_kind: str | None = None) -> str:
         """Join compact draft keys, without opening every source/image/payload.
 
         Catalogued image hashes select candidates; get_item and human saves
@@ -2517,24 +2643,34 @@ class DatasetCatalog:
         """
         if not ai_status:
             return where
-        if ai_status not in {"ready", "needs_attention"}:
+        if ai_status not in {"ready", "needs_attention", "regenerated"}:
             raise ValueError(f"unsupported AI status: {ai_status}")
         prefix = where + " AND " if where else "WHERE "
+        db.execute("CREATE TEMP TABLE ai_human_touched(collection TEXT,uid TEXT,PRIMARY KEY(collection,uid)) WITHOUT ROWID")
+        db.executemany("INSERT INTO ai_human_touched VALUES(?,?)", human_touched_uids(self.review_store))
+        eligible = prefix + """review_required=1 AND review_status='pending' AND has_dialogue=1
+            AND json_type(summary_json,'$.human_revision') IS NOT 'object'
+            AND COALESCE(json_extract(summary_json,'$.image_integrity_status'),'')!='unavailable'
+            AND NOT EXISTS (SELECT 1 FROM ai_human_touched AS touched
+                WHERE touched.collection=items.collection AND touched.uid=items.uid)"""
+        if ai_status == "regenerated":
+            modes = {None: "", "none": " AND has_ocr=0 AND has_counting=0",
+                     "ocr": " AND has_ocr=1", "counting": " AND has_counting=1"}
+            if auxiliary_kind not in modes:
+                raise ValueError("unsupported regeneration task filter")
+            db.execute("""CREATE TEMP TABLE ai_ready_keys(ai_collection TEXT,ai_uid TEXT,base TEXT,image_hash TEXT,
+                        has_ocr INTEGER,has_counting INTEGER,PRIMARY KEY(ai_collection,ai_uid,base,image_hash)) WITHOUT ROWID""")
+            db.executemany("INSERT INTO ai_ready_keys VALUES(?,?,?,?,?,?)", self.terra_candidates.queue_keys())
+            return eligible + """ AND base=items.review_id
+                AND image_hash=json_extract(items.summary_json,'$.current_image_sha256')""" + modes[auxiliary_kind]
         db.execute("CREATE TEMP TABLE ai_ready_keys(ai_collection TEXT,ai_uid TEXT,PRIMARY KEY(ai_collection,ai_uid)) WITHOUT ROWID")
         if not self.ai_suggestion_store.path.is_file():
             return prefix + "0"
         db.execute("ATTACH DATABASE ? AS ai_drafts",
                    (self.ai_suggestion_store.path.resolve().as_uri() + "?mode=ro",))
-        db.execute("CREATE TEMP TABLE ai_human_touched(collection TEXT,uid TEXT,PRIMARY KEY(collection,uid)) WITHOUT ROWID")
-        db.executemany("INSERT INTO ai_human_touched VALUES(?,?)", human_touched_uids(self.review_store))
         db.execute("INSERT OR IGNORE INTO ai_ready_keys SELECT collection,uid FROM ai_drafts.suggestions")
         verdict = " AND json_valid(draft.payload_json) AND json_extract(draft.payload_json,'$.verdict')='needs_attention'" if ai_status == "needs_attention" else ""
-        return prefix + """review_required=1 AND review_status='pending' AND has_dialogue=1
-            AND json_type(summary_json,'$.human_revision') IS NOT 'object'
-            AND COALESCE(json_extract(summary_json,'$.image_integrity_status'),'')!='unavailable'
-            AND NOT EXISTS (SELECT 1 FROM ai_human_touched AS touched
-                WHERE touched.collection=items.collection AND touched.uid=items.uid)
-            AND EXISTS (SELECT 1 FROM ai_drafts.suggestions AS draft
+        return eligible + """ AND EXISTS (SELECT 1 FROM ai_drafts.suggestions AS draft
                 WHERE draft.collection=items.collection AND draft.uid=items.uid
                 AND draft.base_fingerprint=items.review_id
                 AND draft.image_sha256=json_extract(items.summary_json,'$.current_image_sha256')""" + verdict + ")"
@@ -2691,7 +2827,7 @@ class DatasetCatalog:
             has_alignment=filters.get("has_alignment"),
             review_status=filters.get("review_status"),
             review_required=filters.get("review_required"),
-            auxiliary_kind=filters.get("auxiliary_kind"),
+            auxiliary_kind=None if filters.get("ai_status") == "regenerated" else filters.get("auxiliary_kind"),
         )
         earlier = "(collection<? OR (collection=? AND (category<? OR (category=? AND uid<?))))"
         later = "(collection>? OR (collection=? AND (category>? OR (category=? AND uid>?))))"
@@ -2703,7 +2839,7 @@ class DatasetCatalog:
             row["uid"],
         ]
         with self._connect() as db:
-            where = self._with_ai_filter(db, where, filters.get("ai_status"))
+            where = self._with_ai_filter(db, where, filters.get("ai_status"), filters.get("auxiliary_kind"))
             items_source = self._query_items(filters.get("ai_status"))
             base = where[6:] if where.startswith("WHERE ") else ""
             prefix = f"({base}) AND " if base else ""

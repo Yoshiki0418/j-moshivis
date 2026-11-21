@@ -19,6 +19,7 @@ from typing import Any, Mapping
 
 REVIEW_REQUIRED_STATUS = "unverified_vlm_visual"
 REVIEW_DECISIONS = frozenset({"pending", "approved", "rejected"})
+REGENERATION_ERROR_KINDS = frozenset({"reading", "counting", "grounding", "conversation", "other"})
 MAX_REVIEW_NOTE_CHARS = 1_000
 DEFAULT_REVIEW_EVENTS = Path("data/curation/dialogue_review_events.jsonl")
 
@@ -212,6 +213,30 @@ class ReviewStore:
     def decision_for(self, fingerprint: str) -> dict[str, Any] | None:
         return self.latest_decisions().get(fingerprint)
 
+    def regeneration_stats(self) -> dict[str, Any]:
+        """Count human decisions on regenerated candidates, including reviews later superseded."""
+        stats = dict(total=0, approved=0, edited=0, rejected=0, active_ms=0, timed_reviews=0, error_kinds={})
+        if not self.path.is_file():
+            return stats
+        with self.path.open(encoding="utf-8") as stream:
+            fcntl.flock(stream, fcntl.LOCK_SH)
+            for line in stream:
+                try:
+                    event = json.loads(line)
+                except (UnicodeError, ValueError):
+                    continue
+                review = event.get("regeneration_review") if isinstance(event, dict) else None
+                if not isinstance(review, dict) or review.get("action") not in ("approved", "edited", "rejected"):
+                    continue
+                stats["total"] += 1
+                stats[review["action"]] += 1
+                if type(review.get("active_ms")) is int:
+                    stats["active_ms"] += review["active_ms"]
+                    stats["timed_reviews"] += 1
+                for kind in review.get("error_kinds", []):
+                    stats["error_kinds"][kind] = stats["error_kinds"].get(kind, 0) + 1
+        return stats
+
     def append(
         self,
         *,
@@ -226,6 +251,7 @@ class ReviewStore:
         parent_fingerprint: str | None = None,
         task_mode: str | None = None,
         require_unreviewed: bool = False,
+        regeneration_review: Mapping[str, Any] | None = None,
     ) -> dict[str, Any]:
         if not isinstance(fingerprint, str) or len(fingerprint) != 64:
             raise ValueError("fingerprint must be a 64-character SHA-256 hex string")
@@ -260,15 +286,38 @@ class ReviewStore:
             event["reviewer"] = str(reviewer)[:200]
         if task_mode is not None:
             event["task_mode"] = str(task_mode)
+        if regeneration_review is not None:
+            if not require_unreviewed or revised_record is None or decision == "pending":
+                raise ValueError("A regeneration decision requires a guarded candidate revision")
+            candidate_id = regeneration_review.get("candidate_id")
+            if (not isinstance(candidate_id, str) or len(candidate_id) != 64
+                    or any(c not in "0123456789abcdef" for c in candidate_id)):
+                raise ValueError("Invalid regenerated candidate ID")
+            action = "rejected" if decision == "rejected" else "approved" if fingerprint == candidate_id else "edited"
+            if (regeneration_review.get("action") != action or (action == "rejected" and fingerprint != candidate_id)
+                    or not revised_record.get("generator") or not revised_record.get("prompt_version")
+                    or regeneration_review.get("model") != revised_record["generator"]
+                    or regeneration_review.get("prompt_version") != revised_record["prompt_version"]):
+                raise ValueError("Regeneration provenance differs from the reviewed version")
+            active_ms = regeneration_review.get("active_ms")
+            errors = regeneration_review.get("error_kinds", [])
+            if active_ms is not None and (type(active_ms) is not int or active_ms < 0):
+                raise ValueError("active_ms must be a nonnegative integer")
+            if (not isinstance(errors, list) or len(errors) > len(REGENERATION_ERROR_KINDS)
+                    or any(not isinstance(e, str) or e not in REGENERATION_ERROR_KINDS for e in errors)):
+                raise ValueError("Unknown regeneration review error category")
+            event["regeneration_review"] = dict(candidate_id=candidate_id, action=action,
+                model=revised_record["generator"], prompt_version=revised_record["prompt_version"],
+                active_ms=active_ms, error_kinds=sorted(set(errors)))
         if revised_record is not None:
-            if decision != "approved" or content_fingerprint(revised_record) != fingerprint:
-                raise ValueError("a saved revision must approve its exact revised content")
+            if (decision != "approved" and regeneration_review is None) or content_fingerprint(revised_record) != fingerprint:
+                raise ValueError("a saved revision must match its exact reviewed content")
             if not base_fingerprint or not parent_fingerprint:
                 raise ValueError("a revision requires original and parent fingerprints")
             event.update(revised_record=dict(revised_record),
                          base_fingerprint=base_fingerprint,
                          parent_fingerprint=parent_fingerprint,
-                         action="edit_and_approve")
+                         action="reject_regeneration" if decision == "rejected" else "edit_and_approve")
 
         self.path.parent.mkdir(parents=True, exist_ok=True)
         encoded = _canonical_json(event) + b"\n"
@@ -278,7 +327,7 @@ class ReviewStore:
         fd = os.open(self.path, os.O_RDWR | os.O_CREAT | os.O_APPEND, 0o664)
         try:
             fcntl.flock(fd, fcntl.LOCK_EX)
-            if revised_record is not None or require_unreviewed:
+            if revised_record is not None or require_unreviewed or parent_fingerprint is not None:
                 # Compare while holding the same lock used by all writers. A
                 # second tab/server cannot slip in a decision between this
                 # check and the append/fsync below. Read the locked descriptor,
@@ -307,7 +356,7 @@ class ReviewStore:
                         if (previous.get("base_fingerprint") == base_fingerprint
                                 and isinstance(previous.get("revised_record"), dict)):
                             current = previous.get("fingerprint")
-                if revised_record is not None and current != parent_fingerprint:
+                if parent_fingerprint is not None and current != parent_fingerprint:
                     raise ReviewConflictError("Another editor saved a newer revision. Reload before saving.")
             size = os.fstat(fd).st_size
             if size and os.pread(fd, 1, size - 1) != b"\n":

@@ -153,6 +153,42 @@ def approve_for_tts(root: Path, record: dict) -> ReviewStore:
 
 
 class ReviewGateTests(unittest.TestCase):
+    def test_regenerated_review_resolves_from_source_and_gates_exact_speech(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            image = root / "source.png"
+            Image.new("RGB", (12, 12)).save(image)
+            store = ReviewStore(root / "decisions.jsonl")
+            voices, config = fake_tts_inputs()
+            out = root / "speech"
+            for action in ("approved", "edited", "rejected"):
+                original = reviewed_record(image, uid=action)
+                base = original["review_id"]
+                candidate = dict(original, generator="gpt-6.1-terra", prompt_version="visual_dialogue_v10",
+                                 review_warnings=[])
+                candidate_id = content_fingerprint(candidate)
+                candidate["review_id"] = candidate_id
+                self.assertEqual(build_one(candidate, voices, config, out, "cpu", review_store=store), "review_blocked")
+                if action == "edited":
+                    candidate["dialogue"] = [*candidate["dialogue"][:-1],
+                        {"speaker": "アシスタント", "text": "リンゴは二つ見えます。"}]
+                fingerprint = content_fingerprint(candidate)
+                candidate["review_id"] = fingerprint
+                event = store.append(fingerprint=fingerprint, decision="rejected" if action == "rejected" else "approved",
+                    uid=action, collection="japanese_daily_v1", base_fingerprint=base, parent_fingerprint=base,
+                    require_unreviewed=True, revised_record=candidate,
+                    regeneration_review=dict(candidate_id=candidate_id, model=candidate["generator"],
+                        prompt_version=candidate["prompt_version"], action=action, active_ms=123,
+                        error_kinds=["counting"] if action == "edited" else []))
+                self.assertEqual(event["regeneration_review"]["candidate_id"], candidate_id)
+                effective = store.resolve_record(original)
+                self.assertEqual(effective["review_id"], fingerprint)
+                self.assertEqual(build_one(original, voices, config, out, "cpu", review_store=store), "review_blocked")
+                result = build_one(effective, voices, config, out, "cpu", review_store=store)
+                self.assertEqual(result, "review_blocked" if action == "rejected" else "ok")
+            self.assertEqual(store.regeneration_stats(), dict(total=3, approved=1, edited=1, rejected=1,
+                active_ms=369, timed_reviews=3, error_kinds={"counting": 1}))
+
     def test_approval_round_trip_preserves_optional_review_warnings(self):
         marker = {"kind": "counting", "grounding_source": "vlm_visual", "question_turn_index": 4, "answer_turn_index": 5}
         cases = (

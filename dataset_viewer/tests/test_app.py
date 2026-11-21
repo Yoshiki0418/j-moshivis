@@ -127,11 +127,13 @@ class FakeCatalog:
         decision: str,
         note: str = "",
         reviewer: str | None = None,
+        **regeneration,
     ) -> dict[str, Any]:
         if token != "known":
             raise KeyError(token)
         if fingerprint != "a" * 64:
             raise ReviewConflictError("stale dialogue")
+        self.last_regeneration = regeneration
         return {
             "ok": True,
             "uid": "uid-1",
@@ -147,12 +149,13 @@ class FakeCatalog:
         return self.status()
 
     def edit_dialogue(self, token, *, fingerprint, dialogue, auxiliary_task=None, note="", reviewer=None,
-                      ai_suggestion_id=None):
+                      ai_suggestion_id=None, **regeneration):
         if token != "known":
             raise KeyError(token)
         if fingerprint != "a" * 64:
             raise ReviewConflictError("stale dialogue")
         self.last_ai_suggestion_id = ai_suggestion_id
+        self.last_regeneration = regeneration
         return {"ok": True, "item": {"dialogue": dialogue, "review_status": "approved"}}
 
     def close(self) -> None:
@@ -374,6 +377,17 @@ class DatasetViewerApiTests(unittest.IsolatedAsyncioTestCase):
             response = await self.client.put("/api/items/known/dialogue", json={
                 "content_sha256": "a" * 64, "dialogue": [{"text": "修正案"}],
                 "ai_suggestion_id": invalid})
+            self.assertEqual(response.status, 400)
+
+    async def test_regeneration_review_binds_the_visible_version_and_records_review_effort(self):
+        fields = {"regeneration_candidate_id": "c"*64, "active_ms": 1900, "error_kinds": ["reading"]}
+        for path, payload in (("dialogue", {"dialogue": [{"text": "人手修正版"}]}), ("review", {"decision": "rejected"})):
+            route = "/api/items/known/" + path
+            body = {**payload, "content_sha256": "a"*64, **fields}
+            response = await self.client.put(route, json=body)
+            self.assertEqual(response.status, 200)
+            self.assertEqual(self.catalog.last_regeneration, fields)
+            response = await self.client.put(route, json={**body, "regeneration_candidate_id": "invalid"})
             self.assertEqual(response.status, 400)
 
     async def test_registered_media_supports_range(self) -> None:

@@ -118,6 +118,8 @@ async def _error_middleware(
             )
         else:
             raise
+    except ReviewConflictError as exc:
+        response = _json_response(_error_payload("review_conflict", str(exc)), status=409)
     except ValueError as exc:
         response = _json_response(_error_payload("bad_request", str(exc)), status=400)
     except (KeyError, FileNotFoundError):
@@ -293,6 +295,11 @@ async def status(request: web.Request) -> web.Response:
     return _json_response(payload)
 
 
+async def regeneration_review_stats(request: web.Request) -> web.Response:
+    store = request.app[APP_CATALOG].review_store
+    return _json_response(await asyncio.to_thread(store.regeneration_stats))
+
+
 async def dashboard(request: web.Request) -> web.Response:
     catalog = request.app[APP_CATALOG]
     payload = await asyncio.to_thread(_call_with_supported_kwargs,
@@ -399,6 +406,17 @@ async def item_detail(request: web.Request) -> web.Response:
     return _json_response(payload)
 
 
+def _regeneration_fields(body: Mapping[str, Any]) -> dict[str, Any]:
+    candidate_id = body.get("regeneration_candidate_id")
+    if candidate_id is None:
+        return {}
+    if (not isinstance(candidate_id, str) or len(candidate_id) != 64
+            or any(ch not in "0123456789abcdef" for ch in candidate_id)):
+        raise ValueError("regeneration_candidate_id must be the candidate SHA-256")
+    return {"regeneration_candidate_id": candidate_id,
+            "active_ms": body.get("active_ms"), "error_kinds": body.get("error_kinds")}
+
+
 async def review_item(request: web.Request) -> web.Response:
     _note_interaction(request.app)
     token = request.match_info["token"]
@@ -442,6 +460,7 @@ async def review_item(request: web.Request) -> web.Response:
             decision=decision,
             note=note,
             reviewer=reviewer or request.remote,
+            **_regeneration_fields(body),
         )
     except ReviewConflictError as exc:
         raise web.HTTPConflict(reason=str(exc)) from exc
@@ -472,7 +491,7 @@ async def edit_dialogue(request: web.Request) -> web.Response:
             request.match_info["token"], fingerprint=fingerprint,
             dialogue=body["dialogue"], auxiliary_task=body.get("auxiliary_task"),
             note=body.get("note", ""), reviewer=body.get("reviewer") or request.remote,
-            **suggestion_kwargs,
+            **suggestion_kwargs, **_regeneration_fields(body),
         )
     except ReviewConflictError as exc:
         raise web.HTTPConflict(reason=str(exc)) from exc
@@ -624,6 +643,7 @@ def create_app(
 
     app.router.add_get("/api/health", health)
     app.router.add_get("/api/status", status)
+    app.router.add_get("/api/regeneration-review-stats", regeneration_review_stats)
     app.router.add_get("/api/dashboard", dashboard)
     app.router.add_get("/api/tree", tree)
     app.router.add_get("/api/items", items)

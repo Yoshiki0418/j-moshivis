@@ -12,7 +12,7 @@ from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 from dataset_viewer.catalog import DatasetCatalog
-from ssvd.review_store import ReviewConflictError, image_file_sha256
+from ssvd.review_store import ReviewConflictError, image_file_sha256, review_metadata
 
 
 def _write_jsonl(path: Path, records: list[dict], partial: dict | None = None) -> None:
@@ -25,6 +25,106 @@ def _write_jsonl(path: Path, records: list[dict], partial: dict | None = None) -
 
 
 class DatasetCatalogTest(unittest.TestCase):
+    def _generated_dialogue(self):
+        source, record, original, suggestion = self._required_ai_suggestion()
+        candidate = {**record, "generator": "gpt-6.1-terra", "prompt_version": "visual_dialogue_v10",
+                     "review_required": True, "review_warnings": [], "dialogue": record["dialogue"] + [
+                         {"speaker": "ユーザー", "text": "横の文字は読める？"},
+                         {"speaker": "アシスタント", "text": "赤い字のところは分からないな。"}],
+                     "auxiliary_task": {"kind": "ocr", "question_turn_index": 2, "answer_turn_index": 3,
+                         "grounding_source": "vlm_visual", "additional_tasks": [
+                             {"kind": "counting", "question_turn_index": 0, "answer_turn_index": 1,
+                              "grounding_source": "vlm_visual"}]}}
+        candidate.update(review_metadata(candidate))
+        key = dict(collection=original["collection"], uid=original["uid"],
+                   base_fingerprint=original["review_id"], image_sha256=record["image_sha256"])
+        draft = {"candidate": candidate, "source": "production_v10_terra", "created_at": "2026-11-21T00:00:00Z"}
+        mocked = patch.object(self.catalog.terra_candidates, "get", side_effect=lambda **kw: draft if kw == key else None)
+        mocked.start()
+        self.addCleanup(mocked.stop)
+        mocked = patch.object(self.catalog.terra_candidates, "queue_keys", return_value=[(*key.values(), 1, 1)])
+        mocked.start()
+        self.addCleanup(mocked.stop)
+        return source, record, original, suggestion, candidate
+
+    def test_terra_filter_and_exact_version_approval(self):
+        source, record, original, suggestion, candidate = self._generated_dialogue()
+        for kind in ("ocr", "counting"):
+            rows = self.catalog.list_items(ai_status="regenerated", auxiliary_kind=kind)
+            self.assertEqual(rows["total"], 1)
+        self.assertEqual(self.catalog.list_items(ai_status="regenerated", auxiliary_kind="none")["total"], 0)
+        shown = self.catalog.get_item(original["token"], {"ai_status": "regenerated"})
+        self.assertEqual(len(shown["dialogue"]), 4)
+        self.assertEqual(shown["original_dialogue"], original["dialogue"])
+        self.assertEqual(shown["original_ai_suggestion"]["suggestion_id"], suggestion["suggestion_id"])
+        self.assertEqual(shown["regeneration_candidate"]["candidate_id"], candidate["review_id"])
+        self.assertEqual(shown["navigation"]["total"], 1)
+        for stale in ({}, {"regeneration_candidate_id": "a" * 64}):
+            with self.assertRaises(ReviewConflictError):
+                self.catalog.review_item(original["token"], fingerprint=original["review_id"], decision="approved", **stale)
+        with self.assertRaises(ReviewConflictError):
+            self.catalog.edit_dialogue(original["token"], fingerprint=original["review_id"],
+                                      dialogue=suggestion["dialogue"], ai_suggestion_id=suggestion["suggestion_id"])
+        self.assertEqual(self.catalog.review_store.resolve_record(record), record)
+        original_bytes = source.read_bytes()
+        result = self.catalog.review_item(original["token"], fingerprint=original["review_id"],
+                                         decision="approved", regeneration_candidate_id=candidate["review_id"])
+        self.assertEqual(result["review_status"], "approved")
+        self.assertEqual(result["event"]["regeneration_review"]["action"], "approved")
+        self.assertEqual(result["review_id"], candidate["review_id"])
+        self.assertEqual(source.read_bytes(), original_bytes)
+        self.assertEqual(self.catalog.review_store.resolve_record(record)["generator"], candidate["generator"])
+        self.assertEqual(self.catalog.list_items(ai_status="regenerated")["total"], 0)
+        with self.assertRaises(ReviewConflictError):
+            self.catalog.get_item(original["token"], {"ai_status": "regenerated"})
+
+    def test_edit_terra_second_marker_without_requiring_a_ground_truth_value(self):
+        _, record, original, _, candidate = self._generated_dialogue()
+        turns = [dict(t) for t in candidate["dialogue"]]
+        turns[-1]["text"] = "赤い字は一部だけ読めるよ。"
+        auxiliary = {**candidate["auxiliary_task"], "answer_mode": "partial", "additional_tasks": [
+            {**candidate["auxiliary_task"]["additional_tasks"][0], "answer_mode": "approximate"}]}
+        result = self.catalog.edit_dialogue(original["token"], fingerprint=original["review_id"],
+            regeneration_candidate_id=candidate["review_id"], dialogue=turns, auxiliary_task=auxiliary,
+            active_ms=2400, error_kinds=["reading"])
+        self.assertEqual(result["event"]["regeneration_review"]["action"], "edited")
+        revised = self.catalog.review_store.resolve_record(record)
+        self.assertNotEqual(revised["review_id"], candidate["review_id"])
+        self.assertEqual(revised["dialogue"], turns)
+        self.assertEqual(revised["auxiliary_task"], auxiliary)
+        self.assertEqual(revised["human_revision"]["regeneration_candidate_id"], candidate["review_id"])
+        self.assertEqual(result["item"]["original_generator"], record["generator"])
+
+    def test_reject_terra_preserves_version_and_decision_after_refresh(self):
+        source, record, original, _, candidate = self._generated_dialogue()
+        source_bytes = source.read_bytes()
+        result = self.catalog.review_item(original["token"], fingerprint=original["review_id"], decision="rejected",
+                                         regeneration_candidate_id=candidate["review_id"])
+        self.assertFalse(result["dataset_usable"])
+        self.assertEqual(result["event"]["regeneration_review"]["action"], "rejected")
+        self.assertEqual(result["review_id"], candidate["review_id"])
+        self.catalog.refresh()
+        current = self.catalog.get_item(original["token"])
+        self.assertEqual(current["review_status"], "rejected")
+        self.assertEqual(current["dialogue"], result["item"]["dialogue"])
+        self.assertFalse(current["dataset_usable"])
+        self.assertEqual(source.read_bytes(), source_bytes)
+        self.assertEqual(self.catalog.list_items(ai_status="regenerated")["total"], 0)
+
+    def test_terra_save_loses_to_an_intervening_human_decision(self):
+        _, record, original, _, candidate = self._generated_dialogue()
+        append = self.catalog.review_store.append
+        def another_reviewer(**kwargs):
+            append(fingerprint=original["review_id"], decision="approved", uid=original["uid"],
+                   collection=original["collection"])
+            return append(**kwargs)
+        with patch.object(self.catalog.review_store, "append", side_effect=another_reviewer):
+            with self.assertRaises(ReviewConflictError):
+                self.catalog.review_item(original["token"], fingerprint=original["review_id"],
+                    regeneration_candidate_id=candidate["review_id"], decision="rejected")
+        self.assertEqual(self.catalog.review_store.resolve_record(record), record)
+        self.assertIsNone(self.catalog.review_store.decision_for(candidate["review_id"]))
+
     def _required_ai_suggestion(self, *, unchanged=False):
         source = self.data / "dialogues_counting/full/qwen3vl_30b_normal_s0.jsonl"
         record = {"uid": "count:one", "task_mode": "normal", "generator": "test-vlm",
