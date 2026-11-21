@@ -18,7 +18,8 @@ from ssvd.review_store import (
 
 ROOT = Path(__file__).resolve().parents[2]
 COLLECTION = "japanese_daily_v1"
-PROMPT_VERSION = "visual_dialogue_v4"
+PROMPT_VERSION = "visual_dialogue_v5"
+VISUAL_V4 = "visual_dialogue_v4"
 OBSERVATION_VERSION = "grounded_roles_v3"
 
 
@@ -91,7 +92,7 @@ def preview(root, uid, *, model="gpt-6-luna", pairs=None, transcript=None, recov
     """Replay decoded replies bound to the same image, review revision and settings."""
     if pairs is not None and (type(pairs) is not int or pairs not in PAIR_COUNTS):
         raise ValueError("Japanese Daily candidates use 4 to 8 question-answer pairs")
-    if prompt_version not in (PROMPT_VERSION, OBSERVATION_VERSION):
+    if prompt_version not in (PROMPT_VERSION, VISUAL_V4, OBSERVATION_VERSION):
         raise ValueError("Unsupported prompt version")
     source, kind, image, base = _load_source(root, uid)
     identity = dict(collection=COLLECTION, uid=uid, base_fingerprint=base,
@@ -107,7 +108,8 @@ def preview(root, uid, *, model="gpt-6-luna", pairs=None, transcript=None, recov
     if prompt_version == OBSERVATION_VERSION:
         step = regeneration_roles_v3.next_step(uid, kind, image, replies, model=model, pairs=pairs, recovery=recovery)
     else:
-        step = next_step(uid, kind, image, replies, model=model, pairs=pairs)
+        step = next_step(uid, kind, image, replies, model=model, pairs=pairs,
+                         legacy_v4=prompt_version == VISUAL_V4)
     if step["status"] != "pending_review":
         return {"identity": identity, **step}
 
@@ -141,7 +143,7 @@ def main():
     parser.add_argument("--model", default="gpt-6-luna")
     parser.add_argument("--pairs", type=int, choices=PAIR_COUNTS)
     parser.add_argument("--transcript", type=Path, help="JSON with identity and ordered decoded replies")
-    parser.add_argument("--prompt-version", choices=(PROMPT_VERSION, OBSERVATION_VERSION), default=PROMPT_VERSION)
+    parser.add_argument("--prompt-version", choices=(PROMPT_VERSION, VISUAL_V4, OBSERVATION_VERSION), default=PROMPT_VERSION)
     parser.add_argument("--recovery", action="store_true", help="Apply the follow-up pilot replay checks")
     args = parser.parse_args()
     try:

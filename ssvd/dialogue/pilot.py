@@ -17,11 +17,12 @@ from ssvd.ai_suggestion_store import human_touched_uids
 from ssvd.dialogue.pilot_api import MODELS, OpenAIPilotAPI, PilotRequestRejected
 from ssvd.dialogue.pilot_review import write_review
 from ssvd.dialogue.pilot_selection import prepare_manifest
-from ssvd.dialogue.preview_regeneration import COLLECTION, OBSERVATION_VERSION, PROMPT_VERSION, ROOT, preview
+from ssvd.dialogue.preview_regeneration import COLLECTION, OBSERVATION_VERSION, PROMPT_VERSION, ROOT, VISUAL_V4, preview
 from ssvd.review_store import DEFAULT_REVIEW_EVENTS, ReviewStore
 
 LEGACY_VERSION = "grounded_roles_v2"
-ARCHIVED_VERSIONS = (LEGACY_VERSION, OBSERVATION_VERSION)
+GROUNDING_VERSIONS = (LEGACY_VERSION, OBSERVATION_VERSION)
+ARCHIVED_VERSIONS = (*GROUNDING_VERSIONS, VISUAL_V4)
 LEGACY_RUN_DIR = ROOT / "data/curation/gpt_pilot_issue12"
 RUN_DIR = LEGACY_RUN_DIR / PROMPT_VERSION
 BUDGET_USD = Decimal("2.00")
@@ -75,7 +76,7 @@ def predecessor_snapshots(base, *, prompt_version=PROMPT_VERSION):
 
 @contextmanager
 def shared_operation(run_dir):
-    # v2 holds the common parent lock; v3 and v4 acquire it before their run lock.
+    # v2 holds the common parent lock; later versions acquire it before their own lock.
     with operation(run_dir.parent), operation(run_dir):
         yield predecessor_snapshots(run_dir.parent)
 
@@ -189,7 +190,7 @@ def status(run_dir, *, prompt_version=PROMPT_VERSION):
             for outcome in results:
                 if outcome["status"] != "pending_review":
                     continue
-                if prompt_version in ARCHIVED_VERSIONS:
+                if prompt_version in GROUNDING_VERSIONS:
                     tasks = [(t["kind"], t["mode"]) for t in outcome["grounding"]["tasks"]]
                 else:
                     candidate = outcome["candidate"]
@@ -209,10 +210,11 @@ def status(run_dir, *, prompt_version=PROMPT_VERSION):
                 cost += charge
                 usage = json.loads(payload)["usage"]
                 tokens.update({k: usage[k] for k in ("input_tokens", "output_tokens")})
-            comparison[model] = dict(outcomes=dict(Counter(v["status"] for v in results)),
+            comparison[model] = dict(remaining=len(manifest["samples"]) - len(results),
+                                     outcomes=dict(Counter(v["status"] for v in results)),
                                      generated_tasks=dict(task_mix), answer_modes=dict(modes),
                                      tokens=dict(tokens), cost_usd=cost/NANOS)
-            if prompt_version not in ARCHIVED_VERSIONS:
+            if prompt_version not in GROUNDING_VERSIONS:
                 comparison[model].update(candidates_with_warnings=candidates_with_warnings,
                                          review_warnings_by_code=dict(warning_counts))
     return dict(images=len(manifest["samples"]), old_tasks=dict(Counter(s["kind"] for s in manifest["samples"])),
@@ -290,7 +292,10 @@ def generate_one(root, db, sample, model, api, *, previous_commitment, recovery=
         replies.append(reply)
 
 
-def run_pilot(root, run_dir, api):
+def run_pilot(root, run_dir, api, *, model=None):
+    if model is not None and model not in MODELS:
+        raise ValueError("Unknown pilot model")
+    models = MODELS if model is None else (model,)
     with shared_operation(run_dir) as (predecessors, previous_commitment), closing(open_db(run_dir)) as db:
         manifest = load_manifest(db)
         check_predecessors(manifest, predecessors)
@@ -301,18 +306,21 @@ def run_pilot(root, run_dir, api):
         with db:
             db.execute("""
                 INSERT OR IGNORE INTO outcomes(uid,model,outcome)
-                SELECT uid,model,? FROM calls WHERE charged IS NULL
-            """, (encode({"status": "hold", "reason": "unresolved_billing"}),))
+                SELECT uid,model,? FROM calls WHERE charged IS NULL AND (? IS NULL OR model=?)
+            """, (encode({"status": "hold", "reason": "unresolved_billing"}), model, model))
         finished = read_outcomes(db)
+        completed = sum(name in models for _, name in finished)
+        total = len(manifest["samples"]) * len(models)
         for sample in manifest["samples"]:
-            for model in MODELS:
-                key = (sample["uid"], model)
+            for selected_model in models:
+                key = (sample["uid"], selected_model)
                 if key in finished:
                     continue
-                result = generate_one(root, db, sample, model, api, previous_commitment=previous_commitment)
+                result = generate_one(root, db, sample, selected_model, api, previous_commitment=previous_commitment)
                 with db:
                     db.execute("INSERT INTO outcomes VALUES(?,?,?)", (*key, encode(result)))
-                print(f"{len(finished)+1}/{len(manifest['samples'])*len(MODELS)} {model} {result['status']}", flush=True)
+                completed += 1
+                print(f"{completed}/{total} {selected_model} {result['status']}", flush=True)
                 finished[key] = result
         return write_review(root, run_dir, manifest, finished)
 
@@ -328,8 +336,11 @@ def main():
         archive.add_argument("--archive", choices=ARCHIVED_VERSIONS,
                              help="Read an archived pilot without altering its ledger or HTML")
     for name in ("run", "recover"):
-        commands.add_parser(name).add_argument("--api-key-file", type=Path,
-                                               help="Private file containing only the project API key")
+        generation = commands.add_parser(name)
+        generation.add_argument("--api-key-file", type=Path,
+                                help="Private file containing only the project API key")
+        if name == "run":
+            generation.add_argument("--model", choices=MODELS, help="Run just this model (default: both)")
     args = parser.parse_args()
     archived = getattr(args, "archive", None)
     prompt_version = archived or PROMPT_VERSION
@@ -346,7 +357,7 @@ def main():
             if not key:
                 raise RuntimeError("Set OPENAI_API_KEY or supply --api-key-file for the credited project")
             if args.command == "run":
-                run_pilot(ROOT, RUN_DIR, OpenAIPilotAPI(key))
+                run_pilot(ROOT, RUN_DIR, OpenAIPilotAPI(key), model=args.model)
             else:
                 from ssvd.dialogue.pilot_recovery import recover
                 recover(ROOT, RUN_DIR, OpenAIPilotAPI(key))
