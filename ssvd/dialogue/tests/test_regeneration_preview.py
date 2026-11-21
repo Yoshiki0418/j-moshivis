@@ -55,10 +55,13 @@ class PreviewTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "different source"):
             preview(self.root, "test", transcript={"identity": identity, "replies": []})
         for old_version in ("grounded_roles_v1", "grounded_roles_v2", "grounded_roles_v3",
-                            "visual_dialogue_v4", "visual_dialogue_v5"):
+                            "visual_dialogue_v4", "visual_dialogue_v5", "visual_dialogue_v6"):
             earlier = dict(step["identity"], prompt_version=old_version)
             with self.assertRaisesRegex(ValueError, "different source"):
                 preview(self.root, "test", transcript={"identity": earlier, "replies": []})
+        old_step = preview(self.root, "test", prompt_version="visual_dialogue_v6")
+        self.assertEqual(old_step["request"]["input"], step["request"]["input"])
+        self.assertNotEqual(old_step["request"]["instructions"], step["request"]["instructions"])
 
     def test_prior_human_event_and_image_replacement(self):
         self.image.write_bytes(b"changed")

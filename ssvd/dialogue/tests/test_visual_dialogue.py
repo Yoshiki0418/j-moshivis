@@ -19,8 +19,8 @@ class VisualDialogueTests(unittest.TestCase):
     def test_archived_requests_match_original_generation(self):
         question = {"text": "札には営業時間が書いてあるの？"}
         answer = {"text": "アオバって書いてあるね。", "tasks": [OCR]}
-        # Computed with the original request builder at 0d4409f. The third
-        # request includes the old reminder after the first annotated answer.
+        # Hashes from the original v4/v5 (0d4409f) and v6 (d813b51) builders.
+        # The third request follows an answer with private task metadata.
         expected = {
             "visual_dialogue_v4": [
                 "32c834924b4691706ed0da21cdbc07abd834af65a2ce5abafe1bff1b057fbea5",
@@ -32,6 +32,11 @@ class VisualDialogueTests(unittest.TestCase):
                 "1c61541ae9ec1508665a57dd5d8ddf943d06312cc6efec0c0e0539cb093ef761",
                 "c8ad10d67cf0536e4704a07dfb2aa3ba4009ae7fed1bd460e08b73ad538e205b",
             ],
+            "visual_dialogue_v6": [
+                "2253f840dfbe7ff9d2928602ccf872a2f545b1595c70167b8e0f1b2a574d731c",
+                "6930c1db3229c592dbe837c7a4b882bf9da6227add3866ee7985577b2e889de2",
+                "9f52610afe0252633994901e0e74d95bbb5316ba01b3a39eca1ee64de8d3078c",
+            ],
         }
         for version, digests in expected.items():
             for replies, digest in zip(([], [question], [question, answer]), digests):
@@ -39,6 +44,20 @@ class VisualDialogueTests(unittest.TestCase):
                     old = next_step("example", "ocr", IMAGE, replies, pairs=4, version=version)["request"]
                     wire = json.dumps(old, sort_keys=True, ensure_ascii=False, separators=(",", ":")).encode()
                     self.assertEqual(hashlib.sha256(wire).hexdigest(), digest)
+
+    def test_new_pilot_changes_only_the_user_instructions(self):
+        question = {"text": "この看板、どっちを指してる？"}
+        answer = {"text": "左を指しているよ。", "tasks": []}
+        for replies in ([], [question], [question, answer]):
+            with self.subTest(turn=len(replies) + 1):
+                current = step(replies)["request"]
+                previous = next_step("example", "ocr", IMAGE, replies, pairs=4, version="visual_dialogue_v6")["request"]
+                if len(replies) % 2 == 0:
+                    self.assertIn("相手に質問してください", current["instructions"])
+                    self.assertNotEqual(current["instructions"], previous["instructions"])
+                    self.assertEqual(current, {**previous, "instructions": current["instructions"]})
+                else:
+                    self.assertEqual(current, previous)
 
     def test_false_premise_can_be_corrected_and_printed_quantity_stays_ocr(self):
         printed = {"kind": "ocr", "target": "入口の札", "mode": "exact",
