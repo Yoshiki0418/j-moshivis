@@ -278,6 +278,19 @@ codex login status
 
 完成候補は既存のAPI生成分と同じ「Terraの本番対話を確認」に表示される。「生成経路」が `Codex CLI` の対話は、元画像と対話全文を確認して承認・編集後承認・却下できる。人が承認した版を音声合成に使う。[アノテーション画面](http://127.0.0.1:8765/#annotate-terra)・[ビューアの操作手順](../../dataset_viewer/README.md)
 
+#### 8並列の常駐サービス（#59）
+
+本番サーバーでは `j-moshivis-terra.service` を使う。確認には上記の台帳の `status` と次のコマンドを使う。サービスのPIDはsystemdが管理する。
+
+```bash
+systemctl --user status j-moshivis-terra.service
+journalctl --user -u j-moshivis-terra.service -n 20
+```
+
+起動ごとに1件を先行処理し、続いて最大8枚を並行して生成する。画像ごとの発話順は従来どおり。通信タイムアウト・一時的な403・サーバーエラー・異常終了からはsystemdが待機後に再起動する。再試行間隔は2分から最大1時間。未受領発話のある対話は保留する。明示された利用上限と全件完了では終了する。枠回復後は `systemctl --user start j-moshivis-terra.service` で再開する。データや設定の不整合はログを確認する。手動停止は `systemctl --user stop j-moshivis-terra.service`。サーバー起動時も停止状態を維持する場合は `disable --now` を使う。
+
+設置時はサービス定義を `ssvd/dialogue/systemd/` から `~/.config/systemd/user/` に配置し、`~/.config/j-moshivis/terra-cli.env` にChatGPTログイン済みの `codex` を含む `PATH` を指定する。CLIの設置場所を変えたらこの設定を更新する。ユーザーのlingerを有効にし、`systemctl --user daemon-reload`、`systemctl --user enable --now j-moshivis-terra.service` の順で登録する。
+
 ### 少数試行で使ったコマンド（20画像）
 
 リポジトリ直下で実行する。`prepare` は人手未確認の旧 Qwen 対話から抽出し、v3 の評価画像、固定の外部視覚評価・キャプション評価画像、試行内の画像と重複・類似する候補を除く。元の OCR／カウント分類や選定時の難しさは旧記録からの目印。元画像で実際に判別できる内容は各モデルが改めて観察し、人が確認する。
