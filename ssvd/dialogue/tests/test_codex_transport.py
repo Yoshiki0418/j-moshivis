@@ -56,6 +56,13 @@ if mode=="extra": reply["old_dialogue"]="unused"
 out.write_text(json.dumps(reply))
 if mode=="wrong_model": print(json.dumps({"type":"turn.started","model":"other-model"}))
 if mode=="tool": print(json.dumps({"type":"item.started","item":{"type":"command_execution"}}))
+if mode.startswith("native_fallback"):
+    print(json.dumps({"type":"item.completed","item":{"type":"error","message":
+                     "Falling back from WebSockets to HTTPS transport. unexpected status 403 Forbidden"}}))
+    if mode=="native_fallback_failure":
+        print(json.dumps({"type":"turn.failed","error":{"message":"HTTP 403 Forbidden"}}))
+        sys.exit(1)
+    if mode=="native_fallback_bad_json": out.write_text("invalid json")
 if mode=="reconnect": print(json.dumps({"type":"error","message":"Reconnecting… 1/5"}))
 print(json.dumps({"type":"turn.completed","usage":{"input_tokens":4,"output_tokens":2,"arbitrary_debug":"private"}}))
 '''
@@ -136,6 +143,17 @@ class CodexTransportTests(unittest.TestCase):
         reply, _ = self.cli.generate(self.request(), self.image)
         self.assertIsInstance(reply["text"], str)
 
+    def test_native_https_recovery_still_requires_a_valid_final_utterance(self):
+        self.mode.write_text("native_fallback")
+        reply, receipt = self.cli.generate(self.request(), self.image)
+        self.assertEqual(receipt["recovered_transport_notices"], 1)
+        self.assertTrue(reply["text"])
+        for mode in ("native_fallback_failure", "native_fallback_bad_json"):
+            with self.subTest(mode=mode):
+                self.mode.write_text(mode)
+                with self.assertRaises(CodexInvocationError):
+                    self.cli.generate(self.request(), self.image)
+
     def test_real_cli_disabled_code_mode_advisory_before_turn_is_informational(self):
         message = ("Code Mode is unavailable because code-mode host is disabled. Code mode will fail closed; "
                    "enable `features.code_mode_host` and install `codex-code-mode-host`.")
@@ -148,7 +166,14 @@ class CodexTransportTests(unittest.TestCase):
         def events(*items):
             return _events("\n".join(json.dumps(item) for item in items).encode())
 
-        self.assertEqual(events(advisory, start, user, reply, end), ([], [end], None, True))
+        self.assertEqual(events(advisory, start, user, reply, end), ([], [end], None, True, 0))
+        notice = {"type": "item.completed", "item": {"type": "error", "message":
+                  "Falling back from WebSockets to HTTPS transport. unexpected status 403 Forbidden"}}
+        reconnect = {"type": "item.completed", "item": {"type": "error", "message": "Reconnecting... 1/5"}}
+        self.assertEqual(events(start, reconnect, notice, reply, end), ([], [end], None, True, 2))
+        self.assertTrue(events(start, notice)[0])
+        self.assertTrue(events(start, notice, {"type": "turn.failed"}, end)[0])
+        self.assertTrue(events(start, reply, end, notice)[0])
         self.assertTrue(events(start, advisory, end)[0])
         self.assertTrue(events({"type": "item.completed", "item": {"type": "error", "message": "model unavailable"}}, start, end)[0])
         with self.assertRaisesRegex(CodexInvocationError, "command_execution"):
