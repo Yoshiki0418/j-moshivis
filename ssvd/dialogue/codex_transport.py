@@ -128,6 +128,8 @@ def _inputs(request, image_path):
 
 def _events(raw):
     errors, completed, reported_models = [], [], set()
+    pending_notices = []
+    recovered_notices = 0
     response_started = False
     turn_started = False
     for line in raw.splitlines():
@@ -146,23 +148,33 @@ def _events(raw):
             if event["model"] != MODEL:
                 raise CodexInvocationError("CLI reported an unexpected model")
             reported_models.add(event["model"])
-        if kind == "turn.failed" or (kind == "error" and not _RECONNECT.match(str(event.get("message", "")))):
+        if kind == "turn.failed":
             errors.append(json.dumps(event))
+        diagnostic = event if kind == "error" else None
         if kind in ("item.started", "item.updated", "item.completed"):
             item = event.get("item")
             item_type = item.get("type") if isinstance(item, dict) else None
             if item_type == "error":
                 if not turn_started and kind == "item.completed" and item.get("message") == _CODE_MODE_DISABLED:
                     continue
-                errors.append(json.dumps(item))
+                diagnostic = item
             elif item_type in ("reasoning", "agent_message"):
                 response_started = True
             elif item_type != "user_message":
                 category = item_type if isinstance(item_type, str) and item_type in _CLI_TOOL_ITEMS else "unknown item"
                 raise CodexInvocationError(f"Unexpected CLI activity ({category})")
+        if diagnostic is not None:
+            message = str(diagnostic.get("message", ""))
+            if (_RECONNECT.match(message)
+                    or message.startswith("Falling back from WebSockets to HTTPS transport.")):
+                pending_notices.append(json.dumps(diagnostic))
+            else:
+                errors.append(json.dumps(diagnostic))
         if kind == "turn.completed":
+            recovered_notices += len(pending_notices)
+            pending_notices.clear()
             completed.append(event)
-    return errors, completed, next(iter(reported_models), None), response_started
+    return errors + pending_notices, completed, next(iter(reported_models), None), response_started, recovered_notices
 
 
 class CodexTransport:
@@ -232,7 +244,7 @@ class CodexTransport:
             except OSError as exc:
                 raise CodexInvocationError("Could not execute Codex") from exc
 
-            errors, completed, reported, response_started = _events(stdout)
+            errors, completed, reported, response_started, recovered = _events(stdout)
             if errors or proc.returncode:
                 raise _failure(errors, stderr, proc.returncode, bool(completed) or response_started)
             if len(completed) != 1 or not output.is_file() or output.stat().st_size > 1024 * 1024:
@@ -254,4 +266,6 @@ class CodexTransport:
             raise CodexInvocationError("Invalid final utterance or usage record") from exc
         receipt = dict(identity, reported_model=reported, usage={k: usage[k] for k in _USAGE_KEYS if k in usage},
                        response_sha256=hashlib.sha256(raw).hexdigest(), elapsed_seconds=round(time.monotonic()-start, 3))
+        if recovered:
+            receipt["recovered_transport_notices"] = recovered
         return reply, receipt
