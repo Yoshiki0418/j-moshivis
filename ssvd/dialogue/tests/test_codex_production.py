@@ -2,12 +2,14 @@
 
 from contextlib import closing
 import hashlib
+import os
+import threading
 import json
 from pathlib import Path
 import sqlite3
 import tempfile
 import unittest
-from unittest.mock import patch
+from unittest.mock import patch, call
 
 from ssvd.dialogue import codex_production as runner, preview_regeneration
 from ssvd.dialogue.codex_transport import CodexInvocationError, CodexRateLimit, CodexUsageLimit
@@ -119,8 +121,38 @@ class CLIRunTests(unittest.TestCase):
         self.assertEqual(self.generate()["outcomes"], {"hold": 1, "pending_review": 1})
         self.assertEqual(self.transport.history_lengths, [0, 1, *range(self.steps[1])])
 
+    def test_partial_quota_stops_service_and_preserves_unconfirmed_turn(self):
+        def hit_quota():
+            raise runner.CodexIncompleteAtLimit("quota after partial output")
+        self.transport.on_generate = hit_quota
+        result = runner.run(self.root, self.digest, workers=8, transport=self.transport)
+        self.assertEqual(result["state"], "usage_limit")
+        self.assertGreater(result["outstanding_turns"], 0)
+        self.assertEqual(result["received_turns"], 0)
+
     def test_wrong_digest_prevents_dispatch(self):
         self.digest = "a"*64
         with self.assertRaisesRegex(ValueError, "checksum"):
             self.generate()
         self.assertFalse((self.path.parent / runner.DB_NAME).exists())
+
+class ServiceTests(unittest.TestCase):
+    def test_warmup_then_eight_workers(self):
+        stop = threading.Event()
+        with patch.object(runner, "run", side_effect=[{"state": "segment_complete"}, {"state": "queue_complete"}]) as run:
+            self.assertEqual(runner.serve(Path("."), "digest", 8, stop), 0)
+        self.assertEqual(run.call_args_list, [
+            call(Path("."), "digest", workers=1, limit=1, stop=stop),
+            call(Path("."), "digest", workers=8, stop=stop),
+        ])
+
+    def test_service_restart_policy(self):
+        for outcome, code in [
+            ({"state": "usage_limit"}, 0), ({"state": "operator_stop"}, 0),
+            ({"state": "rate_limited"}, os.EX_TEMPFAIL),
+            (runner.CodexTransientError("temporary 403"), os.EX_TEMPFAIL),
+            (ValueError("manifest checksum"), os.EX_CONFIG),
+        ]:
+            with self.subTest(outcome=outcome), patch.object(runner, "run", side_effect=[outcome]) as run:
+                self.assertEqual(runner.serve(Path("."), "digest", 8, threading.Event()), code)
+                self.assertEqual(run.call_count, 1)

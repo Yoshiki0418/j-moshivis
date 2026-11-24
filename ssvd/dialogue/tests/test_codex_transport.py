@@ -153,3 +153,12 @@ class CodexTransportTests(unittest.TestCase):
         self.assertTrue(events({"type": "item.completed", "item": {"type": "error", "message": "model unavailable"}}, start, end)[0])
         with self.assertRaisesRegex(CodexInvocationError, "command_execution"):
             events(advisory, start, {"type": "item.started", "item": {"type": "command_execution"}})
+
+
+class SupervisedFailureTests(unittest.TestCase):
+    def test_quota_before_and_after_output_and_transient_errors(self):
+        from ssvd.dialogue.codex_transport import _failure, CodexIncompleteAtLimit, CodexTransientError
+        for started, kind in ((False, CodexUsageLimit), (True, CodexIncompleteAtLimit)):
+            self.assertIs(type(_failure(["weekly limit reached"], b"", 1, started)), kind)
+        self.assertIsInstance(_failure(["403 forbidden"], b"", 1, False), CodexTransientError)
+        self.assertNotIsInstance(_failure(["401 unauthorized"], b"", 1, False), CodexTransientError)

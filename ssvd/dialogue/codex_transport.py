@@ -21,6 +21,14 @@ class CodexInvocationError(RuntimeError):
     """The request could not be confirmed as successful. Never retry it blindly."""
 
 
+class CodexTransientError(CodexInvocationError):
+    """A transport interruption that may clear after a cooldown."""
+
+
+class CodexIncompleteAtLimit(CodexInvocationError):
+    """Quota reported after output started; retain the unconfirmed reservation."""
+
+
 class CodexUsageLimit(CodexInvocationError):
     """The CLI explicitly rejected the turn due to a usage limit."""
 
@@ -42,6 +50,7 @@ _DISABLED = (
 _MIME = {"data:image/jpeg;base64": ".jpg", "data:image/png;base64": ".png", "data:image/webp;base64": ".webp"}
 _USAGE_KEYS = ("input_tokens", "cached_input_tokens", "cache_write_input_tokens", "output_tokens", "reasoning_output_tokens")
 _QUOTA = re.compile(r"(?:hit|reached|exceeded) (?:your |the )?usage limit|usage[ _-]limit[ _-](?:reached|exceeded)|"
+                    r"(?:weekly|weekly usage)[ _-]limit[ _-](?:reached|exceeded)|(?:hit|reached|exceeded) (?:your |the )?weekly (?:usage )?limit|"
                     r"insufficient_quota|quota[ _-](?:exceeded|exhausted)|out of (?:usage|credits)", re.I)
 _RATE = re.compile(r"(?:hit|reached|exceeded) (?:your |the )?rate limit|rate[ _-]limit[ _-](?:reached|exceeded)|"
                    r"rate[ _-]limited|too many requests|\b429\b", re.I)
@@ -57,9 +66,11 @@ _CLI_TOOL_ITEMS = frozenset({"command_execution", "file_change", "mcp_tool_call"
 def _failure(errors, stderr, returncode, response_started):
     # Persist only known diagnostic categories, never arbitrary provider text or account identifiers.
     diagnostic = "\n".join([*errors, stderr.decode(errors="replace")])
+    if _QUOTA.search(diagnostic):
+        if response_started:
+            return CodexIncompleteAtLimit("Codex usage limit reached during a turn")
+        return CodexUsageLimit("Codex usage limit reached")
     if not response_started:
-        if _QUOTA.search(diagnostic):
-            return CodexUsageLimit("Codex usage limit reached")
         if _RATE.search(diagnostic):
             delay = re.search(r"(?:retry[ _-]after(?:_seconds)?[\s\"':=]+|try again in\s+)(\d+(?:\.\d+)?)\s*(?:seconds?|s)?", diagnostic, re.I)
             return CodexRateLimit(retry_after=float(delay[1]) if delay else None)
@@ -72,6 +83,9 @@ def _failure(errors, stderr, returncode, response_started):
         (r"\b5\d\d\b", "provider error"),
     ):
         if re.search(pattern, diagnostic, re.I):
+            if reason in ("connection interrupted", "provider error") or (
+                    reason == "authentication or access denied" and re.search(r"\b403\b|forbidden", diagnostic, re.I)):
+                return CodexTransientError(f"CLI {reason} (exit {returncode})")
             return CodexInvocationError(f"CLI {reason} (exit {returncode})")
     stage = "after partial output" if response_started else "before a confirmed response"
     return CodexInvocationError(f"CLI failure {stage} (exit {returncode})")
@@ -213,8 +227,10 @@ class CodexTransport:
                         with contextlib.suppress(ProcessLookupError):
                             os.killpg(proc.pid, signal.SIGKILL)
                         proc.wait()
-            except (OSError, subprocess.TimeoutExpired) as exc:
-                raise CodexInvocationError("Codex invocation failed or timed out") from exc
+            except subprocess.TimeoutExpired:
+                raise CodexTransientError("Codex invocation timed out") from None
+            except OSError as exc:
+                raise CodexInvocationError("Could not execute Codex") from exc
 
             errors, completed, reported, response_started = _events(stdout)
             if errors or proc.returncode:

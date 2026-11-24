@@ -1,0 +1,20 @@
+[Unit]
+Description=J-MoshiVis Terra CLI dialogue generation
+StartLimitIntervalSec=0
+
+[Service]
+Type=exec
+WorkingDirectory=/gpu-server/yamamoto/j-moshivis
+EnvironmentFile=%h/.config/j-moshivis/terra-cli.env
+ExecStart=/gpu-server/yamamoto/j-moshivis/.venv-data/bin/python -u -m ssvd.dialogue.codex_production serve --workers 8 --manifest-sha b76864e29c9444bf4948e7f2bcff6f4901609130721d0c27e50da78b210566a6
+UMask=0077
+Restart=on-failure
+RestartSec=2min
+RestartSteps=4
+RestartMaxDelaySec=1h
+RestartPreventExitStatus=78
+KillMode=mixed
+TimeoutStopSec=6min
+
+[Install]
+WantedBy=default.target

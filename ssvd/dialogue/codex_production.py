@@ -9,12 +9,15 @@ import os
 from pathlib import Path
 import signal
 import sqlite3
+import sys
 import threading
 import time
 
 from ssvd.ai_suggestion_store import locked_human_uids
 from ssvd.dialogue.codex_cohort import BACKEND, CLI_MANIFEST, load_cli_manifest, verify
-from ssvd.dialogue.codex_transport import CodexRateLimit, CodexTransport, CodexUsageLimit
+from ssvd.dialogue.codex_transport import (
+    CodexIncompleteAtLimit, CodexRateLimit, CodexTransientError, CodexTransport, CodexUsageLimit,
+)
 from ssvd.dialogue.pilot import encode, operation
 from ssvd.dialogue.preview_regeneration import COLLECTION, ROOT, preview
 from ssvd.dialogue.production_budget import private_write
@@ -22,6 +25,7 @@ from ssvd.dialogue.production_cohort import MODEL
 from ssvd.dialogue.regeneration_roles import VISUAL_V11
 from ssvd.review_store import DEFAULT_REVIEW_EVENTS, ReviewStore, review_metadata
 
+WORKER_COUNTS = range(1, 9)
 DB_NAME = "generation.sqlite3"
 
 
@@ -161,8 +165,8 @@ def report(root, digest):
 
 
 def run(root, digest, *, workers=2, limit=None, transport=None, stop=None, retry_delays=(30, 90, 300)):
-    if workers not in range(1, 5) or (limit is not None and limit < 1):
-        raise ValueError("Expected 1–4 workers and a positive optional limit")
+    if workers not in WORKER_COUNTS or (limit is not None and limit < 1):
+        raise ValueError("Expected 1–8 workers and a positive optional limit")
     stop = stop if stop is not None else threading.Event()
     transport = transport if transport is not None else CodexTransport()
     directory = (root / CLI_MANIFEST).parent
@@ -219,24 +223,46 @@ def run(root, digest, *, workers=2, limit=None, transport=None, stop=None, retry
                 if stop.is_set():
                     state = "operator_stop"
                 if reasons:
-                    state = "usage_limit" if all(isinstance(e, CodexUsageLimit) for e in reasons) else "invocation_error"
-                    if all(isinstance(e, CodexRateLimit) for e in reasons):
+                    state = "invocation_error"
+                    if any(isinstance(e, (CodexUsageLimit, CodexIncompleteAtLimit))
+                           and not isinstance(e, CodexRateLimit) for e in reasons):
+                        state = "usage_limit"
+                    elif all(isinstance(e, CodexRateLimit) for e in reasons):
                         state = "rate_limited"
                 with control:
                     control.execute("UPDATE run SET state=? WHERE id=1", (state,))
             if reasons and state == "invocation_error":
-                raise next(e for e in reasons if not isinstance(e, CodexUsageLimit))
+                failures = [e for e in reasons if not isinstance(e, CodexRateLimit)]
+                raise next((e for e in failures if not isinstance(e, CodexTransientError)), failures[0])
     return report(root, digest)
+
+
+def serve(root, digest, workers, stop):
+    """After each service start, confirm one dialogue before opening all worker slots."""
+    try:
+        result = run(root, digest, workers=1, limit=1, stop=stop)
+        if result["state"] == "segment_complete" and not stop.is_set():
+            result = run(root, digest, workers=workers, stop=stop)
+    except CodexTransientError as error:
+        print(str(error), file=sys.stderr, flush=True)
+        return os.EX_TEMPFAIL
+    except Exception as error:
+        print(f"Generation requires attention: {error}", file=sys.stderr, flush=True)
+        return os.EX_CONFIG
+    print(json.dumps(result, ensure_ascii=False), flush=True)
+    return os.EX_TEMPFAIL if result["state"] == "rate_limited" else os.EX_OK
 
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("action", choices=("run", "status"))
+    parser.add_argument("action", choices=("run", "serve", "status"))
     parser.add_argument("--root", default=ROOT, type=Path)
     parser.add_argument("--manifest-sha", required=True)
-    parser.add_argument("--workers", type=int, choices=range(1, 5), default=2)
+    parser.add_argument("--workers", type=int, choices=WORKER_COUNTS, default=2)
     parser.add_argument("--limit", type=int)
     args = parser.parse_args()
+    if args.action == "serve" and args.limit is not None:
+        parser.error("serve processes the full frozen cohort")
     os.umask(0o077)
     root = args.root.resolve()
     if args.action == "status":
@@ -245,9 +271,11 @@ def main():
         stop = threading.Event()
         for sig in (signal.SIGTERM, signal.SIGINT):
             signal.signal(sig, lambda *_: stop.set())
+        if args.action == "serve":
+            return serve(root, args.manifest_sha, args.workers, stop)
         result = run(root, args.manifest_sha, limit=args.limit, workers=args.workers, stop=stop)
     print(json.dumps(result, ensure_ascii=False), flush=True)
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())
